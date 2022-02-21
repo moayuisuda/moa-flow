@@ -1,0 +1,19 @@
+{
+  "name": "flow",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "lodash": "^4.17.21",
+    "mobx": "^6.4.1",
+    "mobx-react": "^7.3.0",
+    "react-konva": "^17.0.2-5",
+    "react-konva-utils": "^0.2.0",
+    "uuid": "^8.3.2"
+  }
+}

@@ -1,48 +1,55 @@
-[
-  {
-    "id": 0,
-    "type": "node",
-    "component": "MatrixNode",
-    "fields": [
-      {
-        "label": "name",
-        "ports": [
-          {
-            "id": "0-0",
-            "position": "right",
-            "target": "1-0",
-            "data": {
-              "type": "start"
-            }
-          }
-        ]
-      }
-    ],
-    "x": 200,
-    "y": 200
-  },
-  {
-    "id": 1,
-    "type": "node",
-    "component": "MatrixNode",
-    "fields": [
-      {
-        "label": "age",
-        "ports": {
-          "id": "1-0",
-          "target": "0",
-          "data": {
-            "type": "hello"
-          }
+{
+  "scale": { "x": 0.9, "y": 0.9 },
+  "x": 0,
+  "y": 0,
+  "cells": [
+    {
+      "id": "0",
+      "type": "node",
+      "component": "MatrixNode",
+      "x": 200,
+      "y": 500,
+      "data": {},
+      "ports": [
+        {
+          "label": "name",
+          "id": "port-0",
+          "edges": ["edge-0"]
+        },
+        {
+          "label": "age",
+          "id": "port-1"
         }
-      }
-    ],
-    "x": 400,
-    "y": 400
-  },
-
-  {
-    "type": "inspector",
-    "component": "Inspector"
-  }
-]
+      ],
+      "label": "NODE 1 Matrix"
+    },
+    {
+      "id": "1",
+      "type": "node",
+      "component": "TuringNode",
+      "label": "NODE 2 Turing",
+      "x": 450,
+      "y": 500,
+      "data": {},
+      "ports": [
+        {
+          "label": "",
+          "id": "port-2",
+          "edges": ["edge-0"]
+        }
+      ]
+    },
+    {
+      "id": "#INSPECTOR",
+      "type": "dev",
+      "component": "Inspector"
+    },
+    {
+      "id": "edge-0",
+      "type": "edge",
+      "component": "Edge",
+      "source": "port-1",
+      "target": "port-2"
+    }
+  ]
+}

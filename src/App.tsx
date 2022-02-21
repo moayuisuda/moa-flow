@@ -5,7 +5,12 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <Flow canvasData={testData}></Flow>
+        <Flow
+          canvasData={testData}
+          onEvent={(e) => {
+            alert(JSON.stringify(e, null, "\t"));
+          }}
+        ></Flow>
         <p>
           Edit <code>src/App.tsx</code> and save to reload.
         </p>

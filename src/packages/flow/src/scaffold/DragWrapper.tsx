@@ -2,14 +2,15 @@
 import { Group } from "react-konva";
 import React from "react";
 import { FlowContext } from "../Context";
+import { CellType } from "../cells/Cell";
 
-type NodeProps = {
+type DragWrapperType = {
   x?: number;
   y?: number;
   id: string;
 };
 
-class NodeBase extends React.Component<NodeProps, {}> {
+class DragWrapper extends React.Component<DragWrapperType, {}> {
   static contextType = FlowContext;
 
   syncDragPosition = (e) => {
@@ -22,14 +23,12 @@ class NodeBase extends React.Component<NodeProps, {}> {
   };
 
   render() {
-    console.log(this.props);
     return (
       <Group
         x={this.props.x}
         y={this.props.y}
         draggable={true}
-        // 拖拽这种高频操作用非受控，异步设置data
-        onDragEnd={(e) => {
+        onDragMove={(e) => {
           this.syncDragPosition(e);
         }}
       >
@@ -39,4 +38,4 @@ class NodeBase extends React.Component<NodeProps, {}> {
   }
 }
 
-export default NodeBase;
+export default DragWrapper;
