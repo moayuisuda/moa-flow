@@ -1,5 +1,6 @@
-import { action, observable, makeObservable, computed } from "mobx";
+import { action, observable, makeObservable } from "mobx";
 import { v4 } from "uuid";
+import { CellType } from "./cells/Cell";
 
 export class FlowModel {
   constructor(eventSender) {
@@ -8,9 +9,9 @@ export class FlowModel {
   }
 
   // cell的<id, 实例>map，方便用id获取到组件实例
-  cellsMap = new Map();
+  cellsMap = new Map<string, React.ReactNode>();
   // cellData的<id, cellData>map，用来修改受控数据
-  cellsDataMap = new Map();
+  cellsDataMap = new Map<string, CellType>();
 
   // 注册节点到model，方便动态引用
   componentsMap = new Map();
@@ -20,12 +21,29 @@ export class FlowModel {
     sender: undefined,
     receiver: undefined,
   };
+
+  // 选中的cell
+  @observable selectCells: string[] = [];
+  @action setSelectedCells = (id) => {
+    // 多选
+    // if (!this.selectCells.includes(id)) {
+    //   this.selectCells.push(id);
+    // }
+
+    // 单选
+    this.selectCells = [id];
+  };
+
   // 画布的渲染数据，之后的渲染大部分都为受控渲染，更改canvasData => 触发重新渲染
   @observable canvasData = {
     scale: { x: 1, y: 1 },
     x: 0,
     y: 0,
     cells: [],
+  };
+
+  @action clearSelect = () => {
+    this.selectCells = [];
   };
 
   sendEvent = (data) => {
@@ -58,6 +76,11 @@ export class FlowModel {
     });
   };
 
+  @action deleCell = (id) => {
+    const matchCellIndex = this.canvasData.cells.find((cell) => cell.id === id);
+    this.canvasData.cells.splice(matchCellIndex, 1);
+  };
+
   // 自动布局，用自动布局的三方库对每一个节点的x，y进行计算
   @action setAutoLayout = (layoutOption) => {};
 
@@ -71,7 +94,7 @@ export class FlowModel {
     });
   };
 
-  //test
+  // test
   @action addNode = () => {
     this.canvasData.cells = this.canvasData.cells.concat([
       this.createCellData("TuringNode", {

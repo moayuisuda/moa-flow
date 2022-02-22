@@ -24,12 +24,13 @@ const Button = (props: ButtonProps) => {
         height={height}
       />
       <Text
+        stroke="white"
         text={props.text}
         width={width}
         height={height}
         align="center"
         verticalAlign="middle"
-      ></Text>
+      />
     </Group>
   );
 };

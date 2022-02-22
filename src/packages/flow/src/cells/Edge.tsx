@@ -3,6 +3,7 @@ import { Group, Line } from "react-konva";
 import _ from "lodash";
 import { color } from "../global/style";
 import { observer } from "mobx-react";
+import Interactor from "../scaffold/Interactor";
 
 type EdgeType = {
   source: string;
@@ -23,6 +24,16 @@ class Edge extends Cell<
       points: [],
     };
   }
+
+  getStroke = () => {
+    const isSelect = this.context.model.selectCells.includes(this.props.id);
+
+    if (isSelect) {
+      return {
+        stroke: color.orange,
+      };
+    } else return {};
+  };
 
   getPoints() {
     const { model } = this.context;
@@ -49,21 +60,24 @@ class Edge extends Cell<
 
   render() {
     return (
-      <Group
-        onClick={(e) => {
-          this.context.onClick({
-            event: e,
-            cell: this,
-          });
-        }}
-      >
-        <Line
-          stroke={color.deepGrey}
-          points={this.getPoints()}
-          strokeWidth={3}
-          lineCap="round"
-          bezier
-        ></Line>
+      <Group>
+        <Interactor id={this.props.id} draggable={false}>
+          <Line
+            stroke={color.deepGrey}
+            points={this.getPoints()}
+            strokeWidth={3}
+            {...this.getStroke()}
+            lineCap="round"
+            bezier
+          ></Line>
+          <Line
+            stroke="transparent"
+            points={this.getPoints()}
+            strokeWidth={20}
+            lineCap="round"
+            bezier
+          ></Line>
+        </Interactor>
       </Group>
     );
   }

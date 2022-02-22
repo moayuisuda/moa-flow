@@ -6,6 +6,7 @@ import { observer } from "mobx-react";
 import { FlowContext } from "./Context";
 
 import { registComponents } from "./utils/registComponents";
+import "antd/dist/antd.css";
 
 const renderComponent = (cellData, model) => {
   return React.createElement(model.componentsMap.get(cellData.component), {
@@ -41,10 +42,15 @@ const renderComponents = (cellsData, model) => {
 
 const Canvas = observer((props) => {
   const { model } = props;
-  useStrictMode(true); // 完全受控
+
+  // 完全受控，https://github.com/konvajs/react-konva/blob/master/README.md#strict-mode
+  useStrictMode(true);
 
   return (
     <Stage
+      onMouseDown={() => {
+        model.clearSelect();
+      }}
       scale={model.canvasData.scale}
       x={model.canvasData.x}
       y={model.canvasData.y}

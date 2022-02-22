@@ -3,7 +3,7 @@ import type { FieldType } from "../../types/common";
 import { PortType } from "../Port";
 import Port from "../Port";
 import { Rect, Text, Circle, Group } from "react-konva";
-import DragWrapper from "../../scaffold/DragWrapper";
+import Interactor from "../../scaffold/Interactor";
 import { observer } from "mobx-react";
 
 const HEIGHT = 100;
@@ -31,7 +31,7 @@ class TuringNode extends Cell<TuringNodeType, {}> {
 
   render() {
     return (
-      <DragWrapper x={this.props.x} y={this.props.y} id={this.props.id}>
+      <Interactor x={this.props.x} y={this.props.y} id={this.props.id}>
         <Rect
           stroke="blue"
           strokeWidth={4}
@@ -69,7 +69,7 @@ class TuringNode extends Cell<TuringNodeType, {}> {
             </Group>
           </Port>
         ))}
-      </DragWrapper>
+      </Interactor>
     );
   }
 }

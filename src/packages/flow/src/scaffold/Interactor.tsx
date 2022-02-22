@@ -1,18 +1,19 @@
-// 这不是node的基类，只是一个外层wrapper用来包裹内容，并提供drag等功能
+// 这不是node的基类，只是一个外层wrapper用来包裹内容，并按需提供选中、拖拽等功能
 import { Group } from "react-konva";
 import React from "react";
 import { FlowContext } from "../Context";
-import { CellType } from "../cells/Cell";
 import { observer } from "mobx-react";
 
-type DragWrapperType = {
+type InteractorType = {
   x?: number;
   y?: number;
   id: string;
+  draggable?: boolean;
+  selectable?: boolean;
 };
 
 @observer
-class DragWrapper extends React.Component<DragWrapperType, {}> {
+class Interactor extends React.Component<InteractorType, {}> {
   static contextType = FlowContext;
 
   syncDragPosition = (e) => {
@@ -25,11 +26,22 @@ class DragWrapper extends React.Component<DragWrapperType, {}> {
   };
 
   render() {
+    const {
+      context: { model },
+      props: { x, y, draggable = true, id, selectable = true },
+    } = this;
+
     return (
       <Group
-        x={this.props.x}
-        y={this.props.y}
-        draggable={true}
+        x={x}
+        y={y}
+        draggable={draggable}
+        onMouseDown={(e) => {
+          if (selectable) {
+            e.cancelBubble = true;
+            model.setSelectedCells(id);
+          }
+        }}
         onDragMove={(e) => {
           this.syncDragPosition(e);
         }}
@@ -40,4 +52,4 @@ class DragWrapper extends React.Component<DragWrapperType, {}> {
   }
 }
 
-export default DragWrapper;
+export default Interactor;
