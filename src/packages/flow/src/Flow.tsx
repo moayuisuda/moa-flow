@@ -69,19 +69,19 @@ const Canvas = observer((props) => {
   );
 });
 
+type FlowProps = { canvasData: any; onEvent: (e: any) => void; modelRef: any };
+
 @observer
-class Flow extends React.Component<
-  { canvasData: any; onEvent: (e: any) => void },
-  {}
-> {
+class Flow extends React.Component<FlowProps, {}> {
   eventBus;
   flowModel;
 
-  constructor(props: { canvasData: string; onEvent: (e: any) => void }) {
+  constructor(props: FlowProps) {
     super(props);
 
     this.flowModel = new FlowModel(props.onEvent);
     this.flowModel.setCanvasData(this.props.canvasData);
+    props.modelRef.current = this.flowModel;
 
     registComponents(this.flowModel);
   }
