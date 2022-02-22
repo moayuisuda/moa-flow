@@ -4,25 +4,12 @@ import testData from "./test.json";
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <Flow
-          canvasData={testData}
-          onEvent={(e) => {
-            alert(JSON.stringify(e, null, "\t"));
-          }}
-        ></Flow>
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Flow
+        canvasData={testData}
+        onEvent={(e) => {
+          alert(JSON.stringify(e, null, "\t"));
+        }}
+      ></Flow>
     </div>
   );
 }

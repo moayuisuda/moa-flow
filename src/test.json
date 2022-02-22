@@ -28,8 +28,8 @@
       "type": "node",
       "component": "TuringNode",
       "label": "NODE 2 Turing",
-      "x": 450,
-      "y": 500,
+      "x": 550,
+      "y": 800,
       "data": {},
       "ports": [
         {

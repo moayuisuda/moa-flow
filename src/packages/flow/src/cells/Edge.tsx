@@ -1,12 +1,15 @@
-import Cell, { CellType } from "./Cell";
+import Cell from "./Cell";
 import { Group, Line } from "react-konva";
 import _ from "lodash";
+import { color } from "../global/style";
+import { observer } from "mobx-react";
 
 type EdgeType = {
   source: string;
   target: string;
 };
 
+@observer
 class Edge extends Cell<
   EdgeType,
   {
@@ -26,30 +29,22 @@ class Edge extends Cell<
 
     const sourceAnchor = model.cellsMap.get(this.props.source).props.anchor();
     const targetAnchor = model.cellsMap.get(this.props.target).props.anchor();
-    this.setState({
-      points: [sourceAnchor.x, sourceAnchor.y, targetAnchor.x, targetAnchor.y],
-    });
-  }
 
-  shouldComponentUpdate(
-    nextProps: Readonly<EdgeType & CellType>,
-    nextState: Readonly<{ points: number[] }>,
-    nextContext: any
-  ): boolean {
-    if (!this.state.points.length) return true;
-    return !_.isEqual(this.props, nextProps);
-  }
+    const MIDDLE = (sourceAnchor.x + targetAnchor.x) / 2;
 
-  componentDidMount(): void {
-    this.getPoints();
-  }
+    return [
+      sourceAnchor.x,
+      sourceAnchor.y,
 
-  componentDidUpdate(
-    prevProps: Readonly<EdgeType & CellType>,
-    prevState: Readonly<{ points: number[] }>,
-    snapshot?: any
-  ): void {
-    this.getPoints();
+      MIDDLE,
+      sourceAnchor.y,
+
+      MIDDLE,
+      targetAnchor.y,
+
+      targetAnchor.x,
+      targetAnchor.y,
+    ];
   }
 
   render() {
@@ -62,7 +57,13 @@ class Edge extends Cell<
           });
         }}
       >
-        <Line stroke={"black"} points={this.state.points} tension={1}></Line>
+        <Line
+          stroke={color.deepGrey}
+          points={this.getPoints()}
+          strokeWidth={3}
+          lineCap="round"
+          bezier
+        ></Line>
       </Group>
     );
   }

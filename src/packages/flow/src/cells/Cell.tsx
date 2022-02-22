@@ -1,6 +1,7 @@
 import React from "react";
 import { FlowContext } from "../Context";
 import _ from "lodash";
+import { observer } from "mobx-react";
 
 export type CellType = {
   id: string;

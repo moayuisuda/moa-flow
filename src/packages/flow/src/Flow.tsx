@@ -1,4 +1,4 @@
-import { Stage, Layer, Group } from "react-konva";
+import { Stage, Layer, Group, useStrictMode } from "react-konva";
 import React from "react";
 import FlowModel from "./Model";
 
@@ -6,7 +6,68 @@ import { observer } from "mobx-react";
 import { FlowContext } from "./Context";
 
 import { registComponents } from "./utils/registComponents";
-// 初始化model并注册所有组件
+
+const renderComponent = (cellData, model) => {
+  return React.createElement(model.componentsMap.get(cellData.component), {
+    ...cellData,
+    key: cellData.id,
+  });
+};
+
+const renderComponents = (cellsData, model) => {
+  return (
+    <Layer>
+      <Group>
+        {cellsData
+          // 先渲染注册节点，后渲染注册线
+          .filter((cellData) => cellData.type !== "edge")
+          .map((cellData) => {
+            // 这里顺便生成cellsDataMap
+            model.cellsDataMap.set(cellData.id, cellData);
+            return renderComponent(cellData, model);
+          })}
+      </Group>
+      <Group>
+        {cellsData
+          .filter((cellData) => cellData.type === "edge")
+          .map((cellData) => {
+            model.cellsDataMap.set(cellData.id, cellData);
+            return renderComponent(cellData, model);
+          })}
+      </Group>
+    </Layer>
+  );
+};
+
+const Canvas = observer((props) => {
+  const { model } = props;
+  useStrictMode(true); // 完全受控
+
+  return (
+    <Stage
+      scale={model.canvasData.scale}
+      x={model.canvasData.x}
+      y={model.canvasData.y}
+      draggable={true}
+      onDragMove={(e) => {
+        model.setStagePosition(
+          e.currentTarget.attrs.x,
+          e.currentTarget.attrs.y
+        );
+      }}
+      width={window.innerWidth}
+      height={window.innerHeight}
+    >
+      <FlowContext.Provider
+        value={{
+          model,
+        }}
+      >
+        {renderComponents(model.canvasData.cells, model)}
+      </FlowContext.Provider>
+    </Stage>
+  );
+});
 
 @observer
 class Flow extends React.Component<
@@ -25,74 +86,9 @@ class Flow extends React.Component<
     registComponents(this.flowModel);
   }
 
-  renderComponent(cellData) {
-    return React.createElement(
-      this.flowModel.componentsMap.get(cellData.component),
-      {
-        ...cellData,
-        key: cellData.id,
-      }
-    );
-  }
-
-  renderComponents = (cellsData) => {
-    const { flowModel: model } = this;
-
-    return (
-      <Layer>
-        <Group>
-          {cellsData
-            // 先渲染注册节点，后渲染注册线
-            .filter((cellData) => cellData.type !== "edge")
-            .map((cellData) => {
-              // 这里顺便生成cellsDataMap
-              model.cellsDataMap.set(cellData.id, cellData);
-              return this.renderComponent(cellData);
-            })}
-        </Group>
-        <Group>
-          {cellsData
-            .filter((cellData) => cellData.type === "edge")
-            .map((cellData) => {
-              this.renderComponent(cellData);
-              model.cellsDataMap.set(cellData.id, cellData);
-              return this.renderComponent(cellData);
-            })}
-        </Group>
-      </Layer>
-    );
-  };
-
   render() {
-    const { canvasData } = this.flowModel;
-    const { renderComponents } = this;
-    // debugger;
-
-    return (
-      // Provider不能放在最外层，见issue：https://github.com/facebook/react/issues/12796
-      <Stage
-        scale={canvasData.scale}
-        x={canvasData.x}
-        y={canvasData.y}
-        draggable={true}
-        onDragEnd={(e) => {
-          this.flowModel.setStagePosition(
-            e.currentTarget.attrs.x,
-            e.currentTarget.attrs.y
-          );
-        }}
-        width={window.innerWidth}
-        height={window.innerHeight}
-      >
-        <FlowContext.Provider
-          value={{
-            model: this.flowModel,
-          }}
-        >
-          {renderComponents(canvasData.cells)}
-        </FlowContext.Provider>
-      </Stage>
-    );
+    const { flowModel: model } = this;
+    return <Canvas model={model} />;
   }
 }
 

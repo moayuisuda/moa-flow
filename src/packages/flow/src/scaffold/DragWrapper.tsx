@@ -3,6 +3,7 @@ import { Group } from "react-konva";
 import React from "react";
 import { FlowContext } from "../Context";
 import { CellType } from "../cells/Cell";
+import { observer } from "mobx-react";
 
 type DragWrapperType = {
   x?: number;
@@ -10,6 +11,7 @@ type DragWrapperType = {
   id: string;
 };
 
+@observer
 class DragWrapper extends React.Component<DragWrapperType, {}> {
   static contextType = FlowContext;
 

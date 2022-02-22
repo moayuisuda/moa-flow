@@ -4,6 +4,7 @@ import { PortType } from "../Port";
 import Port from "../Port";
 import { Rect, Text, Circle, Group } from "react-konva";
 import DragWrapper from "../../scaffold/DragWrapper";
+import { observer } from "mobx-react";
 
 const HEIGHT = 100;
 const WIDTH = 200;
@@ -16,6 +17,7 @@ type TuringNodeType = {
   label?: string;
 };
 
+@observer
 class TuringNode extends Cell<TuringNodeType, {}> {
   static metaData = {
     type: "node",
@@ -31,6 +33,8 @@ class TuringNode extends Cell<TuringNodeType, {}> {
     return (
       <DragWrapper x={this.props.x} y={this.props.y} id={this.props.id}>
         <Rect
+          stroke="blue"
+          strokeWidth={4}
           width={WIDTH}
           height={HEIGHT}
           fill="white"

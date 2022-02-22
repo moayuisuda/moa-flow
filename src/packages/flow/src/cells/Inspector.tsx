@@ -2,8 +2,9 @@ import Cell from "./Cell";
 import { Group, Rect, Text } from "react-konva";
 import { Html } from "react-konva-utils";
 import { FlowContext } from "../Context";
-import DragWrapper from "../scaffold/DragWrapper";
+import { observer } from "mobx-react";
 
+@observer
 class Inspector extends Cell<{}, {}> {
   static contextType = FlowContext;
 
@@ -26,7 +27,6 @@ class Inspector extends Cell<{}, {}> {
             style={{
               width: 300,
               height: 400,
-              overflow: "auto",
               position: "relative",
             }}
           >
@@ -35,36 +35,41 @@ class Inspector extends Cell<{}, {}> {
                 position: "absolute",
                 left: 100,
               }}
+            ></div>
+            <h1>Inspector</h1>
+            <button
+              onClick={() => {
+                // model.canvasData.scale.x = 1;
+                // model.canvasData.scale.y = 1;
+                model.setScale(
+                  model.canvasData.scale.x + 0.1,
+                  model.canvasData.scale.y + 0.1
+                );
+              }}
             >
-              <button
-                onClick={() => {
-                  // model.canvasData.scale.x = 1;
-                  // model.canvasData.scale.y = 1;
-                  model.canvasData.scale = {
-                    x: model.canvasData.scale.x + 0.1,
-                    y: model.canvasData.scale.y + 0.1,
-                  };
-                }}
-              >
-                +
-              </button>
-              <button
-                onClick={() => {
-                  model.canvasData.scale = {
-                    x: model.canvasData.scale.x - 0.1,
-                    y: model.canvasData.scale.y - 0.1,
-                  };
-                }}
-              >
-                -
-              </button>
-            </div>
-            <pre>
+              scale +
+            </button>
+            <button
+              onClick={() => {
+                model.setScale(
+                  model.canvasData.scale.x - 0.1,
+                  model.canvasData.scale.y - 0.1
+                );
+              }}
+            >
+              scale -
+            </button>
+            <pre
+              style={{
+                width: 300,
+                height: 280,
+                overflow: "auto",
+              }}
+            >
               {JSON.stringify(this.context.model.canvasData, null, "\t")}
             </pre>
           </div>
         </Html>
-        <Text text="Inspector" />
       </Group>
     );
   }

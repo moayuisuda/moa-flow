@@ -1,4 +1,4 @@
-import { action, observable, makeObservable } from "mobx";
+import { action, observable, makeObservable, computed } from "mobx";
 import { v4 } from "uuid";
 
 export class FlowModel {
@@ -20,7 +20,6 @@ export class FlowModel {
     sender: undefined,
     receiver: undefined,
   };
-
   // 画布的渲染数据，之后的渲染大部分都为受控渲染，更改canvasData => 触发重新渲染
   @observable canvasData = {
     scale: { x: 1, y: 1 },
@@ -34,12 +33,14 @@ export class FlowModel {
   };
 
   @action setScale = (x, y) => {
-    this.canvasData.scale.y = x;
-    this.canvasData.scale.y += y;
+    this.canvasData.scale = {
+      x,
+      y,
+    };
   };
 
   @action setStagePosition = (x, y) => {
-    this.canvasData.y = x;
+    this.canvasData.x = x;
     this.canvasData.y = y;
   };
 

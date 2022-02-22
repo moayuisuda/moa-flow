@@ -1,6 +1,7 @@
 import Cell from "./Cell";
 import { Group } from "react-konva";
 import React from "react";
+import { observer } from "mobx-react";
 
 export type PortType = {
   linkable?: boolean;
@@ -10,6 +11,7 @@ export type PortType = {
   anchor: { x: number; y: number } | (() => { x: number; y: number });
 };
 
+@observer
 class Port extends Cell<PortType, {}> {
   wrapperRef: React.RefObject<any>;
 
