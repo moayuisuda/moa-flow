@@ -13,12 +13,15 @@
       "ports": [
         {
           "label": "name",
-          "id": "port-0",
-          "edges": ["edge-0"]
+          "id": "port-0"
         },
         {
           "label": "age",
           "id": "port-1"
+        },
+        {
+          "label": "father",
+          "id": "port-2"
         }
       ],
       "label": "NODE 1 Matrix"
@@ -34,22 +37,67 @@
       "ports": [
         {
           "label": "",
-          "id": "port-2",
-          "edges": ["edge-0"]
+          "id": "port-t-0"
         }
       ]
     },
     {
+      "id": "2",
+      "type": "node",
+      "component": "MatrixNode",
+      "x": 800,
+      "y": 200,
+      "data": {},
+      "ports": [
+        {
+          "label": "name",
+          "id": "port-4"
+        },
+        {
+          "label": "age",
+          "id": "port-5"
+        },
+        {
+          "label": "father",
+          "id": "port-6"
+        }
+      ],
+      "label": "NODE 3 Matrix"
+    },
+    {
       "id": "#INSPECTOR",
       "type": "dev",
-      "component": "Inspector"
+      "component": "Inspector",
+      "x": 20,
+      "y": 20
+    },
+    {
+      "id": "edge-1",
+      "type": "edge",
+      "component": "Edge",
+      "source": "port-1",
+      "target": "port-5"
+    },
+    {
+      "id": "edge-2",
+      "type": "edge",
+      "component": "Edge",
+      "source": "port-0",
+      "target": "port-4"
     },
     {
       "id": "edge-0",
       "type": "edge",
       "component": "Edge",
-      "source": "port-1",
-      "target": "port-2"
+      "source": "port-2",
+      "target": "port-t-0"
+    },
+    {
+      "id": "edge-3",
+      "type": "edge",
+      "component": "Edge",
+      "source": "port-2",
+      "target": "port-6"
     }
   ]
 }

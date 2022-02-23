@@ -23,6 +23,10 @@ class Cell<P, S> extends React.Component<P & CellType, S> {
   setCellData(data) {
     this.context.setCellData(this.props.id, data);
   }
+
+  isSelected(data) {
+    return this.context.model.canvasData.cells.includes();
+  }
 }
 
 export default Cell;
