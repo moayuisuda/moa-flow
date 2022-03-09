@@ -2,6 +2,16 @@
 import { CellType } from "@/cells/Cell";
 export declare class FlowModel {
     constructor(eventSender: any);
+    buffer: {
+        link: {
+            source: any;
+            target: {
+                x: number;
+                y: number;
+            };
+        };
+    };
+    clearLinkBuffer: () => void;
     color: {
         primary: string;
         active: string;
@@ -33,11 +43,15 @@ export declare class FlowModel {
     setScale: (x: any, y: any) => void;
     setStagePosition: (x: any, y: any) => void;
     setCanvasData: (canvasData: any) => void;
+    setCellId: (data: any) => void;
     setCellData: (id: any, data: any) => void;
     deleCell: (id: any) => void;
     setAutoLayout: (layoutOption: any) => void;
     createCellData: (component: any, initOptions?: any) => any;
-    addNode: () => void;
+    addCell: (componentName: any, initOptions: any) => void;
+    setLinkingPosition: (e: any) => void;
+    link: (source: any, target: any) => void;
+    moveTo(id: any, index: any): void;
     getCellData: (id: any) => CellType;
     onConnect(data: any): void;
 }

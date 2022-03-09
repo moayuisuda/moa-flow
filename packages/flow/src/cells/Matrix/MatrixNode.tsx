@@ -6,15 +6,15 @@ import Interactor from "@/scaffold/Interactor";
 import Node from "../Node";
 const { Port } = Interactor;
 
+type MatrixPortType = PortType & { label: string };
+
 type MatrixNodeType = {
-  ports?: PortType[];
+  ports?: MatrixPortType[];
   fields?: FieldType[];
   x?: number;
   y?: number;
   label?: string;
 };
-
-const meta = {};
 
 const WIDTH = 200;
 const HEIGHT = 160;
@@ -26,7 +26,9 @@ class MatrixNode extends Node<MatrixNodeType, {}> {
   };
 
   getStroke = () => {
-    const isSelect = this.context.model.selectCells.includes(this.props.id);
+    const isSelect = this.context.model.selectCells.includes(
+      this.props.data.id
+    );
     const { color } = this.context.model;
 
     if (isSelect) {
@@ -40,10 +42,10 @@ class MatrixNode extends Node<MatrixNodeType, {}> {
     const { model } = this.context;
     const { color = {} } = model;
     const { getStroke } = this;
-    const { x, y, label } = this.props;
+    const { x, y, label } = this.props.data;
 
     return (
-      <Interactor {...this.props}>
+      <Interactor {...this.props.data} topOnFocus>
         <Rect
           width={WIDTH}
           height={HEIGHT}
@@ -75,9 +77,16 @@ class MatrixNode extends Node<MatrixNodeType, {}> {
             text="＋"
             onClick={(e) => {
               // model.sendEvent(e);
-              const a = model.createCellData("MatrixNode");
-              console.log(a);
-              debugger;
+              model.addCell("MatrixNode", {
+                x: this.props.data.x + 100,
+                y: this.props.data.y,
+                label: "new node",
+                ports: [
+                  {
+                    label: "new",
+                  },
+                ],
+              });
             }}
           />
         </Group>
@@ -91,20 +100,19 @@ class MatrixNode extends Node<MatrixNodeType, {}> {
         />
 
         <Group y={40}>
-          {this.props.ports?.map((portData, index) => (
-            <Port
-              key={portData.id}
-              linkable={true}
-              {...portData}
-              anchor={() => {
-                return {
-                  x: x + 200,
-                  y: y + 65 + index * 30,
-                };
-              }}
-            >
-              <Group x={150} y={20 + index * 30}>
-                <Text text={portData.label}></Text>
+          {this.props.data.ports?.map((portData, index) => (
+            <Group x={150} y={20 + index * 30} key={portData.label}>
+              <Text text={portData.label}></Text>
+              <Port
+                linkable={true}
+                data={portData}
+                anchor={() => {
+                  return {
+                    x: x + 200,
+                    y: y + 65 + index * 30,
+                  };
+                }}
+              >
                 <Circle
                   stroke={color.primary}
                   fill="white"
@@ -112,8 +120,8 @@ class MatrixNode extends Node<MatrixNodeType, {}> {
                   x={50}
                   radius={10}
                 ></Circle>
-              </Group>
-            </Port>
+              </Port>
+            </Group>
           ))}
         </Group>
       </Interactor>

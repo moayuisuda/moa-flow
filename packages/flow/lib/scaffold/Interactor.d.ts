@@ -5,6 +5,7 @@ declare type InteractorType = {
     id: string;
     draggable?: boolean;
     selectable?: boolean;
+    topOnFocus?: boolean;
 };
 declare class Interactor extends React.Component<InteractorType, {}> {
     static contextType: React.Context<import("@/Context").FlowContextType>;

@@ -1,13 +1,36 @@
 import { action, observable, makeObservable } from "mobx";
-import { v4 } from "uuid";
+// import { v4 } from "uuid";
+import { arrayMove, findIndex } from "./utils/util";
 import { CellType } from "@/cells/Cell";
 import { color } from "@/theme/style";
+import { v4 } from "uuid";
 
 export class FlowModel {
   constructor(eventSender) {
     makeObservable(this);
     this.eventBus.sender = eventSender;
   }
+
+  @observable
+  buffer = {
+    link: {
+      source: undefined,
+      target: {
+        x: 0,
+        y: 0,
+      },
+    },
+  };
+
+  @action clearLinkBuffer = () => {
+    this.buffer.link = {
+      source: undefined,
+      target: {
+        x: 0,
+        y: 0,
+      },
+    };
+  };
 
   // 全局颜色，可以由用户自定义
   @observable color = color;
@@ -70,8 +93,9 @@ export class FlowModel {
     this.canvasData = canvasData;
   };
 
-  //   @action setScale;
-
+  @action setCellId = (data) => {
+    data.id = v4();
+  };
   @action setCellData = (id, data) => {
     const cellData = this.getCellData(id);
 
@@ -81,8 +105,11 @@ export class FlowModel {
   };
 
   @action deleCell = (id) => {
-    const matchCellIndex = this.canvasData.cells.find((cell) => cell.id === id);
-    this.canvasData.cells.splice(matchCellIndex, 1);
+    const matchCell = this.canvasData.cells.find((cell) => cell.id === id);
+    this.canvasData.cells.splice(
+      findIndex(this.canvasData.cells, matchCell),
+      1
+    );
   };
 
   // 自动布局，用自动布局的三方库对每一个节点的x，y进行计算
@@ -91,7 +118,10 @@ export class FlowModel {
   // 创建新的节点数据
   @action createCellData = (component, initOptions?) => {
     const id = v4();
-    const metaData = this.componentsMap.get(component).getMetaData();
+
+    const metaData = JSON.parse(
+      JSON.stringify(this.componentsMap.get(component).getMetaData())
+    );
 
     return Object.assign(metaData, {
       id,
@@ -99,15 +129,31 @@ export class FlowModel {
     });
   };
 
-  @action addNode = () => {
-    this.canvasData.cells = this.canvasData.cells.concat([
-      this.createCellData("TuringNode", {
-        x: 400,
-        y: 400,
-        label: "NEW NODE",
-      }),
-    ]);
+  @action addCell = (componentName, initOptions) => {
+    this.canvasData.cells.push(this.createCellData(componentName, initOptions));
   };
+
+  @action setLinkingPosition = (e) => {
+    const cursorPos = e.currentTarget.getRelativePointerPosition();
+
+    this.buffer.link.target.x = cursorPos.x;
+    this.buffer.link.target.y = cursorPos.y;
+  };
+
+  @action link = (source, target) => {
+    this.addCell("Edge", {
+      source,
+      target,
+    });
+
+    this.clearLinkBuffer();
+  };
+
+  @action
+  moveTo(id, index) {
+    const oldIndex = findIndex(this.canvasData.cells, this.getCellData(id));
+    arrayMove(this.canvasData.cells, oldIndex, index);
+  }
 
   getCellData = (id) => {
     return this.cellsDataMap.get(id);

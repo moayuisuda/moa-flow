@@ -12,6 +12,7 @@ type InteractorType = {
   id: string;
   draggable?: boolean;
   selectable?: boolean;
+  topOnFocus?: boolean;
 };
 
 @observer
@@ -31,7 +32,15 @@ class Interactor extends React.Component<InteractorType, {}> {
   render() {
     const {
       context: { model },
-      props: { x, y, draggable = true, id, selectable = true },
+      props: {
+        x,
+        y,
+        draggable = true,
+        id,
+        topOnFocus,
+        selectable = true,
+        ...others
+      },
     } = this;
 
     return (
@@ -43,11 +52,14 @@ class Interactor extends React.Component<InteractorType, {}> {
           if (selectable) {
             e.cancelBubble = true;
             model.setSelectedCells(id);
+            if (topOnFocus)
+              model.moveTo(this.props.id, model.canvasData.cells.length - 1);
           }
         }}
         onDragMove={(e) => {
           this.syncDragPosition(e);
         }}
+        {...others}
       >
         {this.props.children}
       </Group>

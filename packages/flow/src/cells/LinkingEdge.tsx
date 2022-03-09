@@ -1,22 +1,17 @@
 import Cell from "./Cell";
 import { Line } from "react-konva";
-import Interactor from "../scaffold/Interactor";
 
 type EdgeType = {
   source: string;
   target: string;
 };
 
-class Edge extends Cell<
+class LinkingEdge extends Cell<
   EdgeType,
   {
     points: number[];
   }
 > {
-  static metaData: any = {
-    type: "edge",
-  };
-
   constructor(props, context) {
     super(props, context);
 
@@ -43,15 +38,11 @@ class Edge extends Cell<
     const { data } = this.props;
 
     const sourceInstance = model.cellsMap.get(data.source);
-    const targetInstance = model.cellsMap.get(data.target);
 
     const sourceAnchor =
       (sourceInstance.props.anchor && sourceInstance.props.anchor()) ||
       sourceInstance.anchor();
-
-    const targetAnchor =
-      (targetInstance.props.anchor && targetInstance.props.anchor()) ||
-      targetInstance.anchor();
+    const targetAnchor = model.buffer.link.target;
 
     const MIDDLE = (sourceAnchor.x + targetAnchor.x) / 2;
 
@@ -74,33 +65,22 @@ class Edge extends Cell<
     const { color } = this.context.model;
 
     return (
-      <>
-        <Line
-          stroke={color.deepGrey}
-          points={this.getPoints()}
-          strokeWidth={3}
-          {...this.getStroke()}
-          lineCap="round"
-          bezier
-        ></Line>
-        <Line
-          stroke="transparent"
-          points={this.getPoints()}
-          strokeWidth={20}
-          lineCap="round"
-          bezier
-        ></Line>
-      </>
+      <Line
+        listening={false}
+        stroke={color.deepGrey}
+        points={this.getPoints()}
+        strokeWidth={3}
+        {...this.getStroke()}
+        lineCap="round"
+        bezier
+        dash={[10, 10]}
+      ></Line>
     );
   }
 
   content() {
-    return (
-      <Interactor id={this.props.data.id} draggable={false}>
-        {this.edgeRender()}
-      </Interactor>
-    );
+    return <>{this.props.data.source && this.edgeRender()}</>;
   }
 }
 
-export default Edge;
+export default LinkingEdge;

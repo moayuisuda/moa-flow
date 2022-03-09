@@ -4,10 +4,9 @@ declare type EdgeType = {
     source: string;
     target: string;
 };
-declare class Edge extends Cell<EdgeType, {
+declare class LinkingEdge extends Cell<EdgeType, {
     points: number[];
 }> {
-    static metaData: any;
     constructor(props: any, context: any);
     getStroke: () => {
         stroke: any;
@@ -18,4 +17,4 @@ declare class Edge extends Cell<EdgeType, {
     edgeRender(): JSX.Element;
     content(): JSX.Element;
 }
-export default Edge;
+export default LinkingEdge;

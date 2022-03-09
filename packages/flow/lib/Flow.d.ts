@@ -1,8 +1,10 @@
 import React from "react";
+import FlowModel from "./Model";
 declare type FlowProps = {
     canvasData: any;
-    onEvent: (e: any) => void;
-    modelRef: any;
+    onEvent?: (e: any) => void;
+    onLoad?: (model: FlowModel) => void;
+    modelRef?: any;
 };
 declare class Flow extends React.Component<FlowProps, {}> {
     eventBus: any;

@@ -2,8 +2,11 @@
 import type { FieldType } from "@/types/common";
 import { PortType } from "@/scaffold/Port";
 import Node from "../Node";
+declare type MatrixPortType = PortType & {
+    label: string;
+};
 declare type MatrixNodeType = {
-    ports?: PortType[];
+    ports?: MatrixPortType[];
     fields?: FieldType[];
     x?: number;
     y?: number;
