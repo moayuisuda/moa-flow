@@ -113,6 +113,8 @@ export class FlowModel {
       findIndex(this.canvasData.cells, matchCell),
       1
     );
+
+    return matchCell.id;
   };
 
   // 自动布局，用自动布局的三方库对每一个节点的x，y进行计算

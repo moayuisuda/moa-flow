@@ -1,12 +1,13 @@
 import React from "react";
 import { Card, Button, message } from "antd";
 import { ModelType } from "flow";
+import { Command } from "./Command";
 
 type ModelRefType = React.MutableRefObject<ModelType | undefined | null>;
 
 const Controller = (props: { modelRef: ModelRefType }) => {
   const { modelRef } = props;
-  const commander = Command(modelRef);
+  const command = new Command(modelRef);
 
   return (
     <Card
@@ -20,22 +21,16 @@ const Controller = (props: { modelRef: ModelRefType }) => {
       <Button
         danger
         onClick={() => {
-          if (!modelRef.current?.selectCells[0]) message.warn("请先选择元素");
-          else commander.dele();
+          const { error, result } = command.dele();
+          if (error) {
+            message.warn(error.message);
+          } else message.success(`删除 ${result} 成功`);
         }}
       >
         删除
       </Button>
     </Card>
   );
-};
-
-const Command = (modelRef: ModelRefType) => {
-  return {
-    dele: () => {
-      modelRef.current?.deleCell(modelRef.current?.selectCells[0]);
-    },
-  };
 };
 
 export default Controller;

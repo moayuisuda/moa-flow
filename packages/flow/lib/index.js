@@ -1793,6 +1793,7 @@ var FlowModel = /** @class */ (function () {
         this.deleCell = function (id) {
             var matchCell = _this.canvasData.cells.find(function (cell) { return cell.id === id; });
             _this.canvasData.cells.splice(findIndex(_this.canvasData.cells, matchCell), 1);
+            return matchCell.id;
         };
         // 自动布局，用自动布局的三方库对每一个节点的x，y进行计算
         this.setAutoLayout = function (layoutOption) { };

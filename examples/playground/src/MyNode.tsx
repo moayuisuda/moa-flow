@@ -13,7 +13,7 @@ const WIDTH = 300;
 const HEIGHT = 160;
 
 class MyNode extends Node<MyNodeType, {}> {
-  // metaData决定了新增节点时节点的数据，会merge父类的metaData
+  // metaData决定了新增节点时的初始数据，会merge父类的metaData
   static metaData = {
     fields: [{}],
     label: "",
@@ -75,13 +75,13 @@ class MyNode extends Node<MyNodeType, {}> {
 
         <Group y={40}>
           {this.props.data.ports?.map((portData, index) => (
-            // 提供port能力，可以手动传入port的坐标函数
             <Interactor.Port
               key={index}
               x={WIDTH - 50}
               y={20 + index * 30}
               linkable={true}
               data={portData}
+              // // 默认是以包围盒中心为坐标，可以手动传入port锚点的坐标函数
               // anchor={() => {
               //   return {
               //     x: x + 200,

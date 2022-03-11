@@ -46,7 +46,7 @@ export declare class FlowModel {
     setCanvasData: (canvasData: any) => void;
     setCellId: (data: any) => void;
     setCellData: (id: any, data: any) => void;
-    deleCell: (id: any) => void;
+    deleCell: (id: any) => any;
     setAutoLayout: (layoutOption: any) => void;
     createCellData: (component: any, initOptions?: any) => any;
     addCell: (componentName: any, initOptions: any) => any;
