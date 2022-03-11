@@ -1,8 +1,8 @@
-import React, { useContext, useRef } from 'react';
-import { Line, Group, Rect, Text, Circle, useStrictMode, Stage, Layer } from 'react-konva';
-import { observer } from 'mobx-react';
+import React, { useContext, useRef, useState, useEffect } from 'react';
+import { Group, Line, Rect, Text, Circle, useStrictMode, Stage, Layer } from 'react-konva';
 import Konva from 'konva';
-import { action, observable, makeObservable } from 'mobx';
+import { observer } from 'mobx-react';
+import { observable, action, makeObservable } from 'mobx';
 
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation.
@@ -1420,9 +1420,6 @@ var Cell = /** @class */ (function (_super) {
         }
         return __assign(__assign({}, re), { component: componentName });
     };
-    Cell.prototype.setCellData = function (data) {
-        this.context.setCellData(this.props.data.id, data);
-    };
     Cell.prototype.isSelected = function () {
         return this.context.model.canvasData.cells.includes();
     };
@@ -1433,8 +1430,11 @@ var Cell = /** @class */ (function (_super) {
         }
         return re;
     };
+    Cell.prototype.setCellData = function (data) {
+        this.context.setCellData(this.props.data.id, data);
+    };
     Cell.prototype.render = function () {
-        return jsxRuntime.exports.jsx(jsxRuntime.exports.Fragment, { children: this.content() }, void 0);
+        return jsxRuntime.exports.jsx(Group, { children: this.content() }, void 0);
     };
     Cell.contextType = FlowContext;
     Cell.metaData = { id: "" };
@@ -1442,10 +1442,105 @@ var Cell = /** @class */ (function (_super) {
 }(React.Component));
 var Cell$1 = observer(Cell);
 
-var LinkingEdge = /** @class */ (function (_super) {
-    __extends(LinkingEdge, _super);
-    function LinkingEdge(props, context) {
+var Port$1 = /** @class */ (function (_super) {
+    __extends(Port, _super);
+    function Port(props, context) {
         var _this = _super.call(this, props, context) || this;
+        _this.wrapperRef = React.createRef();
+        context.model.setCellData(props.data.id);
+        return _this;
+    }
+    Port.prototype.componentDidMount = function () {
+        var data = this.props.data;
+        var model = this.context.model;
+        if (!data.id) {
+            this.context.model.setCellId(data);
+            model.cellsMap.set(data.id, this);
+            model.cellsDataMap.set(data.id, data);
+        }
+    };
+    Port.prototype.anchor = function () {
+        var konvaNode = this.wrapperRef.current;
+        if (!konvaNode)
+            return { x: 0, y: 0 };
+        var rect = konvaNode.getClientRect({
+            // 有relative不会caculate scale
+            relativeTo: this.getStage(konvaNode),
+        });
+        // 通过变换矩阵将坐标还原为标准坐标
+        // const t = konvaNode.getAbsoluteTransform();
+        return {
+            x: rect.x + rect.width / 2,
+            y: rect.y + rect.height / 2,
+        };
+    };
+    Port.prototype.onLinkStart = function (e) {
+        e.cancelBubble = true;
+        var link = this.context.model.buffer.link;
+        link.source = this.props.data.id;
+        link.target = this.anchor();
+    };
+    Port.prototype.onLinkEnd = function (e) {
+        e.cancelBubble = true;
+        var _a = this.context, link = _a.model.buffer.link, model = _a.model;
+        var target = this.props.data.id;
+        if (link.source === target) {
+            model.clearLinkBuffer();
+        }
+        else
+            model.link(link.source, target);
+    };
+    Port.prototype.content = function () {
+        var _this = this;
+        return (jsxRuntime.exports.jsx(Group, __assign({ ref: this.wrapperRef, onMouseDown: function (e) { return _this.onLinkStart(e); }, onMouseUp: function (e) { return _this.onLinkEnd(e); } }, this.props, { children: this.props.children }), void 0));
+    };
+    Port.metaData = {
+        source: undefined,
+        target: undefined,
+    };
+    return Port;
+}(Cell$1));
+
+var Interactor = /** @class */ (function (_super) {
+    __extends(Interactor, _super);
+    function Interactor() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.syncDragPosition = function (e) {
+            var model = _this.context.model;
+            model.setCellData(_this.props.id, {
+                x: e.currentTarget.attrs.x,
+                y: e.currentTarget.attrs.y,
+            });
+        };
+        return _this;
+    }
+    Interactor.prototype.render = function () {
+        var _this = this;
+        var _a = this, model = _a.context.model, _b = _a.props, x = _b.x, y = _b.y, _c = _b.draggable, draggable = _c === void 0 ? true : _c, id = _b.id, topOnFocus = _b.topOnFocus, _d = _b.selectable, selectable = _d === void 0 ? true : _d, others = __rest(_b, ["x", "y", "draggable", "id", "topOnFocus", "selectable"]);
+        return (jsxRuntime.exports.jsx(Group, __assign({ x: x, y: y, draggable: draggable, onMouseDown: function (e) {
+                if (selectable) {
+                    e.cancelBubble = true;
+                    model.setSelectedCells(id);
+                    if (topOnFocus)
+                        model.moveTo(_this.props.id, model.canvasData.cells.length - 1);
+                }
+            }, onDragMove: function (e) {
+                _this.syncDragPosition(e);
+            } }, others, { children: this.props.children }), void 0));
+    };
+    Interactor.contextType = FlowContext;
+    Interactor = __decorate([
+        observer
+    ], Interactor);
+    return Interactor;
+}(React.Component));
+Interactor.Port = Port$1;
+
+var Edge = /** @class */ (function (_super) {
+    __extends(Edge, _super);
+    function Edge(props, context) {
+        var _this = _super.call(this, props, context) || this;
+        _this.bazier = true;
         _this.getStroke = function () {
             var isSelect = _this.context.model.selectCells.includes(_this.props.data.id);
             var color = _this.context.model.color;
@@ -1462,13 +1557,19 @@ var LinkingEdge = /** @class */ (function (_super) {
         };
         return _this;
     }
-    LinkingEdge.prototype.getPoints = function () {
+    Edge.prototype.getPoints = function () {
         var model = this.context.model;
         var data = this.props.data;
         var sourceInstance = model.cellsMap.get(data.source);
+        var targetInstance = model.cellsMap.get(data.target);
         var sourceAnchor = (sourceInstance.props.anchor && sourceInstance.props.anchor()) ||
             sourceInstance.anchor();
-        var targetAnchor = model.buffer.link.target;
+        var targetAnchor = (targetInstance.props.anchor && targetInstance.props.anchor()) ||
+            targetInstance.anchor();
+        return this.route(sourceAnchor, targetAnchor);
+    };
+    // 这个方法暴露出去，可自定义路由
+    Edge.prototype.route = function (sourceAnchor, targetAnchor) {
         var MIDDLE = (sourceAnchor.x + targetAnchor.x) / 2;
         return [
             sourceAnchor.x,
@@ -1481,15 +1582,40 @@ var LinkingEdge = /** @class */ (function (_super) {
             targetAnchor.y,
         ];
     };
-    LinkingEdge.prototype.edgeRender = function () {
+    Edge.prototype.edgeRender = function () {
         var color = this.context.model.color;
-        return (jsxRuntime.exports.jsx(Line, __assign({ listening: false, stroke: color.deepGrey, points: this.getPoints(), strokeWidth: 3 }, this.getStroke(), { lineCap: "round", bezier: true, dash: [10, 10] }), void 0));
+        var points = this.getPoints();
+        return (jsxRuntime.exports.jsxs(Group, { children: [jsxRuntime.exports.jsx(Line, __assign({ stroke: color.deepGrey, points: points, strokeWidth: 3 }, this.getStroke(), { lineCap: "round", bezier: this.bazier }), void 0), jsxRuntime.exports.jsx(Line, { stroke: "transparent", points: points, strokeWidth: 20, lineCap: "round", bezier: this.bazier }, void 0)] }, void 0));
     };
+    Edge.prototype.content = function () {
+        return (jsxRuntime.exports.jsx(Interactor, __assign({ id: this.props.data.id, draggable: false }, { children: this.edgeRender() }), void 0));
+    };
+    Edge.metaData = {
+        type: "edge",
+    };
+    return Edge;
+}(Cell$1));
+
+var LinkingEdge = /** @class */ (function (_super) {
+    __extends(LinkingEdge, _super);
+    function LinkingEdge() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    LinkingEdge.prototype.getPoints = function () {
+        var model = this.context.model;
+        var data = this.props.data;
+        var sourceInstance = model.cellsMap.get(data.source);
+        var sourceAnchor = (sourceInstance.props.anchor && sourceInstance.props.anchor()) ||
+            sourceInstance.anchor();
+        var targetAnchor = model.buffer.link.target;
+        return this.route(sourceAnchor, targetAnchor);
+    };
+    // 一般不会重写这个方法
     LinkingEdge.prototype.content = function () {
-        return jsxRuntime.exports.jsx(jsxRuntime.exports.Fragment, { children: this.props.data.source && this.edgeRender() }, void 0);
+        return (jsxRuntime.exports.jsx(Group, __assign({ listening: false }, { children: this.props.data.source && this.edgeRender() }), void 0));
     };
     return LinkingEdge;
-}(Cell$1));
+}(Edge));
 
 var arrayMove = function (arr, oldIndex, newIndex) {
     arr.splice(newIndex, 0, arr.splice(oldIndex, 1)[0]);
@@ -1677,7 +1803,9 @@ var FlowModel = /** @class */ (function () {
             return Object.assign(metaData, __assign({ id: id }, initOptions));
         };
         this.addCell = function (componentName, initOptions) {
-            _this.canvasData.cells.push(_this.createCellData(componentName, initOptions));
+            var newCellData = _this.createCellData(componentName, initOptions);
+            _this.canvasData.cells.push(newCellData);
+            return newCellData.id;
         };
         this.setLinkingPosition = function (e) {
             var cursorPos = e.currentTarget.getRelativePointerPosition();
@@ -1693,6 +1821,9 @@ var FlowModel = /** @class */ (function () {
         };
         this.getCellData = function (id) {
             return _this.cellsDataMap.get(id);
+        };
+        this.getCellInstance = function (id) {
+            return _this.cellsMap.get(id);
         };
         makeObservable(this);
         this.eventBus.sender = eventSender;
@@ -1770,100 +1901,6 @@ var Button = function (props) {
     return (jsxRuntime.exports.jsxs(Group, __assign({ x: x, y: y, onClick: props.onClick }, { children: [jsxRuntime.exports.jsx(Rect, { shadowBlur: 10, shadowOpacity: 0.1, cornerRadius: 4, fill: color.active, width: width, height: height }, void 0), jsxRuntime.exports.jsx(Text, { stroke: "white", text: props.text, width: width, height: height, align: "center", verticalAlign: "middle" }, void 0)] }), void 0));
 };
 
-var Port$1 = /** @class */ (function (_super) {
-    __extends(Port, _super);
-    function Port(props, context) {
-        var _this = _super.call(this, props, context) || this;
-        _this.wrapperRef = React.createRef();
-        context.model.setCellData(props.data.id);
-        return _this;
-    }
-    Port.prototype.componentDidMount = function () {
-        var data = this.props.data;
-        var model = this.context.model;
-        if (!data.id) {
-            this.context.model.setCellId(data);
-            model.cellsMap.set(data.id, this);
-            model.cellsDataMap.set(data.id, data);
-        }
-    };
-    Port.prototype.anchor = function () {
-        var konvaNode = this.wrapperRef.current;
-        if (!konvaNode)
-            return { x: 0, y: 0 };
-        var rect = konvaNode.getClientRect({
-            // 有relative不会caculate scale
-            relativeTo: this.getStage(konvaNode),
-        });
-        // 通过变换矩阵将坐标还原为标准坐标
-        // const t = konvaNode.getAbsoluteTransform();
-        return {
-            x: rect.x + rect.width / 2,
-            y: rect.y + rect.height / 2,
-        };
-    };
-    Port.prototype.onLinkStart = function (e) {
-        e.cancelBubble = true;
-        var link = this.context.model.buffer.link;
-        link.source = this.props.data.id;
-        link.target = this.anchor();
-    };
-    Port.prototype.onLinkEnd = function (e) {
-        e.cancelBubble = true;
-        var _a = this.context, link = _a.model.buffer.link, model = _a.model;
-        var target = this.props.data.id;
-        if (link.source === target) {
-            model.clearLinkBuffer();
-        }
-        else
-            model.link(link.source, target);
-    };
-    Port.prototype.content = function () {
-        var _this = this;
-        return (jsxRuntime.exports.jsx(Group, __assign({ ref: this.wrapperRef, onMouseDown: function (e) { return _this.onLinkStart(e); }, onMouseUp: function (e) { return _this.onLinkEnd(e); } }, this.props, { children: this.props.children }), void 0));
-    };
-    Port.metaData = {
-        source: undefined,
-        target: undefined,
-    };
-    return Port;
-}(Cell$1));
-
-var Interactor = /** @class */ (function (_super) {
-    __extends(Interactor, _super);
-    function Interactor() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.syncDragPosition = function (e) {
-            var model = _this.context.model;
-            model.setCellData(_this.props.id, {
-                x: e.currentTarget.attrs.x,
-                y: e.currentTarget.attrs.y,
-            });
-        };
-        return _this;
-    }
-    Interactor.prototype.render = function () {
-        var _this = this;
-        var _a = this, model = _a.context.model, _b = _a.props, x = _b.x, y = _b.y, _c = _b.draggable, draggable = _c === void 0 ? true : _c, id = _b.id, topOnFocus = _b.topOnFocus, _d = _b.selectable, selectable = _d === void 0 ? true : _d, others = __rest(_b, ["x", "y", "draggable", "id", "topOnFocus", "selectable"]);
-        return (jsxRuntime.exports.jsx(Group, __assign({ x: x, y: y, draggable: draggable, onMouseDown: function (e) {
-                if (selectable) {
-                    e.cancelBubble = true;
-                    model.setSelectedCells(id);
-                    if (topOnFocus)
-                        model.moveTo(_this.props.id, model.canvasData.cells.length - 1);
-                }
-            }, onDragMove: function (e) {
-                _this.syncDragPosition(e);
-            } }, others, { children: this.props.children }), void 0));
-    };
-    Interactor.contextType = FlowContext;
-    Interactor = __decorate([
-        observer
-    ], Interactor);
-    return Interactor;
-}(React.Component));
-Interactor.Port = Port$1;
-
 var Node = /** @class */ (function (_super) {
     __extends(Node, _super);
     function Node() {
@@ -1903,11 +1940,10 @@ var MatrixNode = /** @class */ (function (_super) {
         var model = this.context.model;
         var _b = model.color, color = _b === void 0 ? {} : _b;
         var getStroke = this.getStroke;
-        var _c = this.props.data, x = _c.x, y = _c.y, label = _c.label;
+        var _c = this.props.data, x = _c.x, y = _c.y, label = _c.label, ports = _c.ports;
         return (jsxRuntime.exports.jsxs(Interactor, __assign({}, this.props.data, { topOnFocus: true }, { children: [jsxRuntime.exports.jsx(Rect, { width: WIDTH, height: HEIGHT, fill: "white", shadowColor: "black", shadowBlur: 10, shadowOpacity: 0.1, cornerRadius: 10 }, void 0), jsxRuntime.exports.jsxs(Group, { children: [jsxRuntime.exports.jsx(Rect, { cornerRadius: [10, 10, 0, 0], width: WIDTH, height: 40, fill: color.grey }, void 0), jsxRuntime.exports.jsx(Text, { fontSize: 14, text: label, height: 40, x: 20, verticalAlign: "middle" }, void 0), jsxRuntime.exports.jsx(Button, { x: WIDTH, width: 20, height: 40, text: "\uFF0B", onClick: function (e) {
-                                // model.sendEvent(e);
-                                model.addCell("MatrixNode", {
-                                    x: _this.props.data.x + 100,
+                                var id = model.addCell("MatrixNode", {
+                                    x: _this.props.data.x + 300,
                                     y: _this.props.data.y,
                                     label: "new node",
                                     ports: [
@@ -1915,6 +1951,14 @@ var MatrixNode = /** @class */ (function (_super) {
                                             label: "new",
                                         },
                                     ],
+                                });
+                                model.sendEvent({
+                                    type: "chore",
+                                    value: "cell [".concat(id, "] has been added"),
+                                });
+                                Promise.resolve().then(function () {
+                                    var nextData = model.getCellData(id);
+                                    model.link(ports[0].id, nextData.ports[0].id);
                                 });
                             } }, void 0)] }, void 0), jsxRuntime.exports.jsx(Rect, __assign({ width: WIDTH, height: HEIGHT }, getStroke(), { cornerRadius: 10 }), void 0), jsxRuntime.exports.jsx(Group, __assign({ y: 40 }, { children: (_a = this.props.data.ports) === null || _a === void 0 ? void 0 : _a.map(function (portData, index) { return (jsxRuntime.exports.jsxs(Group, __assign({ x: 150, y: 20 + index * 30 }, { children: [jsxRuntime.exports.jsx(Text, { text: portData.label }, void 0), jsxRuntime.exports.jsx(Port, __assign({ linkable: true, data: portData, anchor: function () {
                                     return {
@@ -1929,60 +1973,6 @@ var MatrixNode = /** @class */ (function (_super) {
     };
     return MatrixNode;
 }(Node));
-
-var Edge = /** @class */ (function (_super) {
-    __extends(Edge, _super);
-    function Edge(props, context) {
-        var _this = _super.call(this, props, context) || this;
-        _this.getStroke = function () {
-            var isSelect = _this.context.model.selectCells.includes(_this.props.data.id);
-            var color = _this.context.model.color;
-            if (isSelect) {
-                return {
-                    stroke: color.active,
-                };
-            }
-            else
-                return {};
-        };
-        _this.state = {
-            points: [],
-        };
-        return _this;
-    }
-    Edge.prototype.getPoints = function () {
-        var model = this.context.model;
-        var data = this.props.data;
-        var sourceInstance = model.cellsMap.get(data.source);
-        var targetInstance = model.cellsMap.get(data.target);
-        var sourceAnchor = (sourceInstance.props.anchor && sourceInstance.props.anchor()) ||
-            sourceInstance.anchor();
-        var targetAnchor = (targetInstance.props.anchor && targetInstance.props.anchor()) ||
-            targetInstance.anchor();
-        var MIDDLE = (sourceAnchor.x + targetAnchor.x) / 2;
-        return [
-            sourceAnchor.x,
-            sourceAnchor.y,
-            MIDDLE,
-            sourceAnchor.y,
-            MIDDLE,
-            targetAnchor.y,
-            targetAnchor.x,
-            targetAnchor.y,
-        ];
-    };
-    Edge.prototype.edgeRender = function () {
-        var color = this.context.model.color;
-        return (jsxRuntime.exports.jsxs(jsxRuntime.exports.Fragment, { children: [jsxRuntime.exports.jsx(Line, __assign({ stroke: color.deepGrey, points: this.getPoints(), strokeWidth: 3 }, this.getStroke(), { lineCap: "round", bezier: true }), void 0), jsxRuntime.exports.jsx(Line, { stroke: "transparent", points: this.getPoints(), strokeWidth: 20, lineCap: "round", bezier: true }, void 0)] }, void 0));
-    };
-    Edge.prototype.content = function () {
-        return (jsxRuntime.exports.jsx(Interactor, __assign({ id: this.props.data.id, draggable: false }, { children: this.edgeRender() }), void 0));
-    };
-    Edge.metaData = {
-        type: "edge",
-    };
-    return Edge;
-}(Cell$1));
 
 var registComponents = function (model) {
     MatrixNode.regist(model);
@@ -2010,6 +2000,7 @@ var renderComponents = function (cellsData, model) {
 var Canvas = observer(function (props) {
     var model = props.model;
     var stageRef = useRef();
+    var _a = useState(0); _a[0]; var setSecondRefresh = _a[1];
     // 完全受控，https://github.com/konvajs/react-konva/blob/master/README.md#strict-mode
     useStrictMode(true);
     var setLinkingPosition = function (e) {
@@ -2018,6 +2009,10 @@ var Canvas = observer(function (props) {
             return;
         model.setLinkingPosition(e);
     };
+    useEffect(function () {
+        // 第一次render的zIndex会失效，见issue https://github.com/konvajs/react-konva/issues/194
+        setSecondRefresh(1);
+    });
     return (jsxRuntime.exports.jsx(Stage, __assign({ ref: stageRef, onMouseDown: function () {
             model.clearSelect();
         }, onMouseMove: function (e) {
@@ -29678,4 +29673,4 @@ var mountFlow = function (container, props) {
     return { modelRef: modelRef };
 };
 
-export { Cell$1 as Cell, Flow, Interactor, Node, Port$1 as Port, mountFlow };
+export { Cell$1 as Cell, Edge, Flow, Interactor, Node, Port$1 as Port, mountFlow };

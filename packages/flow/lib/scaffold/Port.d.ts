@@ -1,7 +1,6 @@
 import React from "react";
 import Cell from "@/cells/Cell";
 export declare type PortType = {
-    linkable?: boolean;
     id: string;
     anchor: {
         x: number;

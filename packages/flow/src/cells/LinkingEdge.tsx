@@ -1,38 +1,7 @@
-import Cell from "./Cell";
-import { Line } from "react-konva";
+import Edge from "@/cells/Edge";
+import { Group } from "react-konva";
 
-type EdgeType = {
-  source: string;
-  target: string;
-};
-
-class LinkingEdge extends Cell<
-  EdgeType,
-  {
-    points: number[];
-  }
-> {
-  constructor(props, context) {
-    super(props, context);
-
-    this.state = {
-      points: [],
-    };
-  }
-
-  getStroke = () => {
-    const isSelect = this.context.model.selectCells.includes(
-      this.props.data.id
-    );
-    const { color } = this.context.model;
-
-    if (isSelect) {
-      return {
-        stroke: color.active,
-      };
-    } else return {};
-  };
-
+class LinkingEdge extends Edge<{}, {}> {
   getPoints() {
     const { model } = this.context;
     const { data } = this.props;
@@ -44,42 +13,16 @@ class LinkingEdge extends Cell<
       sourceInstance.anchor();
     const targetAnchor = model.buffer.link.target;
 
-    const MIDDLE = (sourceAnchor.x + targetAnchor.x) / 2;
-
-    return [
-      sourceAnchor.x,
-      sourceAnchor.y,
-
-      MIDDLE,
-      sourceAnchor.y,
-
-      MIDDLE,
-      targetAnchor.y,
-
-      targetAnchor.x,
-      targetAnchor.y,
-    ];
+    return this.route(sourceAnchor, targetAnchor);
   }
 
-  edgeRender() {
-    const { color } = this.context.model;
-
-    return (
-      <Line
-        listening={false}
-        stroke={color.deepGrey}
-        points={this.getPoints()}
-        strokeWidth={3}
-        {...this.getStroke()}
-        lineCap="round"
-        bezier
-        dash={[10, 10]}
-      ></Line>
-    );
-  }
-
+  // 一般不会重写这个方法
   content() {
-    return <>{this.props.data.source && this.edgeRender()}</>;
+    return (
+      <Group listening={false}>
+        {this.props.data.source && this.edgeRender()}
+      </Group>
+    );
   }
 }
 

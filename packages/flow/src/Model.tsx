@@ -11,6 +11,8 @@ export class FlowModel {
     this.eventBus.sender = eventSender;
   }
 
+  registedEdge: undefined;
+
   @observable
   buffer = {
     link: {
@@ -96,6 +98,7 @@ export class FlowModel {
   @action setCellId = (data) => {
     data.id = v4();
   };
+
   @action setCellData = (id, data) => {
     const cellData = this.getCellData(id);
 
@@ -130,7 +133,10 @@ export class FlowModel {
   };
 
   @action addCell = (componentName, initOptions) => {
-    this.canvasData.cells.push(this.createCellData(componentName, initOptions));
+    const newCellData = this.createCellData(componentName, initOptions);
+    this.canvasData.cells.push(newCellData);
+
+    return newCellData.id;
   };
 
   @action setLinkingPosition = (e) => {
@@ -157,6 +163,10 @@ export class FlowModel {
 
   getCellData = (id) => {
     return this.cellsDataMap.get(id);
+  };
+
+  getCellInstance = (id) => {
+    return this.cellsMap.get(id);
   };
 
   onConnect(data) {

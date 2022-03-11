@@ -75,19 +75,13 @@ class MyNode extends Node<MyNodeType, {}> {
 
         <Group y={40}>
           {this.props.data.ports?.map((portData, index) => (
-            // 提供port能力，可以手动传入port的坐标函数
+            // 提供port能力，需要手动传入port的坐标函数
             <Interactor.Port
               key={index}
               x={WIDTH - 50}
               y={20 + index * 30}
               linkable={true}
               data={portData}
-              // anchor={() => {
-              //   return {
-              //     x: x + 200,
-              //     y: y + 65 + index * 30,
-              //   };
-              // }}
             >
               <Circle
                 stroke={"#0cbb52"}

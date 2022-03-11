@@ -1,12 +1,13 @@
 import { Stage, Layer, Group, useStrictMode } from "react-konva";
 import LinkingEdge from "./cells/LinkingEdge";
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import FlowModel from "./Model";
 
 import { observer } from "mobx-react";
 import { FlowContext } from "./Context";
 
 import { registComponents } from "./utils/registComponents";
+import { useEffect } from "react";
 
 const renderComponent = (cellData, model) => {
   return React.createElement(
@@ -29,6 +30,7 @@ const renderComponents = (cellsData, model) => {
             return renderComponent(cellData, model);
           })}
       </Group>
+
       <Group zIndex={0}>
         {cellsData
           .filter((cellData) => cellData.type === "edge")
@@ -45,6 +47,7 @@ const renderComponents = (cellsData, model) => {
 const Canvas = observer((props) => {
   const { model } = props;
   const stageRef = useRef();
+  const [_, setSecondRefresh] = useState(0);
 
   // 完全受控，https://github.com/konvajs/react-konva/blob/master/README.md#strict-mode
   useStrictMode(true);
@@ -58,6 +61,11 @@ const Canvas = observer((props) => {
 
     model.setLinkingPosition(e);
   };
+
+  useEffect(() => {
+    // 第一次render的zIndex会失效，见issue https://github.com/konvajs/react-konva/issues/194
+    setSecondRefresh(1);
+  });
 
   return (
     <Stage
@@ -84,6 +92,7 @@ const Canvas = observer((props) => {
       width={window.innerWidth}
       height={window.innerHeight}
     >
+      {/* provider要写到stage内，见issue https://github.com/konvajs/react-konva/issues/188 */}
       <FlowContext.Provider
         value={{
           model,

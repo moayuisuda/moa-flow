@@ -5,7 +5,6 @@ import Cell from "@/cells/Cell";
 import { v4 } from "uuid";
 
 export type PortType = {
-  linkable?: boolean;
   id: string;
   anchor: { x: number; y: number } | (() => { x: number; y: number });
 };

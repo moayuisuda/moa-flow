@@ -19,20 +19,23 @@ function App() {
   const modelRef = useRef<ModelType>();
 
   useEffect(() => {
+    // 注册自定义节点;
+    MyNode.regist(modelRef.current);
+    // MyEdge.regist(modelRef.current);
     // 调用model中的方法，创建80个节点压测一下
-    // for (let i = 0; i < 80; i++) {
-    //   modelRef.current?.addCell("MyNode", {
-    //     x: 50 * i,
-    //     y: 50 * i,
-    //     label: `${1} ${Math.random()}`,
-    //     ports: [
-    //       {
-    //         label: "haha",
-    //       },
-    //     ],
-    //   });
-    // }
-    //------------------- 非react组件引用 ------------------
+    for (let i = 0; i < 1; i++) {
+      modelRef.current?.addCell("MyNode", {
+        x: 50 * i,
+        y: 50 * i,
+        label: `${1} ${Math.random()}`,
+        ports: [
+          {
+            label: "haha",
+          },
+        ],
+      });
+    }
+    // //------------------- 非react组件引用 ------------------
     // const { modelRef } = mountFlow(document.querySelector(".App") as Element, {
     //   canvasData: {
     //     scale: [0.5, 0.5],
@@ -59,8 +62,6 @@ function App() {
     //     alert(JSON.stringify(e, null, "\t"));
     //   },
     // });
-
-    MyNode.regist(modelRef.current);
   }, []);
 
   return (

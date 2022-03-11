@@ -1,8 +1,9 @@
 import React from "react";
+import { Group } from "react-konva";
+import Konva from "konva";
 import { FlowContext } from "../Context";
 import _ from "lodash";
 import { observer } from "mobx-react";
-import Konva from "konva";
 
 export type CellType = { id: string };
 
@@ -39,10 +40,6 @@ abstract class Cell<P, S> extends React.Component<{ data: P & CellType }, S> {
     };
   }
 
-  setCellData(data) {
-    this.context.setCellData(this.props.data.id, data);
-  }
-
   isSelected() {
     return this.context.model.canvasData.cells.includes();
   }
@@ -57,8 +54,12 @@ abstract class Cell<P, S> extends React.Component<{ data: P & CellType }, S> {
     return re;
   }
 
+  setCellData(data) {
+    this.context.setCellData(this.props.data.id, data);
+  }
+
   render() {
-    return <>{this.content()}</>;
+    return <Group>{this.content()}</Group>;
   }
 }
 

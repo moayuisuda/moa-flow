@@ -1,5 +1,5 @@
 import Cell from "./Cell";
-import { Line } from "react-konva";
+import { Line, Group, FastLayer } from "react-konva";
 import Interactor from "../scaffold/Interactor";
 
 type EdgeType = {
@@ -7,25 +7,29 @@ type EdgeType = {
   target: string;
 };
 
-class Edge extends Cell<
-  EdgeType,
+class Edge<P, S> extends Cell<
+  EdgeType & P,
   {
     points: number[];
-  }
+  } & S
 > {
   static metaData: any = {
     type: "edge",
   };
+
+  protected bazier = true;
 
   constructor(props, context) {
     super(props, context);
 
     this.state = {
       points: [],
-    };
+    } as {
+      points: number[];
+    } & S;
   }
 
-  getStroke = () => {
+  private getStroke = () => {
     const isSelect = this.context.model.selectCells.includes(
       this.props.data.id
     );
@@ -38,7 +42,7 @@ class Edge extends Cell<
     } else return {};
   };
 
-  getPoints() {
+  protected getPoints() {
     const { model } = this.context;
     const { data } = this.props;
 
@@ -53,6 +57,11 @@ class Edge extends Cell<
       (targetInstance.props.anchor && targetInstance.props.anchor()) ||
       targetInstance.anchor();
 
+    return this.route(sourceAnchor, targetAnchor);
+  }
+
+  // 这个方法暴露出去，可自定义路由
+  route(sourceAnchor, targetAnchor) {
     const MIDDLE = (sourceAnchor.x + targetAnchor.x) / 2;
 
     return [
@@ -70,27 +79,28 @@ class Edge extends Cell<
     ];
   }
 
-  edgeRender() {
+  protected edgeRender() {
     const { color } = this.context.model;
+    const points = this.getPoints();
 
     return (
-      <>
+      <Group>
         <Line
           stroke={color.deepGrey}
-          points={this.getPoints()}
+          points={points}
           strokeWidth={3}
           {...this.getStroke()}
           lineCap="round"
-          bezier
+          bezier={this.bazier}
         ></Line>
         <Line
           stroke="transparent"
-          points={this.getPoints()}
+          points={points}
           strokeWidth={20}
           lineCap="round"
-          bezier
+          bezier={this.bazier}
         ></Line>
-      </>
+      </Group>
     );
   }
 

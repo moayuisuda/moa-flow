@@ -42,7 +42,7 @@ class MatrixNode extends Node<MatrixNodeType, {}> {
     const { model } = this.context;
     const { color = {} } = model;
     const { getStroke } = this;
-    const { x, y, label } = this.props.data;
+    const { x, y, label, ports } = this.props.data;
 
     return (
       <Interactor {...this.props.data} topOnFocus>
@@ -76,9 +76,8 @@ class MatrixNode extends Node<MatrixNodeType, {}> {
             height={40}
             text="＋"
             onClick={(e) => {
-              // model.sendEvent(e);
-              model.addCell("MatrixNode", {
-                x: this.props.data.x + 100,
+              const id = model.addCell("MatrixNode", {
+                x: this.props.data.x + 300,
                 y: this.props.data.y,
                 label: "new node",
                 ports: [
@@ -86,6 +85,16 @@ class MatrixNode extends Node<MatrixNodeType, {}> {
                     label: "new",
                   },
                 ],
+              });
+
+              model.sendEvent({
+                type: "chore",
+                value: `cell [${id}] has been added`,
+              });
+
+              Promise.resolve().then(() => {
+                const nextData = model.getCellData(id);
+                model.link(ports[0].id, nextData.ports[0].id);
               });
             }}
           />

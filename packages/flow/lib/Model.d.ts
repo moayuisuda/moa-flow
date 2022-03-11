@@ -2,6 +2,7 @@
 import { CellType } from "@/cells/Cell";
 export declare class FlowModel {
     constructor(eventSender: any);
+    registedEdge: undefined;
     buffer: {
         link: {
             source: any;
@@ -48,11 +49,12 @@ export declare class FlowModel {
     deleCell: (id: any) => void;
     setAutoLayout: (layoutOption: any) => void;
     createCellData: (component: any, initOptions?: any) => any;
-    addCell: (componentName: any, initOptions: any) => void;
+    addCell: (componentName: any, initOptions: any) => any;
     setLinkingPosition: (e: any) => void;
     link: (source: any, target: any) => void;
     moveTo(id: any, index: any): void;
     getCellData: (id: any) => CellType;
+    getCellInstance: (id: any) => import("react").ReactNode;
     onConnect(data: any): void;
 }
 export default FlowModel;

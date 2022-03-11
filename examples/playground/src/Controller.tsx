@@ -2,7 +2,7 @@ import React from "react";
 import { Card, Button, message } from "antd";
 import { ModelType } from "flow";
 
-type ModelRefType = React.MutableRefObject<ModelType | undefined>;
+type ModelRefType = React.MutableRefObject<ModelType | undefined | null>;
 
 const Controller = (props: { modelRef: ModelRefType }) => {
   const { modelRef } = props;
