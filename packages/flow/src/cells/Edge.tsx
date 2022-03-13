@@ -18,6 +18,7 @@ class Edge<P, S> extends Cell<
   };
 
   protected bazier = true;
+  protected dash = false;
 
   constructor(props, context) {
     super(props, context);
@@ -92,6 +93,7 @@ class Edge<P, S> extends Cell<
           {...this.getStroke()}
           lineCap="round"
           bezier={this.bazier}
+          dash={this.dash ? [10, 10] : undefined}
         ></Line>
         <Line
           stroke="transparent"

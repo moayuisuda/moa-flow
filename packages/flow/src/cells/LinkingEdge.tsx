@@ -2,6 +2,8 @@ import Edge from "@/cells/Edge";
 import { Group } from "react-konva";
 
 class LinkingEdge extends Edge<{}, {}> {
+  protected dash: boolean = true;
+
   getPoints() {
     const { model } = this.context;
     const { data } = this.props;

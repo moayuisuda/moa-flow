@@ -11,5 +11,7 @@ declare class Flow extends React.Component<FlowProps, {}> {
     flowModel: any;
     constructor(props: FlowProps);
     render(): JSX.Element;
+    componentDidMount(): void;
+    initHotKeys(): void;
 }
 export default Flow;

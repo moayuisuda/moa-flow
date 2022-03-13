@@ -13,10 +13,14 @@ abstract class Cell<P, S> extends React.Component<{ data: P & CellType }, S> {
   abstract content(): JSX.Element;
   static metaData: any = { id: "" };
 
+  wrapperRef: React.RefObject<any>;
+
   constructor(props, context) {
     super(props);
     context.model.cellsMap.set(props.data.id, this);
     context.model.cellsDataMap.set(props.data.id, props.data);
+
+    this.wrapperRef = React.createRef();
   }
 
   static regist(model) {
@@ -59,7 +63,7 @@ abstract class Cell<P, S> extends React.Component<{ data: P & CellType }, S> {
   }
 
   render() {
-    return <Group>{this.content()}</Group>;
+    return <Group ref={this.wrapperRef}>{this.content()}</Group>;
   }
 }
 

@@ -8,6 +8,7 @@ declare abstract class Cell<P, S> extends React.Component<{
     static contextType: React.Context<import("../Context").FlowContextType>;
     abstract content(): JSX.Element;
     static metaData: any;
+    wrapperRef: React.RefObject<any>;
     constructor(props: any, context: any);
     static regist(model: any): void;
     static getMetaData(): {

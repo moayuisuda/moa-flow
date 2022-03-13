@@ -1,9 +1,19 @@
-/// <reference types="react" />
 import { CellType } from "@/cells/Cell";
 export declare class FlowModel {
     constructor(eventSender: any);
+    hotKey: {};
     registedEdge: undefined;
     buffer: {
+        select: {
+            start: {
+                x: number;
+                y: number;
+            };
+            end: {
+                x: number;
+                y: number;
+            };
+        };
         link: {
             source: any;
             target: {
@@ -12,6 +22,7 @@ export declare class FlowModel {
             };
         };
     };
+    setMultiSelect: (select: any) => void;
     clearLinkBuffer: () => void;
     color: {
         primary: string;
@@ -21,7 +32,7 @@ export declare class FlowModel {
         green: string;
         deepGrey: string;
     };
-    cellsMap: Map<string, import("react").ReactNode>;
+    cellsMap: Map<string, any>;
     cellsDataMap: Map<string, CellType>;
     componentsMap: Map<any, any>;
     eventBus: {
@@ -29,7 +40,7 @@ export declare class FlowModel {
         receiver: any;
     };
     selectCells: string[];
-    setSelectedCells: (id: any) => void;
+    setSelectedCells: (id: any, isSingleSelect?: boolean) => void;
     canvasData: {
         scale: {
             x: number;
@@ -54,7 +65,7 @@ export declare class FlowModel {
     link: (source: any, target: any) => void;
     moveTo(id: any, index: any): void;
     getCellData: (id: any) => CellType;
-    getCellInstance: (id: any) => import("react").ReactNode;
+    getCellInstance: (id: any) => any;
     onConnect(data: any): void;
 }
 export default FlowModel;

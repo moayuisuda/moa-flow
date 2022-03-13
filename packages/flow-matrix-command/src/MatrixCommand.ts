@@ -1,6 +1,8 @@
-import { ModelType } from "flow";
+import { ModelType } from 'flow'
+
 type ModelRefType = React.MutableRefObject<ModelType | undefined | null>;
 
+// 统一约束可以分包
 type CommandResultType = {
     error?: {
         message: string
@@ -8,7 +10,7 @@ type CommandResultType = {
     result?: any;
 }
 
-class Command {
+class CommonCommand {
     modelRef: ModelRefType
 
     constructor(modelRef: ModelRefType) {
@@ -26,12 +28,12 @@ class Command {
             }
         }
         else {
-            const id = modelRef.current?.deleCell(modelRef.current?.selectCells[0]);
-            return { result: id }
+            for (let node of modelRef.current?.selectCells) {
+                modelRef.current?.deleCell(node);
+            }
+            return { result: '' }
         }
-
-
     }
 }
 
-export { Command }
+export default CommonCommand

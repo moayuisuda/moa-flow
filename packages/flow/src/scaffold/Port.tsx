@@ -2,7 +2,6 @@ import { Group } from "react-konva";
 import React from "react";
 
 import Cell from "@/cells/Cell";
-import { v4 } from "uuid";
 
 export type PortType = {
   id: string;
@@ -18,7 +17,6 @@ class Port extends Cell<PortType, {}> {
 
   constructor(props, context) {
     super(props, context);
-    this.wrapperRef = React.createRef();
     context.model.setCellData(props.data.id);
   }
 
@@ -83,7 +81,6 @@ class Port extends Cell<PortType, {}> {
   content() {
     return (
       <Group
-        ref={this.wrapperRef}
         onMouseDown={(e) => this.onLinkStart(e)}
         onMouseUp={(e) => this.onLinkEnd(e)}
         {...this.props}

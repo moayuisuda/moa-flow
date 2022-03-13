@@ -1,4 +1,4 @@
-import { action, observable, makeObservable } from "mobx";
+import { action, observable, computed, makeObservable } from "mobx";
 // import { v4 } from "uuid";
 import { arrayMove, findIndex } from "./utils/util";
 import { CellType } from "@/cells/Cell";
@@ -11,10 +11,17 @@ export class FlowModel {
     this.eventBus.sender = eventSender;
   }
 
+  @observable
+  hotKey = {};
+
   registedEdge: undefined;
 
   @observable
   buffer = {
+    select: {
+      start: { x: 0, y: 0 },
+      end: { x: 0, y: 0 },
+    },
     link: {
       source: undefined,
       target: {
@@ -22,6 +29,39 @@ export class FlowModel {
         y: 0,
       },
     },
+  };
+
+  @action setMultiSelect = (select) => {
+    const {
+      buffer: { select: bufferSelect },
+    } = this;
+
+    Object.assign(bufferSelect, select);
+
+    const right = Math.max(bufferSelect.start.x, bufferSelect.end.x);
+    const left = Math.min(bufferSelect.start.x, bufferSelect.end.x);
+    const top = Math.min(bufferSelect.start.y, bufferSelect.end.y);
+    const bottom = Math.max(bufferSelect.start.y, bufferSelect.end.y);
+
+    this.cellsMap.forEach((cell) => {
+      if (cell.props.data?.type === "node") {
+        const instance = cell.wrapperRef.current;
+        const bounds = instance.getClientRect({
+          relativeTo: instance.getStage(instance),
+        });
+        // judge which nodes interact with 'select rect'
+        if (
+          !(
+            right < bounds.x ||
+            left > bounds.x + bounds.width ||
+            bottom < bounds.y ||
+            top > bounds.y + bounds.height
+          )
+        ) {
+          this.setSelectedCells(cell.props.data.id, false);
+        }
+      }
+    });
   };
 
   @action clearLinkBuffer = () => {
@@ -38,7 +78,7 @@ export class FlowModel {
   @observable color = color;
 
   // cell的<id, 实例>map，方便用id获取到组件实例
-  cellsMap = new Map<string, React.ReactNode>();
+  cellsMap = new Map<string, React.Component<any, any> & any>();
   // cellData的<id, cellData>map，用来修改受控数据
   cellsDataMap = new Map<string, CellType>();
 
@@ -53,14 +93,15 @@ export class FlowModel {
 
   // 选中的cell
   @observable selectCells: string[] = [];
-  @action setSelectedCells = (id) => {
+  @action setSelectedCells = (id, isSingleSelect = true) => {
     // 多选
-    // if (!this.selectCells.includes(id)) {
-    //   this.selectCells.push(id);
-    // }
-
-    // 单选
-    this.selectCells = [id];
+    if (isSingleSelect) {
+      this.selectCells = [id];
+    } else {
+      if (!this.selectCells.includes(id)) {
+        this.selectCells.push(id);
+      }
+    }
   };
 
   // 画布的渲染数据，之后的渲染大部分都为受控渲染，更改canvasData => 触发重新渲染

@@ -1404,6 +1404,7 @@ var Cell = /** @class */ (function (_super) {
         var _this = _super.call(this, props) || this;
         context.model.cellsMap.set(props.data.id, _this);
         context.model.cellsDataMap.set(props.data.id, props.data);
+        _this.wrapperRef = React.createRef();
         return _this;
     }
     Cell.regist = function (model) {
@@ -1434,7 +1435,7 @@ var Cell = /** @class */ (function (_super) {
         this.context.setCellData(this.props.data.id, data);
     };
     Cell.prototype.render = function () {
-        return jsxRuntime.exports.jsx(Group, { children: this.content() }, void 0);
+        return jsxRuntime.exports.jsx(Group, __assign({ ref: this.wrapperRef }, { children: this.content() }), void 0);
     };
     Cell.contextType = FlowContext;
     Cell.metaData = { id: "" };
@@ -1446,7 +1447,6 @@ var Port$1 = /** @class */ (function (_super) {
     __extends(Port, _super);
     function Port(props, context) {
         var _this = _super.call(this, props, context) || this;
-        _this.wrapperRef = React.createRef();
         context.model.setCellData(props.data.id);
         return _this;
     }
@@ -1492,7 +1492,7 @@ var Port$1 = /** @class */ (function (_super) {
     };
     Port.prototype.content = function () {
         var _this = this;
-        return (jsxRuntime.exports.jsx(Group, __assign({ ref: this.wrapperRef, onMouseDown: function (e) { return _this.onLinkStart(e); }, onMouseUp: function (e) { return _this.onLinkEnd(e); } }, this.props, { children: this.props.children }), void 0));
+        return (jsxRuntime.exports.jsx(Group, __assign({ onMouseDown: function (e) { return _this.onLinkStart(e); }, onMouseUp: function (e) { return _this.onLinkEnd(e); } }, this.props, { children: this.props.children }), void 0));
     };
     Port.metaData = {
         source: undefined,
@@ -1541,6 +1541,7 @@ var Edge = /** @class */ (function (_super) {
     function Edge(props, context) {
         var _this = _super.call(this, props, context) || this;
         _this.bazier = true;
+        _this.dash = false;
         _this.getStroke = function () {
             var isSelect = _this.context.model.selectCells.includes(_this.props.data.id);
             var color = _this.context.model.color;
@@ -1585,7 +1586,7 @@ var Edge = /** @class */ (function (_super) {
     Edge.prototype.edgeRender = function () {
         var color = this.context.model.color;
         var points = this.getPoints();
-        return (jsxRuntime.exports.jsxs(Group, { children: [jsxRuntime.exports.jsx(Line, __assign({ stroke: color.deepGrey, points: points, strokeWidth: 3 }, this.getStroke(), { lineCap: "round", bezier: this.bazier }), void 0), jsxRuntime.exports.jsx(Line, { stroke: "transparent", points: points, strokeWidth: 20, lineCap: "round", bezier: this.bazier }, void 0)] }, void 0));
+        return (jsxRuntime.exports.jsxs(Group, { children: [jsxRuntime.exports.jsx(Line, __assign({ stroke: color.deepGrey, points: points, strokeWidth: 3 }, this.getStroke(), { lineCap: "round", bezier: this.bazier, dash: this.dash ? [10, 10] : undefined }), void 0), jsxRuntime.exports.jsx(Line, { stroke: "transparent", points: points, strokeWidth: 20, lineCap: "round", bezier: this.bazier }, void 0)] }, void 0));
     };
     Edge.prototype.content = function () {
         return (jsxRuntime.exports.jsx(Interactor, __assign({ id: this.props.data.id, draggable: false }, { children: this.edgeRender() }), void 0));
@@ -1599,7 +1600,9 @@ var Edge = /** @class */ (function (_super) {
 var LinkingEdge = /** @class */ (function (_super) {
     __extends(LinkingEdge, _super);
     function LinkingEdge() {
-        return _super !== null && _super.apply(this, arguments) || this;
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.dash = true;
+        return _this;
     }
     LinkingEdge.prototype.getPoints = function () {
         var model = this.context.model;
@@ -1716,7 +1719,12 @@ function v4(options, buf, offset) {
 var FlowModel = /** @class */ (function () {
     function FlowModel(eventSender) {
         var _this = this;
+        this.hotKey = {};
         this.buffer = {
+            select: {
+                start: { x: 0, y: 0 },
+                end: { x: 0, y: 0 },
+            },
             link: {
                 source: undefined,
                 target: {
@@ -1724,6 +1732,30 @@ var FlowModel = /** @class */ (function () {
                     y: 0,
                 },
             },
+        };
+        this.setMultiSelect = function (select) {
+            var bufferSelect = _this.buffer.select;
+            Object.assign(bufferSelect, select);
+            var right = Math.max(bufferSelect.start.x, bufferSelect.end.x);
+            var left = Math.min(bufferSelect.start.x, bufferSelect.end.x);
+            var top = Math.min(bufferSelect.start.y, bufferSelect.end.y);
+            var bottom = Math.max(bufferSelect.start.y, bufferSelect.end.y);
+            _this.cellsMap.forEach(function (cell) {
+                var _a;
+                if (((_a = cell.props.data) === null || _a === void 0 ? void 0 : _a.type) === "node") {
+                    var instance = cell.wrapperRef.current;
+                    var bounds = instance.getClientRect({
+                        relativeTo: instance.getStage(instance),
+                    });
+                    // judge which nodes interact with 'select rect'
+                    if (!(right < bounds.x ||
+                        left > bounds.x + bounds.width ||
+                        bottom < bounds.y ||
+                        top > bounds.y + bounds.height)) {
+                        _this.setSelectedCells(cell.props.data.id, false);
+                    }
+                }
+            });
         };
         this.clearLinkBuffer = function () {
             _this.buffer.link = {
@@ -1749,13 +1781,17 @@ var FlowModel = /** @class */ (function () {
         };
         // 选中的cell
         this.selectCells = [];
-        this.setSelectedCells = function (id) {
+        this.setSelectedCells = function (id, isSingleSelect) {
+            if (isSingleSelect === void 0) { isSingleSelect = true; }
             // 多选
-            // if (!this.selectCells.includes(id)) {
-            //   this.selectCells.push(id);
-            // }
-            // 单选
-            _this.selectCells = [id];
+            if (isSingleSelect) {
+                _this.selectCells = [id];
+            }
+            else {
+                if (!_this.selectCells.includes(id)) {
+                    _this.selectCells.push(id);
+                }
+            }
         };
         // 画布的渲染数据，之后的渲染大部分都为受控渲染，更改canvasData => 触发重新渲染
         this.canvasData = {
@@ -1838,7 +1874,13 @@ var FlowModel = /** @class */ (function () {
     };
     __decorate([
         observable
+    ], FlowModel.prototype, "hotKey", void 0);
+    __decorate([
+        observable
     ], FlowModel.prototype, "buffer", void 0);
+    __decorate([
+        action
+    ], FlowModel.prototype, "setMultiSelect", void 0);
     __decorate([
         action
     ], FlowModel.prototype, "clearLinkBuffer", void 0);
@@ -1980,6 +2022,63 @@ var registComponents = function (model) {
     Edge.regist(model);
 };
 
+var initHotKeys = function (model) {
+    var hotKey = model.hotKey;
+    window.addEventListener('keydown', function (e) {
+        switch (e.code) {
+            case 'MetaLeft':
+                e.preventDefault();
+                hotKey.MetaLeft = true;
+                break;
+            case 'AltLeft':
+                e.preventDefault();
+                hotKey.AltLeft = true;
+                break;
+            case 'Space':
+                // e.preventDefault()
+                hotKey.Space = true;
+                break;
+            case 'ControlLeft':
+                hotKey.ControlLeft = true;
+                break;
+        }
+    });
+    window.addEventListener('keyup', function (e) {
+        switch (e.code) {
+            case 'MetaLeft':
+                e.preventDefault();
+                hotKey.MetaLeft = false;
+                break;
+            case 'AltLeft':
+                e.preventDefault();
+                hotKey.AltLeft = false;
+                break;
+            case 'Space':
+                hotKey.Space = false;
+                break;
+            case 'ControlLeft':
+                hotKey.ControlLeft = false;
+                break;
+        }
+    });
+};
+
+var SelectBoundsRect = /** @class */ (function (_super) {
+    __extends(SelectBoundsRect, _super);
+    function SelectBoundsRect() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    SelectBoundsRect.prototype.render = function () {
+        var _a = this.context.model, select = _a.buffer.select, color = _a.color, hotKey = _a.hotKey;
+        return (jsxRuntime.exports.jsx(jsxRuntime.exports.Fragment, { children: !hotKey["Space"] && hotKey["MouseDown"] && (jsxRuntime.exports.jsx(Rect, { x: Math.min(select.start.x, select.end.x), y: Math.min(select.start.y, select.end.y), width: Math.abs(select.start.x - select.end.x), height: Math.abs(select.start.y - select.end.y), stroke: color.primary }, void 0)) }, void 0));
+    };
+    SelectBoundsRect.contextType = FlowContext;
+    SelectBoundsRect = __decorate([
+        observer
+    ], SelectBoundsRect);
+    return SelectBoundsRect;
+}(React.Component));
+
 var renderComponent = function (cellData, model) {
     return React.createElement(model.componentsMap.get(cellData.component) || Group, {
         data: cellData,
@@ -1988,7 +2087,7 @@ var renderComponent = function (cellData, model) {
 };
 var renderComponents = function (cellsData, model) {
     return (jsxRuntime.exports.jsxs(Layer, { children: [jsxRuntime.exports.jsx(Group, __assign({ zIndex: 1 }, { children: cellsData
-                    // 先渲染注册节点，后渲染注册线
+                    // regist node first, because some compute in edge need node instance
                     .filter(function (cellData) { return cellData.type !== "edge"; })
                     .map(function (cellData) {
                     return renderComponent(cellData, model);
@@ -1996,13 +2095,13 @@ var renderComponents = function (cellsData, model) {
                     .filter(function (cellData) { return cellData.type === "edge"; })
                     .map(function (cellData) {
                     return renderComponent(cellData, model);
-                }) }), void 0), jsxRuntime.exports.jsx(LinkingEdge, { data: model.buffer.link }, void 0)] }, void 0));
+                }) }), void 0), jsxRuntime.exports.jsx(LinkingEdge, { data: model.buffer.link }, void 0), jsxRuntime.exports.jsx(SelectBoundsRect, {}, void 0)] }, void 0));
 };
 var Canvas = observer(function (props) {
     var model = props.model;
     var stageRef = useRef();
     var _a = useState(0); _a[0]; var setSecondRefresh = _a[1];
-    // 完全受控，https://github.com/konvajs/react-konva/blob/master/README.md#strict-mode
+    // fully controlled，https://github.com/konvajs/react-konva/blob/master/README.md#strict-mode
     useStrictMode(true);
     var setLinkingPosition = function (e) {
         var link = model.buffer.link;
@@ -2011,18 +2110,55 @@ var Canvas = observer(function (props) {
         model.setLinkingPosition(e);
     };
     useEffect(function () {
-        // 第一次render的zIndex会失效，见issue https://github.com/konvajs/react-konva/issues/194
+        // zIndex not work in first render，issue link https://github.com/konvajs/react-konva/issues/194
         setSecondRefresh(1);
     });
-    return (jsxRuntime.exports.jsx(Stage, __assign({ ref: stageRef, onMouseDown: function () {
+    model.buffer;
+    return (jsxRuntime.exports.jsx(Stage, __assign({ ref: stageRef, onMouseDown: function (e) {
             model.clearSelect();
+            model.hotKey.MouseDown = true;
+            if (!model.hotKey["Space"]) {
+                var pos = stageRef.current.getRelativePointerPosition();
+                model.setMultiSelect({
+                    start: {
+                        x: pos.x,
+                        y: pos.y,
+                    },
+                    end: {
+                        x: pos.x,
+                        y: pos.y,
+                    },
+                });
+            }
         }, onMouseMove: function (e) {
             setLinkingPosition(e);
+            if (model.hotKey["Space"] && model.hotKey["MouseDown"]) {
+                model.setStagePosition(e.currentTarget.attrs.x + e.evt.movementX, e.currentTarget.attrs.y + e.evt.movementY);
+            }
+            if (!model.hotKey["Space"] && model.hotKey["MouseDown"]) {
+                var pos = stageRef.current.getRelativePointerPosition();
+                model.setMultiSelect({
+                    end: {
+                        x: pos.x,
+                        y: pos.y,
+                    },
+                });
+            }
         }, onMouseUp: function (e) {
             model.clearLinkBuffer();
-        }, scale: model.canvasData.scale, x: model.canvasData.x, y: model.canvasData.y, draggable: true, onDragMove: function (e) {
-            model.setStagePosition(e.currentTarget.attrs.x, e.currentTarget.attrs.y);
-        }, width: window.innerWidth, height: window.innerHeight }, { children: jsxRuntime.exports.jsx(FlowContext.Provider, __assign({ value: {
+            model.hotKey.MouseDown = false;
+            var pos = stageRef.current.getRelativePointerPosition();
+            model.setMultiSelect({
+                start: {
+                    x: pos.x,
+                    y: pos.y,
+                },
+                end: {
+                    x: pos.x,
+                    y: pos.y,
+                },
+            });
+        }, scale: model.canvasData.scale, x: model.canvasData.x, y: model.canvasData.y, width: window.innerWidth, height: window.innerHeight }, { children: jsxRuntime.exports.jsx(FlowContext.Provider, __assign({ value: {
                 model: model,
             } }, { children: renderComponents(model.canvasData.cells, model) }), void 0) }), void 0));
 });
@@ -2041,6 +2177,10 @@ var Flow = /** @class */ (function (_super) {
         var model = this.flowModel;
         return jsxRuntime.exports.jsx(Canvas, { model: model }, void 0);
     };
+    Flow.prototype.componentDidMount = function () {
+        initHotKeys(this.flowModel);
+    };
+    Flow.prototype.initHotKeys = function () { };
     Flow = __decorate([
         observer
     ], Flow);

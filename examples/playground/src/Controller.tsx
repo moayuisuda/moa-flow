@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, Button, message } from "antd";
 import { ModelType } from "flow";
-import { Command } from "./Command";
+import Command from "flow-matrix-command";
 
 type ModelRefType = React.MutableRefObject<ModelType | undefined | null>;
 

@@ -9,6 +9,7 @@ declare class Edge<P, S> extends Cell<EdgeType & P, {
 } & S> {
     static metaData: any;
     protected bazier: boolean;
+    protected dash: boolean;
     constructor(props: any, context: any);
     private getStroke;
     protected getPoints(): any[];

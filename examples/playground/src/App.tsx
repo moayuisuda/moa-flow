@@ -74,8 +74,9 @@ function App() {
           alert(JSON.stringify(e, null, "\t"));
         }}
       ></Flow>
+
+      {/* 同Flow一样Controller也可封装ReactDOM.render */}
       <Controller modelRef={modelRef}></Controller>
-      <h1>HELLO</h1>
     </div>
   );
 }
