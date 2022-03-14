@@ -16,6 +16,16 @@
       static name = "bob";
     }
 
-    console.log(A.name);
+    const map = new Map([
+      ["a", "ao"],
+      ["b", "bo"],
+    ]);
+
+    const entries = map.entries();
+
+    let value;
+    while ((value = entries.next().value)) {
+      console.log(value);
+    }
   </script>
 </html>

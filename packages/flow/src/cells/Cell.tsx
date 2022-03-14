@@ -5,9 +5,13 @@ import { FlowContext } from "../Context";
 import _ from "lodash";
 import { observer } from "mobx-react";
 
-export type CellType = { id: string };
+export type CellType = { id: string; type: string };
 
-abstract class Cell<P, S> extends React.Component<{ data: P & CellType }, S> {
+// D: data, S: state, P: props
+abstract class Cell<D, S = {}, P = {}> extends React.Component<
+  { data: D & CellType } & P,
+  S
+> {
   static contextType = FlowContext;
 
   abstract content(): JSX.Element;

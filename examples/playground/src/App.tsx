@@ -7,6 +7,7 @@ import MyNode from "./MyNode";
 import Controller from "./Controller";
 
 import "antd/dist/antd.css";
+import { message } from "antd";
 
 const randomIn = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -70,8 +71,8 @@ function App() {
       <Flow
         modelRef={modelRef}
         canvasData={testData}
-        onEvent={(e: any) => {
-          alert(JSON.stringify(e, null, "\t"));
+        onEvent={(e) => {
+          message.info(`[${e.type}] ${JSON.stringify(e.data)}`);
         }}
       ></Flow>
 

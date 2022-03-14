@@ -89,7 +89,7 @@ class MatrixNode extends Node<MatrixNodeType, {}> {
 
               model.sendEvent({
                 type: "chore",
-                value: `cell [${id}] has been added`,
+                data: `cell [${id}] has been added`,
               });
 
               Promise.resolve().then(() => {
@@ -113,7 +113,6 @@ class MatrixNode extends Node<MatrixNodeType, {}> {
             <Group x={150} y={20 + index * 30} key={portData.label}>
               <Text text={portData.label}></Text>
               <Port
-                linkable={true}
                 data={portData}
                 anchor={() => {
                   return {

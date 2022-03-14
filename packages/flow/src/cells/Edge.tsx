@@ -1,8 +1,8 @@
 import Cell from "./Cell";
-import { Line, Group, FastLayer } from "react-konva";
+import { Line, Group } from "react-konva";
 import Interactor from "../scaffold/Interactor";
 
-type EdgeType = {
+export type EdgeType = {
   source: string;
   target: string;
 };

@@ -1,10 +1,16 @@
 import { CellType } from "@/cells/Cell";
 export declare class FlowModel {
     constructor(eventSender: any);
-    hotKey: {};
-    registedEdge: undefined;
+    hotKey: {
+        MouseDown: boolean;
+    };
+    setHotKey: (key: any, value: any) => void;
+    linkEdge: string;
+    setLinkEdge: (name: string) => void;
     buffer: {
+        singleSelect: boolean;
         select: {
+            single: boolean;
             start: {
                 x: number;
                 y: number;
@@ -22,6 +28,7 @@ export declare class FlowModel {
             };
         };
     };
+    setSingleSelect: (isSingleSelect: boolean) => void;
     setMultiSelect: (select: any) => void;
     clearLinkBuffer: () => void;
     color: {
@@ -40,7 +47,7 @@ export declare class FlowModel {
         receiver: any;
     };
     selectCells: string[];
-    setSelectedCells: (id: any, isSingleSelect?: boolean) => void;
+    setSelectedCells: (ids: string[], ifReplace?: boolean) => void;
     canvasData: {
         scale: {
             x: number;
@@ -66,6 +73,8 @@ export declare class FlowModel {
     moveTo(id: any, index: any): void;
     getCellData: (id: any) => CellType;
     getCellInstance: (id: any) => any;
+    getPortNode(id: any): any;
+    getPortEdges(id: any): any[];
     onConnect(data: any): void;
 }
 export default FlowModel;

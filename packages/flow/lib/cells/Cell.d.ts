@@ -1,10 +1,11 @@
 import React from "react";
 export declare type CellType = {
     id: string;
+    type: string;
 };
-declare abstract class Cell<P, S> extends React.Component<{
-    data: P & CellType;
-}, S> {
+declare abstract class Cell<D, S = {}, P = {}> extends React.Component<{
+    data: D & CellType;
+} & P, S> {
     static contextType: React.Context<import("../Context").FlowContextType>;
     abstract content(): JSX.Element;
     static metaData: any;

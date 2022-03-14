@@ -51,10 +51,14 @@ class Interactor extends React.Component<InteractorType, {}> {
         onMouseDown={(e) => {
           if (selectable) {
             e.cancelBubble = true;
-            model.setSelectedCells(id);
+            model.setSelectedCells([id]);
+            model.setSingleSelect(true);
             if (topOnFocus)
               model.moveTo(this.props.id, model.canvasData.cells.length - 1);
           }
+        }}
+        onMouseUp={() => {
+          model.setSingleSelect(false);
         }}
         onDragMove={(e) => {
           this.syncDragPosition(e);

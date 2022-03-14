@@ -1,9 +1,11 @@
 import { Rect, Text, Circle, Group } from "react-konva";
 import { Interactor, Node } from "flow";
 import type { PortType } from "flow";
+import { message } from "antd";
 
+type MyPortType = PortType & { label: string };
 type MyNodeType = {
-  ports?: PortType[];
+  ports?: MyPortType[];
   x: number;
   y: number;
   label?: string;
@@ -34,7 +36,6 @@ class MyNode extends Node<MyNodeType, {}> {
   // 只有这个方法是必要的，可以理解为包装后的render，基类已经做了observer处理，会自动收集依赖
   content() {
     const { getStroke } = this;
-    const { x, y, label } = this.props.data;
 
     return (
       // 这个组件提供交互能力，可以手动设置draggable（可拖拽），selectable（可被选择）
@@ -58,7 +59,7 @@ class MyNode extends Node<MyNodeType, {}> {
           />
           <Text
             fontSize={14}
-            text={this.props.data.id}
+            text="一个只能连接father桩的节点"
             height={40}
             x={20}
             verticalAlign="middle"
@@ -79,7 +80,13 @@ class MyNode extends Node<MyNodeType, {}> {
               key={index}
               x={WIDTH - 50}
               y={20 + index * 30}
-              linkable={true}
+              link={(source: MyPortType, target: MyPortType) => {
+                // const source = portData;
+                const adopt =
+                  target.label === "father" || source.label === "father";
+                if (!adopt) message.warn("我只能链接father桩");
+                return adopt;
+              }}
               data={portData}
               // // 默认是以包围盒中心为坐标，可以手动传入port锚点的坐标函数
               // anchor={() => {

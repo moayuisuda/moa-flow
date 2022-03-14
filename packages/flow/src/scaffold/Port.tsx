@@ -1,5 +1,6 @@
 import { Group } from "react-konva";
 import React from "react";
+import Node from "../cells/Node";
 
 import Cell from "@/cells/Cell";
 
@@ -8,7 +9,13 @@ export type PortType = {
   anchor: { x: number; y: number } | (() => { x: number; y: number });
 };
 
-class Port extends Cell<PortType, {}> {
+class Port extends Cell<
+  PortType,
+  {},
+  {
+    link: (source: PortType & unknown, target: PortType & unknown) => boolean;
+  }
+> {
   wrapperRef: React.RefObject<any>;
   static metaData = {
     source: undefined,
@@ -71,11 +78,31 @@ class Port extends Cell<PortType, {}> {
       model,
     } = this.context;
 
-    const target = this.props.data.id;
+    const sourceInstance = model.cellsMap.get(link.source);
 
-    if (link.source === target) {
+    if (link.source === this.props.data.id) {
       model.clearLinkBuffer();
-    } else model.link(link.source, target);
+    } else if (this.props.link || sourceInstance.props.link) {
+      let adoptSource = true;
+      let adoptTarget = true;
+      const sourceData = model.getCellData(link.source);
+
+      if (sourceInstance.props.link) {
+        if (sourceInstance.props.link(sourceData, this.props.data))
+          adoptSource = true;
+        else adoptSource = false;
+      }
+      if (this.props.link) {
+        if (this.props.link(sourceData, this.props.data)) adoptTarget = true;
+        else adoptTarget = false;
+      }
+
+      if (adoptSource && adoptTarget)
+        model.link(link.source, this.props.data.id);
+      else model.clearLinkBuffer();
+    } else {
+      model.link(link.source, this.props.data.id);
+    }
   }
 
   content() {

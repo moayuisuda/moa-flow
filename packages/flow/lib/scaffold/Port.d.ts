@@ -10,7 +10,9 @@ export declare type PortType = {
         y: number;
     });
 };
-declare class Port extends Cell<PortType, {}> {
+declare class Port extends Cell<PortType, {}, {
+    link: (source: PortType & unknown, target: PortType & unknown) => boolean;
+}> {
     wrapperRef: React.RefObject<any>;
     static metaData: {
         source: any;

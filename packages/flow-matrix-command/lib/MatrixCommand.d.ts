@@ -7,9 +7,10 @@ declare type CommandResultType = {
     };
     result?: any;
 };
-declare class CommonCommand {
+declare class MatrixCommand {
     modelRef: ModelRefType;
     constructor(modelRef: ModelRefType);
     dele(): CommandResultType;
+    deleEdges(): CommandResultType;
 }
-export default CommonCommand;
+export default MatrixCommand;

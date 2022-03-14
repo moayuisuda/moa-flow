@@ -8,9 +8,15 @@ import { FlowContext } from "./Context";
 
 import { registComponents } from "./utils/registComponents";
 import { useEffect } from "react";
-import { initHotKeys } from "./hotKeys";
 import SelectBoundsRect from "./scaffold/SelectBoundsRect";
 import { Stage as KonvaStage } from "konva/lib/Stage";
+import {
+  initDrag,
+  initMultiSelect,
+  initLinkingLine,
+  initStage,
+  initHotKeys,
+} from "./events";
 
 const renderComponent = (cellData, model) => {
   return React.createElement(
@@ -54,79 +60,21 @@ const Canvas = observer((props) => {
   // fully controlled，https://github.com/konvajs/react-konva/blob/master/README.md#strict-mode
   useStrictMode(true);
 
-  const setLinkingPosition = (e) => {
-    const {
-      buffer: { link },
-    } = model;
-
-    if (!link.source) return;
-
-    model.setLinkingPosition(e);
-  };
-
   useEffect(() => {
     // zIndex not work in first render，issue link https://github.com/konvajs/react-konva/issues/194
     setSecondRefresh(1);
-  });
 
-  const { buffer } = model;
+    const stage = stageRef.current;
+    initStage(model, stage);
+    initDrag(model, stage);
+    initMultiSelect(model, stage);
+    initLinkingLine(model, stage);
+    initHotKeys(model);
+  }, []);
 
   return (
     <Stage
       ref={stageRef}
-      onMouseDown={(e) => {
-        model.clearSelect();
-        model.hotKey.MouseDown = true;
-
-        if (!model.hotKey["Space"]) {
-          const pos = stageRef.current.getRelativePointerPosition();
-          model.setMultiSelect({
-            start: {
-              x: pos.x,
-              y: pos.y,
-            },
-            end: {
-              x: pos.x,
-              y: pos.y,
-            },
-          });
-        }
-      }}
-      onMouseMove={(e) => {
-        setLinkingPosition(e);
-        if (model.hotKey["Space"] && model.hotKey["MouseDown"]) {
-          model.setStagePosition(
-            e.currentTarget.attrs.x + e.evt.movementX,
-            e.currentTarget.attrs.y + e.evt.movementY
-          );
-        }
-
-        if (!model.hotKey["Space"] && model.hotKey["MouseDown"]) {
-          const pos = stageRef.current.getRelativePointerPosition();
-          model.setMultiSelect({
-            end: {
-              x: pos.x,
-              y: pos.y,
-            },
-          });
-        }
-      }}
-      onMouseUp={(e) => {
-        model.clearLinkBuffer();
-        model.hotKey.MouseDown = false;
-
-        const pos = stageRef.current.getRelativePointerPosition();
-        model.setMultiSelect({
-          start: {
-            x: pos.x,
-            y: pos.y,
-          },
-          end: {
-            x: pos.x,
-            y: pos.y,
-          },
-        });
-      }}
       scale={model.canvasData.scale}
       x={model.canvasData.x}
       y={model.canvasData.y}
@@ -147,7 +95,7 @@ const Canvas = observer((props) => {
 
 type FlowProps = {
   canvasData: any;
-  onEvent?: (e: any) => void;
+  onEvent?: (e: { type: string; data: any }) => void;
   onLoad?: (model: FlowModel) => void;
   modelRef?: any;
 };
@@ -173,12 +121,6 @@ class Flow extends React.Component<FlowProps, {}> {
     const { flowModel: model } = this;
     return <Canvas model={model} />;
   }
-
-  componentDidMount(): void {
-    initHotKeys(this.flowModel);
-  }
-
-  initHotKeys() {}
 }
 
 export default Flow;

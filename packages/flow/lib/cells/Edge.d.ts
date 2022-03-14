@@ -1,6 +1,6 @@
 /// <reference types="react" />
 import Cell from "./Cell";
-declare type EdgeType = {
+export declare type EdgeType = {
     source: string;
     target: string;
 };

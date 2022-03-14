@@ -4,21 +4,32 @@ import { arrayMove, findIndex } from "./utils/util";
 import { CellType } from "@/cells/Cell";
 import { color } from "@/theme/style";
 import { v4 } from "uuid";
+import { union } from "lodash";
+import { EdgeType } from "./cells/Edge";
 
 export class FlowModel {
   constructor(eventSender) {
     makeObservable(this);
     this.eventBus.sender = eventSender;
   }
-
   @observable
-  hotKey = {};
+  hotKey = {
+    MouseDown: false,
+  };
+  @action setHotKey = (key, value) => {
+    this.hotKey[key] = value;
+  };
 
-  registedEdge: undefined;
+  linkEdge = "Edge";
+  @action setLinkEdge = (name: string) => {
+    this.linkEdge = name;
+  };
 
   @observable
   buffer = {
+    singleSelect: false,
     select: {
+      single: false,
       start: { x: 0, y: 0 },
       end: { x: 0, y: 0 },
     },
@@ -29,6 +40,10 @@ export class FlowModel {
         y: 0,
       },
     },
+  };
+
+  @action setSingleSelect = (isSingleSelect: boolean) => {
+    this.buffer.select.single = isSingleSelect;
   };
 
   @action setMultiSelect = (select) => {
@@ -43,6 +58,7 @@ export class FlowModel {
     const top = Math.min(bufferSelect.start.y, bufferSelect.end.y);
     const bottom = Math.max(bufferSelect.start.y, bufferSelect.end.y);
 
+    const re = [];
     this.cellsMap.forEach((cell) => {
       if (cell.props.data?.type === "node") {
         const instance = cell.wrapperRef.current;
@@ -58,10 +74,12 @@ export class FlowModel {
             top > bounds.y + bounds.height
           )
         ) {
-          this.setSelectedCells(cell.props.data.id, false);
+          re.push(cell.props.data.id);
         }
       }
     });
+
+    this.setSelectedCells(re);
   };
 
   @action clearLinkBuffer = () => {
@@ -93,14 +111,11 @@ export class FlowModel {
 
   // 选中的cell
   @observable selectCells: string[] = [];
-  @action setSelectedCells = (id, isSingleSelect = true) => {
-    // 多选
-    if (isSingleSelect) {
-      this.selectCells = [id];
+  @action setSelectedCells = (ids: string[], ifReplace = true) => {
+    if (ifReplace) {
+      this.selectCells = ids;
     } else {
-      if (!this.selectCells.includes(id)) {
-        this.selectCells.push(id);
-      }
+      this.selectCells = union(this.selectCells, ids);
     }
   };
 
@@ -190,11 +205,18 @@ export class FlowModel {
   };
 
   @action link = (source, target) => {
-    this.addCell("Edge", {
+    this.addCell(this.linkEdge, {
       source,
       target,
     });
 
+    this.sendEvent({
+      type: "link",
+      data: {
+        source,
+        target,
+      },
+    });
     this.clearLinkBuffer();
   };
 
@@ -211,6 +233,33 @@ export class FlowModel {
   getCellInstance = (id) => {
     return this.cellsMap.get(id);
   };
+
+  getPortNode(id) {
+    var mapIter = this.cellsDataMap.entries();
+
+    let value;
+    while ((value = mapIter.next().value)) {
+      const [_, cellData] = value;
+
+      let matchPort;
+      if (cellData.ports)
+        matchPort = cellData.ports.find((portData) => portData.id === id);
+      if (matchPort) return cellData.id;
+    }
+  }
+
+  getPortEdges(id) {
+    const re = [];
+
+    this.cellsDataMap.forEach((cellData: EdgeType & CellType) => {
+      if (cellData.type === "edge") {
+        if (cellData.target === id || cellData.source === id)
+          re.push(cellData.id);
+      }
+    });
+
+    return re;
+  }
 
   onConnect(data) {
     // this.eventBus.sender(data);

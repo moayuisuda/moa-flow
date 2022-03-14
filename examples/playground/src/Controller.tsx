@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, Button, message } from "antd";
+import { Card, Button, message, Divider } from "antd";
 import { ModelType } from "flow";
 import Command from "flow-matrix-command";
 
@@ -27,7 +27,19 @@ const Controller = (props: { modelRef: ModelRefType }) => {
           } else message.success(`删除 ${result} 成功`);
         }}
       >
-        删除
+        删除选择的节点
+      </Button>
+      <Divider />
+      <Button
+        danger
+        onClick={() => {
+          const { error, result } = command.deleEdges();
+          if (error) {
+            message.warn(error.message);
+          } else message.success(`删除 ${result} 成功`);
+        }}
+      >
+        删除选择节点的边
       </Button>
     </Card>
   );

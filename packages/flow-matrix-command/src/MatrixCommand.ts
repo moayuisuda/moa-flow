@@ -10,7 +10,7 @@ type CommandResultType = {
     result?: any;
 }
 
-class CommonCommand {
+class MatrixCommand {
     modelRef: ModelRefType
 
     constructor(modelRef: ModelRefType) {
@@ -34,6 +34,35 @@ class CommonCommand {
             return { result: '' }
         }
     }
+
+    deleEdges(): CommandResultType {
+        const model = this.modelRef.current
+
+        if (model.selectCells.length > 1) {
+            return {
+                error: {
+                    message: '至多选择一个节点'
+                }
+            }
+        } else {
+            const nodeData = model.cellsDataMap.get(model.selectCells[0])
+            const edges = []
+
+            if (nodeData.ports) {
+                nodeData.ports.forEach(port => {
+                    edges.push(...model.getPortEdges(port.id))
+                });
+            }
+
+            for (let edge of edges) {
+                model.deleCell(edge);
+            }
+
+            return {
+                result: model.selectCells[0]
+            }
+        }
+    }
 }
 
-export default CommonCommand
+export default MatrixCommand
