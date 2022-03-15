@@ -6,7 +6,10 @@ import Interactor from "@/scaffold/Interactor";
 import Node from "../Node";
 const { Port } = Interactor;
 
-type MatrixPortType = PortType & { label: string };
+type MatrixPortType = PortType & {
+  label: string;
+  portType: "in" | "out" | "control-out" | "control-in";
+};
 
 type MatrixNodeType = {
   ports?: MatrixPortType[];
@@ -42,7 +45,23 @@ class MatrixNode extends Node<MatrixNodeType, {}> {
     const { model } = this.context;
     const { color = {} } = model;
     const { getStroke } = this;
-    const { x, y, label, ports } = this.props.data;
+    const { label, ports } = this.props.data;
+
+    const outPorts = this.props.data.ports.filter(
+      (portData) => portData.portType === "out"
+    );
+
+    const inPorts = this.props.data.ports.filter(
+      (portData) => portData.portType === "in"
+    );
+
+    const controlOutPorts = this.props.data.ports.filter(
+      (portData) => portData.portType === "control-out"
+    );
+
+    const controlInPorts = this.props.data.ports.filter(
+      (portData) => portData.portType === "control-in"
+    );
 
     return (
       <Interactor {...this.props.data} topOnFocus>
@@ -109,18 +128,45 @@ class MatrixNode extends Node<MatrixNodeType, {}> {
         />
 
         <Group y={40}>
-          {this.props.data.ports?.map((portData, index) => (
-            <Group x={150} y={20 + index * 30} key={portData.label}>
+          {/* in的port */}
+          {inPorts.map((portData, index) => (
+            <Group x={0} y={20 + index * 30} key={portData.label}>
+              <Port data={portData}>
+                <Circle
+                  stroke={color.primary}
+                  fill="white"
+                  radius={10}
+                  y={6}
+                ></Circle>
+              </Port>
+              <Text x={20} text={portData.label}></Text>
+            </Group>
+          ))}
+          {/* control-in的port */}
+          {controlInPorts.map((portData, index) => (
+            <Group
+              x={-10}
+              y={20 + (inPorts.length + index) * 30}
+              key={portData.label}
+            >
+              <Port data={portData}>
+                <Rect
+                  fill={color.primary}
+                  y={-5}
+                  width={20}
+                  height={20}
+                  radius={10}
+                ></Rect>
+              </Port>
+              <Text x={30} text={portData.label}></Text>
+            </Group>
+          ))}
+
+          {/* out的port */}
+          {outPorts.map((portData, index) => (
+            <Group x={WIDTH - 50} y={20 + index * 30} key={portData.label}>
               <Text text={portData.label}></Text>
-              <Port
-                data={portData}
-                anchor={() => {
-                  return {
-                    x: x + 200,
-                    y: y + 65 + index * 30,
-                  };
-                }}
-              >
+              <Port data={portData}>
                 <Circle
                   stroke={color.primary}
                   fill="white"
@@ -128,6 +174,26 @@ class MatrixNode extends Node<MatrixNodeType, {}> {
                   x={50}
                   radius={10}
                 ></Circle>
+              </Port>
+            </Group>
+          ))}
+          {/* control-out的port */}
+          {controlOutPorts.map((portData, index) => (
+            <Group
+              x={WIDTH - 60}
+              y={20 + (outPorts.length + index) * 30}
+              key={portData.label}
+            >
+              <Text text={portData.label}></Text>
+              <Port data={portData}>
+                <Rect
+                  fill={color.primary}
+                  x={50}
+                  y={-5}
+                  width={20}
+                  height={20}
+                  radius={10}
+                ></Rect>
               </Port>
             </Group>
           ))}

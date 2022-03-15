@@ -19262,11 +19262,14 @@ var MatrixNode = /** @class */ (function (_super) {
     }
     MatrixNode.prototype.content = function () {
         var _this = this;
-        var _a;
         var model = this.context.model;
-        var _b = model.color, color = _b === void 0 ? {} : _b;
+        var _a = model.color, color = _a === void 0 ? {} : _a;
         var getStroke = this.getStroke;
-        var _c = this.props.data, x = _c.x, y = _c.y, label = _c.label, ports = _c.ports;
+        var _b = this.props.data, label = _b.label, ports = _b.ports;
+        var outPorts = this.props.data.ports.filter(function (portData) { return portData.portType === "out"; });
+        var inPorts = this.props.data.ports.filter(function (portData) { return portData.portType === "in"; });
+        var controlOutPorts = this.props.data.ports.filter(function (portData) { return portData.portType === "control-out"; });
+        var controlInPorts = this.props.data.ports.filter(function (portData) { return portData.portType === "control-in"; });
         return (jsxRuntime.exports.jsxs(Interactor, __assign({}, this.props.data, { topOnFocus: true }, { children: [jsxRuntime.exports.jsx(Rect, { width: WIDTH, height: HEIGHT, fill: "white", shadowColor: "black", shadowBlur: 10, shadowOpacity: 0.1, cornerRadius: 10 }, void 0), jsxRuntime.exports.jsxs(Group, { children: [jsxRuntime.exports.jsx(Rect, { cornerRadius: [10, 10, 0, 0], width: WIDTH, height: 40, fill: color.grey }, void 0), jsxRuntime.exports.jsx(Text, { fontSize: 14, text: label, height: 40, x: 20, verticalAlign: "middle" }, void 0), jsxRuntime.exports.jsx(Button, { x: WIDTH, width: 20, height: 40, text: "\uFF0B", onClick: function (e) {
                                 var id = model.addCell("MatrixNode", {
                                     x: _this.props.data.x + 300,
@@ -19286,12 +19289,7 @@ var MatrixNode = /** @class */ (function (_super) {
                                     var nextData = model.getCellData(id);
                                     model.link(ports[0].id, nextData.ports[0].id);
                                 });
-                            } }, void 0)] }, void 0), jsxRuntime.exports.jsx(Rect, __assign({ width: WIDTH, height: HEIGHT }, getStroke(), { cornerRadius: 10 }), void 0), jsxRuntime.exports.jsx(Group, __assign({ y: 40 }, { children: (_a = this.props.data.ports) === null || _a === void 0 ? void 0 : _a.map(function (portData, index) { return (jsxRuntime.exports.jsxs(Group, __assign({ x: 150, y: 20 + index * 30 }, { children: [jsxRuntime.exports.jsx(Text, { text: portData.label }, void 0), jsxRuntime.exports.jsx(Port, __assign({ data: portData, anchor: function () {
-                                    return {
-                                        x: x + 200,
-                                        y: y + 65 + index * 30,
-                                    };
-                                } }, { children: jsxRuntime.exports.jsx(Circle, { stroke: color.primary, fill: "white", y: 6, x: 50, radius: 10 }, void 0) }), void 0)] }), portData.label)); }) }), void 0)] }), void 0));
+                            } }, void 0)] }, void 0), jsxRuntime.exports.jsx(Rect, __assign({ width: WIDTH, height: HEIGHT }, getStroke(), { cornerRadius: 10 }), void 0), jsxRuntime.exports.jsxs(Group, __assign({ y: 40 }, { children: [inPorts.map(function (portData, index) { return (jsxRuntime.exports.jsxs(Group, __assign({ x: 0, y: 20 + index * 30 }, { children: [jsxRuntime.exports.jsx(Port, __assign({ data: portData }, { children: jsxRuntime.exports.jsx(Circle, { stroke: color.primary, fill: "white", radius: 10, y: 6 }, void 0) }), void 0), jsxRuntime.exports.jsx(Text, { x: 20, text: portData.label }, void 0)] }), portData.label)); }), controlInPorts.map(function (portData, index) { return (jsxRuntime.exports.jsxs(Group, __assign({ x: -10, y: 20 + (inPorts.length + index) * 30 }, { children: [jsxRuntime.exports.jsx(Port, __assign({ data: portData }, { children: jsxRuntime.exports.jsx(Rect, { fill: color.primary, y: -5, width: 20, height: 20, radius: 10 }, void 0) }), void 0), jsxRuntime.exports.jsx(Text, { x: 30, text: portData.label }, void 0)] }), portData.label)); }), outPorts.map(function (portData, index) { return (jsxRuntime.exports.jsxs(Group, __assign({ x: WIDTH - 50, y: 20 + index * 30 }, { children: [jsxRuntime.exports.jsx(Text, { text: portData.label }, void 0), jsxRuntime.exports.jsx(Port, __assign({ data: portData }, { children: jsxRuntime.exports.jsx(Circle, { stroke: color.primary, fill: "white", y: 6, x: 50, radius: 10 }, void 0) }), void 0)] }), portData.label)); }), controlOutPorts.map(function (portData, index) { return (jsxRuntime.exports.jsxs(Group, __assign({ x: WIDTH - 60, y: 20 + (outPorts.length + index) * 30 }, { children: [jsxRuntime.exports.jsx(Text, { text: portData.label }, void 0), jsxRuntime.exports.jsx(Port, __assign({ data: portData }, { children: jsxRuntime.exports.jsx(Rect, { fill: color.primary, x: 50, y: -5, width: 20, height: 20, radius: 10 }, void 0) }), void 0)] }), portData.label)); })] }), void 0)] }), void 0));
     };
     MatrixNode.metaData = {
         fields: [{}],

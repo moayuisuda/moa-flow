@@ -12,16 +12,24 @@
       "data": {},
       "ports": [
         {
+          "label": "name-in",
+          "id": "port-in",
+          "portType": "in"
+        },
+        {
           "label": "name",
-          "id": "port-0"
+          "id": "port-0",
+          "portType": "out"
         },
         {
           "label": "age",
-          "id": "port-1"
+          "id": "port-1",
+          "portType": "out"
         },
         {
           "label": "father",
-          "id": "port-2"
+          "id": "port-2",
+          "portType": "control-out"
         }
       ],
       "label": "NODE 1 Matrix"
@@ -30,14 +38,15 @@
       "id": "1",
       "type": "node",
       "component": "MatrixNode",
-      "label": "NODE 2 Turing",
+      "label": "NODE 2 Matrix",
       "x": 550,
       "y": 800,
       "data": {},
       "ports": [
         {
-          "label": "",
-          "id": "port-t-0"
+          "label": "father",
+          "id": "port-t-0",
+          "portType": "control-in"
         }
       ]
     },
@@ -51,15 +60,18 @@
       "ports": [
         {
           "label": "name",
-          "id": "port-4"
+          "id": "port-4",
+          "portType": "in"
         },
         {
           "label": "age",
-          "id": "port-5"
+          "id": "port-5",
+          "portType": "in"
         },
         {
           "label": "father",
-          "id": "port-6"
+          "id": "port-6",
+          "portType": "out"
         }
       ],
       "label": "NODE 3 Matrix"

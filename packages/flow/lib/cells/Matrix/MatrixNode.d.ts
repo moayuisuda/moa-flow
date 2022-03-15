@@ -4,6 +4,7 @@ import { PortType } from "@/scaffold/Port";
 import Node from "../Node";
 declare type MatrixPortType = PortType & {
     label: string;
+    portType: "in" | "out" | "control-out" | "control-in";
 };
 declare type MatrixNodeType = {
     ports?: MatrixPortType[];
