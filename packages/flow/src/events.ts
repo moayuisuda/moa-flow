@@ -26,6 +26,40 @@ export const initDrag = (model: ModelType, stage: Konva.Stage) => {
     })
 }
 
+export const initScale = (model: ModelType, stage: Konva.Stage) => {
+    let scaleBy = 1.03;
+    const stageOption = model.canvasData
+
+    stage.on('wheel', (e) => {
+        e.evt.preventDefault();
+
+        const oldScale = stageOption.scale.x;
+        const pointer = stage.getPointerPosition();
+
+        const mousePointTo = {
+            x: (pointer.x - stageOption.x) / oldScale,
+            y: (pointer.y - stageOption.y) / oldScale,
+        };
+
+        let direction = e.evt.deltaY > 0 ? 1 : -1;
+
+        if (e.evt.ctrlKey) {
+            direction = -direction;
+        }
+
+        const newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy;
+
+        model.setStageScale(newScale, newScale);
+
+        const newPos = {
+            x: pointer.x - mousePointTo.x * newScale,
+            y: pointer.y - mousePointTo.y * newScale,
+        };
+
+        model.setStagePosition(newPos.x, newPos.y);
+    });
+}
+
 export const initMultiSelect = (model: ModelType, stage: Konva.Stage) => {
     stage.on('mousedown', () => {
         if (!model.hotKey["Space"]) {
@@ -55,7 +89,7 @@ export const initMultiSelect = (model: ModelType, stage: Konva.Stage) => {
                 x: pos.x,
                 y: pos.y,
             },
-        });
+        }, true);
     })
 
     stage.on('mousemove', () => {

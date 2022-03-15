@@ -15,6 +15,7 @@ import {
   initMultiSelect,
   initLinkingLine,
   initStage,
+  initScale,
   initHotKeys,
 } from "./events";
 
@@ -33,7 +34,7 @@ const renderComponents = (cellsData, model) => {
     <Layer>
       <Group zIndex={1}>
         {cellsData
-          // regist node first, because some compute in edge need node instance
+          // 先注册节点，后注册线，线的一些计算属性需要节点的map
           .filter((cellData) => cellData.type !== "edge")
           .map((cellData) => {
             return renderComponent(cellData, model);
@@ -57,16 +58,17 @@ const Canvas = observer((props) => {
   const stageRef = useRef<KonvaStage>();
   const [_, setSecondRefresh] = useState(0);
 
-  // fully controlled，https://github.com/konvajs/react-konva/blob/master/README.md#strict-mode
+  // 完全受控，https://github.com/konvajs/react-konva/blob/master/README.md#strict-mode
   useStrictMode(true);
 
   useEffect(() => {
-    // zIndex not work in first render，issue link https://github.com/konvajs/react-konva/issues/194
+    // 第一次渲染zIndex失效，issue link https://github.com/konvajs/react-konva/issues/194
     setSecondRefresh(1);
 
     const stage = stageRef.current;
     initStage(model, stage);
     initDrag(model, stage);
+    initScale(model, stage);
     initMultiSelect(model, stage);
     initLinkingLine(model, stage);
     initHotKeys(model);
@@ -81,7 +83,7 @@ const Canvas = observer((props) => {
       width={window.innerWidth}
       height={window.innerHeight}
     >
-      {/* Provider needs inside Stage，issue https://github.com/konvajs/react-konva/issues/188 */}
+      {/* Provider需要在Stage内部，issue https://github.com/konvajs/react-konva/issues/188 */}
       <FlowContext.Provider
         value={{
           model,

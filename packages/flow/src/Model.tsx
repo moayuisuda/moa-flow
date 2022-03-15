@@ -46,7 +46,7 @@ export class FlowModel {
     this.buffer.select.single = isSingleSelect;
   };
 
-  @action setMultiSelect = (select) => {
+  @action setMultiSelect = (select, onlySetPosition = false) => {
     const {
       buffer: { select: bufferSelect },
     } = this;
@@ -57,6 +57,8 @@ export class FlowModel {
     const left = Math.min(bufferSelect.start.x, bufferSelect.end.x);
     const top = Math.min(bufferSelect.start.y, bufferSelect.end.y);
     const bottom = Math.max(bufferSelect.start.y, bufferSelect.end.y);
+
+    if (onlySetPosition) return;
 
     const re = [];
     this.cellsMap.forEach((cell) => {
@@ -135,7 +137,7 @@ export class FlowModel {
     this.eventBus.sender(data);
   };
 
-  @action setScale = (x, y) => {
+  @action setStageScale = (x, y) => {
     this.canvasData.scale = {
       x,
       y,

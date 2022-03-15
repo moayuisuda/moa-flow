@@ -18976,13 +18976,16 @@ var FlowModel = /** @class */ (function () {
         this.setSingleSelect = function (isSingleSelect) {
             _this.buffer.select.single = isSingleSelect;
         };
-        this.setMultiSelect = function (select) {
+        this.setMultiSelect = function (select, onlySetPosition) {
+            if (onlySetPosition === void 0) { onlySetPosition = false; }
             var bufferSelect = _this.buffer.select;
             Object.assign(bufferSelect, select);
             var right = Math.max(bufferSelect.start.x, bufferSelect.end.x);
             var left = Math.min(bufferSelect.start.x, bufferSelect.end.x);
             var top = Math.min(bufferSelect.start.y, bufferSelect.end.y);
             var bottom = Math.max(bufferSelect.start.y, bufferSelect.end.y);
+            if (onlySetPosition)
+                return;
             var re = [];
             _this.cellsMap.forEach(function (cell) {
                 var _a;
@@ -19048,7 +19051,7 @@ var FlowModel = /** @class */ (function () {
         this.sendEvent = function (data) {
             _this.eventBus.sender(data);
         };
-        this.setScale = function (x, y) {
+        this.setStageScale = function (x, y) {
             _this.canvasData.scale = {
                 x: x,
                 y: y,
@@ -19181,7 +19184,7 @@ var FlowModel = /** @class */ (function () {
     ], FlowModel.prototype, "clearSelect", void 0);
     __decorate([
         action
-    ], FlowModel.prototype, "setScale", void 0);
+    ], FlowModel.prototype, "setStageScale", void 0);
     __decorate([
         action
     ], FlowModel.prototype, "setStagePosition", void 0);
@@ -19335,6 +19338,30 @@ var initDrag = function (model, stage) {
         }
     });
 };
+var initScale = function (model, stage) {
+    var scaleBy = 1.03;
+    var stageOption = model.canvasData;
+    stage.on('wheel', function (e) {
+        e.evt.preventDefault();
+        var oldScale = stageOption.scale.x;
+        var pointer = stage.getPointerPosition();
+        var mousePointTo = {
+            x: (pointer.x - stageOption.x) / oldScale,
+            y: (pointer.y - stageOption.y) / oldScale,
+        };
+        var direction = e.evt.deltaY > 0 ? 1 : -1;
+        if (e.evt.ctrlKey) {
+            direction = -direction;
+        }
+        var newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy;
+        model.setStageScale(newScale, newScale);
+        var newPos = {
+            x: pointer.x - mousePointTo.x * newScale,
+            y: pointer.y - mousePointTo.y * newScale,
+        };
+        model.setStagePosition(newPos.x, newPos.y);
+    });
+};
 var initMultiSelect = function (model, stage) {
     stage.on('mousedown', function () {
         if (!model.hotKey["Space"]) {
@@ -19364,7 +19391,7 @@ var initMultiSelect = function (model, stage) {
                 x: pos.x,
                 y: pos.y,
             },
-        });
+        }, true);
     });
     stage.on('mousemove', function () {
         if (!model.hotKey["Space"] && model.hotKey["MouseDown"]) {
@@ -19420,7 +19447,7 @@ var renderComponent = function (cellData, model) {
 };
 var renderComponents = function (cellsData, model) {
     return (jsxRuntime.exports.jsxs(Layer, { children: [jsxRuntime.exports.jsx(Group, __assign({ zIndex: 1 }, { children: cellsData
-                    // regist node first, because some compute in edge need node instance
+                    // 先注册节点，后注册线，线的一些计算属性需要节点的map
                     .filter(function (cellData) { return cellData.type !== "edge"; })
                     .map(function (cellData) {
                     return renderComponent(cellData, model);
@@ -19434,14 +19461,15 @@ var Canvas = observer(function (props) {
     var model = props.model;
     var stageRef = useRef();
     var _a = useState(0); _a[0]; var setSecondRefresh = _a[1];
-    // fully controlled，https://github.com/konvajs/react-konva/blob/master/README.md#strict-mode
+    // 完全受控，https://github.com/konvajs/react-konva/blob/master/README.md#strict-mode
     useStrictMode(true);
     useEffect(function () {
-        // zIndex not work in first render，issue link https://github.com/konvajs/react-konva/issues/194
+        // 第一次渲染zIndex失效，issue link https://github.com/konvajs/react-konva/issues/194
         setSecondRefresh(1);
         var stage = stageRef.current;
         initStage(model, stage);
         initDrag(model, stage);
+        initScale(model, stage);
         initMultiSelect(model, stage);
         initLinkingLine(model, stage);
         initHotKeys(model);

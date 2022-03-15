@@ -29,7 +29,7 @@ export declare class FlowModel {
         };
     };
     setSingleSelect: (isSingleSelect: boolean) => void;
-    setMultiSelect: (select: any) => void;
+    setMultiSelect: (select: any, onlySetPosition?: boolean) => void;
     clearLinkBuffer: () => void;
     color: {
         primary: string;
@@ -59,7 +59,7 @@ export declare class FlowModel {
     };
     clearSelect: () => void;
     sendEvent: (data: any) => void;
-    setScale: (x: any, y: any) => void;
+    setStageScale: (x: any, y: any) => void;
     setStagePosition: (x: any, y: any) => void;
     setCanvasData: (canvasData: any) => void;
     setCellId: (data: any) => void;
