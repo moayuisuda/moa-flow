@@ -1,8 +1,10 @@
 import { ModelType } from 'flow'
 
+// 提供具体的行为实现，相当于 react-dom
+
 type ModelRefType = React.MutableRefObject<ModelType | undefined | null>;
 
-// 统一约束可以分包
+// 提供抽象的行为，相当于 react-reconciler，需要分包
 type CommandResultType = {
     error?: {
         message: string

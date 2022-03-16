@@ -8,7 +8,8 @@ export declare class FlowModel {
     linkEdge: string;
     setLinkEdge: (name: string) => void;
     buffer: {
-        singleSelect: boolean;
+        isDragging: boolean;
+        isSingleSelect: boolean;
         select: {
             single: boolean;
             start: {
@@ -28,7 +29,7 @@ export declare class FlowModel {
             };
         };
     };
-    setSingleSelect: (isSingleSelect: boolean) => void;
+    setisSingleSelect: (isisSingleSelect: boolean) => void;
     setMultiSelect: (select: any, onlySetPosition?: boolean) => void;
     clearLinkBuffer: () => void;
     color: {

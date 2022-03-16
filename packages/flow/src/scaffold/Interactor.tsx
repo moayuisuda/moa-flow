@@ -16,18 +16,27 @@ type InteractorType = {
 };
 
 @observer
-class Interactor extends React.Component<InteractorType, {}> {
+class Interactor extends React.Component<InteractorType> {
   static contextType = FlowContext;
   static Port;
+
+  local = {
+    isDragging: false,
+  };
 
   syncDragPosition = (e) => {
     const model = this.context.model;
 
     model.setCellData(this.props.id, {
-      x: e.currentTarget.attrs.x,
-      y: e.currentTarget.attrs.y,
+      x: e.currentTarget.attrs.x + e.evt.movementX,
+      y: e.currentTarget.attrs.y + e.evt.movementY,
     });
   };
+
+  constructor(props) {
+    super(props);
+    console.log("ins");
+  }
 
   render() {
     const {
@@ -47,21 +56,22 @@ class Interactor extends React.Component<InteractorType, {}> {
       <Group
         x={x}
         y={y}
-        draggable={draggable}
         onMouseDown={(e) => {
           if (selectable) {
             e.cancelBubble = true;
             model.setSelectedCells([id]);
-            model.setSingleSelect(true);
+            // 防止单选重叠时选到下面重叠的节点
+            model.setisSingleSelect(true);
+
+            model.buffer.isDragging = true;
+            console.log("down", this.local.isDragging);
             if (topOnFocus)
               model.moveTo(this.props.id, model.canvasData.cells.length - 1);
           }
         }}
         onMouseUp={() => {
-          model.setSingleSelect(false);
-        }}
-        onDragMove={(e) => {
-          this.syncDragPosition(e);
+          model.buffer.isDragging = false;
+          model.setisSingleSelect(false);
         }}
         {...others}
       >

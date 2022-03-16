@@ -12,9 +12,7 @@ declare abstract class Cell<D, S = {}, P = {}> extends React.Component<{
     wrapperRef: React.RefObject<any>;
     constructor(props: any, context: any);
     static regist(model: any): void;
-    static getMetaData(): {
-        component: string;
-    };
+    static getMetaData(): any;
     isSelected(): any;
     getStage(konvaNode: any): any;
     setCellData(data: any): void;

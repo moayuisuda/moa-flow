@@ -27,7 +27,8 @@ export class FlowModel {
 
   @observable
   buffer = {
-    singleSelect: false,
+    isDragging: false,
+    isSingleSelect: false,
     select: {
       single: false,
       start: { x: 0, y: 0 },
@@ -42,8 +43,8 @@ export class FlowModel {
     },
   };
 
-  @action setSingleSelect = (isSingleSelect: boolean) => {
-    this.buffer.select.single = isSingleSelect;
+  @action setisSingleSelect = (isisSingleSelect: boolean) => {
+    this.buffer.select.single = isisSingleSelect;
   };
 
   @action setMultiSelect = (select, onlySetPosition = false) => {

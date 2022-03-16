@@ -7,10 +7,14 @@ declare type InteractorType = {
     selectable?: boolean;
     topOnFocus?: boolean;
 };
-declare class Interactor extends React.Component<InteractorType, {}> {
+declare class Interactor extends React.Component<InteractorType> {
     static contextType: React.Context<import("@/Context").FlowContextType>;
     static Port: any;
+    local: {
+        isDragging: boolean;
+    };
     syncDragPosition: (e: any) => void;
+    constructor(props: any);
     render(): JSX.Element;
 }
 export default Interactor;

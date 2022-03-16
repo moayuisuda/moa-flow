@@ -30,6 +30,11 @@
           "label": "father",
           "id": "port-2",
           "portType": "control-out"
+        },
+        {
+          "label": "grandfa",
+          "id": "port-3",
+          "portType": "control-out"
         }
       ],
       "label": "NODE 1 Matrix"

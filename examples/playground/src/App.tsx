@@ -22,16 +22,15 @@ function App() {
   useEffect(() => {
     // 注册自定义节点;
     MyNode.regist(modelRef.current);
-    // MyEdge.regist(modelRef.current);
-    // 调用model中的方法，创建80个节点压测一下
-    for (let i = 0; i < 1; i++) {
-      modelRef.current?.addCell("MyNode", {
-        x: 50 * i,
-        y: 50 * i,
+    for (let i = 0; i < 10; i++) {
+      modelRef.current?.addCell("MatrixNode", {
+        x: randomIn(0, 1000),
+        y: randomIn(0, 1000),
         label: `${1} ${Math.random()}`,
         ports: [
           {
             label: "haha",
+            portType: "out",
           },
         ],
       });

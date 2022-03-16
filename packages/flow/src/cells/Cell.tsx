@@ -2,7 +2,7 @@ import React from "react";
 import { Group } from "react-konva";
 import Konva from "konva";
 import { FlowContext } from "../Context";
-import _ from "lodash";
+import { cloneDeep } from "lodash";
 import { observer } from "mobx-react";
 
 export type CellType = { id: string; type: string };
@@ -43,7 +43,7 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
     }
 
     return {
-      ...re,
+      ...cloneDeep(re),
       component: componentName,
     };
   }

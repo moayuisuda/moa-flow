@@ -9,7 +9,7 @@ import { FlowContext } from "./Context";
 import { registComponents } from "./utils/registComponents";
 import { useEffect } from "react";
 import SelectBoundsRect from "./scaffold/SelectBoundsRect";
-import { Stage as KonvaStage } from "konva/lib/Stage";
+import Konva from "konva";
 import {
   initDrag,
   initMultiSelect,
@@ -29,55 +29,51 @@ const renderComponent = (cellData, model) => {
   );
 };
 
-const renderComponents = (cellsData, model) => {
-  return (
-    <Layer>
-      <Group zIndex={1}>
-        {cellsData
-          // 先注册节点，后注册线，线的一些计算属性需要节点的map
-          .filter((cellData) => cellData.type !== "edge")
-          .map((cellData) => {
-            return renderComponent(cellData, model);
-          })}
-      </Group>
-      <Group zIndex={0}>
-        {cellsData
-          .filter((cellData) => cellData.type === "edge")
-          .map((cellData) => {
-            return renderComponent(cellData, model);
-          })}
-      </Group>
-      <LinkingEdge data={model.buffer.link}></LinkingEdge>
-      <SelectBoundsRect />
-    </Layer>
-  );
-};
-
 const Canvas = observer((props) => {
   const { model } = props;
-  const stageRef = useRef<KonvaStage>();
+  const stageRef = useRef<Konva.Stage>();
+  const nodesLayerRef = useRef<Konva.Layer>();
+  const linesLayerRef = useRef<Konva.Layer>();
   const [_, setSecondRefresh] = useState(0);
 
   // 完全受控，https://github.com/konvajs/react-konva/blob/master/README.md#strict-mode
   useStrictMode(true);
 
   useEffect(() => {
-    // 第一次渲染zIndex失效，issue link https://github.com/konvajs/react-konva/issues/194
-    setSecondRefresh(1);
-
     const stage = stageRef.current;
+    const linesLayer = linesLayerRef.current;
+    const nodesLayer = nodesLayerRef.current;
     initStage(model, stage);
-    initDrag(model, stage);
-    initScale(model, stage);
+    initDrag(model, stage, {
+      linesLayer,
+      nodesLayer,
+    });
+    initScale(model, stage, {
+      linesLayer,
+      nodesLayer,
+    });
     initMultiSelect(model, stage);
     initLinkingLine(model, stage);
     initHotKeys(model);
+
+    // 第一次渲染zIndex失效，issue link https://github.com/konvajs/react-konva/issues/194
+    Promise.resolve().then(() => {
+      setSecondRefresh(1);
+    });
   }, []);
+
+  const nodesData = model.canvasData.cells.filter(
+    (cellData) => cellData.type !== "edge"
+  );
+  const edgesData = model.canvasData.cells.filter(
+    (cellData) => cellData.type === "edge"
+  );
 
   return (
     <Stage
       ref={stageRef}
       scale={model.canvasData.scale}
+      // draggable={true}
       x={model.canvasData.x}
       y={model.canvasData.y}
       width={window.innerWidth}
@@ -89,7 +85,24 @@ const Canvas = observer((props) => {
           model,
         }}
       >
-        {renderComponents(model.canvasData.cells, model)}
+        {/* 先注册节点，后注册线，线的一些计算属性需要节点的map */}
+        <Layer ref={nodesLayerRef} zIndex={1}>
+          {nodesData.slice(0, nodesData.length - 1).map((cellData) => {
+            return renderComponent(cellData, model);
+          })}
+        </Layer>
+
+        <Layer zIndex={2}>
+          {renderComponent(nodesData[nodesData.length - 1], model)}
+          <LinkingEdge data={model.buffer.link}></LinkingEdge>
+          <SelectBoundsRect />
+        </Layer>
+
+        <Layer ref={linesLayerRef} zIndex={0}>
+          {edgesData.map((cellData) => {
+            return renderComponent(cellData, model);
+          })}
+        </Layer>
       </FlowContext.Provider>
     </Stage>
   );
