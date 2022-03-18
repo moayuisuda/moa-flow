@@ -14,6 +14,13 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
 > {
   static contextType = FlowContext;
 
+  static getBounds: (cellData) => {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+
   abstract content(): JSX.Element;
   static metaData: any = { id: "" };
 
@@ -21,8 +28,7 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
 
   constructor(props, context) {
     super(props);
-    context.model.cellsMap.set(props.data.id, this);
-    context.model.cellsDataMap.set(props.data.id, props.data);
+    context.cellsMap.set(props.data.id, this);
 
     this.wrapperRef = React.createRef();
   }
@@ -49,7 +55,7 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
   }
 
   isSelected() {
-    return this.context.model.canvasData.cells.includes();
+    return this.context.canvasData.cells.includes();
   }
 
   getStage(konvaNode) {

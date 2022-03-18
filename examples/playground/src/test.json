@@ -4,58 +4,6 @@
   "y": 0,
   "cells": [
     {
-      "id": "0",
-      "type": "node",
-      "component": "MatrixNode",
-      "x": 200,
-      "y": 500,
-      "data": {},
-      "ports": [
-        {
-          "label": "name-in",
-          "id": "port-in",
-          "portType": "in"
-        },
-        {
-          "label": "name",
-          "id": "port-0",
-          "portType": "out"
-        },
-        {
-          "label": "age",
-          "id": "port-1",
-          "portType": "out"
-        },
-        {
-          "label": "father",
-          "id": "port-2",
-          "portType": "control-out"
-        },
-        {
-          "label": "grandfa",
-          "id": "port-3",
-          "portType": "control-out"
-        }
-      ],
-      "label": "NODE 1 Matrix"
-    },
-    {
-      "id": "1",
-      "type": "node",
-      "component": "MatrixNode",
-      "label": "NODE 2 Matrix",
-      "x": 550,
-      "y": 800,
-      "data": {},
-      "ports": [
-        {
-          "label": "father",
-          "id": "port-t-0",
-          "portType": "control-in"
-        }
-      ]
-    },
-    {
       "id": "2",
       "type": "node",
       "component": "MatrixNode",
@@ -66,48 +14,23 @@
         {
           "label": "name",
           "id": "port-4",
-          "portType": "in"
+          "portType": "in",
+          "host": "2"
         },
         {
           "label": "age",
           "id": "port-5",
-          "portType": "in"
+          "portType": "in",
+          "host": "2"
         },
         {
           "label": "father",
           "id": "port-6",
-          "portType": "out"
+          "portType": "out",
+          "host": "2"
         }
       ],
       "label": "NODE 3 Matrix"
-    },
-    {
-      "id": "edge-1",
-      "type": "edge",
-      "component": "Edge",
-      "source": "port-1",
-      "target": "port-5"
-    },
-    {
-      "id": "edge-2",
-      "type": "edge",
-      "component": "Edge",
-      "source": "port-0",
-      "target": "port-4"
-    },
-    {
-      "id": "edge-0",
-      "type": "edge",
-      "component": "Edge",
-      "source": "port-2",
-      "target": "port-t-0"
-    },
-    {
-      "id": "edge-3",
-      "type": "edge",
-      "component": "Edge",
-      "source": "port-2",
-      "target": "port-6"
     }
   ]
 }

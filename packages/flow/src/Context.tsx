@@ -1,7 +1,4 @@
 import React from "react";
+import Model from "./Model";
 
-export type FlowContextType = {
-  model: any;
-};
-
-export const FlowContext = React.createContext<FlowContextType>(null);
+export const FlowContext = React.createContext<Model>(null);

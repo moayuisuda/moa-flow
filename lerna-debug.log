@@ -1,12 +1,21 @@
 0 silly argv {
-0 silly argv   _: [ 'add' ],
-0 silly argv   scope: 'playground',
-0 silly argv   globs: [],
+0 silly argv   _: [ 'create' ],
 0 silly argv   lernaVersion: '4.0.0',
 0 silly argv   '$0': 'lerna',
-0 silly argv   pkg: 'flow-matrix-command'
+0 silly argv   name: 'moa-konva'
 0 silly argv }
 1 notice cli v4.0.0
 2 verbose rootPath /Users/moayuisuda/Documents/work/moa-flow
-3 error HttpErrorGeneral: 404 Not Found - GET https://registry.npmjs.org/flow-matrix-command - Not found
-3 error     at /Users/moayuisuda/Documents/work/moa-flow/node_modules/npm-registry-fetch/check-response.js:95:15
+3 error Error: canceled
+3 error     at Interface.<anonymous> (/Users/moayuisuda/Documents/work/moa-flow/node_modules/read/lib/read.js:66:13)
+3 error     at Interface.emit (node:events:520:28)
+3 error     at Interface._ttyWrite (node:readline:1081:16)
+3 error     at ReadStream.onkeypress (node:readline:288:10)
+3 error     at ReadStream.emit (node:events:520:28)
+3 error     at emitKeys (node:internal/readline/utils:358:14)
+3 error     at emitKeys.next (<anonymous>)
+3 error     at ReadStream.onData (node:internal/readline/emitKeypressEvents:61:36)
+3 error     at ReadStream.emit (node:events:520:28)
+3 error     at addChunk (node:internal/streams/readable:315:12)
+3 error     at readableAddChunk (node:internal/streams/readable:289:9)
+3 error     at ReadStream.Readable.push (node:internal/streams/readable:228:10)

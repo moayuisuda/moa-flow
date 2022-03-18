@@ -1,5 +1,6 @@
 import React from "react";
 import Cell from "@/cells/Cell";
+import { CellType } from "../cells/Cell";
 export declare type PortType = {
     id: string;
     anchor: {
@@ -9,7 +10,9 @@ export declare type PortType = {
         x: number;
         y: number;
     });
-};
+    edges?: string[];
+    host: string;
+} & CellType;
 declare class Port extends Cell<PortType, {}, {
     link: (source: PortType & unknown, target: PortType & unknown) => boolean;
 }> {
@@ -19,7 +22,6 @@ declare class Port extends Cell<PortType, {}, {
         target: any;
     };
     constructor(props: any, context: any);
-    componentDidMount(): void;
     anchor(): {
         x: any;
         y: any;

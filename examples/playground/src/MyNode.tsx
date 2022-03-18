@@ -22,9 +22,7 @@ class MyNode extends Node<MyNodeType, {}> {
   };
 
   getStroke = () => {
-    const isSelect = this.context.model.selectCells.includes(
-      this.props.data.id
-    );
+    const isSelect = this.context.selectCells.includes(this.props.data.id);
 
     if (isSelect) {
       return {

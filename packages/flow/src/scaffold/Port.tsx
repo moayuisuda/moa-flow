@@ -1,13 +1,15 @@
 import { Group } from "react-konva";
 import React from "react";
-import Node from "../cells/Node";
 
 import Cell from "@/cells/Cell";
+import { CellType } from "../cells/Cell";
 
 export type PortType = {
   id: string;
   anchor: { x: number; y: number } | (() => { x: number; y: number });
-};
+  edges?: string[];
+  host: string;
+} & CellType;
 
 class Port extends Cell<
   PortType,
@@ -24,19 +26,10 @@ class Port extends Cell<
 
   constructor(props, context) {
     super(props, context);
-    context.model.setCellData(props.data.id);
+    context.setCellData(props.data.id);
   }
 
-  componentDidMount(): void {
-    const { data } = this.props;
-    const { model } = this.context;
-    if (!data.id) {
-      this.context.model.setCellId(data);
-      model.cellsMap.set(data.id, this);
-      model.cellsDataMap.set(data.id, data);
-    }
-  }
-
+  // 暂时废弃
   anchor() {
     const konvaNode = this.wrapperRef.current;
     if (!konvaNode) return { x: 0, y: 0 };
@@ -59,10 +52,10 @@ class Port extends Cell<
     e.cancelBubble = true;
 
     const {
-      model: {
+      context: {
         buffer: { link },
       },
-    } = this.context;
+    } = this;
 
     link.source = this.props.data.id;
     link.target = this.anchor();
@@ -72,20 +65,20 @@ class Port extends Cell<
     e.cancelBubble = true;
 
     const {
-      model: {
+      context,
+      context: {
         buffer: { link },
       },
-      model,
-    } = this.context;
+    } = this;
 
-    const sourceInstance = model.cellsMap.get(link.source);
+    const sourceInstance = context.cellsMap.get(link.source);
 
     if (link.source === this.props.data.id) {
-      model.clearLinkBuffer();
+      context.clearLinkBuffer();
     } else if (this.props.link || sourceInstance.props.link) {
       let adoptSource = true;
       let adoptTarget = true;
-      const sourceData = model.getCellData(link.source);
+      const sourceData = context.getCellData(link.source);
 
       if (sourceInstance.props.link) {
         if (sourceInstance.props.link(sourceData, this.props.data))
@@ -98,10 +91,10 @@ class Port extends Cell<
       }
 
       if (adoptSource && adoptTarget)
-        model.link(link.source, this.props.data.id);
-      else model.clearLinkBuffer();
+        context.link(link.source, this.props.data.id);
+      else context.clearLinkBuffer();
     } else {
-      model.link(link.source, this.props.data.id);
+      context.link(link.source, this.props.data.id);
     }
   }
 

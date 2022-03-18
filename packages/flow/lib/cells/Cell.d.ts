@@ -6,7 +6,13 @@ export declare type CellType = {
 declare abstract class Cell<D, S = {}, P = {}> extends React.Component<{
     data: D & CellType;
 } & P, S> {
-    static contextType: React.Context<import("../Context").FlowContextType>;
+    static contextType: React.Context<import("../Model").FlowModel>;
+    static getBounds: (cellData: any) => {
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+    };
     abstract content(): JSX.Element;
     static metaData: any;
     wrapperRef: React.RefObject<any>;

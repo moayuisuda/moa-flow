@@ -1,6 +1,9 @@
 import { CellType } from "@/cells/Cell";
 export declare class FlowModel {
-    constructor(eventSender: any);
+    constructor(eventSender?: any);
+    setEventSender: (eventSender: any) => void;
+    setCellsDataMap: () => void;
+    setCellDataMap: (cellData: any) => void;
     hotKey: {
         MouseDown: boolean;
     };
@@ -10,6 +13,7 @@ export declare class FlowModel {
     buffer: {
         isDragging: boolean;
         isSingleSelect: boolean;
+        isWheeling: boolean;
         select: {
             single: boolean;
             start: {
@@ -65,7 +69,9 @@ export declare class FlowModel {
     setCanvasData: (canvasData: any) => void;
     setCellId: (data: any) => void;
     setCellData: (id: any, data: any) => void;
+    getLinkNode: (id: any) => any[];
     deleCell: (id: any) => any;
+    deleEdge: (id: any) => void;
     setAutoLayout: (layoutOption: any) => void;
     createCellData: (component: any, initOptions?: any) => any;
     addCell: (componentName: any, initOptions: any) => any;
@@ -74,8 +80,5 @@ export declare class FlowModel {
     moveTo(id: any, index: any): void;
     getCellData: (id: any) => CellType;
     getCellInstance: (id: any) => any;
-    getPortNode(id: any): any;
-    getPortEdges(id: any): any[];
-    onConnect(data: any): void;
 }
 export default FlowModel;

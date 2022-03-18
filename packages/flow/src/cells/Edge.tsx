@@ -1,11 +1,13 @@
 import Cell from "./Cell";
 import { Line, Group } from "react-konva";
 import Interactor from "../scaffold/Interactor";
+import { observer } from "mobx-react";
+import { CellType } from "./Cell";
 
 export type EdgeType = {
   source: string;
   target: string;
-};
+} & CellType;
 
 class Edge<P, S> extends Cell<
   EdgeType & P,
@@ -16,6 +18,30 @@ class Edge<P, S> extends Cell<
   static metaData: any = {
     type: "edge",
   };
+
+  // static getBounds(cellData) {
+  //   const sourceInstance = flowModel.cellsMap.get(cellData.source);
+  //   const targetInstance = flowModel.cellsMap.get(cellData.target);
+
+  //   const sourceAnchor =
+  //     sourceInstance.props.anchor && sourceInstance.props.anchor();
+  //   // || sourceInstance.anchor();
+
+  //   const targetAnchor =
+  //     targetInstance.props.anchor && targetInstance.props.anchor();
+
+  //   const left = Math.min(sourceAnchor.x, targetAnchor.x);
+  //   const right = Math.max(sourceAnchor.x, targetAnchor.x);
+  //   const top = Math.min(sourceAnchor.y, targetAnchor.y);
+  //   const bottom = Math.max(sourceAnchor.y, targetAnchor.y);
+
+  //   return {
+  //     width: right - left,
+  //     height: bottom - top,
+  //     x: left,
+  //     y: top,
+  //   };
+  // }
 
   protected bazier = true;
   protected dash = false;
@@ -31,10 +57,8 @@ class Edge<P, S> extends Cell<
   }
 
   private getStroke = () => {
-    const isSelect = this.context.model.selectCells.includes(
-      this.props.data.id
-    );
-    const { color } = this.context.model;
+    const isSelect = this.context.selectCells.includes(this.props.data.id);
+    const { color } = this.context;
 
     if (isSelect) {
       return {
@@ -44,19 +68,20 @@ class Edge<P, S> extends Cell<
   };
 
   protected getPoints() {
-    const { model } = this.context;
     const { data } = this.props;
 
-    const sourceInstance = model.cellsMap.get(data.source);
-    const targetInstance = model.cellsMap.get(data.target);
+    console.log("points");
+
+    const sourceInstance = this.context.cellsMap.get(data.source);
+    const targetInstance = this.context.cellsMap.get(data.target);
 
     const sourceAnchor =
-      (sourceInstance.props.anchor && sourceInstance.props.anchor()) ||
-      sourceInstance.anchor();
+      sourceInstance.props.anchor && sourceInstance.props.anchor();
+    // || sourceInstance.anchor();
 
     const targetAnchor =
-      (targetInstance.props.anchor && targetInstance.props.anchor()) ||
-      targetInstance.anchor();
+      targetInstance.props.anchor && targetInstance.props.anchor();
+    // || targetInstance.anchor();
 
     return this.route(sourceAnchor, targetAnchor);
   }
@@ -81,7 +106,7 @@ class Edge<P, S> extends Cell<
   }
 
   protected edgeRender() {
-    const { color } = this.context.model;
+    const { color } = this.context;
     const points = this.getPoints();
 
     return (

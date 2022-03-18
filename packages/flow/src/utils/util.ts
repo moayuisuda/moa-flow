@@ -10,3 +10,18 @@ export const findIndex = (arr, target) => {
         if (curr === target) return i
     }
 }
+
+export const isRectsInterSect = (boundsA, boundsB) => {
+    console.log(boundsA, boundsB)
+    return !(
+        boundsA.x + boundsA.width < boundsB.x ||
+        boundsA.x > boundsB.x + boundsB.width ||
+        boundsA.y + boundsA.height < boundsB.y ||
+        boundsA.y > boundsB.y + boundsB.height
+    )
+}
+
+// export const isCellVisible = (cellData) => {
+//     flowModel
+//     // return isRectsInterSect(flowModel. flowModel.componentsMap[cellData.component].getBounds)
+// }

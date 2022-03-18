@@ -4,6 +4,8 @@ import { Rect, Text, Circle, Group } from "react-konva";
 import Button from "@/common/Button";
 import Interactor from "@/scaffold/Interactor";
 import Node from "../Node";
+import { observer } from "mobx-react";
+import { NodeType } from "../Node";
 const { Port } = Interactor;
 
 type MatrixPortType = PortType & {
@@ -17,12 +19,21 @@ type MatrixNodeType = {
   x?: number;
   y?: number;
   label?: string;
-};
+} & NodeType;
 
 const WIDTH = 200;
 const HEADER_HEIGHT = 40;
 const SINGLE_PORT_HEIGHT = 30;
 const HEADER_MARGIN = 20;
+const PORT_RADIUS = 10;
+const TEXT_WIDTH = 70;
+const PORT_TEXT_MARGIN = 10;
+const BOTTOM_PADDING = 10;
+
+const PORTS_OFFSET = HEADER_HEIGHT + HEADER_MARGIN;
+const PORT_OFFSET = PORTS_OFFSET + SINGLE_PORT_HEIGHT / 2;
+const PORT_GRAPHIC_OFFSET =
+  PORT_RADIUS + (SINGLE_PORT_HEIGHT - PORT_RADIUS * 2) / 2;
 
 class MatrixNode extends Node<MatrixNodeType, {}> {
   static metaData = {
@@ -30,11 +41,47 @@ class MatrixNode extends Node<MatrixNodeType, {}> {
     label: "",
   };
 
-  getStroke = () => {
-    const isSelect = this.context.model.selectCells.includes(
-      this.props.data.id
+  static getBounds(cellData) {
+    const outPorts = cellData.ports.filter(
+      (portData) => portData.portType === "out"
     );
-    const { color } = this.context.model;
+
+    const inPorts = cellData.ports.filter(
+      (portData) => portData.portType === "in"
+    );
+
+    const controlOutPorts = cellData.ports.filter(
+      (portData) => portData.portType === "control-out"
+    );
+
+    const controlInPorts = cellData.ports.filter(
+      (portData) => portData.portType === "control-in"
+    );
+
+    const height =
+      Math.max(
+        outPorts.length + controlOutPorts.length,
+        inPorts.length + controlInPorts.length
+      ) *
+        SINGLE_PORT_HEIGHT +
+      HEADER_HEIGHT +
+      HEADER_MARGIN +
+      BOTTOM_PADDING;
+    const width = WIDTH;
+    const x = cellData.x - PORT_RADIUS * 0.5;
+    const y = cellData.y;
+
+    return {
+      width,
+      height,
+      x,
+      y,
+    };
+  }
+
+  getStroke = () => {
+    const isSelect = this.context.selectCells.includes(this.props.data.id);
+    const { color } = this.context;
 
     if (isSelect) {
       return {
@@ -44,35 +91,25 @@ class MatrixNode extends Node<MatrixNodeType, {}> {
   };
 
   content() {
-    const { model } = this.context;
-    const { color = {} } = model;
+    const { color = {} } = this.context;
     const { getStroke } = this;
     const { label, ports } = this.props.data;
 
-    const outPorts = this.props.data.ports.filter(
-      (portData) => portData.portType === "out"
-    );
+    const outPorts = ports.filter((portData) => portData.portType === "out");
 
-    const inPorts = this.props.data.ports.filter(
-      (portData) => portData.portType === "in"
-    );
+    const inPorts = ports.filter((portData) => portData.portType === "in");
 
-    const controlOutPorts = this.props.data.ports.filter(
+    const controlOutPorts = ports.filter(
       (portData) => portData.portType === "control-out"
     );
 
-    const controlInPorts = this.props.data.ports.filter(
+    const controlInPorts = ports.filter(
       (portData) => portData.portType === "control-in"
     );
 
-    const FULL_HEIGHT =
-      HEADER_MARGIN +
-      HEADER_HEIGHT +
-      Math.max(
-        outPorts.length + controlOutPorts.length,
-        inPorts.length + controlInPorts.length
-      ) *
-        SINGLE_PORT_HEIGHT;
+    const FULL_HEIGHT = MatrixNode.getBounds(this.props.data).height;
+
+    const { data } = this.props;
 
     return (
       <Interactor {...this.props.data} topOnFocus>
@@ -106,7 +143,7 @@ class MatrixNode extends Node<MatrixNodeType, {}> {
             height={HEADER_HEIGHT}
             text="＋"
             onClick={(e) => {
-              const id = model.addCell("MatrixNode", {
+              const id = this.context.addCell("MatrixNode", {
                 x: this.props.data.x + 300,
                 y: this.props.data.y,
                 label: "new node",
@@ -118,15 +155,12 @@ class MatrixNode extends Node<MatrixNodeType, {}> {
                 ],
               });
 
-              model.sendEvent({
-                type: "chore",
-                data: `cell [${id}] has been added`,
-              });
+              // this.context.sendEvent({
+              //   type: "chore",
+              //   data: `cell [${id}] has been added`,
+              // });
 
-              Promise.resolve().then(() => {
-                const nextData = model.getCellData(id);
-                model.link(ports[0].id, nextData.ports[0].id);
-              });
+              console.log("haha", this.context.getLinkNode(this.props.data.id));
             }}
           />
         </Group>
@@ -139,56 +173,92 @@ class MatrixNode extends Node<MatrixNodeType, {}> {
           cornerRadius={10}
         />
 
-        <Group y={HEADER_HEIGHT + HEADER_MARGIN}>
+        <Group y={PORTS_OFFSET}>
           {/* in的port */}
           {inPorts.map((portData, index) => (
             <Group x={0} y={index * SINGLE_PORT_HEIGHT} key={portData.label}>
-              <Port data={portData}>
+              <Port
+                data={portData}
+                anchor={() => ({
+                  x: data.x,
+                  y: data.y + PORT_OFFSET + index * SINGLE_PORT_HEIGHT,
+                })}
+              >
                 <Circle
                   stroke={color.primary}
                   fill="white"
-                  radius={10}
-                  y={6}
+                  radius={PORT_RADIUS}
+                  y={PORT_GRAPHIC_OFFSET}
                 ></Circle>
               </Port>
-              <Text x={20} text={portData.label}></Text>
+              <Text
+                x={PORT_RADIUS + PORT_TEXT_MARGIN}
+                height={SINGLE_PORT_HEIGHT}
+                verticalAlign="middle"
+                text={portData.label}
+              ></Text>
             </Group>
           ))}
           {/* control-in的port */}
           {controlInPorts.map((portData, index) => (
             <Group
-              x={-10}
               y={(inPorts.length + index) * SINGLE_PORT_HEIGHT}
               key={portData.label}
             >
-              <Port data={portData}>
+              <Port
+                data={portData}
+                anchor={() => ({
+                  x: data.x,
+                  y:
+                    data.y +
+                    PORT_OFFSET +
+                    (inPorts.length + index) * SINGLE_PORT_HEIGHT,
+                })}
+              >
                 <Rect
                   fill={color.primary}
-                  y={-5}
-                  width={20}
-                  height={20}
-                  radius={10}
+                  x={-PORT_RADIUS}
+                  y={PORT_GRAPHIC_OFFSET - PORT_RADIUS}
+                  width={PORT_RADIUS * 2}
+                  height={PORT_RADIUS * 2}
                 ></Rect>
               </Port>
-              <Text x={30} text={portData.label}></Text>
+              <Text
+                x={PORT_RADIUS + PORT_TEXT_MARGIN}
+                height={SINGLE_PORT_HEIGHT}
+                verticalAlign="middle"
+                text={portData.label}
+              ></Text>
             </Group>
           ))}
 
           {/* out的port */}
           {outPorts.map((portData, index) => (
             <Group
-              x={WIDTH - 50}
+              x={WIDTH - TEXT_WIDTH - PORT_TEXT_MARGIN - PORT_RADIUS}
               y={index * SINGLE_PORT_HEIGHT}
               key={portData.label}
             >
-              <Text text={portData.label}></Text>
-              <Port data={portData}>
+              <Text
+                text={portData.label}
+                align="right"
+                height={SINGLE_PORT_HEIGHT}
+                verticalAlign="middle"
+                width={TEXT_WIDTH}
+              ></Text>
+              <Port
+                data={portData}
+                anchor={() => ({
+                  x: data.x + WIDTH,
+                  y: data.y + PORT_OFFSET + index * SINGLE_PORT_HEIGHT,
+                })}
+              >
                 <Circle
                   stroke={color.primary}
                   fill="white"
-                  y={6}
-                  x={50}
-                  radius={10}
+                  x={TEXT_WIDTH + PORT_RADIUS + PORT_TEXT_MARGIN}
+                  y={PORT_GRAPHIC_OFFSET}
+                  radius={PORT_RADIUS}
                 ></Circle>
               </Port>
             </Group>
@@ -196,19 +266,33 @@ class MatrixNode extends Node<MatrixNodeType, {}> {
           {/* control-out的port */}
           {controlOutPorts.map((portData, index) => (
             <Group
-              x={WIDTH - 60}
+              x={WIDTH - TEXT_WIDTH - PORT_RADIUS - PORT_TEXT_MARGIN}
               y={(outPorts.length + index) * SINGLE_PORT_HEIGHT}
               key={portData.label}
             >
-              <Text text={portData.label}></Text>
-              <Port data={portData}>
+              <Text
+                text={portData.label}
+                align="right"
+                height={SINGLE_PORT_HEIGHT}
+                verticalAlign="middle"
+                width={TEXT_WIDTH}
+              ></Text>
+              <Port
+                data={portData}
+                anchor={() => ({
+                  x: data.x + WIDTH,
+                  y:
+                    data.y +
+                    PORT_OFFSET +
+                    (outPorts.length + index) * SINGLE_PORT_HEIGHT,
+                })}
+              >
                 <Rect
                   fill={color.primary}
-                  x={50}
-                  y={-5}
-                  width={20}
-                  height={20}
-                  radius={10}
+                  x={TEXT_WIDTH + PORT_TEXT_MARGIN}
+                  y={PORT_GRAPHIC_OFFSET - PORT_RADIUS}
+                  width={PORT_RADIUS * 2}
+                  height={PORT_RADIUS * 2}
                 ></Rect>
               </Port>
             </Group>

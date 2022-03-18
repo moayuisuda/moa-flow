@@ -27,7 +27,7 @@ const Controller = (props: { modelRef: ModelRefType }) => {
           } else message.success(`删除 ${result} 成功`);
         }}
       >
-        删除选择的节点
+        删除选择的元素
       </Button>
       <Divider />
       <Button

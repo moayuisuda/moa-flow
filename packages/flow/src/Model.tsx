@@ -1,17 +1,37 @@
-import { action, observable, computed, makeObservable } from "mobx";
+import { action, observable, makeObservable } from "mobx";
 // import { v4 } from "uuid";
-import { arrayMove, findIndex } from "./utils/util";
+import { arrayMove, findIndex, isRectsInterSect } from "./utils/util";
 import { CellType } from "@/cells/Cell";
 import { color } from "@/theme/style";
 import { v4 } from "uuid";
-import { union } from "lodash";
+import { union, without } from "lodash";
 import { EdgeType } from "./cells/Edge";
+import { PortType } from "@/scaffold/Port";
+import { NodeType } from "./cells/Node";
 
 export class FlowModel {
-  constructor(eventSender) {
+  constructor(eventSender?) {
     makeObservable(this);
-    this.eventBus.sender = eventSender;
+    if (eventSender) this.eventBus.sender = eventSender;
   }
+  setEventSender = (eventSender) => {
+    this.eventBus.sender = eventSender;
+  };
+
+  setCellsDataMap = () => {
+    this.canvasData.cells.forEach((cellData) => {
+      this.setCellDataMap(cellData);
+    });
+  };
+  setCellDataMap = (cellData) => {
+    this.cellsDataMap.set(cellData.id, cellData);
+    if (cellData.type === "node" && cellData.ports) {
+      cellData.ports.forEach((portData) => {
+        this.setCellDataMap(portData);
+      });
+    }
+  };
+
   @observable
   hotKey = {
     MouseDown: false,
@@ -29,6 +49,7 @@ export class FlowModel {
   buffer = {
     isDragging: false,
     isSingleSelect: false,
+    isWheeling: false,
     select: {
       single: false,
       start: { x: 0, y: 0 },
@@ -55,8 +76,8 @@ export class FlowModel {
     Object.assign(bufferSelect, select);
 
     const right = Math.max(bufferSelect.start.x, bufferSelect.end.x);
-    const left = Math.min(bufferSelect.start.x, bufferSelect.end.x);
-    const top = Math.min(bufferSelect.start.y, bufferSelect.end.y);
+    const x = Math.min(bufferSelect.start.x, bufferSelect.end.x);
+    const y = Math.min(bufferSelect.start.y, bufferSelect.end.y);
     const bottom = Math.max(bufferSelect.start.y, bufferSelect.end.y);
 
     if (onlySetPosition) return;
@@ -70,11 +91,14 @@ export class FlowModel {
         });
         // judge which nodes interact with 'select rect'
         if (
-          !(
-            right < bounds.x ||
-            left > bounds.x + bounds.width ||
-            bottom < bounds.y ||
-            top > bounds.y + bounds.height
+          isRectsInterSect(
+            {
+              x,
+              y,
+              width: right - x,
+              height: bottom - y,
+            },
+            bounds
           )
         ) {
           re.push(cell.props.data.id);
@@ -166,6 +190,27 @@ export class FlowModel {
     });
   };
 
+  getLinkNode = (id) => {
+    const re = [];
+    const nodeData = this.getCellData(id) as NodeType;
+    if (nodeData.ports)
+      nodeData.ports.forEach((port: PortType) => {
+        if (port.edges) {
+          port.edges.forEach((edgeId) => {
+            const edgeData = this.getCellData(edgeId) as EdgeType;
+            const sourcePort = this.getCellData(edgeData.source) as PortType;
+            const targetPort = this.getCellData(edgeData.target) as PortType;
+
+            re.push(
+              ...without(union([sourcePort.host], [targetPort.host]), id)
+            );
+          });
+        }
+      });
+
+    return re;
+  };
+
   @action deleCell = (id) => {
     const matchCell = this.canvasData.cells.find((cell) => cell.id === id);
     this.canvasData.cells.splice(
@@ -175,6 +220,8 @@ export class FlowModel {
 
     return matchCell.id;
   };
+
+  @action deleEdge = (id) => {};
 
   // 自动布局，用自动布局的三方库对每一个节点的x，y进行计算
   @action setAutoLayout = (layoutOption) => {};
@@ -195,7 +242,23 @@ export class FlowModel {
 
   @action addCell = (componentName, initOptions) => {
     const newCellData = this.createCellData(componentName, initOptions);
+
+    if (newCellData.ports) {
+      newCellData.ports.forEach((port) => {
+        port.host = newCellData.id;
+        port.id = v4();
+      });
+    }
+
     this.canvasData.cells.push(newCellData);
+    this.setCellDataMap(
+      this.canvasData.cells[this.canvasData.cells.length - 1]
+    );
+
+    // console.log(
+    //   newCellData,
+    //   this.canvasData.cells[this.canvasData.cells.length - 1]
+    // ); // 两者不是一个对象，后者是proxy
 
     return newCellData.id;
   };
@@ -208,10 +271,21 @@ export class FlowModel {
   };
 
   @action link = (source, target) => {
-    this.addCell(this.linkEdge, {
+    const sourceCellData = this.getCellData(source) as PortType;
+    const targetCellData = this.getCellData(target) as PortType;
+
+    const edgeId = this.addCell(this.linkEdge, {
       source,
       target,
     });
+
+    if (sourceCellData.edges) {
+      sourceCellData.edges.push(edgeId);
+    } else sourceCellData.edges = [edgeId];
+
+    if (targetCellData.edges) {
+      targetCellData.edges.push(edgeId);
+    } else targetCellData.edges = [edgeId];
 
     this.sendEvent({
       type: "link",
@@ -236,37 +310,6 @@ export class FlowModel {
   getCellInstance = (id) => {
     return this.cellsMap.get(id);
   };
-
-  getPortNode(id) {
-    var mapIter = this.cellsDataMap.entries();
-
-    let value;
-    while ((value = mapIter.next().value)) {
-      const [_, cellData] = value;
-
-      let matchPort;
-      if (cellData.ports)
-        matchPort = cellData.ports.find((portData) => portData.id === id);
-      if (matchPort) return cellData.id;
-    }
-  }
-
-  getPortEdges(id) {
-    const re = [];
-
-    this.cellsDataMap.forEach((cellData: EdgeType & CellType) => {
-      if (cellData.type === "edge") {
-        if (cellData.target === id || cellData.source === id)
-          re.push(cellData.id);
-      }
-    });
-
-    return re;
-  }
-
-  onConnect(data) {
-    // this.eventBus.sender(data);
-  }
 }
 
 export default FlowModel;

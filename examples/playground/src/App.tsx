@@ -22,10 +22,51 @@ function App() {
   useEffect(() => {
     // 注册自定义节点;
     MyNode.regist(modelRef.current);
-    for (let i = 0; i < 10; i++) {
-      modelRef.current?.addCell("MatrixNode", {
-        x: randomIn(0, 1000),
-        y: randomIn(0, 1000),
+    const { addCell } = modelRef.current as ModelType;
+    addCell("MatrixNode", {
+      x: 200,
+      y: 500,
+      ports: [
+        {
+          label: "name-in",
+          portType: "in",
+        },
+        {
+          label: "name",
+          portType: "out",
+        },
+        {
+          label: "age",
+          portType: "out",
+        },
+        {
+          label: "father",
+          portType: "control-out",
+        },
+        {
+          label: "grandfa",
+          portType: "control-out",
+        },
+      ],
+      label: "NODE 1 Matrix",
+    });
+
+    addCell("MatrixNode", {
+      label: "NODE 2 Matrix",
+      x: 550,
+      y: 800,
+      ports: [
+        {
+          label: "father",
+          portType: "control-in",
+        },
+      ],
+    });
+
+    for (let i = 0; i < 300; i++) {
+      addCell("MatrixNode", {
+        x: randomIn(0, 3000),
+        y: randomIn(0, 3000),
         label: `${1} ${Math.random()}`,
         ports: [
           {
@@ -70,6 +111,22 @@ function App() {
       <Flow
         modelRef={modelRef}
         canvasData={testData}
+        // canvasData={{
+        //   scale: [0.5, 0.5],
+        //   x: 0,
+        //   y: 0,
+        //   cells: [
+        //     {
+        //       type: "node",
+        //       component: "MatrixNode",
+        //       x: 1,
+        //       y: 1,
+        //       id: "0",
+        //       ports: [],
+        //       label: "haha",
+        //     },
+        //   ],
+        // }}
         onEvent={(e) => {
           message.info(`[${e.type}] ${JSON.stringify(e.data)}`);
         }}

@@ -8,7 +8,7 @@ declare type InteractorType = {
     topOnFocus?: boolean;
 };
 declare class Interactor extends React.Component<InteractorType> {
-    static contextType: React.Context<import("@/Context").FlowContextType>;
+    static contextType: React.Context<import("../Model").FlowModel>;
     static Port: any;
     local: {
         isDragging: boolean;

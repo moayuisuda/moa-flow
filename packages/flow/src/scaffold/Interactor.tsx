@@ -25,9 +25,9 @@ class Interactor extends React.Component<InteractorType> {
   };
 
   syncDragPosition = (e) => {
-    const model = this.context.model;
+    const { context } = this;
 
-    model.setCellData(this.props.id, {
+    context.setCellData(this.props.id, {
       x: e.currentTarget.attrs.x + e.evt.movementX,
       y: e.currentTarget.attrs.y + e.evt.movementY,
     });
@@ -35,12 +35,11 @@ class Interactor extends React.Component<InteractorType> {
 
   constructor(props) {
     super(props);
-    console.log("ins");
   }
 
   render() {
     const {
-      context: { model },
+      context,
       props: {
         x,
         y,
@@ -58,20 +57,10 @@ class Interactor extends React.Component<InteractorType> {
         y={y}
         onMouseDown={(e) => {
           if (selectable) {
+            context.setSelectedCells([id]);
             e.cancelBubble = true;
-            model.setSelectedCells([id]);
-            // 防止单选重叠时选到下面重叠的节点
-            model.setisSingleSelect(true);
-
-            model.buffer.isDragging = true;
-            console.log("down", this.local.isDragging);
-            if (topOnFocus)
-              model.moveTo(this.props.id, model.canvasData.cells.length - 1);
+            context.buffer.isDragging = true;
           }
-        }}
-        onMouseUp={() => {
-          model.buffer.isDragging = false;
-          model.setisSingleSelect(false);
         }}
         {...others}
       >

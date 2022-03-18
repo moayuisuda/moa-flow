@@ -7,6 +7,7 @@ import { NodeType } from "./cells/Node";
 import { CellType } from './cells/Cell';
 
 export const initStage = (model: ModelType, stage: Konva.Stage) => {
+
     stage.on('mousedown', e => {
         model.clearSelect();
         model.setHotKey('MouseDown', true)
@@ -26,37 +27,57 @@ export const initDrag = (model: ModelType, stage: Konva.Stage, layers: {
     const { linesLayer, nodesLayer } = layers
 
     autorun(() => {
+        if (!model.buffer.isWheeling) {
+            // @TODO requestIdleCallbak 分片缓存
+            if (model.hotKey["Space"] && !nodesLayer.isCached()) {
+                linesLayer.cache()
+                nodesLayer.cache()
+                linesLayer.listening(false)
+                nodesLayer.listening(false)
+            } else {
+                // model.setStagePosition(stage.x(), stage.y());
+                linesLayer.clearCache()
+                nodesLayer.clearCache()
+                linesLayer.listening(true)
+                nodesLayer.listening(true)
+            }
+        }
+    })
+
+    stage.on('mousemove', e => {
         if (model.hotKey["Space"]) {
-            linesLayer.cache()
-            nodesLayer.cache()
-        } else {
-            model.setStagePosition(stage.x(), stage.y());
-            linesLayer.clearCache()
-            nodesLayer.clearCache()
+            model.setStagePosition(
+                e.currentTarget.attrs.x + e.evt.movementX,
+                e.currentTarget.attrs.y + e.evt.movementY
+            );
         }
     })
 
     stage.on('mousemove', e => {
         if (model.buffer.isDragging) {
+            if (stage.isListening()) stage.listening(false);
+
             model.selectCells.forEach(id => {
                 const cellData = model.getCellData(id) as NodeType & CellType
                 if (cellData.type === 'node') {
+                    model.moveTo(
+                        cellData.id,
+                        model.canvasData.cells.length - 1
+                    );
+
                     model.setCellData(cellData.id, {
-                        x: cellData.x + e.evt.movementX,
-                        y: cellData.y + e.evt.movementY,
+                        x: cellData.x + e.evt.movementX / model.canvasData.scale.x,
+                        y: cellData.y + e.evt.movementY / model.canvasData.scale.y,
                     });
                 }
             })
         }
     })
 
-    stage.on('mousemove', e => {
-        if (model.hotKey['Space']) {
-            stage.position({
-                x: stage.x() + e.evt.movementX,
-                y: stage.y() + e.evt.movementY
-            })
-            // @TODO move比draggable性能差，看下draggable的原理
+    stage.on('mouseup', () => {
+        if (model.buffer.isDragging) {
+            stage.listening(true)
+            model.buffer.isDragging = false
         }
     })
 }
@@ -66,30 +87,37 @@ export const initScale = (model: ModelType, stage: Konva.Stage, layers: {
     linesLayer: Konva.Layer,
     nodesLayer: Konva.Layer
 }) => {
-    let scaleBy = 1.02;
+    let scaleBy = 1.03;
     const { linesLayer, nodesLayer } = layers
 
-    const debouncedSetStage = debounce((scale, x, y) => {
-        model.setStageScale(scale, scale);
-        model.setStagePosition(x, y);
-
+    const debounceClearCache = debounce(() => {
         linesLayer.clearCache()
         nodesLayer.clearCache()
-    }, 500)
+        linesLayer.listening(true)
+        nodesLayer.listening(true)
+
+        model.buffer.isWheeling = false
+    }, 300)
 
     stage.on('wheel', (e) => {
-        if (!linesLayer.isCached()) linesLayer.cache()
-        if (!nodesLayer.isCached()) nodesLayer.cache()
+        if (!nodesLayer.isCached()) {
+            model.buffer.isWheeling = true
+            linesLayer.cache()
+            nodesLayer.cache()
+            linesLayer.listening(false)
+            nodesLayer.listening(false)
+        }
+
 
         // stop default scrolling
         e.evt.preventDefault();
 
-        const oldScale = stage.scaleX();
+        const oldScale = model.canvasData.scale.x;
         const pointer = stage.getPointerPosition();
 
         var mousePointTo = {
-            x: (pointer.x - stage.x()) / oldScale,
-            y: (pointer.y - stage.y()) / oldScale,
+            x: (pointer.x - model.canvasData.x) / oldScale,
+            y: (pointer.y - model.canvasData.y) / oldScale,
         };
 
         // how to scale? Zoom in? Or zoom out?
@@ -103,15 +131,16 @@ export const initScale = (model: ModelType, stage: Konva.Stage, layers: {
 
         const newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy;
 
-        stage.scale({ x: newScale, y: newScale });
+        model.setStageScale(newScale, newScale);
 
         const newPos = {
             x: pointer.x - mousePointTo.x * newScale,
             y: pointer.y - mousePointTo.y * newScale,
         };
-        stage.position(newPos);
 
-        debouncedSetStage(newScale, newPos.x, newPos.y)
+        model.setStagePosition(newPos.x, newPos.y);
+
+        debounceClearCache()
     });
 }
 
@@ -175,6 +204,7 @@ export const initHotKeys = (model) => {
     const { hotKey } = model
 
     window.addEventListener('keydown', e => {
+        e.preventDefault()
         if (e.code in hotKey) {
             model.setHotKey(e.code, true)
         } else {
@@ -185,6 +215,7 @@ export const initHotKeys = (model) => {
     })
 
     window.addEventListener('keyup', e => {
+        e.preventDefault()
         if (e.code in hotKey) {
             model.setHotKey(e.code, false)
         } else {

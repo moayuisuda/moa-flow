@@ -1,5 +1,5 @@
-import React, { useContext, useRef, useState, useEffect } from 'react';
-import { Group, Line, Rect, Text, Circle, useStrictMode, Stage, Layer } from 'react-konva';
+import React, { useContext, useState, useEffect, createRef } from 'react';
+import { Group, Line, Rect, Text, Circle, Layer, Stage, useStrictMode } from 'react-konva';
 import Konva from 'konva';
 import { observer } from 'mobx-react';
 import { observable, action, makeObservable, autorun, extendObservable } from 'mobx';
@@ -18606,8 +18606,7 @@ var Cell = /** @class */ (function (_super) {
     __extends(Cell, _super);
     function Cell(props, context) {
         var _this = _super.call(this, props) || this;
-        context.model.cellsMap.set(props.data.id, _this);
-        context.model.cellsDataMap.set(props.data.id, props.data);
+        context.cellsMap.set(props.data.id, _this);
         _this.wrapperRef = React.createRef();
         return _this;
     }
@@ -18626,7 +18625,7 @@ var Cell = /** @class */ (function (_super) {
         return __assign(__assign({}, lodash.exports.cloneDeep(re)), { component: componentName });
     };
     Cell.prototype.isSelected = function () {
-        return this.context.model.canvasData.cells.includes();
+        return this.context.canvasData.cells.includes();
     };
     Cell.prototype.getStage = function (konvaNode) {
         var re = konvaNode;
@@ -18651,18 +18650,10 @@ var Port$1 = /** @class */ (function (_super) {
     __extends(Port, _super);
     function Port(props, context) {
         var _this = _super.call(this, props, context) || this;
-        context.model.setCellData(props.data.id);
+        context.setCellData(props.data.id);
         return _this;
     }
-    Port.prototype.componentDidMount = function () {
-        var data = this.props.data;
-        var model = this.context.model;
-        if (!data.id) {
-            this.context.model.setCellId(data);
-            model.cellsMap.set(data.id, this);
-            model.cellsDataMap.set(data.id, data);
-        }
-    };
+    // 暂时废弃
     Port.prototype.anchor = function () {
         var konvaNode = this.wrapperRef.current;
         if (!konvaNode)
@@ -18680,21 +18671,21 @@ var Port$1 = /** @class */ (function (_super) {
     };
     Port.prototype.onLinkStart = function (e) {
         e.cancelBubble = true;
-        var link = this.context.model.buffer.link;
+        var link = this.context.buffer.link;
         link.source = this.props.data.id;
         link.target = this.anchor();
     };
     Port.prototype.onLinkEnd = function (e) {
         e.cancelBubble = true;
-        var _a = this.context, link = _a.model.buffer.link, model = _a.model;
-        var sourceInstance = model.cellsMap.get(link.source);
+        var _a = this, context = _a.context, link = _a.context.buffer.link;
+        var sourceInstance = context.cellsMap.get(link.source);
         if (link.source === this.props.data.id) {
-            model.clearLinkBuffer();
+            context.clearLinkBuffer();
         }
         else if (this.props.link || sourceInstance.props.link) {
             var adoptSource = true;
             var adoptTarget = true;
-            var sourceData = model.getCellData(link.source);
+            var sourceData = context.getCellData(link.source);
             if (sourceInstance.props.link) {
                 if (sourceInstance.props.link(sourceData, this.props.data))
                     adoptSource = true;
@@ -18708,12 +18699,12 @@ var Port$1 = /** @class */ (function (_super) {
                     adoptTarget = false;
             }
             if (adoptSource && adoptTarget)
-                model.link(link.source, this.props.data.id);
+                context.link(link.source, this.props.data.id);
             else
-                model.clearLinkBuffer();
+                context.clearLinkBuffer();
         }
         else {
-            model.link(link.source, this.props.data.id);
+            context.link(link.source, this.props.data.id);
         }
     };
     Port.prototype.content = function () {
@@ -18735,32 +18726,22 @@ var Interactor = /** @class */ (function (_super) {
             isDragging: false,
         };
         _this.syncDragPosition = function (e) {
-            var model = _this.context.model;
-            model.setCellData(_this.props.id, {
+            var context = _this.context;
+            context.setCellData(_this.props.id, {
                 x: e.currentTarget.attrs.x + e.evt.movementX,
                 y: e.currentTarget.attrs.y + e.evt.movementY,
             });
         };
-        console.log("ins");
         return _this;
     }
     Interactor.prototype.render = function () {
-        var _this = this;
-        var _a = this, model = _a.context.model, _b = _a.props, x = _b.x, y = _b.y; _b.draggable; var id = _b.id, topOnFocus = _b.topOnFocus, _d = _b.selectable, selectable = _d === void 0 ? true : _d, others = __rest(_b, ["x", "y", "draggable", "id", "topOnFocus", "selectable"]);
+        var _a = this, context = _a.context, _b = _a.props, x = _b.x, y = _b.y; _b.draggable; var id = _b.id; _b.topOnFocus; var _d = _b.selectable, selectable = _d === void 0 ? true : _d, others = __rest(_b, ["x", "y", "draggable", "id", "topOnFocus", "selectable"]);
         return (jsxRuntime.exports.jsx(Group, __assign({ x: x, y: y, onMouseDown: function (e) {
                 if (selectable) {
+                    context.setSelectedCells([id]);
                     e.cancelBubble = true;
-                    model.setSelectedCells([id]);
-                    // 防止单选重叠时选到下面重叠的节点
-                    model.setisSingleSelect(true);
-                    model.buffer.isDragging = true;
-                    console.log("down", _this.local.isDragging);
-                    if (topOnFocus)
-                        model.moveTo(_this.props.id, model.canvasData.cells.length - 1);
+                    context.buffer.isDragging = true;
                 }
-            }, onMouseUp: function () {
-                model.buffer.isDragging = false;
-                model.setisSingleSelect(false);
             } }, others, { children: this.props.children }), void 0));
     };
     Interactor.contextType = FlowContext;
@@ -18775,11 +18756,30 @@ var Edge = /** @class */ (function (_super) {
     __extends(Edge, _super);
     function Edge(props, context) {
         var _this = _super.call(this, props, context) || this;
+        // static getBounds(cellData) {
+        //   const sourceInstance = flowModel.cellsMap.get(cellData.source);
+        //   const targetInstance = flowModel.cellsMap.get(cellData.target);
+        //   const sourceAnchor =
+        //     sourceInstance.props.anchor && sourceInstance.props.anchor();
+        //   // || sourceInstance.anchor();
+        //   const targetAnchor =
+        //     targetInstance.props.anchor && targetInstance.props.anchor();
+        //   const left = Math.min(sourceAnchor.x, targetAnchor.x);
+        //   const right = Math.max(sourceAnchor.x, targetAnchor.x);
+        //   const top = Math.min(sourceAnchor.y, targetAnchor.y);
+        //   const bottom = Math.max(sourceAnchor.y, targetAnchor.y);
+        //   return {
+        //     width: right - left,
+        //     height: bottom - top,
+        //     x: left,
+        //     y: top,
+        //   };
+        // }
         _this.bazier = true;
         _this.dash = false;
         _this.getStroke = function () {
-            var isSelect = _this.context.model.selectCells.includes(_this.props.data.id);
-            var color = _this.context.model.color;
+            var isSelect = _this.context.selectCells.includes(_this.props.data.id);
+            var color = _this.context.color;
             if (isSelect) {
                 return {
                     stroke: color.active,
@@ -18794,14 +18794,14 @@ var Edge = /** @class */ (function (_super) {
         return _this;
     }
     Edge.prototype.getPoints = function () {
-        var model = this.context.model;
         var data = this.props.data;
-        var sourceInstance = model.cellsMap.get(data.source);
-        var targetInstance = model.cellsMap.get(data.target);
-        var sourceAnchor = (sourceInstance.props.anchor && sourceInstance.props.anchor()) ||
-            sourceInstance.anchor();
-        var targetAnchor = (targetInstance.props.anchor && targetInstance.props.anchor()) ||
-            targetInstance.anchor();
+        console.log("points");
+        var sourceInstance = this.context.cellsMap.get(data.source);
+        var targetInstance = this.context.cellsMap.get(data.target);
+        var sourceAnchor = sourceInstance.props.anchor && sourceInstance.props.anchor();
+        // || sourceInstance.anchor();
+        var targetAnchor = targetInstance.props.anchor && targetInstance.props.anchor();
+        // || targetInstance.anchor();
         return this.route(sourceAnchor, targetAnchor);
     };
     // 这个方法暴露出去，可自定义路由
@@ -18819,7 +18819,7 @@ var Edge = /** @class */ (function (_super) {
         ];
     };
     Edge.prototype.edgeRender = function () {
-        var color = this.context.model.color;
+        var color = this.context.color;
         var points = this.getPoints();
         return (jsxRuntime.exports.jsxs(Group, { children: [jsxRuntime.exports.jsx(Line, __assign({ stroke: color.deepGrey, points: points, strokeWidth: 3 }, this.getStroke(), { lineCap: "round", bezier: this.bazier, dash: this.dash ? [10, 10] : undefined }), void 0), jsxRuntime.exports.jsx(Line, { stroke: "transparent", points: points, strokeWidth: 20, lineCap: "round", bezier: this.bazier }, void 0)] }, void 0));
     };
@@ -18840,12 +18840,12 @@ var LinkingEdge = /** @class */ (function (_super) {
         return _this;
     }
     LinkingEdge.prototype.getPoints = function () {
-        var model = this.context.model;
+        var context = this.context;
         var data = this.props.data;
-        var sourceInstance = model.cellsMap.get(data.source);
-        var sourceAnchor = (sourceInstance.props.anchor && sourceInstance.props.anchor()) ||
-            sourceInstance.anchor();
-        var targetAnchor = model.buffer.link.target;
+        var sourceInstance = context.cellsMap.get(data.source);
+        var sourceAnchor = sourceInstance.props.anchor && sourceInstance.props.anchor();
+        // || sourceInstance.anchor();
+        var targetAnchor = context.buffer.link.target;
         return this.route(sourceAnchor, targetAnchor);
     };
     // 一般不会重写这个方法
@@ -18867,6 +18867,17 @@ var findIndex = function (arr, target) {
             return i;
     }
 };
+var isRectsInterSect = function (boundsA, boundsB) {
+    console.log(boundsA, boundsB);
+    return !(boundsA.x + boundsA.width < boundsB.x ||
+        boundsA.x > boundsB.x + boundsB.width ||
+        boundsA.y + boundsA.height < boundsB.y ||
+        boundsA.y > boundsB.y + boundsB.height);
+};
+// export const isCellVisible = (cellData) => {
+//     flowModel
+//     // return isRectsInterSect(flowModel. flowModel.componentsMap[cellData.component].getBounds)
+// }
 
 var color = {
     primary: 'rgb(255, 108, 55)',
@@ -18954,6 +18965,22 @@ function v4(options, buf, offset) {
 var FlowModel = /** @class */ (function () {
     function FlowModel(eventSender) {
         var _this = this;
+        this.setEventSender = function (eventSender) {
+            _this.eventBus.sender = eventSender;
+        };
+        this.setCellsDataMap = function () {
+            _this.canvasData.cells.forEach(function (cellData) {
+                _this.setCellDataMap(cellData);
+            });
+        };
+        this.setCellDataMap = function (cellData) {
+            _this.cellsDataMap.set(cellData.id, cellData);
+            if (cellData.type === "node" && cellData.ports) {
+                cellData.ports.forEach(function (portData) {
+                    _this.setCellDataMap(portData);
+                });
+            }
+        };
         this.hotKey = {
             MouseDown: false,
         };
@@ -18967,6 +18994,7 @@ var FlowModel = /** @class */ (function () {
         this.buffer = {
             isDragging: false,
             isSingleSelect: false,
+            isWheeling: false,
             select: {
                 single: false,
                 start: { x: 0, y: 0 },
@@ -18988,8 +19016,8 @@ var FlowModel = /** @class */ (function () {
             var bufferSelect = _this.buffer.select;
             Object.assign(bufferSelect, select);
             var right = Math.max(bufferSelect.start.x, bufferSelect.end.x);
-            var left = Math.min(bufferSelect.start.x, bufferSelect.end.x);
-            var top = Math.min(bufferSelect.start.y, bufferSelect.end.y);
+            var x = Math.min(bufferSelect.start.x, bufferSelect.end.x);
+            var y = Math.min(bufferSelect.start.y, bufferSelect.end.y);
             var bottom = Math.max(bufferSelect.start.y, bufferSelect.end.y);
             if (onlySetPosition)
                 return;
@@ -19002,10 +19030,12 @@ var FlowModel = /** @class */ (function () {
                         relativeTo: instance.getStage(instance),
                     });
                     // judge which nodes interact with 'select rect'
-                    if (!(right < bounds.x ||
-                        left > bounds.x + bounds.width ||
-                        bottom < bounds.y ||
-                        top > bounds.y + bounds.height)) {
+                    if (isRectsInterSect({
+                        x: x,
+                        y: y,
+                        width: right - x,
+                        height: bottom - y,
+                    }, bounds)) {
                         re.push(cell.props.data.id);
                     }
                 }
@@ -19078,11 +19108,28 @@ var FlowModel = /** @class */ (function () {
             var cellData = _this.getCellData(id);
             Object.assign(cellData, __assign({}, data));
         };
+        this.getLinkNode = function (id) {
+            var re = [];
+            var nodeData = _this.getCellData(id);
+            if (nodeData.ports)
+                nodeData.ports.forEach(function (port) {
+                    if (port.edges) {
+                        port.edges.forEach(function (edgeId) {
+                            var edgeData = _this.getCellData(edgeId);
+                            var sourcePort = _this.getCellData(edgeData.source);
+                            var targetPort = _this.getCellData(edgeData.target);
+                            re.push.apply(re, lodash.exports.without(lodash.exports.union([sourcePort.host], [targetPort.host]), id));
+                        });
+                    }
+                });
+            return re;
+        };
         this.deleCell = function (id) {
             var matchCell = _this.canvasData.cells.find(function (cell) { return cell.id === id; });
             _this.canvasData.cells.splice(findIndex(_this.canvasData.cells, matchCell), 1);
             return matchCell.id;
         };
+        this.deleEdge = function (id) { };
         // 自动布局，用自动布局的三方库对每一个节点的x，y进行计算
         this.setAutoLayout = function (layoutOption) { };
         // 创建新的节点数据
@@ -19093,7 +19140,18 @@ var FlowModel = /** @class */ (function () {
         };
         this.addCell = function (componentName, initOptions) {
             var newCellData = _this.createCellData(componentName, initOptions);
+            if (newCellData.ports) {
+                newCellData.ports.forEach(function (port) {
+                    port.host = newCellData.id;
+                    port.id = v4();
+                });
+            }
             _this.canvasData.cells.push(newCellData);
+            _this.setCellDataMap(_this.canvasData.cells[_this.canvasData.cells.length - 1]);
+            // console.log(
+            //   newCellData,
+            //   this.canvasData.cells[this.canvasData.cells.length - 1]
+            // ); // 两者不是一个对象，后者是proxy
             return newCellData.id;
         };
         this.setLinkingPosition = function (e) {
@@ -19102,10 +19160,22 @@ var FlowModel = /** @class */ (function () {
             _this.buffer.link.target.y = cursorPos.y;
         };
         this.link = function (source, target) {
-            _this.addCell(_this.linkEdge, {
+            var sourceCellData = _this.getCellData(source);
+            var targetCellData = _this.getCellData(target);
+            var edgeId = _this.addCell(_this.linkEdge, {
                 source: source,
                 target: target,
             });
+            if (sourceCellData.edges) {
+                sourceCellData.edges.push(edgeId);
+            }
+            else
+                sourceCellData.edges = [edgeId];
+            if (targetCellData.edges) {
+                targetCellData.edges.push(edgeId);
+            }
+            else
+                targetCellData.edges = [edgeId];
             _this.sendEvent({
                 type: "link",
                 data: {
@@ -19122,36 +19192,12 @@ var FlowModel = /** @class */ (function () {
             return _this.cellsMap.get(id);
         };
         makeObservable(this);
-        this.eventBus.sender = eventSender;
+        if (eventSender)
+            this.eventBus.sender = eventSender;
     }
     FlowModel.prototype.moveTo = function (id, index) {
         var oldIndex = findIndex(this.canvasData.cells, this.getCellData(id));
         arrayMove(this.canvasData.cells, oldIndex, index);
-    };
-    FlowModel.prototype.getPortNode = function (id) {
-        var mapIter = this.cellsDataMap.entries();
-        var value;
-        while ((value = mapIter.next().value)) {
-            value[0]; var cellData = value[1];
-            var matchPort = void 0;
-            if (cellData.ports)
-                matchPort = cellData.ports.find(function (portData) { return portData.id === id; });
-            if (matchPort)
-                return cellData.id;
-        }
-    };
-    FlowModel.prototype.getPortEdges = function (id) {
-        var re = [];
-        this.cellsDataMap.forEach(function (cellData) {
-            if (cellData.type === "edge") {
-                if (cellData.target === id || cellData.source === id)
-                    re.push(cellData.id);
-            }
-        });
-        return re;
-    };
-    FlowModel.prototype.onConnect = function (data) {
-        // this.eventBus.sender(data);
     };
     __decorate([
         observable
@@ -19209,6 +19255,9 @@ var FlowModel = /** @class */ (function () {
     ], FlowModel.prototype, "deleCell", void 0);
     __decorate([
         action
+    ], FlowModel.prototype, "deleEdge", void 0);
+    __decorate([
+        action
     ], FlowModel.prototype, "setAutoLayout", void 0);
     __decorate([
         action
@@ -19230,7 +19279,7 @@ var FlowModel = /** @class */ (function () {
 
 var Button = function (props) {
     var _a = props.x, x = _a === void 0 ? 0 : _a, _b = props.y, y = _b === void 0 ? 0 : _b, _c = props.width, width = _c === void 0 ? 100 : _c, _d = props.height, height = _d === void 0 ? 30 : _d;
-    var color = useContext(FlowContext).model.color;
+    var color = useContext(FlowContext).color;
     return (jsxRuntime.exports.jsxs(Group, __assign({ x: x, y: y, onClick: props.onClick }, { children: [jsxRuntime.exports.jsx(Rect, { shadowBlur: 10, shadowOpacity: 0.1, cornerRadius: 4, fill: color.active, width: width, height: height }, void 0), jsxRuntime.exports.jsx(Text, { stroke: "white", text: props.text, width: width, height: height, align: "center", verticalAlign: "middle" }, void 0)] }), void 0));
 };
 
@@ -19252,13 +19301,20 @@ var WIDTH = 200;
 var HEADER_HEIGHT = 40;
 var SINGLE_PORT_HEIGHT = 30;
 var HEADER_MARGIN = 20;
+var PORT_RADIUS = 10;
+var TEXT_WIDTH = 70;
+var PORT_TEXT_MARGIN = 10;
+var BOTTOM_PADDING = 10;
+var PORTS_OFFSET = HEADER_HEIGHT + HEADER_MARGIN;
+var PORT_OFFSET = PORTS_OFFSET + SINGLE_PORT_HEIGHT / 2;
+var PORT_GRAPHIC_OFFSET = PORT_RADIUS + (SINGLE_PORT_HEIGHT - PORT_RADIUS * 2) / 2;
 var MatrixNode = /** @class */ (function (_super) {
     __extends(MatrixNode, _super);
     function MatrixNode() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
         _this.getStroke = function () {
-            var isSelect = _this.context.model.selectCells.includes(_this.props.data.id);
-            var color = _this.context.model.color;
+            var isSelect = _this.context.selectCells.includes(_this.props.data.id);
+            var color = _this.context.color;
             if (isSelect) {
                 return {
                     stroke: color.active,
@@ -19269,22 +19325,39 @@ var MatrixNode = /** @class */ (function (_super) {
         };
         return _this;
     }
+    MatrixNode.getBounds = function (cellData) {
+        var outPorts = cellData.ports.filter(function (portData) { return portData.portType === "out"; });
+        var inPorts = cellData.ports.filter(function (portData) { return portData.portType === "in"; });
+        var controlOutPorts = cellData.ports.filter(function (portData) { return portData.portType === "control-out"; });
+        var controlInPorts = cellData.ports.filter(function (portData) { return portData.portType === "control-in"; });
+        var height = Math.max(outPorts.length + controlOutPorts.length, inPorts.length + controlInPorts.length) *
+            SINGLE_PORT_HEIGHT +
+            HEADER_HEIGHT +
+            HEADER_MARGIN +
+            BOTTOM_PADDING;
+        var width = WIDTH;
+        var x = cellData.x - PORT_RADIUS * 0.5;
+        var y = cellData.y;
+        return {
+            width: width,
+            height: height,
+            x: x,
+            y: y,
+        };
+    };
     MatrixNode.prototype.content = function () {
         var _this = this;
-        var model = this.context.model;
-        var _a = model.color, color = _a === void 0 ? {} : _a;
+        var _a = this.context.color, color = _a === void 0 ? {} : _a;
         var getStroke = this.getStroke;
         var _b = this.props.data, label = _b.label, ports = _b.ports;
-        var outPorts = this.props.data.ports.filter(function (portData) { return portData.portType === "out"; });
-        var inPorts = this.props.data.ports.filter(function (portData) { return portData.portType === "in"; });
-        var controlOutPorts = this.props.data.ports.filter(function (portData) { return portData.portType === "control-out"; });
-        var controlInPorts = this.props.data.ports.filter(function (portData) { return portData.portType === "control-in"; });
-        var FULL_HEIGHT = HEADER_MARGIN +
-            HEADER_HEIGHT +
-            Math.max(outPorts.length + controlOutPorts.length, inPorts.length + controlInPorts.length) *
-                SINGLE_PORT_HEIGHT;
+        var outPorts = ports.filter(function (portData) { return portData.portType === "out"; });
+        var inPorts = ports.filter(function (portData) { return portData.portType === "in"; });
+        var controlOutPorts = ports.filter(function (portData) { return portData.portType === "control-out"; });
+        var controlInPorts = ports.filter(function (portData) { return portData.portType === "control-in"; });
+        var FULL_HEIGHT = MatrixNode.getBounds(this.props.data).height;
+        var data = this.props.data;
         return (jsxRuntime.exports.jsxs(Interactor, __assign({}, this.props.data, { topOnFocus: true }, { children: [jsxRuntime.exports.jsx(Rect, { width: WIDTH, height: FULL_HEIGHT, fill: "white", shadowColor: "black", shadowBlur: 10, shadowOpacity: 0.1, cornerRadius: 10 }, void 0), jsxRuntime.exports.jsxs(Group, { children: [jsxRuntime.exports.jsx(Rect, { cornerRadius: [10, 10, 0, 0], width: WIDTH, height: HEADER_HEIGHT, fill: color.grey }, void 0), jsxRuntime.exports.jsx(Text, { fontSize: 14, text: label, height: HEADER_HEIGHT, x: 20, verticalAlign: "middle" }, void 0), jsxRuntime.exports.jsx(Button, { x: WIDTH, width: 20, height: HEADER_HEIGHT, text: "\uFF0B", onClick: function (e) {
-                                var id = model.addCell("MatrixNode", {
+                                _this.context.addCell("MatrixNode", {
                                     x: _this.props.data.x + 300,
                                     y: _this.props.data.y,
                                     label: "new node",
@@ -19295,15 +19368,28 @@ var MatrixNode = /** @class */ (function (_super) {
                                         },
                                     ],
                                 });
-                                model.sendEvent({
-                                    type: "chore",
-                                    data: "cell [".concat(id, "] has been added"),
-                                });
-                                Promise.resolve().then(function () {
-                                    var nextData = model.getCellData(id);
-                                    model.link(ports[0].id, nextData.ports[0].id);
-                                });
-                            } }, void 0)] }, void 0), jsxRuntime.exports.jsx(Rect, __assign({ width: WIDTH, height: FULL_HEIGHT }, getStroke(), { cornerRadius: 10 }), void 0), jsxRuntime.exports.jsxs(Group, __assign({ y: HEADER_HEIGHT + HEADER_MARGIN }, { children: [inPorts.map(function (portData, index) { return (jsxRuntime.exports.jsxs(Group, __assign({ x: 0, y: index * SINGLE_PORT_HEIGHT }, { children: [jsxRuntime.exports.jsx(Port, __assign({ data: portData }, { children: jsxRuntime.exports.jsx(Circle, { stroke: color.primary, fill: "white", radius: 10, y: 6 }, void 0) }), void 0), jsxRuntime.exports.jsx(Text, { x: 20, text: portData.label }, void 0)] }), portData.label)); }), controlInPorts.map(function (portData, index) { return (jsxRuntime.exports.jsxs(Group, __assign({ x: -10, y: (inPorts.length + index) * SINGLE_PORT_HEIGHT }, { children: [jsxRuntime.exports.jsx(Port, __assign({ data: portData }, { children: jsxRuntime.exports.jsx(Rect, { fill: color.primary, y: -5, width: 20, height: 20, radius: 10 }, void 0) }), void 0), jsxRuntime.exports.jsx(Text, { x: 30, text: portData.label }, void 0)] }), portData.label)); }), outPorts.map(function (portData, index) { return (jsxRuntime.exports.jsxs(Group, __assign({ x: WIDTH - 50, y: index * SINGLE_PORT_HEIGHT }, { children: [jsxRuntime.exports.jsx(Text, { text: portData.label }, void 0), jsxRuntime.exports.jsx(Port, __assign({ data: portData }, { children: jsxRuntime.exports.jsx(Circle, { stroke: color.primary, fill: "white", y: 6, x: 50, radius: 10 }, void 0) }), void 0)] }), portData.label)); }), controlOutPorts.map(function (portData, index) { return (jsxRuntime.exports.jsxs(Group, __assign({ x: WIDTH - 60, y: (outPorts.length + index) * SINGLE_PORT_HEIGHT }, { children: [jsxRuntime.exports.jsx(Text, { text: portData.label }, void 0), jsxRuntime.exports.jsx(Port, __assign({ data: portData }, { children: jsxRuntime.exports.jsx(Rect, { fill: color.primary, x: 50, y: -5, width: 20, height: 20, radius: 10 }, void 0) }), void 0)] }), portData.label)); })] }), void 0)] }), void 0));
+                                // this.context.sendEvent({
+                                //   type: "chore",
+                                //   data: `cell [${id}] has been added`,
+                                // });
+                                console.log("haha", _this.context.getLinkNode(_this.props.data.id));
+                            } }, void 0)] }, void 0), jsxRuntime.exports.jsx(Rect, __assign({ width: WIDTH, height: FULL_HEIGHT }, getStroke(), { cornerRadius: 10 }), void 0), jsxRuntime.exports.jsxs(Group, __assign({ y: PORTS_OFFSET }, { children: [inPorts.map(function (portData, index) { return (jsxRuntime.exports.jsxs(Group, __assign({ x: 0, y: index * SINGLE_PORT_HEIGHT }, { children: [jsxRuntime.exports.jsx(Port, __assign({ data: portData, anchor: function () { return ({
+                                        x: data.x,
+                                        y: data.y + PORT_OFFSET + index * SINGLE_PORT_HEIGHT,
+                                    }); } }, { children: jsxRuntime.exports.jsx(Circle, { stroke: color.primary, fill: "white", radius: PORT_RADIUS, y: PORT_GRAPHIC_OFFSET }, void 0) }), void 0), jsxRuntime.exports.jsx(Text, { x: PORT_RADIUS + PORT_TEXT_MARGIN, height: SINGLE_PORT_HEIGHT, verticalAlign: "middle", text: portData.label }, void 0)] }), portData.label)); }), controlInPorts.map(function (portData, index) { return (jsxRuntime.exports.jsxs(Group, __assign({ y: (inPorts.length + index) * SINGLE_PORT_HEIGHT }, { children: [jsxRuntime.exports.jsx(Port, __assign({ data: portData, anchor: function () { return ({
+                                        x: data.x,
+                                        y: data.y +
+                                            PORT_OFFSET +
+                                            (inPorts.length + index) * SINGLE_PORT_HEIGHT,
+                                    }); } }, { children: jsxRuntime.exports.jsx(Rect, { fill: color.primary, x: -PORT_RADIUS, y: PORT_GRAPHIC_OFFSET - PORT_RADIUS, width: PORT_RADIUS * 2, height: PORT_RADIUS * 2 }, void 0) }), void 0), jsxRuntime.exports.jsx(Text, { x: PORT_RADIUS + PORT_TEXT_MARGIN, height: SINGLE_PORT_HEIGHT, verticalAlign: "middle", text: portData.label }, void 0)] }), portData.label)); }), outPorts.map(function (portData, index) { return (jsxRuntime.exports.jsxs(Group, __assign({ x: WIDTH - TEXT_WIDTH - PORT_TEXT_MARGIN - PORT_RADIUS, y: index * SINGLE_PORT_HEIGHT }, { children: [jsxRuntime.exports.jsx(Text, { text: portData.label, align: "right", height: SINGLE_PORT_HEIGHT, verticalAlign: "middle", width: TEXT_WIDTH }, void 0), jsxRuntime.exports.jsx(Port, __assign({ data: portData, anchor: function () { return ({
+                                        x: data.x + WIDTH,
+                                        y: data.y + PORT_OFFSET + index * SINGLE_PORT_HEIGHT,
+                                    }); } }, { children: jsxRuntime.exports.jsx(Circle, { stroke: color.primary, fill: "white", x: TEXT_WIDTH + PORT_RADIUS + PORT_TEXT_MARGIN, y: PORT_GRAPHIC_OFFSET, radius: PORT_RADIUS }, void 0) }), void 0)] }), portData.label)); }), controlOutPorts.map(function (portData, index) { return (jsxRuntime.exports.jsxs(Group, __assign({ x: WIDTH - TEXT_WIDTH - PORT_RADIUS - PORT_TEXT_MARGIN, y: (outPorts.length + index) * SINGLE_PORT_HEIGHT }, { children: [jsxRuntime.exports.jsx(Text, { text: portData.label, align: "right", height: SINGLE_PORT_HEIGHT, verticalAlign: "middle", width: TEXT_WIDTH }, void 0), jsxRuntime.exports.jsx(Port, __assign({ data: portData, anchor: function () { return ({
+                                        x: data.x + WIDTH,
+                                        y: data.y +
+                                            PORT_OFFSET +
+                                            (outPorts.length + index) * SINGLE_PORT_HEIGHT,
+                                    }); } }, { children: jsxRuntime.exports.jsx(Rect, { fill: color.primary, x: TEXT_WIDTH + PORT_TEXT_MARGIN, y: PORT_GRAPHIC_OFFSET - PORT_RADIUS, width: PORT_RADIUS * 2, height: PORT_RADIUS * 2 }, void 0) }), void 0)] }), portData.label)); })] }), void 0)] }), void 0));
     };
     MatrixNode.metaData = {
         fields: [{}],
@@ -19323,7 +19409,7 @@ var SelectBoundsRect = /** @class */ (function (_super) {
         return _super !== null && _super.apply(this, arguments) || this;
     }
     SelectBoundsRect.prototype.render = function () {
-        var _a = this.context.model, select = _a.buffer.select, color = _a.color, hotKey = _a.hotKey;
+        var _a = this.context, select = _a.buffer.select, color = _a.color, hotKey = _a.hotKey;
         return (jsxRuntime.exports.jsx(jsxRuntime.exports.Fragment, { children: !hotKey["Space"] && hotKey["MouseDown"] && (jsxRuntime.exports.jsx(Rect, { x: Math.min(select.start.x, select.end.x), y: Math.min(select.start.y, select.end.y), width: Math.abs(select.start.x - select.end.x), height: Math.abs(select.start.y - select.end.y), stroke: color.primary }, void 0)) }, void 0));
     };
     SelectBoundsRect.contextType = FlowContext;
@@ -19346,60 +19432,76 @@ var initStage = function (model, stage) {
 var initDrag = function (model, stage, layers) {
     var linesLayer = layers.linesLayer, nodesLayer = layers.nodesLayer;
     autorun(function () {
-        if (model.hotKey["Space"]) {
-            linesLayer.cache();
-            nodesLayer.cache();
+        if (!model.buffer.isWheeling) {
+            // @TODO requestIdleCallbak 分片缓存
+            if (model.hotKey["Space"] && !nodesLayer.isCached()) {
+                linesLayer.cache();
+                nodesLayer.cache();
+                linesLayer.listening(false);
+                nodesLayer.listening(false);
+            }
+            else {
+                // model.setStagePosition(stage.x(), stage.y());
+                linesLayer.clearCache();
+                nodesLayer.clearCache();
+                linesLayer.listening(true);
+                nodesLayer.listening(true);
+            }
         }
-        else {
-            model.setStagePosition(stage.x(), stage.y());
-            linesLayer.clearCache();
-            nodesLayer.clearCache();
+    });
+    stage.on('mousemove', function (e) {
+        if (model.hotKey["Space"]) {
+            model.setStagePosition(e.currentTarget.attrs.x + e.evt.movementX, e.currentTarget.attrs.y + e.evt.movementY);
         }
     });
     stage.on('mousemove', function (e) {
         if (model.buffer.isDragging) {
+            if (stage.isListening())
+                stage.listening(false);
             model.selectCells.forEach(function (id) {
                 var cellData = model.getCellData(id);
                 if (cellData.type === 'node') {
+                    model.moveTo(cellData.id, model.canvasData.cells.length - 1);
                     model.setCellData(cellData.id, {
-                        x: cellData.x + e.evt.movementX,
-                        y: cellData.y + e.evt.movementY,
+                        x: cellData.x + e.evt.movementX / model.canvasData.scale.x,
+                        y: cellData.y + e.evt.movementY / model.canvasData.scale.y,
                     });
                 }
             });
         }
     });
-    stage.on('mousemove', function (e) {
-        if (model.hotKey['Space']) {
-            stage.position({
-                x: stage.x() + e.evt.movementX,
-                y: stage.y() + e.evt.movementY
-            });
-            // @TODO move比draggable性能差，看下draggable的原理
+    stage.on('mouseup', function () {
+        if (model.buffer.isDragging) {
+            stage.listening(true);
+            model.buffer.isDragging = false;
         }
     });
 };
 var initScale = function (model, stage, layers) {
-    var scaleBy = 1.02;
+    var scaleBy = 1.03;
     var linesLayer = layers.linesLayer, nodesLayer = layers.nodesLayer;
-    var debouncedSetStage = lodash.exports.debounce(function (scale, x, y) {
-        model.setStageScale(scale, scale);
-        model.setStagePosition(x, y);
+    var debounceClearCache = lodash.exports.debounce(function () {
         linesLayer.clearCache();
         nodesLayer.clearCache();
-    }, 500);
+        linesLayer.listening(true);
+        nodesLayer.listening(true);
+        model.buffer.isWheeling = false;
+    }, 300);
     stage.on('wheel', function (e) {
-        if (!linesLayer.isCached())
+        if (!nodesLayer.isCached()) {
+            model.buffer.isWheeling = true;
             linesLayer.cache();
-        if (!nodesLayer.isCached())
             nodesLayer.cache();
+            linesLayer.listening(false);
+            nodesLayer.listening(false);
+        }
         // stop default scrolling
         e.evt.preventDefault();
-        var oldScale = stage.scaleX();
+        var oldScale = model.canvasData.scale.x;
         var pointer = stage.getPointerPosition();
         var mousePointTo = {
-            x: (pointer.x - stage.x()) / oldScale,
-            y: (pointer.y - stage.y()) / oldScale,
+            x: (pointer.x - model.canvasData.x) / oldScale,
+            y: (pointer.y - model.canvasData.y) / oldScale,
         };
         // how to scale? Zoom in? Or zoom out?
         var direction = e.evt.deltaY > 0 ? 1 : -1;
@@ -19409,13 +19511,13 @@ var initScale = function (model, stage, layers) {
             direction = -direction;
         }
         var newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy;
-        stage.scale({ x: newScale, y: newScale });
+        model.setStageScale(newScale, newScale);
         var newPos = {
             x: pointer.x - mousePointTo.x * newScale,
             y: pointer.y - mousePointTo.y * newScale,
         };
-        stage.position(newPos);
-        debouncedSetStage(newScale, newPos.x, newPos.y);
+        model.setStagePosition(newPos.x, newPos.y);
+        debounceClearCache();
     });
 };
 var initMultiSelect = function (model, stage) {
@@ -19473,6 +19575,7 @@ var initHotKeys = function (model) {
     var hotKey = model.hotKey;
     window.addEventListener('keydown', function (e) {
         var _a;
+        e.preventDefault();
         if (e.code in hotKey) {
             model.setHotKey(e.code, true);
         }
@@ -19484,6 +19587,7 @@ var initHotKeys = function (model) {
     });
     window.addEventListener('keyup', function (e) {
         var _a;
+        e.preventDefault();
         if (e.code in hotKey) {
             model.setHotKey(e.code, false);
         }
@@ -19501,18 +19605,49 @@ var renderComponent = function (cellData, model) {
         key: cellData.id,
     });
 };
-var Canvas = observer(function (props) {
+var Nodes = observer(function (props) {
+    var nodesLayerRef = props.nodesLayerRef, model = props.model;
+    var nodesData = model.canvasData.cells.filter(function (cellData) {
+        console.log();
+        return cellData.type !== "edge";
+    });
+    return (jsxRuntime.exports.jsx(Layer, __assign({ ref: nodesLayerRef, zIndex: 1 }, { children: nodesData.slice(0, nodesData.length - 1).map(function (cellData) {
+            return renderComponent(cellData, model);
+        }) }), void 0));
+});
+var InteractTop = observer(function (props) {
     var model = props.model;
-    var stageRef = useRef();
-    var nodesLayerRef = useRef();
-    var linesLayerRef = useRef();
+    var nodesData = model.canvasData.cells.filter(function (cellData) { return cellData.type !== "edge"; });
+    return (jsxRuntime.exports.jsxs(Layer, __assign({ zIndex: 2 }, { children: [renderComponent(nodesData[nodesData.length - 1], model), jsxRuntime.exports.jsx(LinkingEdge, { data: model.buffer.link }, void 0), jsxRuntime.exports.jsx(SelectBoundsRect, {}, void 0)] }), void 0));
+});
+var Edges = observer(function (props) {
+    var linesLayerRef = props.linesLayerRef, model = props.model;
     var _a = useState(0); _a[0]; var setSecondRefresh = _a[1];
-    // 完全受控，https://github.com/konvajs/react-konva/blob/master/README.md#strict-mode
-    useStrictMode(true);
     useEffect(function () {
-        var stage = stageRef.current;
-        var linesLayer = linesLayerRef.current;
-        var nodesLayer = nodesLayerRef.current;
+        setSecondRefresh(1);
+    }, []);
+    var edgesData = model.canvasData.cells.filter(function (cellData) { return cellData.type === "edge"; });
+    return (jsxRuntime.exports.jsx(Layer, __assign({ ref: linesLayerRef, zIndex: 0 }, { children: edgesData.map(function (cellData) {
+            return renderComponent(cellData, model);
+        }) }), void 0));
+});
+var Canvas = /** @class */ (function (_super) {
+    __extends(Canvas, _super);
+    function Canvas(props) {
+        var _this = _super.call(this, props) || this;
+        // 完全受控，https://github.com/konvajs/react-konva/blob/master/README.md#strict-mode
+        useStrictMode(true);
+        _this.stageRef = createRef();
+        _this.nodesLayerRef = createRef();
+        _this.linesLayerRef = createRef();
+        return _this;
+        // 第一次渲染zIndex失效，issue link https://github.com/konvajs/react-konva/issues/194
+    }
+    Canvas.prototype.componentDidMount = function () {
+        var model = this.props.model;
+        var stage = this.stageRef.current;
+        var linesLayer = this.linesLayerRef.current;
+        var nodesLayer = this.nodesLayerRef.current;
         initStage(model, stage);
         initDrag(model, stage, {
             linesLayer: linesLayer,
@@ -19525,29 +19660,25 @@ var Canvas = observer(function (props) {
         initMultiSelect(model, stage);
         initLinkingLine(model, stage);
         initHotKeys(model);
-        // 第一次渲染zIndex失效，issue link https://github.com/konvajs/react-konva/issues/194
-        Promise.resolve().then(function () {
-            setSecondRefresh(1);
-        });
-    }, []);
-    var nodesData = model.canvasData.cells.filter(function (cellData) { return cellData.type !== "edge"; });
-    var edgesData = model.canvasData.cells.filter(function (cellData) { return cellData.type === "edge"; });
-    return (jsxRuntime.exports.jsx(Stage, __assign({ ref: stageRef, scale: model.canvasData.scale, 
-        // draggable={true}
-        x: model.canvasData.x, y: model.canvasData.y, width: window.innerWidth, height: window.innerHeight }, { children: jsxRuntime.exports.jsxs(FlowContext.Provider, __assign({ value: {
-                model: model,
-            } }, { children: [jsxRuntime.exports.jsx(Layer, __assign({ ref: nodesLayerRef, zIndex: 1 }, { children: nodesData.slice(0, nodesData.length - 1).map(function (cellData) {
-                        return renderComponent(cellData, model);
-                    }) }), void 0), jsxRuntime.exports.jsxs(Layer, __assign({ zIndex: 2 }, { children: [renderComponent(nodesData[nodesData.length - 1], model), jsxRuntime.exports.jsx(LinkingEdge, { data: model.buffer.link }, void 0), jsxRuntime.exports.jsx(SelectBoundsRect, {}, void 0)] }), void 0), jsxRuntime.exports.jsx(Layer, __assign({ ref: linesLayerRef, zIndex: 0 }, { children: edgesData.map(function (cellData) {
-                        return renderComponent(cellData, model);
-                    }) }), void 0)] }), void 0) }), void 0));
-});
+    };
+    Canvas.prototype.render = function () {
+        var model = this.props.model;
+        return (jsxRuntime.exports.jsx(Stage, __assign({ ref: this.stageRef, scale: model.canvasData.scale, 
+            // draggable={model.hotKey["Space"]}
+            x: model.canvasData.x, y: model.canvasData.y, width: window.innerWidth, height: window.innerHeight }, { children: jsxRuntime.exports.jsxs(FlowContext.Provider, __assign({ value: model }, { children: [jsxRuntime.exports.jsx(Nodes, { nodesLayerRef: this.nodesLayerRef, model: model }, void 0), jsxRuntime.exports.jsx(InteractTop, { model: model }, void 0), jsxRuntime.exports.jsx(Edges, { linesLayerRef: this.linesLayerRef, model: model }, void 0)] }), void 0) }), void 0));
+    };
+    Canvas = __decorate([
+        observer
+    ], Canvas);
+    return Canvas;
+}(React.Component));
 var Flow = /** @class */ (function (_super) {
     __extends(Flow, _super);
     function Flow(props) {
         var _this = _super.call(this, props) || this;
         _this.flowModel = new FlowModel(props.onEvent);
         _this.flowModel.setCanvasData(_this.props.canvasData);
+        _this.flowModel.setCellsDataMap();
         props.modelRef && (props.modelRef.current = _this.flowModel);
         props.onLoad && props.onLoad(_this.flowModel);
         registComponents(_this.flowModel);

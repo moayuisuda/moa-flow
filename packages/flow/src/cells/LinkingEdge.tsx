@@ -5,15 +5,15 @@ class LinkingEdge extends Edge<{}, {}> {
   protected dash: boolean = true;
 
   getPoints() {
-    const { model } = this.context;
+    const { context } = this;
     const { data } = this.props;
 
-    const sourceInstance = model.cellsMap.get(data.source);
+    const sourceInstance = context.cellsMap.get(data.source);
 
     const sourceAnchor =
-      (sourceInstance.props.anchor && sourceInstance.props.anchor()) ||
-      sourceInstance.anchor();
-    const targetAnchor = model.buffer.link.target;
+      sourceInstance.props.anchor && sourceInstance.props.anchor();
+    // || sourceInstance.anchor();
+    const targetAnchor = context.buffer.link.target;
 
     return this.route(sourceAnchor, targetAnchor);
   }

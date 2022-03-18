@@ -13,9 +13,7 @@ type ButtonProps = {
 
 const Button = (props: ButtonProps) => {
   const { x = 0, y = 0, width = 100, height = 30 } = props;
-  const {
-    model: { color },
-  } = useContext(FlowContext);
+  const { color } = useContext(FlowContext);
 
   return (
     <Group x={x} y={y} onClick={props.onClick}>

@@ -11,7 +11,7 @@ class SelectBoundsRect extends React.Component<{}, {}> {
       buffer: { select },
       color,
       hotKey,
-    } = this.context.model;
+    } = this.context;
 
     return (
       <>
