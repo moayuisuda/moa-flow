@@ -5,6 +5,7 @@ export declare const initStage: (model: ModelType, stage: Konva.Stage) => void;
 export declare const initDrag: (model: ModelType, stage: Konva.Stage, layers: {
     linesLayer: Konva.Layer;
     nodesLayer: Konva.Layer;
+    topLayer: Konva.Layer;
 }) => void;
 export declare const initScale: (model: ModelType, stage: Konva.Stage, layers: {
     linesLayer: Konva.Layer;

@@ -63,7 +63,7 @@ function App() {
       ],
     });
 
-    for (let i = 0; i < 300; i++) {
+    for (let i = 0; i < 200; i++) {
       addCell("MatrixNode", {
         x: randomIn(0, 3000),
         y: randomIn(0, 3000),

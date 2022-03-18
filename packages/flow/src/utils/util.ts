@@ -12,7 +12,6 @@ export const findIndex = (arr, target) => {
 }
 
 export const isRectsInterSect = (boundsA, boundsB) => {
-    console.log(boundsA, boundsB)
     return !(
         boundsA.x + boundsA.width < boundsB.x ||
         boundsA.x > boundsB.x + boundsB.width ||

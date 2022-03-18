@@ -18868,7 +18868,6 @@ var findIndex = function (arr, target) {
     }
 };
 var isRectsInterSect = function (boundsA, boundsB) {
-    console.log(boundsA, boundsB);
     return !(boundsA.x + boundsA.width < boundsB.x ||
         boundsA.x > boundsB.x + boundsB.width ||
         boundsA.y + boundsA.height < boundsB.y ||
@@ -19068,6 +19067,7 @@ var FlowModel = /** @class */ (function () {
         this.selectCells = [];
         this.setSelectedCells = function (ids, ifReplace) {
             if (ifReplace === void 0) { ifReplace = true; }
+            // @TODO select感觉只能放在私有属性，否则每次更新要diff全部的节点
             if (ifReplace) {
                 _this.selectCells = ids;
             }
@@ -19437,20 +19437,19 @@ var initDrag = function (model, stage, layers) {
             if (model.hotKey["Space"] && !nodesLayer.isCached()) {
                 linesLayer.cache();
                 nodesLayer.cache();
-                linesLayer.listening(false);
-                nodesLayer.listening(false);
+                // 对于stage完全不需要调用 getIntersection 检测交互碰撞，因为它就是根组件不需要检测交互碰撞，这里先手动设置监听为false，应该是konva的一个设计失误
+                stage.listening(false);
             }
             else {
-                // model.setStagePosition(stage.x(), stage.y());
                 linesLayer.clearCache();
                 nodesLayer.clearCache();
-                linesLayer.listening(true);
-                nodesLayer.listening(true);
+                stage.listening(true);
             }
         }
     });
     stage.on('mousemove', function (e) {
-        if (model.hotKey["Space"]) {
+        console.log(stage.isListening());
+        if (model.hotKey["Space"] && model.hotKey['MouseDown']) {
             model.setStagePosition(e.currentTarget.attrs.x + e.evt.movementX, e.currentTarget.attrs.y + e.evt.movementY);
         }
     });
@@ -19608,7 +19607,6 @@ var renderComponent = function (cellData, model) {
 var Nodes = observer(function (props) {
     var nodesLayerRef = props.nodesLayerRef, model = props.model;
     var nodesData = model.canvasData.cells.filter(function (cellData) {
-        console.log();
         return cellData.type !== "edge";
     });
     return (jsxRuntime.exports.jsx(Layer, __assign({ ref: nodesLayerRef, zIndex: 1 }, { children: nodesData.slice(0, nodesData.length - 1).map(function (cellData) {
@@ -19616,9 +19614,11 @@ var Nodes = observer(function (props) {
         }) }), void 0));
 });
 var InteractTop = observer(function (props) {
-    var model = props.model;
-    var nodesData = model.canvasData.cells.filter(function (cellData) { return cellData.type !== "edge"; });
-    return (jsxRuntime.exports.jsxs(Layer, __assign({ zIndex: 2 }, { children: [renderComponent(nodesData[nodesData.length - 1], model), jsxRuntime.exports.jsx(LinkingEdge, { data: model.buffer.link }, void 0), jsxRuntime.exports.jsx(SelectBoundsRect, {}, void 0)] }), void 0));
+    var model = props.model, topLayerRef = props.topLayerRef;
+    var nodesData = model.canvasData.cells.filter(function (cellData) {
+        return cellData.type !== "edge";
+    });
+    return (jsxRuntime.exports.jsxs(Layer, __assign({ zIndex: 2, ref: topLayerRef }, { children: [renderComponent(nodesData[nodesData.length - 1], model), jsxRuntime.exports.jsx(LinkingEdge, { data: model.buffer.link }, void 0), jsxRuntime.exports.jsx(SelectBoundsRect, {}, void 0)] }), void 0));
 });
 var Edges = observer(function (props) {
     var linesLayerRef = props.linesLayerRef, model = props.model;
@@ -19640,6 +19640,7 @@ var Canvas = /** @class */ (function (_super) {
         _this.stageRef = createRef();
         _this.nodesLayerRef = createRef();
         _this.linesLayerRef = createRef();
+        _this.topLayerRef = createRef();
         return _this;
         // 第一次渲染zIndex失效，issue link https://github.com/konvajs/react-konva/issues/194
     }
@@ -19648,10 +19649,12 @@ var Canvas = /** @class */ (function (_super) {
         var stage = this.stageRef.current;
         var linesLayer = this.linesLayerRef.current;
         var nodesLayer = this.nodesLayerRef.current;
+        var topLayer = this.topLayerRef.current;
         initStage(model, stage);
         initDrag(model, stage, {
             linesLayer: linesLayer,
             nodesLayer: nodesLayer,
+            topLayer: topLayer,
         });
         initScale(model, stage, {
             linesLayer: linesLayer,
@@ -19665,7 +19668,7 @@ var Canvas = /** @class */ (function (_super) {
         var model = this.props.model;
         return (jsxRuntime.exports.jsx(Stage, __assign({ ref: this.stageRef, scale: model.canvasData.scale, 
             // draggable={model.hotKey["Space"]}
-            x: model.canvasData.x, y: model.canvasData.y, width: window.innerWidth, height: window.innerHeight }, { children: jsxRuntime.exports.jsxs(FlowContext.Provider, __assign({ value: model }, { children: [jsxRuntime.exports.jsx(Nodes, { nodesLayerRef: this.nodesLayerRef, model: model }, void 0), jsxRuntime.exports.jsx(InteractTop, { model: model }, void 0), jsxRuntime.exports.jsx(Edges, { linesLayerRef: this.linesLayerRef, model: model }, void 0)] }), void 0) }), void 0));
+            x: model.canvasData.x, y: model.canvasData.y, width: window.innerWidth, height: window.innerHeight }, { children: jsxRuntime.exports.jsxs(FlowContext.Provider, __assign({ value: model }, { children: [jsxRuntime.exports.jsx(Nodes, { nodesLayerRef: this.nodesLayerRef, model: model }, void 0), jsxRuntime.exports.jsx(InteractTop, { topLayerRef: this.topLayerRef, model: model }, void 0), jsxRuntime.exports.jsx(Edges, { linesLayerRef: this.linesLayerRef, model: model }, void 0)] }), void 0) }), void 0));
     };
     Canvas = __decorate([
         observer

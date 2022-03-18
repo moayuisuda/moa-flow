@@ -21,7 +21,8 @@ export const initStage = (model: ModelType, stage: Konva.Stage) => {
 
 export const initDrag = (model: ModelType, stage: Konva.Stage, layers: {
     linesLayer: Konva.Layer,
-    nodesLayer: Konva.Layer
+    nodesLayer: Konva.Layer,
+    topLayer: Konva.Layer
 }
 ) => {
     const { linesLayer, nodesLayer } = layers
@@ -32,20 +33,19 @@ export const initDrag = (model: ModelType, stage: Konva.Stage, layers: {
             if (model.hotKey["Space"] && !nodesLayer.isCached()) {
                 linesLayer.cache()
                 nodesLayer.cache()
-                linesLayer.listening(false)
-                nodesLayer.listening(false)
+                // 对于stage完全不需要调用 getIntersection 检测交互碰撞，因为它就是根组件不需要检测交互碰撞，这里先手动设置监听为false，应该是konva的一个设计失误
+                stage.listening(false)
             } else {
-                // model.setStagePosition(stage.x(), stage.y());
                 linesLayer.clearCache()
                 nodesLayer.clearCache()
-                linesLayer.listening(true)
-                nodesLayer.listening(true)
+                stage.listening(true)
             }
         }
     })
 
     stage.on('mousemove', e => {
-        if (model.hotKey["Space"]) {
+        console.log(stage.isListening())
+        if (model.hotKey["Space"] && model.hotKey['MouseDown']) {
             model.setStagePosition(
                 e.currentTarget.attrs.x + e.evt.movementX,
                 e.currentTarget.attrs.y + e.evt.movementY

@@ -35,7 +35,6 @@ const Nodes = observer((props: { nodesLayerRef; model }) => {
   const { nodesLayerRef, model } = props;
 
   const nodesData = model.canvasData.cells.filter((cellData) => {
-    console.log();
     return cellData.type !== "edge";
   });
 
@@ -48,14 +47,15 @@ const Nodes = observer((props: { nodesLayerRef; model }) => {
   );
 });
 
-const InteractTop = observer((props: { model }) => {
-  const { model } = props;
-  const nodesData = model.canvasData.cells.filter(
-    (cellData) => cellData.type !== "edge"
-  );
+const InteractTop = observer((props: { model; topLayerRef }) => {
+  const { model, topLayerRef } = props;
+
+  const nodesData = model.canvasData.cells.filter((cellData) => {
+    return cellData.type !== "edge";
+  });
 
   return (
-    <Layer zIndex={2}>
+    <Layer zIndex={2} ref={topLayerRef}>
       {renderComponent(nodesData[nodesData.length - 1], model)}
       <LinkingEdge data={model.buffer.link}></LinkingEdge>
       <SelectBoundsRect />
@@ -89,6 +89,7 @@ class Canvas extends React.Component<{ model: ModelType }> {
   stageRef;
   nodesLayerRef;
   linesLayerRef;
+  topLayerRef;
 
   constructor(props) {
     super(props);
@@ -99,6 +100,7 @@ class Canvas extends React.Component<{ model: ModelType }> {
     this.stageRef = createRef<Konva.Stage>();
     this.nodesLayerRef = createRef<Konva.Layer>();
     this.linesLayerRef = createRef<Konva.Layer>();
+    this.topLayerRef = createRef<Konva.Layer>();
     // 第一次渲染zIndex失效，issue link https://github.com/konvajs/react-konva/issues/194
   }
 
@@ -108,11 +110,13 @@ class Canvas extends React.Component<{ model: ModelType }> {
     const stage = this.stageRef.current;
     const linesLayer = this.linesLayerRef.current;
     const nodesLayer = this.nodesLayerRef.current;
+    const topLayer = this.topLayerRef.current;
 
     initStage(model, stage);
     initDrag(model, stage, {
       linesLayer,
       nodesLayer,
+      topLayer,
     });
     initScale(model, stage, {
       linesLayer,
@@ -140,7 +144,7 @@ class Canvas extends React.Component<{ model: ModelType }> {
         <FlowContext.Provider value={model}>
           {/* 先注册节点，后注册线，线的一些计算属性需要节点的map */}
           <Nodes nodesLayerRef={this.nodesLayerRef} model={model} />
-          <InteractTop model={model} />
+          <InteractTop topLayerRef={this.topLayerRef} model={model} />
           <Edges linesLayerRef={this.linesLayerRef} model={model} />
         </FlowContext.Provider>
       </Stage>

@@ -139,6 +139,7 @@ export class FlowModel {
   // 选中的cell
   @observable selectCells: string[] = [];
   @action setSelectedCells = (ids: string[], ifReplace = true) => {
+    // @TODO select感觉只能放在私有属性，否则每次更新要diff全部的节点
     if (ifReplace) {
       this.selectCells = ids;
     } else {
