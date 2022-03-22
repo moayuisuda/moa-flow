@@ -20,19 +20,6 @@ class Interactor extends React.Component<InteractorType> {
   static contextType = FlowContext;
   static Port;
 
-  local = {
-    isDragging: false,
-  };
-
-  syncDragPosition = (e) => {
-    const { context } = this;
-
-    context.setCellData(this.props.id, {
-      x: e.currentTarget.attrs.x + e.evt.movementX,
-      y: e.currentTarget.attrs.y + e.evt.movementY,
-    });
-  };
-
   constructor(props) {
     super(props);
   }
@@ -56,10 +43,17 @@ class Interactor extends React.Component<InteractorType> {
         x={x}
         y={y}
         onMouseDown={(e) => {
+          const {
+            buffer: { drag },
+          } = this.context;
+
           if (selectable) {
-            context.setSelectedCells([id]);
             e.cancelBubble = true;
-            context.buffer.isDragging = true;
+            if (!this.context.selectCells.includes(this.props.id))
+              context.setSelectedCells([id]);
+
+            drag.isDragging = true;
+            drag.movedToTop = false;
           }
         }}
         {...others}

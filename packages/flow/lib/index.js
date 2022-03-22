@@ -65,6 +65,16 @@ function __decorate(decorators, target, key, desc) {
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 }
 
+function __spreadArray(to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+}
+
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
 var jsxRuntime = {exports: {}};
@@ -18607,6 +18617,10 @@ var Cell = /** @class */ (function (_super) {
     function Cell(props, context) {
         var _this = _super.call(this, props) || this;
         context.cellsMap.set(props.data.id, _this);
+        _this.flowState = {
+            isSelect: false,
+        };
+        console.log(props.data);
         _this.wrapperRef = React.createRef();
         return _this;
     }
@@ -18623,9 +18637,6 @@ var Cell = /** @class */ (function (_super) {
             curr = curr.__proto__;
         }
         return __assign(__assign({}, lodash.exports.cloneDeep(re)), { component: componentName });
-    };
-    Cell.prototype.isSelected = function () {
-        return this.context.canvasData.cells.includes();
     };
     Cell.prototype.getStage = function (konvaNode) {
         var re = konvaNode;
@@ -18721,26 +18732,19 @@ var Port$1 = /** @class */ (function (_super) {
 var Interactor = /** @class */ (function (_super) {
     __extends(Interactor, _super);
     function Interactor(props) {
-        var _this = _super.call(this, props) || this;
-        _this.local = {
-            isDragging: false,
-        };
-        _this.syncDragPosition = function (e) {
-            var context = _this.context;
-            context.setCellData(_this.props.id, {
-                x: e.currentTarget.attrs.x + e.evt.movementX,
-                y: e.currentTarget.attrs.y + e.evt.movementY,
-            });
-        };
-        return _this;
+        return _super.call(this, props) || this;
     }
     Interactor.prototype.render = function () {
+        var _this = this;
         var _a = this, context = _a.context, _b = _a.props, x = _b.x, y = _b.y; _b.draggable; var id = _b.id; _b.topOnFocus; var _d = _b.selectable, selectable = _d === void 0 ? true : _d, others = __rest(_b, ["x", "y", "draggable", "id", "topOnFocus", "selectable"]);
         return (jsxRuntime.exports.jsx(Group, __assign({ x: x, y: y, onMouseDown: function (e) {
+                var drag = _this.context.buffer.drag;
                 if (selectable) {
-                    context.setSelectedCells([id]);
                     e.cancelBubble = true;
-                    context.buffer.isDragging = true;
+                    if (!_this.context.selectCells.includes(_this.props.id))
+                        context.setSelectedCells([id]);
+                    drag.isDragging = true;
+                    drag.movedToTop = false;
                 }
             } }, others, { children: this.props.children }), void 0));
     };
@@ -18778,7 +18782,7 @@ var Edge = /** @class */ (function (_super) {
         _this.bazier = true;
         _this.dash = false;
         _this.getStroke = function () {
-            var isSelect = _this.context.selectCells.includes(_this.props.data.id);
+            var isSelect = _this.flowState.isSelect;
             var color = _this.context.color;
             if (isSelect) {
                 return {
@@ -18795,7 +18799,6 @@ var Edge = /** @class */ (function (_super) {
     }
     Edge.prototype.getPoints = function () {
         var data = this.props.data;
-        console.log("points");
         var sourceInstance = this.context.cellsMap.get(data.source);
         var targetInstance = this.context.cellsMap.get(data.target);
         var sourceAnchor = sourceInstance.props.anchor && sourceInstance.props.anchor();
@@ -18991,7 +18994,10 @@ var FlowModel = /** @class */ (function () {
             _this.linkEdge = name;
         };
         this.buffer = {
-            isDragging: false,
+            drag: {
+                isDragging: false,
+                movedToTop: false,
+            },
             isSingleSelect: false,
             isWheeling: false,
             select: {
@@ -19028,7 +19034,7 @@ var FlowModel = /** @class */ (function () {
                     var bounds = instance.getClientRect({
                         relativeTo: instance.getStage(instance),
                     });
-                    // judge which nodes interact with 'select rect'
+                    // 判断矩形是否相交
                     if (isRectsInterSect({
                         x: x,
                         y: y,
@@ -19083,6 +19089,7 @@ var FlowModel = /** @class */ (function () {
             cells: [],
         };
         this.clearSelect = function () {
+            console.log("aa");
             _this.selectCells = [];
         };
         this.sendEvent = function (data) {
@@ -19313,7 +19320,7 @@ var MatrixNode = /** @class */ (function (_super) {
     function MatrixNode() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
         _this.getStroke = function () {
-            var isSelect = _this.context.selectCells.includes(_this.props.data.id);
+            var isSelect = _this.flowState.isSelect;
             var color = _this.context.color;
             if (isSelect) {
                 return {
@@ -19372,7 +19379,6 @@ var MatrixNode = /** @class */ (function (_super) {
                                 //   type: "chore",
                                 //   data: `cell [${id}] has been added`,
                                 // });
-                                console.log("haha", _this.context.getLinkNode(_this.props.data.id));
                             } }, void 0)] }, void 0), jsxRuntime.exports.jsx(Rect, __assign({ width: WIDTH, height: FULL_HEIGHT }, getStroke(), { cornerRadius: 10 }), void 0), jsxRuntime.exports.jsxs(Group, __assign({ y: PORTS_OFFSET }, { children: [inPorts.map(function (portData, index) { return (jsxRuntime.exports.jsxs(Group, __assign({ x: 0, y: index * SINGLE_PORT_HEIGHT }, { children: [jsxRuntime.exports.jsx(Port, __assign({ data: portData, anchor: function () { return ({
                                         x: data.x,
                                         y: data.y + PORT_OFFSET + index * SINGLE_PORT_HEIGHT,
@@ -19419,60 +19425,93 @@ var SelectBoundsRect = /** @class */ (function (_super) {
     return SelectBoundsRect;
 }(React.Component));
 
-var initStage = function (model, stage) {
+var STAGE_CLASS_NAME = 'flow-stage';
+
+var initClearState = function (model, stage) {
     stage.on('mousedown', function (e) {
         model.clearSelect();
         model.setHotKey('MouseDown', true);
     });
+};
+var initLink = function (model, stage) {
     stage.on('mouseup', function (e) {
         model.clearLinkBuffer();
         model.setHotKey('MouseDown', false);
     });
+    stage.on('mousemove', function (e) {
+        var link = model.buffer.link;
+        if (!link.source)
+            return;
+        model.setLinkingPosition(e);
+    });
 };
 var initDrag = function (model, stage, layers) {
-    var linesLayer = layers.linesLayer, nodesLayer = layers.nodesLayer;
-    autorun(function () {
-        if (!model.buffer.isWheeling) {
-            // @TODO requestIdleCallbak 分片缓存
-            if (model.hotKey["Space"] && !nodesLayer.isCached()) {
-                linesLayer.cache();
-                nodesLayer.cache();
-                // 对于stage完全不需要调用 getIntersection 检测交互碰撞，因为它就是根组件不需要检测交互碰撞，这里先手动设置监听为false，应该是konva的一个设计失误
-                stage.listening(false);
-            }
-            else {
-                linesLayer.clearCache();
-                nodesLayer.clearCache();
-                stage.listening(true);
-            }
-        }
-    });
+    var linesLayer = layers.linesLayer, nodesLayer = layers.nodesLayer, topLayer = layers.topLayer;
+    // 移动整个stage
     stage.on('mousemove', function (e) {
-        console.log(stage.isListening());
         if (model.hotKey["Space"] && model.hotKey['MouseDown']) {
             model.setStagePosition(e.currentTarget.attrs.x + e.evt.movementX, e.currentTarget.attrs.y + e.evt.movementY);
         }
     });
+    // 空格键的时候触发缓存
+    var stageDom = document.querySelector(".".concat(STAGE_CLASS_NAME));
+    autorun(function () {
+        if (!model.buffer.isWheeling) {
+            // @TODO requestIdleCallbak 分片缓存
+            if (model.hotKey["Space"] && !nodesLayer.isCached()) {
+                stageDom.style.cursor = 'pointer';
+                linesLayer.cache();
+                nodesLayer.cache();
+                /* 对于stage完全不需要调用`getIntersection`检测交互碰撞，因为它就是根组件不需要检测交互碰撞，逻辑上也是
+                这样的，禁用了listening也能触发事件，实际应该就是禁用了hitGraph */
+                stage.listening(false);
+            }
+            else {
+                stageDom.style.cursor = '';
+                linesLayer.clearCache();
+                nodesLayer.clearCache();
+                // listening语义上更倾向于之前的api`hitGraphEnabled`，但stage并不需要hitGraph
+                stage.listening(true);
+            }
+        }
+    });
+    // 移动选择的节点
+    var zIndexCache = {};
+    var drag = model.buffer.drag;
     stage.on('mousemove', function (e) {
-        if (model.buffer.isDragging) {
+        if (drag.isDragging) {
             if (stage.isListening())
                 stage.listening(false);
             model.selectCells.forEach(function (id) {
                 var cellData = model.getCellData(id);
+                var konvaNode = model.getCellInstance(id).wrapperRef.current;
                 if (cellData.type === 'node') {
-                    model.moveTo(cellData.id, model.canvasData.cells.length - 1);
+                    if (!drag.movedToTop) {
+                        zIndexCache[cellData.id] = konvaNode.zIndex();
+                        konvaNode.moveTo(topLayer);
+                    }
                     model.setCellData(cellData.id, {
                         x: cellData.x + e.evt.movementX / model.canvasData.scale.x,
                         y: cellData.y + e.evt.movementY / model.canvasData.scale.y,
                     });
                 }
             });
+            drag.movedToTop = true;
         }
     });
     stage.on('mouseup', function () {
-        if (model.buffer.isDragging) {
+        if (drag.isDragging) {
             stage.listening(true);
-            model.buffer.isDragging = false;
+            model.selectCells.forEach(function (id) {
+                var cellData = model.getCellData(id);
+                var konvaNode = model.getCellInstance(id).wrapperRef.current;
+                if (cellData.type === 'node') {
+                    konvaNode.moveTo(nodesLayer);
+                    konvaNode.zIndex(zIndexCache[cellData.id]);
+                }
+            });
+            drag.movedToTop = false;
+            drag.isDragging = false;
         }
     });
 };
@@ -19519,7 +19558,28 @@ var initScale = function (model, stage, layers) {
         debounceClearCache();
     });
 };
-var initMultiSelect = function (model, stage) {
+var initSelect = function (model, stage, layers) {
+    layers.linesLayer; layers.nodesLayer;
+    // 手动设置select的节点
+    var prevSelectCells = [];
+    autorun(function () {
+        // 上次存在这次不存在的就是需要设置为false的
+        var toFalseCells = lodash.exports.without.apply(void 0, __spreadArray([prevSelectCells], model.selectCells, false));
+        // 这次存在上次不存在的就是需要设置为true的
+        var toTrueCells = lodash.exports.without.apply(void 0, __spreadArray([model.selectCells], prevSelectCells, false));
+        toFalseCells.forEach(function (cellId) {
+            var instance = model.getCellInstance(cellId);
+            instance.flowState.isSelect = false;
+            instance.forceUpdate();
+        });
+        toTrueCells.forEach(function (cellId) {
+            var instance = model.getCellInstance(cellId);
+            instance.flowState.isSelect = true;
+            instance.forceUpdate();
+        });
+        prevSelectCells = model.selectCells.slice();
+    });
+    // 设置多选矩形框起始点
     stage.on('mousedown', function () {
         if (!model.hotKey["Space"]) {
             var pos = stage.getRelativePointerPosition();
@@ -19535,6 +19595,7 @@ var initMultiSelect = function (model, stage) {
             });
         }
     });
+    // 矩形多选框 鼠标up时
     stage.on('mouseup', function () {
         if (model.buffer.select.single)
             return;
@@ -19550,6 +19611,7 @@ var initMultiSelect = function (model, stage) {
             },
         }, true);
     });
+    // 动态设置多选矩形框大小
     stage.on('mousemove', function () {
         if (!model.hotKey["Space"] && model.hotKey["MouseDown"]) {
             var pos = stage.getRelativePointerPosition();
@@ -19560,14 +19622,6 @@ var initMultiSelect = function (model, stage) {
                 },
             });
         }
-    });
-};
-var initLinkingLine = function (model, stage) {
-    stage.on('mousemove', function (e) {
-        var link = model.buffer.link;
-        if (!link.source)
-            return;
-        model.setLinkingPosition(e);
     });
 };
 var initHotKeys = function (model) {
@@ -19609,16 +19663,16 @@ var Nodes = observer(function (props) {
     var nodesData = model.canvasData.cells.filter(function (cellData) {
         return cellData.type !== "edge";
     });
-    return (jsxRuntime.exports.jsx(Layer, __assign({ ref: nodesLayerRef, zIndex: 1 }, { children: nodesData.slice(0, nodesData.length - 1).map(function (cellData) {
+    return (jsxRuntime.exports.jsx(Layer, __assign({ ref: nodesLayerRef, zIndex: 1 }, { children: nodesData.slice(0, nodesData.length).map(function (cellData) {
             return renderComponent(cellData, model);
         }) }), void 0));
 });
 var InteractTop = observer(function (props) {
     var model = props.model, topLayerRef = props.topLayerRef;
-    var nodesData = model.canvasData.cells.filter(function (cellData) {
+    model.canvasData.cells.filter(function (cellData) {
         return cellData.type !== "edge";
     });
-    return (jsxRuntime.exports.jsxs(Layer, __assign({ zIndex: 2, ref: topLayerRef }, { children: [renderComponent(nodesData[nodesData.length - 1], model), jsxRuntime.exports.jsx(LinkingEdge, { data: model.buffer.link }, void 0), jsxRuntime.exports.jsx(SelectBoundsRect, {}, void 0)] }), void 0));
+    return (jsxRuntime.exports.jsxs(Layer, __assign({ zIndex: 2, ref: topLayerRef }, { children: [jsxRuntime.exports.jsx(LinkingEdge, { data: model.buffer.link }, void 0), jsxRuntime.exports.jsx(SelectBoundsRect, {}, void 0)] }), void 0));
 });
 var Edges = observer(function (props) {
     var linesLayerRef = props.linesLayerRef, model = props.model;
@@ -19650,7 +19704,8 @@ var Canvas = /** @class */ (function (_super) {
         var linesLayer = this.linesLayerRef.current;
         var nodesLayer = this.nodesLayerRef.current;
         var topLayer = this.topLayerRef.current;
-        initStage(model, stage);
+        initClearState(model, stage);
+        initLink(model, stage);
         initDrag(model, stage, {
             linesLayer: linesLayer,
             nodesLayer: nodesLayer,
@@ -19660,13 +19715,16 @@ var Canvas = /** @class */ (function (_super) {
             linesLayer: linesLayer,
             nodesLayer: nodesLayer,
         });
-        initMultiSelect(model, stage);
-        initLinkingLine(model, stage);
+        initSelect(model, stage, {
+            linesLayer: linesLayer,
+            nodesLayer: nodesLayer,
+            topLayer: topLayer,
+        });
         initHotKeys(model);
     };
     Canvas.prototype.render = function () {
         var model = this.props.model;
-        return (jsxRuntime.exports.jsx(Stage, __assign({ ref: this.stageRef, scale: model.canvasData.scale, 
+        return (jsxRuntime.exports.jsx(Stage, __assign({ className: STAGE_CLASS_NAME, ref: this.stageRef, scale: model.canvasData.scale, 
             // draggable={model.hotKey["Space"]}
             x: model.canvasData.x, y: model.canvasData.y, width: window.innerWidth, height: window.innerHeight }, { children: jsxRuntime.exports.jsxs(FlowContext.Provider, __assign({ value: model }, { children: [jsxRuntime.exports.jsx(Nodes, { nodesLayerRef: this.nodesLayerRef, model: model }, void 0), jsxRuntime.exports.jsx(InteractTop, { topLayerRef: this.topLayerRef, model: model }, void 0), jsxRuntime.exports.jsx(Edges, { linesLayerRef: this.linesLayerRef, model: model }, void 0)] }), void 0) }), void 0));
     };

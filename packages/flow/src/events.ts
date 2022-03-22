@@ -2,20 +2,33 @@ import Konva from "konva";
 import { Stage } from "konva/lib/Stage";
 import { ModelType } from ".";
 import { extendObservable, autorun } from "mobx"
-import { debounce } from 'lodash'
+import { debounce, without } from 'lodash';
 import { NodeType } from "./cells/Node";
 import { CellType } from './cells/Cell';
+import { STAGE_CLASS_NAME } from "./constants";
 
-export const initStage = (model: ModelType, stage: Konva.Stage) => {
-
+export const initClearState = (model: ModelType, stage: Konva.Stage) => {
     stage.on('mousedown', e => {
         model.clearSelect();
         model.setHotKey('MouseDown', true)
     })
 
+
+}
+
+export const initLink = (model: ModelType, stage: Konva.Stage) => {
     stage.on('mouseup', e => {
         model.clearLinkBuffer();
         model.setHotKey('MouseDown', false)
+    })
+
+    stage.on('mousemove', e => {
+        const {
+            buffer: { link },
+        } = model;
+
+        if (!link.source) return;
+        model.setLinkingPosition(e);
     })
 }
 
@@ -25,26 +38,10 @@ export const initDrag = (model: ModelType, stage: Konva.Stage, layers: {
     topLayer: Konva.Layer
 }
 ) => {
-    const { linesLayer, nodesLayer } = layers
+    const { linesLayer, nodesLayer, topLayer } = layers
 
-    autorun(() => {
-        if (!model.buffer.isWheeling) {
-            // @TODO requestIdleCallbak 分片缓存
-            if (model.hotKey["Space"] && !nodesLayer.isCached()) {
-                linesLayer.cache()
-                nodesLayer.cache()
-                // 对于stage完全不需要调用 getIntersection 检测交互碰撞，因为它就是根组件不需要检测交互碰撞，这里先手动设置监听为false，应该是konva的一个设计失误
-                stage.listening(false)
-            } else {
-                linesLayer.clearCache()
-                nodesLayer.clearCache()
-                stage.listening(true)
-            }
-        }
-    })
-
+    // 移动整个stage
     stage.on('mousemove', e => {
-        console.log(stage.isListening())
         if (model.hotKey["Space"] && model.hotKey['MouseDown']) {
             model.setStagePosition(
                 e.currentTarget.attrs.x + e.evt.movementX,
@@ -53,31 +50,73 @@ export const initDrag = (model: ModelType, stage: Konva.Stage, layers: {
         }
     })
 
+    // 空格键的时候触发缓存
+    const stageDom = document.querySelector(`.${STAGE_CLASS_NAME}`) as HTMLDivElement
+    autorun(() => {
+        if (!model.buffer.isWheeling) {
+            // @TODO requestIdleCallbak 分片缓存
+            if (model.hotKey["Space"] && !nodesLayer.isCached()) {
+                stageDom.style.cursor = 'pointer'
+                linesLayer.cache()
+                nodesLayer.cache()
+
+                /* 对于stage完全不需要调用`getIntersection`检测交互碰撞，因为它就是根组件不需要检测交互碰撞，逻辑上也是
+                这样的，禁用了listening也能触发事件，实际应该就是禁用了hitGraph */
+                stage.listening(false)
+            } else {
+                stageDom.style.cursor = ''
+                linesLayer.clearCache()
+                nodesLayer.clearCache()
+                // listening语义上更倾向于之前的api`hitGraphEnabled`，但stage并不需要hitGraph
+                stage.listening(true)
+
+            }
+        }
+    })
+
+    // 移动选择的节点
+    let zIndexCache = {}
+
+    const { drag } = model.buffer
     stage.on('mousemove', e => {
-        if (model.buffer.isDragging) {
+        if (drag.isDragging) {
             if (stage.isListening()) stage.listening(false);
 
             model.selectCells.forEach(id => {
                 const cellData = model.getCellData(id) as NodeType & CellType
-                if (cellData.type === 'node') {
-                    model.moveTo(
-                        cellData.id,
-                        model.canvasData.cells.length - 1
-                    );
+                const konvaNode = model.getCellInstance(id).wrapperRef.current
 
+                if (cellData.type === 'node') {
+                    if (!drag.movedToTop) {
+                        zIndexCache[cellData.id] = konvaNode.zIndex()
+                        konvaNode.moveTo(topLayer)
+                    }
                     model.setCellData(cellData.id, {
                         x: cellData.x + e.evt.movementX / model.canvasData.scale.x,
                         y: cellData.y + e.evt.movementY / model.canvasData.scale.y,
                     });
                 }
             })
+
+            drag.movedToTop = true
         }
     })
 
     stage.on('mouseup', () => {
-        if (model.buffer.isDragging) {
+        if (drag.isDragging) {
             stage.listening(true)
-            model.buffer.isDragging = false
+            model.selectCells.forEach(id => {
+                const cellData = model.getCellData(id) as NodeType & CellType
+                const konvaNode = model.getCellInstance(id).wrapperRef.current
+
+                if (cellData.type === 'node') {
+                    konvaNode.moveTo(nodesLayer)
+                    konvaNode.zIndex(zIndexCache[cellData.id])
+                }
+            })
+
+            drag.movedToTop = false
+            drag.isDragging = false
         }
     })
 }
@@ -144,7 +183,38 @@ export const initScale = (model: ModelType, stage: Konva.Stage, layers: {
     });
 }
 
-export const initMultiSelect = (model: ModelType, stage: Konva.Stage) => {
+export const initSelect = (model: ModelType, stage: Konva.Stage, layers: {
+    linesLayer: Konva.Layer,
+    nodesLayer: Konva.Layer,
+    topLayer: Konva.Layer
+}) => {
+    const { linesLayer, nodesLayer } = layers
+
+    // 手动设置select的节点
+    let prevSelectCells = []
+    autorun(() => {
+        // 上次存在这次不存在的就是需要设置为false的
+        const toFalseCells = without(prevSelectCells, ...model.selectCells)
+        // 这次存在上次不存在的就是需要设置为true的
+        const toTrueCells = without(model.selectCells, ...prevSelectCells)
+
+        toFalseCells.forEach(cellId => {
+            const instance = model.getCellInstance(cellId)
+            instance.flowState.isSelect = false
+            instance.forceUpdate()
+        })
+
+        toTrueCells.forEach(cellId => {
+            const instance = model.getCellInstance(cellId)
+            instance.flowState.isSelect = true
+            instance.forceUpdate()
+        })
+
+
+        prevSelectCells = model.selectCells.slice();
+    })
+
+    // 设置多选矩形框起始点
     stage.on('mousedown', () => {
         if (!model.hotKey["Space"]) {
             const pos = stage.getRelativePointerPosition();
@@ -161,6 +231,7 @@ export const initMultiSelect = (model: ModelType, stage: Konva.Stage) => {
         }
     })
 
+    // 矩形多选框 鼠标up时
     stage.on('mouseup', () => {
         if (model.buffer.select.single) return
         const pos = stage.getRelativePointerPosition();
@@ -176,6 +247,7 @@ export const initMultiSelect = (model: ModelType, stage: Konva.Stage) => {
         }, true);
     })
 
+    // 动态设置多选矩形框大小
     stage.on('mousemove', () => {
         if (!model.hotKey["Space"] && model.hotKey["MouseDown"]) {
             const pos = stage.getRelativePointerPosition();
@@ -186,17 +258,6 @@ export const initMultiSelect = (model: ModelType, stage: Konva.Stage) => {
                 },
             });
         }
-    })
-}
-
-export const initLinkingLine = (model: ModelType, stage: Konva.Stage) => {
-    stage.on('mousemove', e => {
-        const {
-            buffer: { link },
-        } = model;
-
-        if (!link.source) return;
-        model.setLinkingPosition(e);
     })
 }
 

@@ -12,14 +12,15 @@ import Konva from "konva";
 
 import {
   initDrag,
-  initMultiSelect,
-  initLinkingLine,
-  initStage,
+  initSelect,
+  initClearState,
+  initLink,
   initScale,
   initHotKeys,
 } from "./events";
 import { ModelType } from ".";
 import { useEffect, useState } from "react";
+import { STAGE_CLASS_NAME } from "./constants";
 
 const renderComponent = (cellData, model) => {
   return React.createElement(
@@ -40,7 +41,7 @@ const Nodes = observer((props: { nodesLayerRef; model }) => {
 
   return (
     <Layer ref={nodesLayerRef} zIndex={1}>
-      {nodesData.slice(0, nodesData.length - 1).map((cellData) => {
+      {nodesData.slice(0, nodesData.length).map((cellData) => {
         return renderComponent(cellData, model);
       })}
     </Layer>
@@ -56,7 +57,6 @@ const InteractTop = observer((props: { model; topLayerRef }) => {
 
   return (
     <Layer zIndex={2} ref={topLayerRef}>
-      {renderComponent(nodesData[nodesData.length - 1], model)}
       <LinkingEdge data={model.buffer.link}></LinkingEdge>
       <SelectBoundsRect />
     </Layer>
@@ -112,7 +112,8 @@ class Canvas extends React.Component<{ model: ModelType }> {
     const nodesLayer = this.nodesLayerRef.current;
     const topLayer = this.topLayerRef.current;
 
-    initStage(model, stage);
+    initClearState(model, stage);
+    initLink(model, stage);
     initDrag(model, stage, {
       linesLayer,
       nodesLayer,
@@ -122,8 +123,11 @@ class Canvas extends React.Component<{ model: ModelType }> {
       linesLayer,
       nodesLayer,
     });
-    initMultiSelect(model, stage);
-    initLinkingLine(model, stage);
+    initSelect(model, stage, {
+      linesLayer,
+      nodesLayer,
+      topLayer,
+    });
     initHotKeys(model);
   }
 
@@ -132,6 +136,7 @@ class Canvas extends React.Component<{ model: ModelType }> {
 
     return (
       <Stage
+        className={STAGE_CLASS_NAME}
         ref={this.stageRef}
         scale={model.canvasData.scale}
         // draggable={model.hotKey["Space"]}

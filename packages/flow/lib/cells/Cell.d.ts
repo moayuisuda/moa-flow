@@ -6,6 +6,9 @@ export declare type CellType = {
 declare abstract class Cell<D, S = {}, P = {}> extends React.Component<{
     data: D & CellType;
 } & P, S> {
+    flowState: {
+        isSelect: boolean;
+    };
     static contextType: React.Context<import("../Model").FlowModel>;
     static getBounds: (cellData: any) => {
         x: number;
@@ -19,7 +22,6 @@ declare abstract class Cell<D, S = {}, P = {}> extends React.Component<{
     constructor(props: any, context: any);
     static regist(model: any): void;
     static getMetaData(): any;
-    isSelected(): any;
     getStage(konvaNode: any): any;
     setCellData(data: any): void;
     render(): JSX.Element;

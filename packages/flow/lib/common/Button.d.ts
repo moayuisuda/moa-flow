@@ -1,3 +1,4 @@
+/// <reference types="react" />
 declare type ButtonProps = {
     x?: number;
     y?: number;

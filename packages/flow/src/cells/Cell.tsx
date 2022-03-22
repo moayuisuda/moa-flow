@@ -12,6 +12,9 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
   { data: D & CellType } & P,
   S
 > {
+  flowState: {
+    isSelect: boolean;
+  };
   static contextType = FlowContext;
 
   static getBounds: (cellData) => {
@@ -29,6 +32,10 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
   constructor(props, context) {
     super(props);
     context.cellsMap.set(props.data.id, this);
+    this.flowState = {
+      isSelect: false,
+    };
+    console.log(props.data);
 
     this.wrapperRef = React.createRef();
   }
@@ -52,10 +59,6 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
       ...cloneDeep(re),
       component: componentName,
     };
-  }
-
-  isSelected() {
-    return this.context.canvasData.cells.includes();
   }
 
   getStage(konvaNode) {

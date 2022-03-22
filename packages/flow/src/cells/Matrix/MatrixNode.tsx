@@ -4,7 +4,6 @@ import { Rect, Text, Circle, Group } from "react-konva";
 import Button from "@/common/Button";
 import Interactor from "@/scaffold/Interactor";
 import Node from "../Node";
-import { observer } from "mobx-react";
 import { NodeType } from "../Node";
 const { Port } = Interactor;
 
@@ -80,7 +79,7 @@ class MatrixNode extends Node<MatrixNodeType, {}> {
   }
 
   getStroke = () => {
-    const isSelect = this.context.selectCells.includes(this.props.data.id);
+    const isSelect = this.flowState.isSelect;
     const { color } = this.context;
 
     if (isSelect) {
@@ -159,8 +158,6 @@ class MatrixNode extends Node<MatrixNodeType, {}> {
               //   type: "chore",
               //   data: `cell [${id}] has been added`,
               // });
-
-              console.log("haha", this.context.getLinkNode(this.props.data.id));
             }}
           />
         </Group>

@@ -11,7 +11,10 @@ export declare class FlowModel {
     linkEdge: string;
     setLinkEdge: (name: string) => void;
     buffer: {
-        isDragging: boolean;
+        drag: {
+            isDragging: boolean;
+            movedToTop: boolean;
+        };
         isSingleSelect: boolean;
         isWheeling: boolean;
         select: {

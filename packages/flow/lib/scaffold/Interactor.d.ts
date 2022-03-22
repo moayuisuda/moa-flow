@@ -10,10 +10,6 @@ declare type InteractorType = {
 declare class Interactor extends React.Component<InteractorType> {
     static contextType: React.Context<import("../Model").FlowModel>;
     static Port: any;
-    local: {
-        isDragging: boolean;
-    };
-    syncDragPosition: (e: any) => void;
     constructor(props: any);
     render(): JSX.Element;
 }

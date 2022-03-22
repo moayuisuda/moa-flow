@@ -47,7 +47,10 @@ export class FlowModel {
 
   @observable
   buffer = {
-    isDragging: false,
+    drag: {
+      isDragging: false,
+      movedToTop: false,
+    },
     isSingleSelect: false,
     isWheeling: false,
     select: {
@@ -89,7 +92,7 @@ export class FlowModel {
         const bounds = instance.getClientRect({
           relativeTo: instance.getStage(instance),
         });
-        // judge which nodes interact with 'select rect'
+        // 判断矩形是否相交
         if (
           isRectsInterSect(
             {
@@ -156,6 +159,7 @@ export class FlowModel {
   };
 
   @action clearSelect = () => {
+    console.log("aa");
     this.selectCells = [];
   };
 

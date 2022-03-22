@@ -57,7 +57,7 @@ class Edge<P, S> extends Cell<
   }
 
   private getStroke = () => {
-    const isSelect = this.context.selectCells.includes(this.props.data.id);
+    const isSelect = this.flowState.isSelect;
     const { color } = this.context;
 
     if (isSelect) {
@@ -69,8 +69,6 @@ class Edge<P, S> extends Cell<
 
   protected getPoints() {
     const { data } = this.props;
-
-    console.log("points");
 
     const sourceInstance = this.context.cellsMap.get(data.source);
     const targetInstance = this.context.cellsMap.get(data.target);

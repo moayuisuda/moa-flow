@@ -23,6 +23,7 @@ function App() {
     // 注册自定义节点;
     MyNode.regist(modelRef.current);
     const { addCell } = modelRef.current as ModelType;
+
     addCell("MatrixNode", {
       x: 200,
       y: 500,
