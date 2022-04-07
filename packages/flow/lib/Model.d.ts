@@ -1,24 +1,33 @@
+import React from "react";
 import { CellType } from "@/cells/Cell";
 export declare class FlowModel {
     constructor(eventSender?: any);
     setEventSender: (eventSender: any) => void;
     setCellsDataMap: () => void;
     setCellDataMap: (cellData: any) => void;
+    refs: {
+        stageRef: React.RefObject<import("konva/lib/Stage").Stage>;
+        nodesLayerRef: React.RefObject<import("konva/lib/Layer").Layer>;
+        linesLayerRef: React.RefObject<import("konva/lib/Layer").Layer>;
+    };
     hotKey: {
-        MouseDown: boolean;
+        RightMouseDown: boolean;
+        LeftMouseDown: boolean;
+        Space: boolean;
     };
     setHotKey: (key: any, value: any) => void;
     linkEdge: string;
     setLinkEdge: (name: string) => void;
     buffer: {
+        rightClickPanel: {
+            visible: boolean;
+        };
         drag: {
-            isDragging: boolean;
             movedToTop: boolean;
         };
-        isSingleSelect: boolean;
         isWheeling: boolean;
         select: {
-            single: boolean;
+            isSelecting: boolean;
             start: {
                 x: number;
                 y: number;
@@ -36,7 +45,6 @@ export declare class FlowModel {
             };
         };
     };
-    setisSingleSelect: (isisSingleSelect: boolean) => void;
     setMultiSelect: (select: any, onlySetPosition?: boolean) => void;
     clearLinkBuffer: () => void;
     color: {
@@ -46,6 +54,7 @@ export declare class FlowModel {
         blue: string;
         green: string;
         deepGrey: string;
+        background: string;
     };
     cellsMap: Map<string, any>;
     cellsDataMap: Map<string, CellType>;
@@ -72,7 +81,8 @@ export declare class FlowModel {
     setCanvasData: (canvasData: any) => void;
     setCellId: (data: any) => void;
     setCellData: (id: any, data: any) => void;
-    getLinkNode: (id: any) => any[];
+    getEdges: (id: any) => any[];
+    getLinkNodes: (id: any) => any[];
     deleCell: (id: any) => any;
     deleEdge: (id: any) => void;
     setAutoLayout: (layoutOption: any) => void;

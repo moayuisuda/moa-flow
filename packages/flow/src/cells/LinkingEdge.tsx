@@ -22,7 +22,7 @@ class LinkingEdge extends Edge<{}, {}> {
   content() {
     return (
       <Group listening={false}>
-        {this.props.data.source && this.edgeRender()}
+        {this.props.data.source && this.edgeRender(this.getPoints())}
       </Group>
     );
   }

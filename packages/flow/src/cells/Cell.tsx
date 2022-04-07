@@ -16,7 +16,10 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
     isSelect: boolean;
   };
   static contextType = FlowContext;
+  // vscode 无法推断 this.context 的类型，需要显式声明 this.context 的类型
+  declare context: React.ContextType<typeof FlowContext>;
 
+  // static方法可以这样写abstract方法
   static getBounds: (cellData) => {
     x: number;
     y: number;
@@ -24,6 +27,7 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
     height: number;
   };
 
+  // 非static的abstract只能这样写
   abstract content(): JSX.Element;
   static metaData: any = { id: "" };
 
@@ -35,7 +39,6 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
     this.flowState = {
       isSelect: false,
     };
-    console.log(props.data);
 
     this.wrapperRef = React.createRef();
   }
@@ -72,7 +75,29 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
   }
 
   setCellData(data) {
+    this.context;
     this.context.setCellData(this.props.data.id, data);
+  }
+
+  componentDidMount(): void {
+    [
+      "mouseenter",
+      "mouseleave",
+      "mousedown",
+      "mouseup",
+      "dblclick",
+      "click",
+    ].forEach((eventName) => {
+      this.wrapperRef.current.on(eventName, (e) => {
+        this.context.sendEvent({
+          type: `cell:${eventName}`,
+          data: {
+            e,
+            cellData: this.props.data,
+          },
+        });
+      });
+    });
   }
 
   render() {

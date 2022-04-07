@@ -79,20 +79,13 @@ class MyNode extends Node<MyNodeType, {}> {
               x={WIDTH - 50}
               y={20 + index * 30}
               link={(source: MyPortType, target: MyPortType) => {
-                // const source = portData;
                 const adopt =
                   target.label === "father" || source.label === "father";
                 if (!adopt) message.warn("我只能链接father桩");
+
                 return adopt;
               }}
               data={portData}
-              // // 默认是以包围盒中心为坐标，可以手动传入port锚点的坐标函数
-              // anchor={() => {
-              //   return {
-              //     x: x + 200,
-              //     y: y + 65 + index * 30,
-              //   };
-              // }}
             >
               <Circle
                 stroke={"#0cbb52"}

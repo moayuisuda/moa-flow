@@ -48,15 +48,8 @@ class MatrixCommand {
             }
         } else {
             const nodeData = model.cellsDataMap.get(model.selectCells[0])
-            const edges = []
 
-            if (nodeData.ports) {
-                nodeData.ports.forEach(port => {
-                    edges.push(...model.getPortEdges(port.id))
-                });
-            }
-
-            for (let edge of edges) {
+            for (let edge of model.getEdges(nodeData.id)) {
                 model.deleCell(edge);
             }
 

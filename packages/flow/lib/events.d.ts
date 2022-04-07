@@ -17,4 +17,4 @@ export declare const initSelect: (model: ModelType, stage: Konva.Stage, layers: 
     nodesLayer: Konva.Layer;
     topLayer: Konva.Layer;
 }) => void;
-export declare const initHotKeys: (model: any) => void;
+export declare const initHotKeys: (model: ModelType, stage: Konva.Stage) => void;

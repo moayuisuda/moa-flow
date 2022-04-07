@@ -1,13 +1,14 @@
 import { action, observable, makeObservable } from "mobx";
-// import { v4 } from "uuid";
+import React from "react";
 import { arrayMove, findIndex, isRectsInterSect } from "./utils/util";
 import { CellType } from "@/cells/Cell";
 import { color } from "@/theme/style";
 import { v4 } from "uuid";
-import { union, without } from "lodash";
+import { union, without, merge } from "lodash";
 import { EdgeType } from "./cells/Edge";
 import { PortType } from "@/scaffold/Port";
 import { NodeType } from "./cells/Node";
+import Konva from "konva";
 
 export class FlowModel {
   constructor(eventSender?) {
@@ -32,9 +33,17 @@ export class FlowModel {
     }
   };
 
+  refs = {
+    stageRef: undefined as React.RefObject<Konva.Stage>,
+    nodesLayerRef: undefined as React.RefObject<Konva.Layer>,
+    linesLayerRef: undefined as React.RefObject<Konva.Layer>,
+  };
+
   @observable
   hotKey = {
-    MouseDown: false,
+    RightMouseDown: false,
+    LeftMouseDown: false,
+    Space: false,
   };
   @action setHotKey = (key, value) => {
     this.hotKey[key] = value;
@@ -45,16 +54,18 @@ export class FlowModel {
     this.linkEdge = name;
   };
 
+  // 一些中间状态，比如连线中的开始节点的暂存，不应该让外部
   @observable
   buffer = {
+    rightClickPanel: {
+      visible: false,
+    },
     drag: {
-      isDragging: false,
       movedToTop: false,
     },
-    isSingleSelect: false,
     isWheeling: false,
     select: {
-      single: false,
+      isSelecting: false, // 鼠标按下还没有松开的状态
       start: { x: 0, y: 0 },
       end: { x: 0, y: 0 },
     },
@@ -65,10 +76,6 @@ export class FlowModel {
         y: 0,
       },
     },
-  };
-
-  @action setisSingleSelect = (isisSingleSelect: boolean) => {
-    this.buffer.select.single = isisSingleSelect;
   };
 
   @action setMultiSelect = (select, onlySetPosition = false) => {
@@ -159,7 +166,6 @@ export class FlowModel {
   };
 
   @action clearSelect = () => {
-    console.log("aa");
     this.selectCells = [];
   };
 
@@ -190,12 +196,26 @@ export class FlowModel {
   @action setCellData = (id, data) => {
     const cellData = this.getCellData(id);
 
-    Object.assign(cellData, {
-      ...data,
-    });
+    merge(cellData, data);
   };
 
-  getLinkNode = (id) => {
+  getEdges = (id) => {
+    const re = [];
+    const nodeData = this.getCellData(id) as NodeType;
+    if (nodeData.ports)
+      nodeData.ports.forEach((port: PortType) => {
+        if (port.edges) {
+          port.edges.forEach((edgeId) => {
+            re.push(edgeId);
+          });
+        }
+      });
+
+    return re;
+  };
+
+  // 获取某一个结点连接的其他节点
+  getLinkNodes = (id) => {
     const re = [];
     const nodeData = this.getCellData(id) as NodeType;
     if (nodeData.ports)
@@ -251,7 +271,8 @@ export class FlowModel {
     if (newCellData.ports) {
       newCellData.ports.forEach((port) => {
         port.host = newCellData.id;
-        port.id = v4();
+        port.type = "port";
+        if (!port.id) port.id = v4();
       });
     }
 
@@ -293,7 +314,7 @@ export class FlowModel {
     } else targetCellData.edges = [edgeId];
 
     this.sendEvent({
-      type: "link",
+      type: "linked",
       data: {
         source,
         target,

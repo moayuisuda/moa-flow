@@ -4,5 +4,6 @@ export const color = {
     grey: 'rgb(242, 242, 242)',
     blue: '#0053b8',
     green: '#0cbb52',
-    deepGrey: '#a6a6a6'
+    deepGrey: '#a6a6a6',
+    background: 'rgba(255,255,255,255)'
 }

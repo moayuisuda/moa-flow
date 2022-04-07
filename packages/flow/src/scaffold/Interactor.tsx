@@ -5,6 +5,7 @@ import { observer } from "mobx-react";
 
 import { FlowContext } from "@/Context";
 import Port from "./Port";
+import { EVT_LEFTCLICK } from "@/constants";
 
 type InteractorType = {
   x?: number;
@@ -44,16 +45,17 @@ class Interactor extends React.Component<InteractorType> {
         y={y}
         onMouseDown={(e) => {
           const {
-            buffer: { drag },
+            buffer: { drag, select },
           } = this.context;
 
           if (selectable) {
-            e.cancelBubble = true;
             if (!this.context.selectCells.includes(this.props.id))
               context.setSelectedCells([id]);
 
-            drag.isDragging = true;
-            drag.movedToTop = false;
+            if (e.evt.button === EVT_LEFTCLICK) {
+              select.isSelecting = true;
+              drag.movedToTop = false;
+            }
           }
         }}
         {...others}

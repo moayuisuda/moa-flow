@@ -1,99 +1,24 @@
-import { Rect, Text, Circle, Group } from "react-konva";
-import { Interactor, Node } from "flow";
-import type { PortType } from "flow";
+import { Edge } from "flow";
+import { NodeFlowState } from "flow";
+import { Html } from "react-konva-utils";
+import { NodeType } from "../../../packages/flow/src/cells/Node";
 
-type MyNodeType = {
-  ports?: PortType[];
-  x: number;
-  y: number;
-  label?: string;
-};
+class MyEdge extends Edge {
+  // getStroke = ({ isSelect }: NodeFlowState) => {
+  //   const { color } = this.context;
 
-const WIDTH = 300;
-const HEIGHT = 160;
+  //   if (isSelect) {
+  //     return {
+  //       stroke: "red",
+  //     };
+  //   } else return {};
+  // };
 
-class MyNode extends Node<MyNodeType, {}> {
-  // metaData决定了新增节点时节点的数据，会merge父类的metaData
-  static metaData = {
-    fields: [{}],
-    label: "",
-  };
+  labelFormatter() {
+    const { source, target } = this.getLinkNodesData();
 
-  getStroke = () => {
-    const isSelect = this.context.selectCells.includes(this.props.data.id);
-
-    if (isSelect) {
-      return {
-        stroke: "#0cbb52",
-      };
-    } else return {};
-  };
-
-  // 只有这个方法是必要的，可以理解为包装后的render，基类已经做了observer处理，会自动收集依赖
-  content() {
-    const { getStroke } = this;
-    const { x, y, label } = this.props.data;
-
-    return (
-      // 这个组件提供交互能力，可以手动设置draggable（可拖拽），selectable（可被选择）
-      <Interactor {...this.props.data} topOnFocus>
-        <Rect
-          width={WIDTH}
-          height={HEIGHT}
-          fill="white"
-          shadowColor="black"
-          shadowBlur={10}
-          shadowOpacity={0.1}
-          cornerRadius={10}
-        />
-
-        <Group>
-          <Rect
-            cornerRadius={[10, 10, 0, 0]}
-            width={WIDTH}
-            height={40}
-            fill="rgb(255, 108, 55)"
-          />
-          <Text
-            fontSize={14}
-            text={this.props.data.id}
-            height={40}
-            x={20}
-            verticalAlign="middle"
-          ></Text>
-        </Group>
-
-        {/* // border */}
-        <Rect
-          width={WIDTH}
-          height={HEIGHT}
-          {...getStroke()}
-          cornerRadius={10}
-        />
-
-        <Group y={40}>
-          {this.props.data.ports?.map((portData, index) => (
-            // 提供port能力，需要手动传入port的坐标函数
-            <Interactor.Port
-              key={index}
-              x={WIDTH - 50}
-              y={20 + index * 30}
-              linkable={true}
-              data={portData}
-            >
-              <Circle
-                stroke={"#0cbb52"}
-                fill="white"
-                y={6}
-                x={50}
-                radius={10}
-              ></Circle>
-            </Interactor.Port>
-          ))}
-        </Group>
-      </Interactor>
-    );
+    return source.x + target.y;
   }
 }
 
-export default MyNode;
+export default MyEdge;

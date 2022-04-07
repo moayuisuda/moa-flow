@@ -20,6 +20,7 @@ class Port extends Cell<
 > {
   wrapperRef: React.RefObject<any>;
   static metaData = {
+    type: "port",
     source: undefined,
     target: undefined,
   };
@@ -57,6 +58,13 @@ class Port extends Cell<
       },
     } = this;
 
+    this.context.sendEvent({
+      type: "beforeLink",
+      data: {
+        source: this.props.data.id,
+      },
+    });
+
     link.source = this.props.data.id;
     link.target = this.anchor();
   }
@@ -86,7 +94,8 @@ class Port extends Cell<
         else adoptSource = false;
       }
       if (this.props.link) {
-        if (this.props.link(sourceData, this.props.data)) adoptTarget = true;
+        if (this.props.link(sourceData as PortType, this.props.data))
+          adoptTarget = true;
         else adoptTarget = false;
       }
 

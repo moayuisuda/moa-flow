@@ -4,3 +4,7 @@ export type FieldType = {
     label: string,
     ports: PortType[]
 }
+
+export type NodeFlowState = {
+    isSelect: boolean
+}

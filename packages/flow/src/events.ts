@@ -1,25 +1,25 @@
 import Konva from "konva";
 import { Stage } from "konva/lib/Stage";
 import { ModelType } from ".";
-import { extendObservable, autorun } from "mobx"
+import { autorun } from "mobx"
 import { debounce, without } from 'lodash';
 import { NodeType } from "./cells/Node";
 import { CellType } from './cells/Cell';
-import { STAGE_CLASS_NAME } from "./constants";
+import { STAGE_CLASS_NAME, EVT_LEFTCLICK, EVT_RIGHTCLICK } from './constants';
 
 export const initClearState = (model: ModelType, stage: Konva.Stage) => {
-    stage.on('mousedown', e => {
-        model.clearSelect();
-        model.setHotKey('MouseDown', true)
+    stage.on('mousedown', (e) => {
+        if (e.evt.button === EVT_LEFTCLICK) {
+            model.buffer.rightClickPanel.visible = false
+        }
+        if (!model.buffer.select.isSelecting && e.evt.button === EVT_LEFTCLICK)
+            model.clearSelect();
     })
-
-
 }
 
 export const initLink = (model: ModelType, stage: Konva.Stage) => {
-    stage.on('mouseup', e => {
+    stage.on('mouseup', () => {
         model.clearLinkBuffer();
-        model.setHotKey('MouseDown', false)
     })
 
     stage.on('mousemove', e => {
@@ -42,7 +42,7 @@ export const initDrag = (model: ModelType, stage: Konva.Stage, layers: {
 
     // 移动整个stage
     stage.on('mousemove', e => {
-        if (model.hotKey["Space"] && model.hotKey['MouseDown']) {
+        if (model.hotKey["Space"] && model.hotKey['LeftMouseDown']) {
             model.setStagePosition(
                 e.currentTarget.attrs.x + e.evt.movementX,
                 e.currentTarget.attrs.y + e.evt.movementY
@@ -75,11 +75,12 @@ export const initDrag = (model: ModelType, stage: Konva.Stage, layers: {
     })
 
     // 移动选择的节点
-    let zIndexCache = {}
 
-    const { drag } = model.buffer
+    // 暂存节点原本的zIndex，方便还原到原本的layer
+    let zIndexCache = {}
+    const { drag, select } = model.buffer
     stage.on('mousemove', e => {
-        if (drag.isDragging) {
+        if (select.isSelecting) {
             if (stage.isListening()) stage.listening(false);
 
             model.selectCells.forEach(id => {
@@ -91,9 +92,11 @@ export const initDrag = (model: ModelType, stage: Konva.Stage, layers: {
                         zIndexCache[cellData.id] = konvaNode.zIndex()
                         konvaNode.moveTo(topLayer)
                     }
+
+                    const t = konvaNode.getAbsoluteTransform();
                     model.setCellData(cellData.id, {
-                        x: cellData.x + e.evt.movementX / model.canvasData.scale.x,
-                        y: cellData.y + e.evt.movementY / model.canvasData.scale.y,
+                        x: cellData.x + e.evt.movementX,
+                        y: cellData.y + e.evt.movementY,
                     });
                 }
             })
@@ -103,7 +106,7 @@ export const initDrag = (model: ModelType, stage: Konva.Stage, layers: {
     })
 
     stage.on('mouseup', () => {
-        if (drag.isDragging) {
+        if (select.isSelecting) {
             stage.listening(true)
             model.selectCells.forEach(id => {
                 const cellData = model.getCellData(id) as NodeType & CellType
@@ -116,12 +119,12 @@ export const initDrag = (model: ModelType, stage: Konva.Stage, layers: {
             })
 
             drag.movedToTop = false
-            drag.isDragging = false
+            select.isSelecting = false
         }
     })
 }
 
-
+const MIN_CACHE_LENGTH = 50
 export const initScale = (model: ModelType, stage: Konva.Stage, layers: {
     linesLayer: Konva.Layer,
     nodesLayer: Konva.Layer
@@ -190,7 +193,7 @@ export const initSelect = (model: ModelType, stage: Konva.Stage, layers: {
 }) => {
     const { linesLayer, nodesLayer } = layers
 
-    // 手动设置select的节点
+    // 非受控设置select的节点
     let prevSelectCells = []
     autorun(() => {
         // 上次存在这次不存在的就是需要设置为false的
@@ -215,8 +218,9 @@ export const initSelect = (model: ModelType, stage: Konva.Stage, layers: {
     })
 
     // 设置多选矩形框起始点
-    stage.on('mousedown', () => {
-        if (!model.hotKey["Space"]) {
+    stage.on('mousedown', (e) => {
+        if (model.buffer.select.isSelecting) return
+        if (!model.hotKey["Space"] && e.evt.button === EVT_LEFTCLICK) {
             const pos = stage.getRelativePointerPosition();
             model.setMultiSelect({
                 start: {
@@ -233,7 +237,7 @@ export const initSelect = (model: ModelType, stage: Konva.Stage, layers: {
 
     // 矩形多选框 鼠标up时
     stage.on('mouseup', () => {
-        if (model.buffer.select.single) return
+        if (model.buffer.select.isSelecting) return
         const pos = stage.getRelativePointerPosition();
         model.setMultiSelect({
             start: {
@@ -249,7 +253,8 @@ export const initSelect = (model: ModelType, stage: Konva.Stage, layers: {
 
     // 动态设置多选矩形框大小
     stage.on('mousemove', () => {
-        if (!model.hotKey["Space"] && model.hotKey["MouseDown"]) {
+        if (model.buffer.select.isSelecting) return
+        if (!model.hotKey["Space"] && model.hotKey["LeftMouseDown"]) {
             const pos = stage.getRelativePointerPosition();
             model.setMultiSelect({
                 end: {
@@ -261,28 +266,29 @@ export const initSelect = (model: ModelType, stage: Konva.Stage, layers: {
     })
 }
 
-export const initHotKeys = (model) => {
-    const { hotKey } = model
+export const initHotKeys = (model: ModelType, stage: Konva.Stage) => {
+    stage.on('mousedown', e => {
+        e.evt.preventDefault()
+
+        switch (e.evt.button) {
+            case EVT_LEFTCLICK: model.setHotKey('LeftMouseDown', true); break;
+            case EVT_RIGHTCLICK: model.setHotKey('RightMouseDown', true)
+        }
+    })
+
+    stage.on('mouseup', e => {
+        switch (e.evt.button) {
+            case EVT_LEFTCLICK: model.setHotKey('LeftMouseDown', false)
+        }
+    })
 
     window.addEventListener('keydown', e => {
         e.preventDefault()
-        if (e.code in hotKey) {
-            model.setHotKey(e.code, true)
-        } else {
-            extendObservable(hotKey, {
-                [e.code]: true
-            })
-        }
+        model.setHotKey(e.code, true)
     })
 
     window.addEventListener('keyup', e => {
         e.preventDefault()
-        if (e.code in hotKey) {
-            model.setHotKey(e.code, false)
-        } else {
-            extendObservable(hotKey, {
-                [e.code]: false
-            })
-        }
+        model.setHotKey(e.code, false)
     })
 }

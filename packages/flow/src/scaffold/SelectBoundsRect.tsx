@@ -15,7 +15,7 @@ class SelectBoundsRect extends React.Component<{}, {}> {
 
     return (
       <>
-        {!hotKey["Space"] && hotKey["MouseDown"] && (
+        {!hotKey["Space"] && hotKey["LeftMouseDown"] && (
           <Rect
             x={Math.min(select.start.x, select.end.x)}
             y={Math.min(select.start.y, select.end.y)}

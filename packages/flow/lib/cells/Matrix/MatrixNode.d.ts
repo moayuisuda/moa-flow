@@ -26,7 +26,7 @@ declare class MatrixNode extends Node<MatrixNodeType, {}> {
         y: any;
     };
     getStroke: () => {
-        stroke: any;
+        stroke: string;
     } | {
         stroke?: undefined;
     };

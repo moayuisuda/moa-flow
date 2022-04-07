@@ -90,7 +90,7 @@ class MatrixNode extends Node<MatrixNodeType, {}> {
   };
 
   content() {
-    const { color = {} } = this.context;
+    const { color } = this.context;
     const { getStroke } = this;
     const { label, ports } = this.props.data;
 

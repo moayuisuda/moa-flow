@@ -21,6 +21,7 @@ import {
 import { ModelType } from ".";
 import { useEffect, useState } from "react";
 import { STAGE_CLASS_NAME } from "./constants";
+import { getRightClickPanel } from "./components/RightClickPanel/index";
 
 const renderComponent = (cellData, model) => {
   return React.createElement(
@@ -97,9 +98,10 @@ class Canvas extends React.Component<{ model: ModelType }> {
     // 完全受控，https://github.com/konvajs/react-konva/blob/master/README.md#strict-mode
     useStrictMode(true);
 
-    this.stageRef = createRef<Konva.Stage>();
-    this.nodesLayerRef = createRef<Konva.Layer>();
-    this.linesLayerRef = createRef<Konva.Layer>();
+    const { refs } = this.props.model;
+    this.stageRef = refs.stageRef = createRef<Konva.Stage>();
+    this.nodesLayerRef = refs.nodesLayerRef = createRef<Konva.Layer>();
+    this.linesLayerRef = refs.linesLayerRef = createRef<Konva.Layer>();
     this.topLayerRef = createRef<Konva.Layer>();
     // 第一次渲染zIndex失效，issue link https://github.com/konvajs/react-konva/issues/194
   }
@@ -128,7 +130,7 @@ class Canvas extends React.Component<{ model: ModelType }> {
       nodesLayer,
       topLayer,
     });
-    initHotKeys(model);
+    initHotKeys(model, stage);
   }
 
   render() {
@@ -139,7 +141,6 @@ class Canvas extends React.Component<{ model: ModelType }> {
         className={STAGE_CLASS_NAME}
         ref={this.stageRef}
         scale={model.canvasData.scale}
-        // draggable={model.hotKey["Space"]}
         x={model.canvasData.x}
         y={model.canvasData.y}
         width={window.innerWidth}
@@ -183,7 +184,18 @@ class Flow extends React.Component<FlowProps, {}> {
 
   render() {
     const { flowModel: model } = this;
-    return <Canvas model={model} />;
+    return (
+      <div
+        style={{
+          position: "relative",
+        }}
+      >
+        <FlowContext.Provider value={model}>
+          {getRightClickPanel(this.props.children)}
+          <Canvas model={model} />
+        </FlowContext.Provider>
+      </div>
+    );
   }
 }
 

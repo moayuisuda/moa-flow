@@ -1,4 +1,5 @@
 import React from "react";
+import { FlowContext } from "../Context";
 export declare type CellType = {
     id: string;
     type: string;
@@ -10,6 +11,7 @@ declare abstract class Cell<D, S = {}, P = {}> extends React.Component<{
         isSelect: boolean;
     };
     static contextType: React.Context<import("../Model").FlowModel>;
+    context: React.ContextType<typeof FlowContext>;
     static getBounds: (cellData: any) => {
         x: number;
         y: number;
@@ -24,6 +26,7 @@ declare abstract class Cell<D, S = {}, P = {}> extends React.Component<{
     static getMetaData(): any;
     getStage(konvaNode: any): any;
     setCellData(data: any): void;
+    componentDidMount(): void;
     render(): JSX.Element;
 }
 declare const _default: typeof Cell;

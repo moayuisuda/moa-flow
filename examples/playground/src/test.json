@@ -12,21 +12,10 @@
       "data": {},
       "ports": [
         {
-          "label": "name",
-          "id": "port-4",
-          "portType": "in",
-          "host": "2"
-        },
-        {
+          "type": "port",
           "label": "age",
           "id": "port-5",
           "portType": "in",
-          "host": "2"
-        },
-        {
-          "label": "father",
-          "id": "port-6",
-          "portType": "out",
           "host": "2"
         }
       ],

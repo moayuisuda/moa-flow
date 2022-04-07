@@ -1,15 +1,21 @@
 import Cell from "./Cell";
-import { Line, Group } from "react-konva";
+import { Line, Group, Label, Text, Tag } from "react-konva";
 import Interactor from "../scaffold/Interactor";
-import { observer } from "mobx-react";
 import { CellType } from "./Cell";
+import { NodeFlowState } from "@/types/common";
+import { PortType } from "../scaffold/Port";
+import React from "react";
+import Konva from "konva";
+import { NodeType } from "./Node";
 
 export type EdgeType = {
   source: string;
   target: string;
+  label: string;
 } & CellType;
-
-class Edge<P, S> extends Cell<
+const TEXT_HEIGHT = 16;
+const LABEL_PADDING = 4;
+abstract class Edge<P = {}, S = {}> extends Cell<
   EdgeType & P,
   {
     points: number[];
@@ -18,7 +24,9 @@ class Edge<P, S> extends Cell<
   static metaData: any = {
     type: "edge",
   };
+  labelRef: React.RefObject<Konva.Group>;
 
+  // // 先不管线条的bounds
   // static getBounds(cellData) {
   //   const sourceInstance = flowModel.cellsMap.get(cellData.source);
   //   const targetInstance = flowModel.cellsMap.get(cellData.target);
@@ -48,6 +56,7 @@ class Edge<P, S> extends Cell<
 
   constructor(props, context) {
     super(props, context);
+    this.labelRef = React.createRef();
 
     this.state = {
       points: [],
@@ -56,8 +65,8 @@ class Edge<P, S> extends Cell<
     } & S;
   }
 
-  private getStroke = () => {
-    const isSelect = this.flowState.isSelect;
+  protected getStroke = (flowState: NodeFlowState) => {
+    const { isSelect } = flowState;
     const { color } = this.context;
 
     if (isSelect) {
@@ -67,25 +76,36 @@ class Edge<P, S> extends Cell<
     } else return {};
   };
 
-  protected getPoints() {
+  private getAnchors = () => {
     const { data } = this.props;
-
     const sourceInstance = this.context.cellsMap.get(data.source);
     const targetInstance = this.context.cellsMap.get(data.target);
 
-    const sourceAnchor =
-      sourceInstance.props.anchor && sourceInstance.props.anchor();
-    // || sourceInstance.anchor();
+    return {
+      source: sourceInstance.props.anchor && sourceInstance.props.anchor(),
+      target: targetInstance.props.anchor && targetInstance.props.anchor(),
+    };
+  };
 
-    const targetAnchor =
-      targetInstance.props.anchor && targetInstance.props.anchor();
-    // || targetInstance.anchor();
+  protected getPoints() {
+    const anchors = this.getAnchors();
 
-    return this.route(sourceAnchor, targetAnchor);
+    return this.route(anchors.source, anchors.target);
+  }
+
+  getLinkNodesData() {
+    const { data } = this.props;
+    const sourcePort = this.context.cellsDataMap.get(data.source) as PortType;
+    const targetPort = this.context.cellsDataMap.get(data.target) as PortType;
+
+    return {
+      source: this.context.cellsDataMap.get(sourcePort.host) as NodeType,
+      target: this.context.cellsDataMap.get(targetPort.host) as NodeType,
+    };
   }
 
   // 这个方法暴露出去，可自定义路由
-  route(sourceAnchor, targetAnchor) {
+  protected route(sourceAnchor, targetAnchor) {
     const MIDDLE = (sourceAnchor.x + targetAnchor.x) / 2;
 
     return [
@@ -103,9 +123,80 @@ class Edge<P, S> extends Cell<
     ];
   }
 
-  protected edgeRender() {
+  labelContent() {
+    const {
+      color,
+      refs: { linesLayerRef },
+    } = this.context;
+
+    const text = this.labelFormatter(this.props.data.label);
+    const textWidth = linesLayerRef.current
+      .getContext()
+      .measureText(text).width;
+
+    return (
+      <Label
+        x={-textWidth / 2 - LABEL_PADDING}
+        y={-TEXT_HEIGHT / 2}
+        onClick={(e) => {
+          this.context.sendEvent({
+            type: "label:click",
+            data: this,
+          });
+        }}
+      >
+        <Tag fill={color.background} />
+        <Text
+          height={TEXT_HEIGHT}
+          verticalAlign="middle"
+          text={this.labelFormatter(this.props.data.label)}
+          padding={LABEL_PADDING}
+        />
+      </Label>
+    );
+  }
+
+  protected labelRender(anchors) {
+    const text = this.labelFormatter(this.props.data.label);
+
+    return (
+      <Group
+        ref={(label) => {
+          if (!label) return;
+
+          [
+            "mouseenter",
+            "mouseleave",
+            "mousedown",
+            "mouseup",
+            "dblclick",
+            "click",
+          ].forEach((eventName) => {
+            label.on(eventName, (e) => {
+              this.context.sendEvent({
+                type: `label:${eventName}`,
+                data: {
+                  e,
+                  cellData: this.props.data,
+                },
+              });
+            });
+          });
+        }}
+        x={(anchors.source.x + anchors.target.x) / 2}
+        y={(anchors.source.y + anchors.target.y) / 2}
+      >
+        {text && this.labelContent()}
+      </Group>
+    );
+  }
+
+  labelFormatter(label) {
+    return label;
+  }
+
+  protected edgeRender(points) {
     const { color } = this.context;
-    const points = this.getPoints();
 
     return (
       <Group>
@@ -113,7 +204,7 @@ class Edge<P, S> extends Cell<
           stroke={color.deepGrey}
           points={points}
           strokeWidth={3}
-          {...this.getStroke()}
+          {...this.getStroke(this.flowState)}
           lineCap="round"
           bezier={this.bazier}
           dash={this.dash ? [10, 10] : undefined}
@@ -132,7 +223,8 @@ class Edge<P, S> extends Cell<
   content() {
     return (
       <Interactor id={this.props.data.id} draggable={false}>
-        {this.edgeRender()}
+        {this.edgeRender(this.getPoints())}
+        {this.labelRender(this.getAnchors())}
       </Interactor>
     );
   }

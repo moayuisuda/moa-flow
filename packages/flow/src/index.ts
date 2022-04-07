@@ -8,9 +8,11 @@ import Interactor from './scaffold/Interactor'
 import Port from "./scaffold/Port";
 import { PortType } from "./scaffold/Port";
 import Model from "./Model";
+import RightClickPanel from './components/RightClickPanel/index';
 
 import ReactDOM from 'react-dom';
 import React from "react";
+import { NodeFlowState } from '@/types/common';
 
 type ModelType = Model
 
@@ -29,7 +31,12 @@ export {
     Node,
     Edge,
     Interactor,
+    RightClickPanel,
 };
+
+export type {
+    NodeFlowState
+}
 
 
 export type { PortType, ModelType };

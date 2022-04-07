@@ -5,4 +5,5 @@ export declare const color: {
     blue: string;
     green: string;
     deepGrey: string;
+    background: string;
 };

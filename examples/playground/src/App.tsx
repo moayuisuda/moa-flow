@@ -1,4 +1,4 @@
-import { Flow, mountFlow } from "flow";
+import { Flow, RightClickPanel } from "flow";
 import type { ModelType } from "flow";
 
 import { useEffect, useRef } from "react";
@@ -7,7 +7,8 @@ import MyNode from "./MyNode";
 import Controller from "./Controller";
 
 import "antd/dist/antd.css";
-import { message } from "antd";
+import { message, Button } from "antd";
+import MyEdge from "./MyEdge";
 
 const randomIn = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -22,29 +23,32 @@ function App() {
   useEffect(() => {
     // 注册自定义节点;
     MyNode.regist(modelRef.current);
-    const { addCell } = modelRef.current as ModelType;
+    MyEdge.regist(modelRef.current);
+    const model = modelRef.current as ModelType;
+    // model.setLinkEdge("MyEdge");
 
-    addCell("MatrixNode", {
+    model.addCell("MatrixNode", {
       x: 200,
       y: 500,
       ports: [
+        //   {
+        //     label: "name-in",
+        //     portType: "in",
+        //   },
+        //   {
+        //     label: "name",
+        //     portType: "out",
+        //   },
+        //   {
+        //     label: "age",
+        //     portType: "out",
+        //   },
+        //   {
+        //     label: "father",
+        //     portType: "control-out",
+        //   },
         {
-          label: "name-in",
-          portType: "in",
-        },
-        {
-          label: "name",
-          portType: "out",
-        },
-        {
-          label: "age",
-          portType: "out",
-        },
-        {
-          label: "father",
-          portType: "control-out",
-        },
-        {
+          id: "out-test",
           label: "grandfa",
           portType: "control-out",
         },
@@ -52,31 +56,26 @@ function App() {
       label: "NODE 1 Matrix",
     });
 
-    addCell("MatrixNode", {
-      label: "NODE 2 Matrix",
-      x: 550,
-      y: 800,
-      ports: [
-        {
-          label: "father",
-          portType: "control-in",
-        },
-      ],
+    model.addCell("MyEdge", {
+      label: "im edge",
+      target: "port-5",
+      source: "out-test",
     });
 
-    for (let i = 0; i < 200; i++) {
-      addCell("MatrixNode", {
-        x: randomIn(0, 3000),
-        y: randomIn(0, 3000),
-        label: `${1} ${Math.random()}`,
-        ports: [
-          {
-            label: "haha",
-            portType: "out",
-          },
-        ],
-      });
-    }
+    // for (let i = 0; i < 200; i++) {
+    //   model.addCell("MatrixNode", {
+    //     x: randomIn(0, 3000),
+    //     y: randomIn(0, 3000),
+    //     label: `${1} ${Math.random()}`,
+    //     ports: [
+    //       {
+    //         label: "haha",
+    //         portType: "out",
+    //       },
+    //     ],
+    //   });
+    // }
+
     // //------------------- 非react组件引用 ------------------
     // const { modelRef } = mountFlow(document.querySelector(".App") as Element, {
     //   canvasData: {
@@ -129,12 +128,25 @@ function App() {
         //   ],
         // }}
         onEvent={(e) => {
-          message.info(`[${e.type}] ${JSON.stringify(e.data)}`);
+          message.info(`[${e.type}]}`);
         }}
-      ></Flow>
-
+      >
+        <RightClickPanel
+          extra={(model: ModelType) => {
+            return (
+              <Button
+                onClick={() => {
+                  console.log({ model });
+                }}
+              >
+                自定义按钮
+              </Button>
+            );
+          }}
+        />
+      </Flow>
       {/* 同Flow一样Controller也可封装ReactDOM.render */}
-      <Controller modelRef={modelRef}></Controller>
+      {/* <Controller modelRef={modelRef}></Controller> */}
     </div>
   );
 }

@@ -18,6 +18,7 @@ declare class Port extends Cell<PortType, {}, {
 }> {
     wrapperRef: React.RefObject<any>;
     static metaData: {
+        type: string;
         source: any;
         target: any;
     };
