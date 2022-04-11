@@ -7,13 +7,13 @@ import Node from "../Node";
 import { NodeType } from "../Node";
 const { Port } = Interactor;
 
-type MatrixPortType = PortType & {
+type CommonPortType = PortType & {
   label: string;
   portType: "in" | "out" | "control-out" | "control-in";
 };
 
-type MatrixNodeType = {
-  ports?: MatrixPortType[];
+type CommonNodeType = {
+  ports?: CommonPortType[];
   fields?: FieldType[];
   x?: number;
   y?: number;
@@ -34,7 +34,7 @@ const PORT_OFFSET = PORTS_OFFSET + SINGLE_PORT_HEIGHT / 2;
 const PORT_GRAPHIC_OFFSET =
   PORT_RADIUS + (SINGLE_PORT_HEIGHT - PORT_RADIUS * 2) / 2;
 
-class MatrixNode extends Node<MatrixNodeType, {}> {
+class CommonNode extends Node<CommonNodeType, {}> {
   static metaData = {
     fields: [{}],
     label: "",
@@ -106,7 +106,7 @@ class MatrixNode extends Node<MatrixNodeType, {}> {
       (portData) => portData.portType === "control-in"
     );
 
-    const FULL_HEIGHT = MatrixNode.getBounds(this.props.data).height;
+    const FULL_HEIGHT = CommonNode.getBounds(this.props.data).height;
 
     const { data } = this.props;
 
@@ -142,7 +142,7 @@ class MatrixNode extends Node<MatrixNodeType, {}> {
             height={HEADER_HEIGHT}
             text="＋"
             onClick={(e) => {
-              const id = this.context.addCell("MatrixNode", {
+              const id = this.context.addCell("CommonNode", {
                 x: this.props.data.x + 300,
                 y: this.props.data.y,
                 label: "new node",
@@ -300,4 +300,4 @@ class MatrixNode extends Node<MatrixNodeType, {}> {
   }
 }
 
-export default MatrixNode;
+export default CommonNode;

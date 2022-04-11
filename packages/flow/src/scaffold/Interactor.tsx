@@ -19,6 +19,8 @@ type InteractorType = {
 @observer
 class Interactor extends React.Component<InteractorType> {
   static contextType = FlowContext;
+  declare context: React.ContextType<typeof FlowContext>;
+
   static Port;
 
   constructor(props) {
@@ -45,15 +47,21 @@ class Interactor extends React.Component<InteractorType> {
         y={y}
         onMouseDown={(e) => {
           const {
-            buffer: { drag, select },
+            selectCells,
+            buffer: { select, drag },
           } = this.context;
 
           if (selectable) {
-            if (!this.context.selectCells.includes(this.props.id))
+            if (!selectCells.includes(this.props.id))
               context.setSelectedCells([id]);
 
+            // drag
             if (e.evt.button === EVT_LEFTCLICK) {
               select.isSelecting = true;
+
+              drag.start.x = e.evt.x;
+              drag.start.y = e.evt.y;
+
               drag.movedToTop = false;
             }
           }

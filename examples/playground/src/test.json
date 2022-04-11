@@ -1,12 +1,12 @@
 {
-  "scale": { "x": 0.8, "y": 0.8 },
+  "scale": { "x": 1, "y": 1 },
   "x": 0,
   "y": 0,
   "cells": [
     {
       "id": "2",
       "type": "node",
-      "component": "MatrixNode",
+      "component": "CommonNode",
       "x": 800,
       "y": 200,
       "data": {},
@@ -15,6 +15,13 @@
           "type": "port",
           "label": "age",
           "id": "port-5",
+          "portType": "in",
+          "host": "2"
+        },
+        {
+          "type": "port",
+          "label": "father",
+          "id": "port-6",
           "portType": "in",
           "host": "2"
         }

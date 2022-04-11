@@ -61,6 +61,14 @@ export class FlowModel {
       visible: false,
     },
     drag: {
+      movement: {
+        x: 0,
+        y: 0,
+      },
+      start: {
+        x: 0,
+        y: 0,
+      },
       movedToTop: false,
     },
     isWheeling: false,

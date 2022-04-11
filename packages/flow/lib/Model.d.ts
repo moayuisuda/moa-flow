@@ -23,6 +23,14 @@ export declare class FlowModel {
             visible: boolean;
         };
         drag: {
+            movement: {
+                x: number;
+                y: number;
+            };
+            start: {
+                x: number;
+                y: number;
+            };
             movedToTop: boolean;
         };
         isWheeling: boolean;

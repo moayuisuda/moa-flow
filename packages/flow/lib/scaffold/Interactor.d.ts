@@ -1,4 +1,5 @@
 import React from "react";
+import { FlowContext } from "@/Context";
 declare type InteractorType = {
     x?: number;
     y?: number;
@@ -9,6 +10,7 @@ declare type InteractorType = {
 };
 declare class Interactor extends React.Component<InteractorType> {
     static contextType: React.Context<import("../Model").FlowModel>;
+    context: React.ContextType<typeof FlowContext>;
     static Port: any;
     constructor(props: any);
     render(): JSX.Element;

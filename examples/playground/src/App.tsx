@@ -25,35 +25,19 @@ function App() {
     MyNode.regist(modelRef.current);
     MyEdge.regist(modelRef.current);
     const model = modelRef.current as ModelType;
-    // model.setLinkEdge("MyEdge");
+    model.setLinkEdge("MyEdge");
 
-    model.addCell("MatrixNode", {
+    model.addCell("CommonNode", {
       x: 200,
       y: 500,
       ports: [
-        //   {
-        //     label: "name-in",
-        //     portType: "in",
-        //   },
-        //   {
-        //     label: "name",
-        //     portType: "out",
-        //   },
-        //   {
-        //     label: "age",
-        //     portType: "out",
-        //   },
-        //   {
-        //     label: "father",
-        //     portType: "control-out",
-        //   },
         {
           id: "out-test",
           label: "grandfa",
           portType: "control-out",
         },
       ],
-      label: "NODE 1 Matrix",
+      label: "NODE 1 Common",
     });
 
     model.addCell("MyEdge", {
@@ -62,19 +46,30 @@ function App() {
       source: "out-test",
     });
 
-    // for (let i = 0; i < 200; i++) {
-    //   model.addCell("MatrixNode", {
-    //     x: randomIn(0, 3000),
-    //     y: randomIn(0, 3000),
-    //     label: `${1} ${Math.random()}`,
-    //     ports: [
-    //       {
-    //         label: "haha",
-    //         portType: "out",
-    //       },
-    //     ],
-    //   });
-    // }
+    model.addCell("MyNode", {
+      x: 0,
+      y: 0,
+      ports: [
+        {
+          label: "grandfa",
+          portType: "control-out",
+        },
+      ],
+    });
+
+    for (let i = 0; i < 200; i++) {
+      model.addCell("CommonNode", {
+        x: randomIn(0, 3000),
+        y: randomIn(0, 3000),
+        label: `${1} ${Math.random()}`,
+        ports: [
+          {
+            label: "haha",
+            portType: "out",
+          },
+        ],
+      });
+    }
 
     // //------------------- 非react组件引用 ------------------
     // const { modelRef } = mountFlow(document.querySelector(".App") as Element, {
@@ -111,24 +106,8 @@ function App() {
       <Flow
         modelRef={modelRef}
         canvasData={testData}
-        // canvasData={{
-        //   scale: [0.5, 0.5],
-        //   x: 0,
-        //   y: 0,
-        //   cells: [
-        //     {
-        //       type: "node",
-        //       component: "MatrixNode",
-        //       x: 1,
-        //       y: 1,
-        //       id: "0",
-        //       ports: [],
-        //       label: "haha",
-        //     },
-        //   ],
-        // }}
         onEvent={(e) => {
-          message.info(`[${e.type}]}`);
+          // message.info(`[${e.type}]}`);
         }}
       >
         <RightClickPanel

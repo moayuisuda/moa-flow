@@ -40,14 +40,52 @@ export const initDrag = (model: ModelType, stage: Konva.Stage, layers: {
 ) => {
     const { linesLayer, nodesLayer, topLayer } = layers
 
+    // 移动选择的节点
+    // 暂存节点原本的zIndex，方便还原到原本的layer
+    let zIndexCache = {}
+    const { drag, select } = model.buffer
+
     // 移动整个stage
     stage.on('mousemove', e => {
+        const movement = {
+            x: (e.evt.x - drag.start.x),
+            y: (e.evt.y - drag.start.y)
+        }
+
         if (model.hotKey["Space"] && model.hotKey['LeftMouseDown']) {
+            // stage并不受scale的影响，不用处理
             model.setStagePosition(
-                e.currentTarget.attrs.x + e.evt.movementX,
-                e.currentTarget.attrs.y + e.evt.movementY
+                model.canvasData.x + movement.x,
+                model.canvasData.y + movement.y
             );
         }
+
+        if (select.isSelecting) {
+            if (stage.isListening()) stage.listening(false);
+
+            model.selectCells.forEach(id => {
+                const cellData = model.getCellData(id) as NodeType & CellType
+                const konvaNode = model.getCellInstance(id).wrapperRef.current
+
+                if (cellData.type === 'node') {
+                    if (!drag.movedToTop) {
+                        zIndexCache[cellData.id] = konvaNode.zIndex()
+                        konvaNode.moveTo(topLayer)
+                    }
+
+                    console.log(e)
+                    model.setCellData(cellData.id, {
+                        x: cellData.x + movement.x / stage.scaleX(),
+                        y: cellData.y + movement.y / stage.scaleY(),
+                    });
+                }
+            })
+
+            drag.movedToTop = true
+        }
+
+        drag.start.x = e.evt.x
+        drag.start.y = e.evt.y
     })
 
     // 空格键的时候触发缓存
@@ -69,39 +107,7 @@ export const initDrag = (model: ModelType, stage: Konva.Stage, layers: {
                 nodesLayer.clearCache()
                 // listening语义上更倾向于之前的api`hitGraphEnabled`，但stage并不需要hitGraph
                 stage.listening(true)
-
             }
-        }
-    })
-
-    // 移动选择的节点
-
-    // 暂存节点原本的zIndex，方便还原到原本的layer
-    let zIndexCache = {}
-    const { drag, select } = model.buffer
-    stage.on('mousemove', e => {
-        if (select.isSelecting) {
-            if (stage.isListening()) stage.listening(false);
-
-            model.selectCells.forEach(id => {
-                const cellData = model.getCellData(id) as NodeType & CellType
-                const konvaNode = model.getCellInstance(id).wrapperRef.current
-
-                if (cellData.type === 'node') {
-                    if (!drag.movedToTop) {
-                        zIndexCache[cellData.id] = konvaNode.zIndex()
-                        konvaNode.moveTo(topLayer)
-                    }
-
-                    const t = konvaNode.getAbsoluteTransform();
-                    model.setCellData(cellData.id, {
-                        x: cellData.x + e.evt.movementX,
-                        y: cellData.y + e.evt.movementY,
-                    });
-                }
-            })
-
-            drag.movedToTop = true
         }
     })
 
@@ -283,12 +289,12 @@ export const initHotKeys = (model: ModelType, stage: Konva.Stage) => {
     })
 
     window.addEventListener('keydown', e => {
-        e.preventDefault()
+        // e.preventDefault()
         model.setHotKey(e.code, true)
     })
 
     window.addEventListener('keyup', e => {
-        e.preventDefault()
+        // e.preventDefault()
         model.setHotKey(e.code, false)
     })
 }

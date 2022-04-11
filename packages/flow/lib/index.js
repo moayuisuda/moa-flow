@@ -18770,12 +18770,15 @@ var Interactor = /** @class */ (function (_super) {
         var _this = this;
         var _a = this, context = _a.context, _b = _a.props, x = _b.x, y = _b.y; _b.draggable; var id = _b.id; _b.topOnFocus; var _d = _b.selectable, selectable = _d === void 0 ? true : _d, others = __rest(_b, ["x", "y", "draggable", "id", "topOnFocus", "selectable"]);
         return (jsxRuntime.exports.jsx(Group, __assign({ x: x, y: y, onMouseDown: function (e) {
-                var _a = _this.context.buffer, drag = _a.drag, select = _a.select;
+                var _a = _this.context, selectCells = _a.selectCells, _b = _a.buffer, select = _b.select, drag = _b.drag;
                 if (selectable) {
-                    if (!_this.context.selectCells.includes(_this.props.id))
+                    if (!selectCells.includes(_this.props.id))
                         context.setSelectedCells([id]);
+                    // drag
                     if (e.evt.button === EVT_LEFTCLICK) {
                         select.isSelecting = true;
+                        drag.start.x = e.evt.x;
+                        drag.start.y = e.evt.y;
                         drag.movedToTop = false;
                     }
                 }
@@ -18833,8 +18836,10 @@ var Edge = /** @class */ (function (_super) {
             var sourceInstance = _this.context.cellsMap.get(data.source);
             var targetInstance = _this.context.cellsMap.get(data.target);
             return {
-                source: sourceInstance.props.anchor && sourceInstance.props.anchor(),
-                target: targetInstance.props.anchor && targetInstance.props.anchor(),
+                source: (sourceInstance.props.anchor && sourceInstance.props.anchor()) ||
+                    sourceInstance.anchor(),
+                target: (targetInstance.props.anchor && targetInstance.props.anchor()) ||
+                    targetInstance.anchor(),
             };
         };
         _this.labelRef = React.createRef();
@@ -18937,7 +18942,8 @@ var LinkingEdge = /** @class */ (function (_super) {
         var context = this.context;
         var data = this.props.data;
         var sourceInstance = context.cellsMap.get(data.source);
-        var sourceAnchor = sourceInstance.props.anchor && sourceInstance.props.anchor();
+        var sourceAnchor = (sourceInstance.props.anchor && sourceInstance.props.anchor()) ||
+            sourceInstance.anchor();
         // || sourceInstance.anchor();
         var targetAnchor = context.buffer.link.target;
         return this.route(sourceAnchor, targetAnchor);
@@ -19098,6 +19104,14 @@ var FlowModel = /** @class */ (function () {
                 visible: false,
             },
             drag: {
+                movement: {
+                    x: 0,
+                    y: 0,
+                },
+                start: {
+                    x: 0,
+                    y: 0,
+                },
                 movedToTop: false,
             },
             isWheeling: false,
@@ -19425,9 +19439,9 @@ var BOTTOM_PADDING = 10;
 var PORTS_OFFSET = HEADER_HEIGHT + HEADER_MARGIN;
 var PORT_OFFSET = PORTS_OFFSET + SINGLE_PORT_HEIGHT / 2;
 var PORT_GRAPHIC_OFFSET = PORT_RADIUS + (SINGLE_PORT_HEIGHT - PORT_RADIUS * 2) / 2;
-var MatrixNode = /** @class */ (function (_super) {
-    __extends(MatrixNode, _super);
-    function MatrixNode() {
+var CommonNode = /** @class */ (function (_super) {
+    __extends(CommonNode, _super);
+    function CommonNode() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
         _this.getStroke = function () {
             var isSelect = _this.flowState.isSelect;
@@ -19442,7 +19456,7 @@ var MatrixNode = /** @class */ (function (_super) {
         };
         return _this;
     }
-    MatrixNode.getBounds = function (cellData) {
+    CommonNode.getBounds = function (cellData) {
         var outPorts = cellData.ports.filter(function (portData) { return portData.portType === "out"; });
         var inPorts = cellData.ports.filter(function (portData) { return portData.portType === "in"; });
         var controlOutPorts = cellData.ports.filter(function (portData) { return portData.portType === "control-out"; });
@@ -19462,7 +19476,7 @@ var MatrixNode = /** @class */ (function (_super) {
             y: y,
         };
     };
-    MatrixNode.prototype.content = function () {
+    CommonNode.prototype.content = function () {
         var _this = this;
         var color = this.context.color;
         var getStroke = this.getStroke;
@@ -19471,10 +19485,10 @@ var MatrixNode = /** @class */ (function (_super) {
         var inPorts = ports.filter(function (portData) { return portData.portType === "in"; });
         var controlOutPorts = ports.filter(function (portData) { return portData.portType === "control-out"; });
         var controlInPorts = ports.filter(function (portData) { return portData.portType === "control-in"; });
-        var FULL_HEIGHT = MatrixNode.getBounds(this.props.data).height;
+        var FULL_HEIGHT = CommonNode.getBounds(this.props.data).height;
         var data = this.props.data;
         return (jsxRuntime.exports.jsxs(Interactor, __assign({}, this.props.data, { topOnFocus: true }, { children: [jsxRuntime.exports.jsx(Rect, { width: WIDTH, height: FULL_HEIGHT, fill: "white", shadowColor: "black", shadowBlur: 10, shadowOpacity: 0.1, cornerRadius: 10 }, void 0), jsxRuntime.exports.jsxs(Group, { children: [jsxRuntime.exports.jsx(Rect, { cornerRadius: [10, 10, 0, 0], width: WIDTH, height: HEADER_HEIGHT, fill: color.grey }, void 0), jsxRuntime.exports.jsx(Text, { fontSize: 14, text: label, height: HEADER_HEIGHT, x: 20, verticalAlign: "middle" }, void 0), jsxRuntime.exports.jsx(Button, { x: WIDTH, width: 20, height: HEADER_HEIGHT, text: "\uFF0B", onClick: function (e) {
-                                _this.context.addCell("MatrixNode", {
+                                _this.context.addCell("CommonNode", {
                                     x: _this.props.data.x + 300,
                                     y: _this.props.data.y,
                                     label: "new node",
@@ -19507,15 +19521,15 @@ var MatrixNode = /** @class */ (function (_super) {
                                             (outPorts.length + index) * SINGLE_PORT_HEIGHT,
                                     }); } }, { children: jsxRuntime.exports.jsx(Rect, { fill: color.primary, x: TEXT_WIDTH + PORT_TEXT_MARGIN, y: PORT_GRAPHIC_OFFSET - PORT_RADIUS, width: PORT_RADIUS * 2, height: PORT_RADIUS * 2 }, void 0) }), void 0)] }), portData.label)); })] }), void 0)] }), void 0));
     };
-    MatrixNode.metaData = {
+    CommonNode.metaData = {
         fields: [{}],
         label: "",
     };
-    return MatrixNode;
+    return CommonNode;
 }(Node));
 
 var registComponents = function (model) {
-    MatrixNode.regist(model);
+    CommonNode.regist(model);
     Edge.regist(model);
 };
 
@@ -19557,11 +19571,42 @@ var initLink = function (model, stage) {
 };
 var initDrag = function (model, stage, layers) {
     var linesLayer = layers.linesLayer, nodesLayer = layers.nodesLayer, topLayer = layers.topLayer;
+    // 移动选择的节点
+    // 暂存节点原本的zIndex，方便还原到原本的layer
+    var zIndexCache = {};
+    var _a = model.buffer, drag = _a.drag, select = _a.select;
     // 移动整个stage
     stage.on('mousemove', function (e) {
+        var movement = {
+            x: (e.evt.x - drag.start.x),
+            y: (e.evt.y - drag.start.y)
+        };
         if (model.hotKey["Space"] && model.hotKey['LeftMouseDown']) {
-            model.setStagePosition(e.currentTarget.attrs.x + e.evt.movementX, e.currentTarget.attrs.y + e.evt.movementY);
+            // stage并不受scale的影响，不用处理
+            model.setStagePosition(model.canvasData.x + movement.x, model.canvasData.y + movement.y);
         }
+        if (select.isSelecting) {
+            if (stage.isListening())
+                stage.listening(false);
+            model.selectCells.forEach(function (id) {
+                var cellData = model.getCellData(id);
+                var konvaNode = model.getCellInstance(id).wrapperRef.current;
+                if (cellData.type === 'node') {
+                    if (!drag.movedToTop) {
+                        zIndexCache[cellData.id] = konvaNode.zIndex();
+                        konvaNode.moveTo(topLayer);
+                    }
+                    console.log(e);
+                    model.setCellData(cellData.id, {
+                        x: cellData.x + movement.x / stage.scaleX(),
+                        y: cellData.y + movement.y / stage.scaleY(),
+                    });
+                }
+            });
+            drag.movedToTop = true;
+        }
+        drag.start.x = e.evt.x;
+        drag.start.y = e.evt.y;
     });
     // 空格键的时候触发缓存
     var stageDom = document.querySelector(".".concat(STAGE_CLASS_NAME));
@@ -19583,32 +19628,6 @@ var initDrag = function (model, stage, layers) {
                 // listening语义上更倾向于之前的api`hitGraphEnabled`，但stage并不需要hitGraph
                 stage.listening(true);
             }
-        }
-    });
-    // 移动选择的节点
-    // 暂存节点原本的zIndex，方便还原到原本的layer
-    var zIndexCache = {};
-    var _a = model.buffer, drag = _a.drag, select = _a.select;
-    stage.on('mousemove', function (e) {
-        if (select.isSelecting) {
-            if (stage.isListening())
-                stage.listening(false);
-            model.selectCells.forEach(function (id) {
-                var cellData = model.getCellData(id);
-                var konvaNode = model.getCellInstance(id).wrapperRef.current;
-                if (cellData.type === 'node') {
-                    if (!drag.movedToTop) {
-                        zIndexCache[cellData.id] = konvaNode.zIndex();
-                        konvaNode.moveTo(topLayer);
-                    }
-                    konvaNode.getAbsoluteTransform();
-                    model.setCellData(cellData.id, {
-                        x: cellData.x + e.evt.movementX,
-                        y: cellData.y + e.evt.movementY,
-                    });
-                }
-            });
-            drag.movedToTop = true;
         }
     });
     stage.on('mouseup', function () {
@@ -19756,11 +19775,11 @@ var initHotKeys = function (model, stage) {
         }
     });
     window.addEventListener('keydown', function (e) {
-        e.preventDefault();
+        // e.preventDefault()
         model.setHotKey(e.code, true);
     });
     window.addEventListener('keyup', function (e) {
-        e.preventDefault();
+        // e.preventDefault()
         model.setHotKey(e.code, false);
     });
 };

@@ -1,8 +1,8 @@
-import MatrixNode from "@/cells/Matrix/MatrixNode";
+import CommonNode from "@/cells/CommonNode";
 import Edge from "@/cells/Edge";
 
 const registComponents = (model) => {
-  MatrixNode.regist(model);
+  CommonNode.regist(model);
   Edge.regist(model);
 };
 

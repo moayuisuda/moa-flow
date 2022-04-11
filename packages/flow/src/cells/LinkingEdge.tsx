@@ -11,7 +11,8 @@ class LinkingEdge extends Edge<{}, {}> {
     const sourceInstance = context.cellsMap.get(data.source);
 
     const sourceAnchor =
-      sourceInstance.props.anchor && sourceInstance.props.anchor();
+      (sourceInstance.props.anchor && sourceInstance.props.anchor()) ||
+      sourceInstance.anchor();
     // || sourceInstance.anchor();
     const targetAnchor = context.buffer.link.target;
 

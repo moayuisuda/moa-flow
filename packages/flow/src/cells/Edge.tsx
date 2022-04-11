@@ -82,8 +82,12 @@ abstract class Edge<P = {}, S = {}> extends Cell<
     const targetInstance = this.context.cellsMap.get(data.target);
 
     return {
-      source: sourceInstance.props.anchor && sourceInstance.props.anchor(),
-      target: targetInstance.props.anchor && targetInstance.props.anchor(),
+      source:
+        (sourceInstance.props.anchor && sourceInstance.props.anchor()) ||
+        sourceInstance.anchor(),
+      target:
+        (targetInstance.props.anchor && targetInstance.props.anchor()) ||
+        targetInstance.anchor(),
     };
   };
 
