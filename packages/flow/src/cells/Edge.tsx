@@ -7,11 +7,13 @@ import { PortType } from "../scaffold/Port";
 import React from "react";
 import Konva from "konva";
 import { NodeType } from "./Node";
+import { isVector2d } from "@/utils/util";
 
 export type EdgeType = {
-  source: string;
-  target: string;
+  source: string | Konva.Vector2d;
+  target: string | Konva.Vector2d;
   label: string;
+  verticies?: Konva.Vector2d[];
 } & CellType;
 const TEXT_HEIGHT = 16;
 const LABEL_PADDING = 4;
@@ -76,55 +78,86 @@ abstract class Edge<P = {}, S = {}> extends Cell<
     } else return {};
   };
 
+  protected formatVerticied = (verticies) => {
+    return verticies;
+  };
+
   private getAnchors = () => {
     const { data } = this.props;
-    const sourceInstance = this.context.cellsMap.get(data.source);
-    const targetInstance = this.context.cellsMap.get(data.target);
+    let sourceAnchor;
+    let targetAnchor;
+
+    if (isVector2d(data.source)) sourceAnchor = data.source;
+    else {
+      const sourceInstance = this.context.cellsMap.get(data.source as string);
+      sourceAnchor =
+        (sourceInstance.props.anchor && sourceInstance.props.anchor()) ||
+        sourceInstance.anchor();
+    }
+    if (isVector2d(data.target)) targetAnchor = data.target;
+    else {
+      const targetInstance = this.context.cellsMap.get(data.target as string);
+      targetAnchor =
+        (targetInstance.props.anchor && targetInstance.props.anchor()) ||
+        targetInstance.anchor();
+    }
 
     return {
-      source:
-        (sourceInstance.props.anchor && sourceInstance.props.anchor()) ||
-        sourceInstance.anchor(),
-      target:
-        (targetInstance.props.anchor && targetInstance.props.anchor()) ||
-        targetInstance.anchor(),
+      source: sourceAnchor,
+      target: targetAnchor,
     };
   };
 
-  protected getPoints() {
+  private getPoints() {
     const anchors = this.getAnchors();
+    const verticies = this.props.data.verticies || [];
 
-    return this.route(anchors.source, anchors.target);
+    const routeResult = this.route([
+      anchors.source,
+      ...verticies,
+      anchors.target,
+    ]);
+
+    return this.vectorsToPoints(routeResult);
   }
 
   getLinkNodesData() {
     const { data } = this.props;
-    const sourcePort = this.context.cellsDataMap.get(data.source) as PortType;
-    const targetPort = this.context.cellsDataMap.get(data.target) as PortType;
+    let source;
+    let target;
+
+    if (!isVector2d(data.source)) {
+      const sourcePort = this.context.cellsDataMap.get(
+        data.source as string
+      ) as PortType;
+      source = this.context.cellsDataMap.get(sourcePort.host) as NodeType;
+    }
+
+    if (!isVector2d(data.target)) {
+      const targetPort = this.context.cellsDataMap.get(
+        data.target as string
+      ) as PortType;
+      target = this.context.cellsDataMap.get(targetPort.host) as NodeType;
+    }
 
     return {
-      source: this.context.cellsDataMap.get(sourcePort.host) as NodeType,
-      target: this.context.cellsDataMap.get(targetPort.host) as NodeType,
+      source,
+      target,
     };
   }
 
   // 这个方法暴露出去，可自定义路由
-  protected route(sourceAnchor, targetAnchor) {
-    const MIDDLE = (sourceAnchor.x + targetAnchor.x) / 2;
+  protected route(vectors: Konva.Vector2d[]) {
+    return vectors;
+  }
 
-    return [
-      sourceAnchor.x,
-      sourceAnchor.y,
+  private vectorsToPoints(vectors) {
+    const re = [];
+    vectors.forEach((vector) => {
+      re.push(vector.x, vector.y);
+    });
 
-      MIDDLE,
-      sourceAnchor.y,
-
-      MIDDLE,
-      targetAnchor.y,
-
-      targetAnchor.x,
-      targetAnchor.y,
-    ];
+    return re;
   }
 
   labelContent() {
@@ -199,7 +232,11 @@ abstract class Edge<P = {}, S = {}> extends Cell<
     return label;
   }
 
-  protected edgeRender(points) {
+  isLinking() {
+    return this.context.buffer.link.edge === this.props.data.id;
+  }
+
+  protected edgeRender({ points, isLinking }) {
     const { color } = this.context;
 
     return (
@@ -210,15 +247,13 @@ abstract class Edge<P = {}, S = {}> extends Cell<
           strokeWidth={3}
           {...this.getStroke(this.flowState)}
           lineCap="round"
-          bezier={this.bazier}
-          dash={this.dash ? [10, 10] : undefined}
+          dash={isLinking ? [10, 10] : undefined}
         ></Line>
         <Line
           stroke="transparent"
           points={points}
           strokeWidth={20}
           lineCap="round"
-          bezier={this.bazier}
         ></Line>
       </Group>
     );
@@ -227,7 +262,10 @@ abstract class Edge<P = {}, S = {}> extends Cell<
   content() {
     return (
       <Interactor id={this.props.data.id} draggable={false}>
-        {this.edgeRender(this.getPoints())}
+        {this.edgeRender({
+          points: this.getPoints(),
+          isLinking: this.isLinking(),
+        })}
         {this.labelRender(this.getAnchors())}
       </Interactor>
     );

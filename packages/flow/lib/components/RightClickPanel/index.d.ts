@@ -15,7 +15,6 @@ declare class RightClickPanel extends React.Component<{
     componentDidMount(): void;
     constructor(props: any);
     dele(): void;
-    add(): void;
     moveToTop(): void;
     render(): JSX.Element;
 }

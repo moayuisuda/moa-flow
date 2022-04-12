@@ -1,29 +1,30 @@
-import Edge from "@/cells/Edge";
+import { observer } from "mobx-react";
+import React from "react";
+import { FlowContext } from "@/Context";
 import { Group } from "react-konva";
+@observer
+class LinkingEdge extends React.Component<{ data: any }> {
+  static contextType = FlowContext;
+  declare context: React.ContextType<typeof FlowContext>;
 
-class LinkingEdge extends Edge<{}, {}> {
-  protected dash: boolean = true;
+  render() {
+    const data = this.props.data;
 
-  getPoints() {
-    const { context } = this;
-    const { data } = this.props;
+    const RegistedEdge = this.context.componentsMap.get(this.context.linkEdge);
+    const id = "linkingEdge";
 
-    const sourceInstance = context.cellsMap.get(data.source);
+    if (!data.source) return <></>;
 
-    const sourceAnchor =
-      (sourceInstance.props.anchor && sourceInstance.props.anchor()) ||
-      sourceInstance.anchor();
-    // || sourceInstance.anchor();
-    const targetAnchor = context.buffer.link.target;
+    this.context.buffer.link.edge = id;
 
-    return this.route(sourceAnchor, targetAnchor);
-  }
-
-  // 一般不会重写这个方法
-  content() {
     return (
       <Group listening={false}>
-        {this.props.data.source && this.edgeRender(this.getPoints())}
+        {React.createElement(RegistedEdge, {
+          data: {
+            id,
+            ...this.props.data,
+          },
+        })}
       </Group>
     );
   }

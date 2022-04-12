@@ -20,7 +20,6 @@ export const isRectsInterSect = (boundsA, boundsB) => {
     )
 }
 
-// export const isCellVisible = (cellData) => {
-//     flowModel
-//     // return isRectsInterSect(flowModel. flowModel.componentsMap[cellData.component].getBounds)
-// }
+export const isVector2d = (source) => {
+    return typeof source !== 'string'
+}

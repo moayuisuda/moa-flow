@@ -78,6 +78,7 @@ export class FlowModel {
       end: { x: 0, y: 0 },
     },
     link: {
+      edge: undefined,
       source: undefined,
       target: {
         x: 0,
@@ -129,6 +130,7 @@ export class FlowModel {
 
   @action clearLinkBuffer = () => {
     this.buffer.link = {
+      edge: undefined,
       source: undefined,
       target: {
         x: 0,
@@ -141,9 +143,9 @@ export class FlowModel {
   @observable color = color;
 
   // cell的<id, 实例>map，方便用id获取到组件实例
-  cellsMap = new Map<string, React.Component<any, any> & any>();
+  cellsMap = new Map<string | Symbol, React.Component<any, any> & any>();
   // cellData的<id, cellData>map，用来修改受控数据
-  cellsDataMap = new Map<string, CellType>();
+  cellsDataMap = new Map<string | Symbol, CellType>();
 
   // 注册节点到model，方便动态引用
   componentsMap = new Map();

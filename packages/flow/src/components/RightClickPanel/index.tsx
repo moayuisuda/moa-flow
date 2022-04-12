@@ -47,10 +47,7 @@ class RightClickPanel extends React.Component<
     };
   }
 
-  dele() {
-    
-  }
-  add() {}
+  dele() {}
 
   moveToTop() {}
 
@@ -65,7 +62,7 @@ class RightClickPanel extends React.Component<
         }}
         className={styles["toolbar"]}
       >
-        <button
+        {/* <button
           className={styles["toolbar__button"]}
           onClick={() => this.dele()}
         >
@@ -76,7 +73,7 @@ class RightClickPanel extends React.Component<
           onClick={() => this.dele()}
         >
           移到顶层
-        </button>
+        </button> */}
         {extra && extra(this.context)}
       </ul>
     );

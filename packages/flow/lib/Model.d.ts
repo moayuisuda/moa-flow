@@ -46,6 +46,7 @@ export declare class FlowModel {
             };
         };
         link: {
+            edge: any;
             source: any;
             target: {
                 x: number;
@@ -64,8 +65,8 @@ export declare class FlowModel {
         deepGrey: string;
         background: string;
     };
-    cellsMap: Map<string, any>;
-    cellsDataMap: Map<string, CellType>;
+    cellsMap: Map<string | Symbol, any>;
+    cellsDataMap: Map<string | Symbol, CellType>;
     componentsMap: Map<any, any>;
     eventBus: {
         sender: any;

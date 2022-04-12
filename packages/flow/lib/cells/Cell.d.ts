@@ -27,6 +27,7 @@ declare abstract class Cell<D, S = {}, P = {}> extends React.Component<{
     getStage(konvaNode: any): any;
     setCellData(data: any): void;
     componentDidMount(): void;
+    isSelect(): boolean;
     render(): JSX.Element;
 }
 declare const _default: typeof Cell;

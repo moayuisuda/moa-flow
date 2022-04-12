@@ -1,8 +1,8 @@
 import React, { useContext, useState, useEffect, createRef } from 'react';
-import { Group, Label, Tag, Text, Line, Rect, Circle, Layer, Stage, useStrictMode } from 'react-konva';
-import Konva from 'konva';
+import { Group, Rect, Text, Circle, Label, Tag, Line, Layer, Stage, useStrictMode } from 'react-konva';
 import { observer } from 'mobx-react';
 import { observable, action, makeObservable, autorun } from 'mobx';
+import Konva from 'konva';
 
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation.
@@ -1409,6 +1409,135 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 var FlowContext = React.createContext(null);
+
+var LinkingEdge = /** @class */ (function (_super) {
+    __extends(LinkingEdge, _super);
+    function LinkingEdge() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    LinkingEdge.prototype.render = function () {
+        var data = this.props.data;
+        var RegistedEdge = this.context.componentsMap.get(this.context.linkEdge);
+        var id = "linkingEdge";
+        if (!data.source)
+            return jsxRuntime.exports.jsx(jsxRuntime.exports.Fragment, {}, void 0);
+        this.context.buffer.link.edge = id;
+        return (jsxRuntime.exports.jsx(Group, __assign({ listening: false }, { children: React.createElement(RegistedEdge, {
+                data: __assign({ id: id }, this.props.data),
+            }) }), void 0));
+    };
+    LinkingEdge.contextType = FlowContext;
+    LinkingEdge = __decorate([
+        observer
+    ], LinkingEdge);
+    return LinkingEdge;
+}(React.Component));
+
+var arrayMove = function (arr, oldIndex, newIndex) {
+    arr.splice(newIndex, 0, arr.splice(oldIndex, 1)[0]);
+    return arr;
+};
+var findIndex = function (arr, target) {
+    var curr;
+    for (var i = 0; i < arr.length; i++) {
+        curr = arr[i];
+        if (curr === target)
+            return i;
+    }
+};
+var isRectsInterSect = function (boundsA, boundsB) {
+    return !(boundsA.x + boundsA.width < boundsB.x ||
+        boundsA.x > boundsB.x + boundsB.width ||
+        boundsA.y + boundsA.height < boundsB.y ||
+        boundsA.y > boundsB.y + boundsB.height);
+};
+var isVector2d = function (source) {
+    return typeof source !== 'string';
+};
+
+var color = {
+    primary: 'rgb(255, 108, 55)',
+    active: 'rgb(255, 108, 55)',
+    grey: 'rgb(242, 242, 242)',
+    blue: '#0053b8',
+    green: '#0cbb52',
+    deepGrey: '#a6a6a6',
+    background: 'rgba(255,255,255,255)'
+};
+
+// Unique ID creation requires a high quality random # generator. In the browser we therefore
+// require the crypto API and do not support built-in fallback to lower quality random number
+// generators (like Math.random()).
+var getRandomValues;
+var rnds8 = new Uint8Array(16);
+function rng() {
+  // lazy load so that environments that need to polyfill have a chance to do so
+  if (!getRandomValues) {
+    // getRandomValues needs to be invoked in a context where "this" is a Crypto implementation. Also,
+    // find the complete implementation of crypto (msCrypto) on IE11.
+    getRandomValues = typeof crypto !== 'undefined' && crypto.getRandomValues && crypto.getRandomValues.bind(crypto) || typeof msCrypto !== 'undefined' && typeof msCrypto.getRandomValues === 'function' && msCrypto.getRandomValues.bind(msCrypto);
+
+    if (!getRandomValues) {
+      throw new Error('crypto.getRandomValues() not supported. See https://github.com/uuidjs/uuid#getrandomvalues-not-supported');
+    }
+  }
+
+  return getRandomValues(rnds8);
+}
+
+var REGEX = /^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i;
+
+function validate(uuid) {
+  return typeof uuid === 'string' && REGEX.test(uuid);
+}
+
+/**
+ * Convert array of 16 byte values to UUID string format of the form:
+ * XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+ */
+
+var byteToHex = [];
+
+for (var i = 0; i < 256; ++i) {
+  byteToHex.push((i + 0x100).toString(16).substr(1));
+}
+
+function stringify(arr) {
+  var offset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+  // Note: Be careful editing this code!  It's been tuned for performance
+  // and works in ways you may not expect. See https://github.com/uuidjs/uuid/pull/434
+  var uuid = (byteToHex[arr[offset + 0]] + byteToHex[arr[offset + 1]] + byteToHex[arr[offset + 2]] + byteToHex[arr[offset + 3]] + '-' + byteToHex[arr[offset + 4]] + byteToHex[arr[offset + 5]] + '-' + byteToHex[arr[offset + 6]] + byteToHex[arr[offset + 7]] + '-' + byteToHex[arr[offset + 8]] + byteToHex[arr[offset + 9]] + '-' + byteToHex[arr[offset + 10]] + byteToHex[arr[offset + 11]] + byteToHex[arr[offset + 12]] + byteToHex[arr[offset + 13]] + byteToHex[arr[offset + 14]] + byteToHex[arr[offset + 15]]).toLowerCase(); // Consistency check for valid UUID.  If this throws, it's likely due to one
+  // of the following:
+  // - One or more input array values don't map to a hex octet (leading to
+  // "undefined" in the uuid)
+  // - Invalid input values for the RFC `version` or `variant` fields
+
+  if (!validate(uuid)) {
+    throw TypeError('Stringified UUID is invalid');
+  }
+
+  return uuid;
+}
+
+function v4(options, buf, offset) {
+  options = options || {};
+  var rnds = options.random || (options.rng || rng)(); // Per 4.4, set bits for version and `clock_seq_hi_and_reserved`
+
+  rnds[6] = rnds[6] & 0x0f | 0x40;
+  rnds[8] = rnds[8] & 0x3f | 0x80; // Copy bytes to buffer, if provided
+
+  if (buf) {
+    offset = offset || 0;
+
+    for (var i = 0; i < 16; ++i) {
+      buf[offset + i] = rnds[i];
+    }
+
+    return buf;
+  }
+
+  return stringify(rnds);
+}
 
 var lodash = {exports: {}};
 
@@ -18611,457 +18740,6 @@ var lodash = {exports: {}};
 }.call(commonjsGlobal));
 }(lodash, lodash.exports));
 
-// D: data, S: state, P: props
-var Cell = /** @class */ (function (_super) {
-    __extends(Cell, _super);
-    function Cell(props, context) {
-        var _this = _super.call(this, props) || this;
-        context.cellsMap.set(props.data.id, _this);
-        _this.flowState = {
-            isSelect: false,
-        };
-        _this.wrapperRef = React.createRef();
-        return _this;
-    }
-    Cell.regist = function (model) {
-        model.componentsMap.set(this.name, this);
-    };
-    Cell.getMetaData = function () {
-        var re = {};
-        var curr = this;
-        var componentName = this.name;
-        // 合并父类metaData
-        while (curr !== React.Component) {
-            Object.assign(re, curr.metaData);
-            curr = curr.__proto__;
-        }
-        return __assign(__assign({}, lodash.exports.cloneDeep(re)), { component: componentName });
-    };
-    Cell.prototype.getStage = function (konvaNode) {
-        var re = konvaNode;
-        while (re.__proto__.constructor !== Konva.Stage) {
-            re = re.parent;
-        }
-        return re;
-    };
-    Cell.prototype.setCellData = function (data) {
-        this.context;
-        this.context.setCellData(this.props.data.id, data);
-    };
-    Cell.prototype.componentDidMount = function () {
-        var _this = this;
-        [
-            "mouseenter",
-            "mouseleave",
-            "mousedown",
-            "mouseup",
-            "dblclick",
-            "click",
-        ].forEach(function (eventName) {
-            _this.wrapperRef.current.on(eventName, function (e) {
-                _this.context.sendEvent({
-                    type: "cell:".concat(eventName),
-                    data: {
-                        e: e,
-                        cellData: _this.props.data,
-                    },
-                });
-            });
-        });
-    };
-    Cell.prototype.render = function () {
-        return jsxRuntime.exports.jsx(Group, __assign({ ref: this.wrapperRef }, { children: this.content() }), void 0);
-    };
-    Cell.contextType = FlowContext;
-    Cell.metaData = { id: "" };
-    return Cell;
-}(React.Component));
-var Cell$1 = observer(Cell);
-
-var Port$1 = /** @class */ (function (_super) {
-    __extends(Port, _super);
-    function Port(props, context) {
-        var _this = _super.call(this, props, context) || this;
-        context.setCellData(props.data.id);
-        return _this;
-    }
-    // 暂时废弃
-    Port.prototype.anchor = function () {
-        var konvaNode = this.wrapperRef.current;
-        if (!konvaNode)
-            return { x: 0, y: 0 };
-        var rect = konvaNode.getClientRect({
-            // 有relative不会caculate scale
-            relativeTo: this.getStage(konvaNode),
-        });
-        // 通过变换矩阵将坐标还原为标准坐标
-        // const t = konvaNode.getAbsoluteTransform();
-        return {
-            x: rect.x + rect.width / 2,
-            y: rect.y + rect.height / 2,
-        };
-    };
-    Port.prototype.onLinkStart = function (e) {
-        e.cancelBubble = true;
-        var link = this.context.buffer.link;
-        this.context.sendEvent({
-            type: "beforeLink",
-            data: {
-                source: this.props.data.id,
-            },
-        });
-        link.source = this.props.data.id;
-        link.target = this.anchor();
-    };
-    Port.prototype.onLinkEnd = function (e) {
-        e.cancelBubble = true;
-        var _a = this, context = _a.context, link = _a.context.buffer.link;
-        var sourceInstance = context.cellsMap.get(link.source);
-        if (link.source === this.props.data.id) {
-            context.clearLinkBuffer();
-        }
-        else if (this.props.link || sourceInstance.props.link) {
-            var adoptSource = true;
-            var adoptTarget = true;
-            var sourceData = context.getCellData(link.source);
-            if (sourceInstance.props.link) {
-                if (sourceInstance.props.link(sourceData, this.props.data))
-                    adoptSource = true;
-                else
-                    adoptSource = false;
-            }
-            if (this.props.link) {
-                if (this.props.link(sourceData, this.props.data))
-                    adoptTarget = true;
-                else
-                    adoptTarget = false;
-            }
-            if (adoptSource && adoptTarget)
-                context.link(link.source, this.props.data.id);
-            else
-                context.clearLinkBuffer();
-        }
-        else {
-            context.link(link.source, this.props.data.id);
-        }
-    };
-    Port.prototype.content = function () {
-        var _this = this;
-        return (jsxRuntime.exports.jsx(Group, __assign({ onMouseDown: function (e) { return _this.onLinkStart(e); }, onMouseUp: function (e) { return _this.onLinkEnd(e); } }, this.props, { children: this.props.children }), void 0));
-    };
-    Port.metaData = {
-        type: "port",
-        source: undefined,
-        target: undefined,
-    };
-    return Port;
-}(Cell$1));
-
-var STAGE_CLASS_NAME = 'flow-stage';
-var EVT_LEFTCLICK = 0;
-var EVT_RIGHTCLICK = 2;
-
-var Interactor = /** @class */ (function (_super) {
-    __extends(Interactor, _super);
-    function Interactor(props) {
-        return _super.call(this, props) || this;
-    }
-    Interactor.prototype.render = function () {
-        var _this = this;
-        var _a = this, context = _a.context, _b = _a.props, x = _b.x, y = _b.y; _b.draggable; var id = _b.id; _b.topOnFocus; var _d = _b.selectable, selectable = _d === void 0 ? true : _d, others = __rest(_b, ["x", "y", "draggable", "id", "topOnFocus", "selectable"]);
-        return (jsxRuntime.exports.jsx(Group, __assign({ x: x, y: y, onMouseDown: function (e) {
-                var _a = _this.context, selectCells = _a.selectCells, _b = _a.buffer, select = _b.select, drag = _b.drag;
-                if (selectable) {
-                    if (!selectCells.includes(_this.props.id))
-                        context.setSelectedCells([id]);
-                    // drag
-                    if (e.evt.button === EVT_LEFTCLICK) {
-                        select.isSelecting = true;
-                        drag.start.x = e.evt.x;
-                        drag.start.y = e.evt.y;
-                        drag.movedToTop = false;
-                    }
-                }
-            } }, others, { children: this.props.children }), void 0));
-    };
-    Interactor.contextType = FlowContext;
-    Interactor = __decorate([
-        observer
-    ], Interactor);
-    return Interactor;
-}(React.Component));
-Interactor.Port = Port$1;
-
-var TEXT_HEIGHT = 16;
-var LABEL_PADDING = 4;
-var Edge = /** @class */ (function (_super) {
-    __extends(Edge, _super);
-    function Edge(props, context) {
-        var _this = _super.call(this, props, context) || this;
-        // // 先不管线条的bounds
-        // static getBounds(cellData) {
-        //   const sourceInstance = flowModel.cellsMap.get(cellData.source);
-        //   const targetInstance = flowModel.cellsMap.get(cellData.target);
-        //   const sourceAnchor =
-        //     sourceInstance.props.anchor && sourceInstance.props.anchor();
-        //   // || sourceInstance.anchor();
-        //   const targetAnchor =
-        //     targetInstance.props.anchor && targetInstance.props.anchor();
-        //   const left = Math.min(sourceAnchor.x, targetAnchor.x);
-        //   const right = Math.max(sourceAnchor.x, targetAnchor.x);
-        //   const top = Math.min(sourceAnchor.y, targetAnchor.y);
-        //   const bottom = Math.max(sourceAnchor.y, targetAnchor.y);
-        //   return {
-        //     width: right - left,
-        //     height: bottom - top,
-        //     x: left,
-        //     y: top,
-        //   };
-        // }
-        _this.bazier = true;
-        _this.dash = false;
-        _this.getStroke = function (flowState) {
-            var isSelect = flowState.isSelect;
-            var color = _this.context.color;
-            if (isSelect) {
-                return {
-                    stroke: color.active,
-                };
-            }
-            else
-                return {};
-        };
-        _this.getAnchors = function () {
-            var data = _this.props.data;
-            var sourceInstance = _this.context.cellsMap.get(data.source);
-            var targetInstance = _this.context.cellsMap.get(data.target);
-            return {
-                source: (sourceInstance.props.anchor && sourceInstance.props.anchor()) ||
-                    sourceInstance.anchor(),
-                target: (targetInstance.props.anchor && targetInstance.props.anchor()) ||
-                    targetInstance.anchor(),
-            };
-        };
-        _this.labelRef = React.createRef();
-        _this.state = {
-            points: [],
-        };
-        return _this;
-    }
-    Edge.prototype.getPoints = function () {
-        var anchors = this.getAnchors();
-        return this.route(anchors.source, anchors.target);
-    };
-    Edge.prototype.getLinkNodesData = function () {
-        var data = this.props.data;
-        var sourcePort = this.context.cellsDataMap.get(data.source);
-        var targetPort = this.context.cellsDataMap.get(data.target);
-        return {
-            source: this.context.cellsDataMap.get(sourcePort.host),
-            target: this.context.cellsDataMap.get(targetPort.host),
-        };
-    };
-    // 这个方法暴露出去，可自定义路由
-    Edge.prototype.route = function (sourceAnchor, targetAnchor) {
-        var MIDDLE = (sourceAnchor.x + targetAnchor.x) / 2;
-        return [
-            sourceAnchor.x,
-            sourceAnchor.y,
-            MIDDLE,
-            sourceAnchor.y,
-            MIDDLE,
-            targetAnchor.y,
-            targetAnchor.x,
-            targetAnchor.y,
-        ];
-    };
-    Edge.prototype.labelContent = function () {
-        var _this = this;
-        var _a = this.context, color = _a.color, linesLayerRef = _a.refs.linesLayerRef;
-        var text = this.labelFormatter(this.props.data.label);
-        var textWidth = linesLayerRef.current
-            .getContext()
-            .measureText(text).width;
-        return (jsxRuntime.exports.jsxs(Label, __assign({ x: -textWidth / 2 - LABEL_PADDING, y: -TEXT_HEIGHT / 2, onClick: function (e) {
-                _this.context.sendEvent({
-                    type: "label:click",
-                    data: _this,
-                });
-            } }, { children: [jsxRuntime.exports.jsx(Tag, { fill: color.background }, void 0), jsxRuntime.exports.jsx(Text, { height: TEXT_HEIGHT, verticalAlign: "middle", text: this.labelFormatter(this.props.data.label), padding: LABEL_PADDING }, void 0)] }), void 0));
-    };
-    Edge.prototype.labelRender = function (anchors) {
-        var _this = this;
-        var text = this.labelFormatter(this.props.data.label);
-        return (jsxRuntime.exports.jsx(Group, __assign({ ref: function (label) {
-                if (!label)
-                    return;
-                [
-                    "mouseenter",
-                    "mouseleave",
-                    "mousedown",
-                    "mouseup",
-                    "dblclick",
-                    "click",
-                ].forEach(function (eventName) {
-                    label.on(eventName, function (e) {
-                        _this.context.sendEvent({
-                            type: "label:".concat(eventName),
-                            data: {
-                                e: e,
-                                cellData: _this.props.data,
-                            },
-                        });
-                    });
-                });
-            }, x: (anchors.source.x + anchors.target.x) / 2, y: (anchors.source.y + anchors.target.y) / 2 }, { children: text && this.labelContent() }), void 0));
-    };
-    Edge.prototype.labelFormatter = function (label) {
-        return label;
-    };
-    Edge.prototype.edgeRender = function (points) {
-        var color = this.context.color;
-        return (jsxRuntime.exports.jsxs(Group, { children: [jsxRuntime.exports.jsx(Line, __assign({ stroke: color.deepGrey, points: points, strokeWidth: 3 }, this.getStroke(this.flowState), { lineCap: "round", bezier: this.bazier, dash: this.dash ? [10, 10] : undefined }), void 0), jsxRuntime.exports.jsx(Line, { stroke: "transparent", points: points, strokeWidth: 20, lineCap: "round", bezier: this.bazier }, void 0)] }, void 0));
-    };
-    Edge.prototype.content = function () {
-        return (jsxRuntime.exports.jsxs(Interactor, __assign({ id: this.props.data.id, draggable: false }, { children: [this.edgeRender(this.getPoints()), this.labelRender(this.getAnchors())] }), void 0));
-    };
-    Edge.metaData = {
-        type: "edge",
-    };
-    return Edge;
-}(Cell$1));
-
-var LinkingEdge = /** @class */ (function (_super) {
-    __extends(LinkingEdge, _super);
-    function LinkingEdge() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.dash = true;
-        return _this;
-    }
-    LinkingEdge.prototype.getPoints = function () {
-        var context = this.context;
-        var data = this.props.data;
-        var sourceInstance = context.cellsMap.get(data.source);
-        var sourceAnchor = (sourceInstance.props.anchor && sourceInstance.props.anchor()) ||
-            sourceInstance.anchor();
-        // || sourceInstance.anchor();
-        var targetAnchor = context.buffer.link.target;
-        return this.route(sourceAnchor, targetAnchor);
-    };
-    // 一般不会重写这个方法
-    LinkingEdge.prototype.content = function () {
-        return (jsxRuntime.exports.jsx(Group, __assign({ listening: false }, { children: this.props.data.source && this.edgeRender(this.getPoints()) }), void 0));
-    };
-    return LinkingEdge;
-}(Edge));
-
-var arrayMove = function (arr, oldIndex, newIndex) {
-    arr.splice(newIndex, 0, arr.splice(oldIndex, 1)[0]);
-    return arr;
-};
-var findIndex = function (arr, target) {
-    var curr;
-    for (var i = 0; i < arr.length; i++) {
-        curr = arr[i];
-        if (curr === target)
-            return i;
-    }
-};
-var isRectsInterSect = function (boundsA, boundsB) {
-    return !(boundsA.x + boundsA.width < boundsB.x ||
-        boundsA.x > boundsB.x + boundsB.width ||
-        boundsA.y + boundsA.height < boundsB.y ||
-        boundsA.y > boundsB.y + boundsB.height);
-};
-// export const isCellVisible = (cellData) => {
-//     flowModel
-//     // return isRectsInterSect(flowModel. flowModel.componentsMap[cellData.component].getBounds)
-// }
-
-var color = {
-    primary: 'rgb(255, 108, 55)',
-    active: 'rgb(255, 108, 55)',
-    grey: 'rgb(242, 242, 242)',
-    blue: '#0053b8',
-    green: '#0cbb52',
-    deepGrey: '#a6a6a6',
-    background: 'rgba(255,255,255,255)'
-};
-
-// Unique ID creation requires a high quality random # generator. In the browser we therefore
-// require the crypto API and do not support built-in fallback to lower quality random number
-// generators (like Math.random()).
-var getRandomValues;
-var rnds8 = new Uint8Array(16);
-function rng() {
-  // lazy load so that environments that need to polyfill have a chance to do so
-  if (!getRandomValues) {
-    // getRandomValues needs to be invoked in a context where "this" is a Crypto implementation. Also,
-    // find the complete implementation of crypto (msCrypto) on IE11.
-    getRandomValues = typeof crypto !== 'undefined' && crypto.getRandomValues && crypto.getRandomValues.bind(crypto) || typeof msCrypto !== 'undefined' && typeof msCrypto.getRandomValues === 'function' && msCrypto.getRandomValues.bind(msCrypto);
-
-    if (!getRandomValues) {
-      throw new Error('crypto.getRandomValues() not supported. See https://github.com/uuidjs/uuid#getrandomvalues-not-supported');
-    }
-  }
-
-  return getRandomValues(rnds8);
-}
-
-var REGEX = /^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i;
-
-function validate(uuid) {
-  return typeof uuid === 'string' && REGEX.test(uuid);
-}
-
-/**
- * Convert array of 16 byte values to UUID string format of the form:
- * XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
- */
-
-var byteToHex = [];
-
-for (var i = 0; i < 256; ++i) {
-  byteToHex.push((i + 0x100).toString(16).substr(1));
-}
-
-function stringify(arr) {
-  var offset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-  // Note: Be careful editing this code!  It's been tuned for performance
-  // and works in ways you may not expect. See https://github.com/uuidjs/uuid/pull/434
-  var uuid = (byteToHex[arr[offset + 0]] + byteToHex[arr[offset + 1]] + byteToHex[arr[offset + 2]] + byteToHex[arr[offset + 3]] + '-' + byteToHex[arr[offset + 4]] + byteToHex[arr[offset + 5]] + '-' + byteToHex[arr[offset + 6]] + byteToHex[arr[offset + 7]] + '-' + byteToHex[arr[offset + 8]] + byteToHex[arr[offset + 9]] + '-' + byteToHex[arr[offset + 10]] + byteToHex[arr[offset + 11]] + byteToHex[arr[offset + 12]] + byteToHex[arr[offset + 13]] + byteToHex[arr[offset + 14]] + byteToHex[arr[offset + 15]]).toLowerCase(); // Consistency check for valid UUID.  If this throws, it's likely due to one
-  // of the following:
-  // - One or more input array values don't map to a hex octet (leading to
-  // "undefined" in the uuid)
-  // - Invalid input values for the RFC `version` or `variant` fields
-
-  if (!validate(uuid)) {
-    throw TypeError('Stringified UUID is invalid');
-  }
-
-  return uuid;
-}
-
-function v4(options, buf, offset) {
-  options = options || {};
-  var rnds = options.random || (options.rng || rng)(); // Per 4.4, set bits for version and `clock_seq_hi_and_reserved`
-
-  rnds[6] = rnds[6] & 0x0f | 0x40;
-  rnds[8] = rnds[8] & 0x3f | 0x80; // Copy bytes to buffer, if provided
-
-  if (buf) {
-    offset = offset || 0;
-
-    for (var i = 0; i < 16; ++i) {
-      buf[offset + i] = rnds[i];
-    }
-
-    return buf;
-  }
-
-  return stringify(rnds);
-}
-
 var FlowModel = /** @class */ (function () {
     function FlowModel(eventSender) {
         var _this = this;
@@ -19121,6 +18799,7 @@ var FlowModel = /** @class */ (function () {
                 end: { x: 0, y: 0 },
             },
             link: {
+                edge: undefined,
                 source: undefined,
                 target: {
                     x: 0,
@@ -19161,6 +18840,7 @@ var FlowModel = /** @class */ (function () {
         };
         this.clearLinkBuffer = function () {
             _this.buffer.link = {
+                edge: undefined,
                 source: undefined,
                 target: {
                     x: 0,
@@ -19414,6 +19094,190 @@ var Button = function (props) {
     return (jsxRuntime.exports.jsxs(Group, __assign({ x: x, y: y, onClick: props.onClick }, { children: [jsxRuntime.exports.jsx(Rect, { shadowBlur: 10, shadowOpacity: 0.1, cornerRadius: 4, fill: color.active, width: width, height: height }, void 0), jsxRuntime.exports.jsx(Text, { stroke: "white", text: props.text, width: width, height: height, align: "center", verticalAlign: "middle" }, void 0)] }), void 0));
 };
 
+// D: data, S: state, P: props
+var Cell = /** @class */ (function (_super) {
+    __extends(Cell, _super);
+    function Cell(props, context) {
+        var _this = _super.call(this, props) || this;
+        context.cellsMap.set(props.data.id, _this);
+        _this.flowState = {
+            isSelect: false,
+        };
+        _this.wrapperRef = React.createRef();
+        return _this;
+    }
+    Cell.regist = function (model) {
+        model.componentsMap.set(this.name, this);
+    };
+    Cell.getMetaData = function () {
+        var re = {};
+        var curr = this;
+        var componentName = this.name;
+        // 合并父类metaData
+        while (curr !== React.Component) {
+            Object.assign(re, curr.metaData);
+            curr = curr.__proto__;
+        }
+        return __assign(__assign({}, lodash.exports.cloneDeep(re)), { component: componentName });
+    };
+    Cell.prototype.getStage = function (konvaNode) {
+        var re = konvaNode;
+        while (re.__proto__.constructor !== Konva.Stage) {
+            re = re.parent;
+        }
+        return re;
+    };
+    Cell.prototype.setCellData = function (data) {
+        this.context;
+        this.context.setCellData(this.props.data.id, data);
+    };
+    Cell.prototype.componentDidMount = function () {
+        var _this = this;
+        [
+            "mouseenter",
+            "mouseleave",
+            "mousedown",
+            "mouseup",
+            "dblclick",
+            "click",
+        ].forEach(function (eventName) {
+            _this.wrapperRef.current.on(eventName, function (e) {
+                _this.context.sendEvent({
+                    type: "cell:".concat(eventName),
+                    data: {
+                        e: e,
+                        cellData: _this.props.data,
+                    },
+                });
+            });
+        });
+    };
+    Cell.prototype.isSelect = function () {
+        return this.flowState.isSelect;
+    };
+    Cell.prototype.render = function () {
+        return jsxRuntime.exports.jsx(Group, __assign({ ref: this.wrapperRef }, { children: this.content() }), void 0);
+    };
+    Cell.contextType = FlowContext;
+    Cell.metaData = { id: "" };
+    return Cell;
+}(React.Component));
+var Cell$1 = observer(Cell);
+
+var Port$1 = /** @class */ (function (_super) {
+    __extends(Port, _super);
+    function Port(props, context) {
+        var _this = _super.call(this, props, context) || this;
+        context.setCellData(props.data.id);
+        return _this;
+    }
+    // 暂时废弃
+    Port.prototype.anchor = function () {
+        var konvaNode = this.wrapperRef.current;
+        if (!konvaNode)
+            return { x: 0, y: 0 };
+        var rect = konvaNode.getClientRect({
+            // 有relative不会caculate scale
+            relativeTo: this.getStage(konvaNode),
+        });
+        // 通过变换矩阵将坐标还原为标准坐标
+        // const t = konvaNode.getAbsoluteTransform();
+        return {
+            x: rect.x + rect.width / 2,
+            y: rect.y + rect.height / 2,
+        };
+    };
+    Port.prototype.onLinkStart = function (e) {
+        e.cancelBubble = true;
+        var link = this.context.buffer.link;
+        this.context.sendEvent({
+            type: "beforeLink",
+            data: {
+                source: this.props.data.id,
+            },
+        });
+        link.source = this.props.data.id;
+        link.target = this.anchor();
+    };
+    Port.prototype.onLinkEnd = function (e) {
+        e.cancelBubble = true;
+        var _a = this, context = _a.context, link = _a.context.buffer.link;
+        var sourceInstance = context.cellsMap.get(link.source);
+        if (link.source === this.props.data.id) {
+            context.clearLinkBuffer();
+        }
+        else if (this.props.link || sourceInstance.props.link) {
+            var adoptSource = true;
+            var adoptTarget = true;
+            var sourceData = context.getCellData(link.source);
+            if (sourceInstance.props.link) {
+                if (sourceInstance.props.link(sourceData, this.props.data))
+                    adoptSource = true;
+                else
+                    adoptSource = false;
+            }
+            if (this.props.link) {
+                if (this.props.link(sourceData, this.props.data))
+                    adoptTarget = true;
+                else
+                    adoptTarget = false;
+            }
+            if (adoptSource && adoptTarget)
+                context.link(link.source, this.props.data.id);
+            else
+                context.clearLinkBuffer();
+        }
+        else {
+            context.link(link.source, this.props.data.id);
+        }
+    };
+    Port.prototype.content = function () {
+        var _this = this;
+        return (jsxRuntime.exports.jsx(Group, __assign({ onMouseDown: function (e) { return _this.onLinkStart(e); }, onMouseUp: function (e) { return _this.onLinkEnd(e); } }, this.props, { children: this.props.children }), void 0));
+    };
+    Port.metaData = {
+        type: "port",
+        source: undefined,
+        target: undefined,
+    };
+    return Port;
+}(Cell$1));
+
+var STAGE_CLASS_NAME = 'flow-stage';
+var EVT_LEFTCLICK = 0;
+var EVT_RIGHTCLICK = 2;
+
+var Interactor = /** @class */ (function (_super) {
+    __extends(Interactor, _super);
+    function Interactor(props) {
+        return _super.call(this, props) || this;
+    }
+    Interactor.prototype.render = function () {
+        var _this = this;
+        var _a = this, context = _a.context, _b = _a.props, x = _b.x, y = _b.y; _b.draggable; var id = _b.id; _b.topOnFocus; var _d = _b.selectable, selectable = _d === void 0 ? true : _d, others = __rest(_b, ["x", "y", "draggable", "id", "topOnFocus", "selectable"]);
+        return (jsxRuntime.exports.jsx(Group, __assign({ x: x, y: y, onMouseDown: function (e) {
+                var _a = _this.context, selectCells = _a.selectCells, _b = _a.buffer, select = _b.select, drag = _b.drag;
+                if (selectable) {
+                    if (!selectCells.includes(_this.props.id))
+                        context.setSelectedCells([id]);
+                    // drag
+                    if (e.evt.button === EVT_LEFTCLICK) {
+                        select.isSelecting = true;
+                        drag.start.x = e.evt.x;
+                        drag.start.y = e.evt.y;
+                        drag.movedToTop = false;
+                    }
+                }
+            } }, others, { children: this.props.children }), void 0));
+    };
+    Interactor.contextType = FlowContext;
+    Interactor = __decorate([
+        observer
+    ], Interactor);
+    return Interactor;
+}(React.Component));
+Interactor.Port = Port$1;
+
 var Node = /** @class */ (function (_super) {
     __extends(Node, _super);
     function Node() {
@@ -19444,7 +19308,7 @@ var CommonNode = /** @class */ (function (_super) {
     function CommonNode() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
         _this.getStroke = function () {
-            var isSelect = _this.flowState.isSelect;
+            var isSelect = _this.isSelect();
             var color = _this.context.color;
             if (isSelect) {
                 return {
@@ -19527,6 +19391,180 @@ var CommonNode = /** @class */ (function (_super) {
     };
     return CommonNode;
 }(Node));
+
+var TEXT_HEIGHT = 16;
+var LABEL_PADDING = 4;
+var Edge = /** @class */ (function (_super) {
+    __extends(Edge, _super);
+    function Edge(props, context) {
+        var _this = _super.call(this, props, context) || this;
+        // // 先不管线条的bounds
+        // static getBounds(cellData) {
+        //   const sourceInstance = flowModel.cellsMap.get(cellData.source);
+        //   const targetInstance = flowModel.cellsMap.get(cellData.target);
+        //   const sourceAnchor =
+        //     sourceInstance.props.anchor && sourceInstance.props.anchor();
+        //   // || sourceInstance.anchor();
+        //   const targetAnchor =
+        //     targetInstance.props.anchor && targetInstance.props.anchor();
+        //   const left = Math.min(sourceAnchor.x, targetAnchor.x);
+        //   const right = Math.max(sourceAnchor.x, targetAnchor.x);
+        //   const top = Math.min(sourceAnchor.y, targetAnchor.y);
+        //   const bottom = Math.max(sourceAnchor.y, targetAnchor.y);
+        //   return {
+        //     width: right - left,
+        //     height: bottom - top,
+        //     x: left,
+        //     y: top,
+        //   };
+        // }
+        _this.bazier = true;
+        _this.dash = false;
+        _this.getStroke = function (flowState) {
+            var isSelect = flowState.isSelect;
+            var color = _this.context.color;
+            if (isSelect) {
+                return {
+                    stroke: color.active,
+                };
+            }
+            else
+                return {};
+        };
+        _this.formatVerticied = function (verticies) {
+            return verticies;
+        };
+        _this.getAnchors = function () {
+            var data = _this.props.data;
+            var sourceAnchor;
+            var targetAnchor;
+            if (isVector2d(data.source))
+                sourceAnchor = data.source;
+            else {
+                var sourceInstance = _this.context.cellsMap.get(data.source);
+                sourceAnchor =
+                    (sourceInstance.props.anchor && sourceInstance.props.anchor()) ||
+                        sourceInstance.anchor();
+            }
+            if (isVector2d(data.target))
+                targetAnchor = data.target;
+            else {
+                var targetInstance = _this.context.cellsMap.get(data.target);
+                targetAnchor =
+                    (targetInstance.props.anchor && targetInstance.props.anchor()) ||
+                        targetInstance.anchor();
+            }
+            return {
+                source: sourceAnchor,
+                target: targetAnchor,
+            };
+        };
+        _this.labelRef = React.createRef();
+        _this.state = {
+            points: [],
+        };
+        return _this;
+    }
+    Edge.prototype.getPoints = function () {
+        var anchors = this.getAnchors();
+        var verticies = this.props.data.verticies || [];
+        var routeResult = this.route(__spreadArray(__spreadArray([
+            anchors.source
+        ], verticies, true), [
+            anchors.target,
+        ], false));
+        return this.vectorsToPoints(routeResult);
+    };
+    Edge.prototype.getLinkNodesData = function () {
+        var data = this.props.data;
+        var source;
+        var target;
+        if (!isVector2d(data.source)) {
+            var sourcePort = this.context.cellsDataMap.get(data.source);
+            source = this.context.cellsDataMap.get(sourcePort.host);
+        }
+        if (!isVector2d(data.target)) {
+            var targetPort = this.context.cellsDataMap.get(data.target);
+            target = this.context.cellsDataMap.get(targetPort.host);
+        }
+        return {
+            source: source,
+            target: target,
+        };
+    };
+    // 这个方法暴露出去，可自定义路由
+    Edge.prototype.route = function (vectors) {
+        return vectors;
+    };
+    Edge.prototype.vectorsToPoints = function (vectors) {
+        var re = [];
+        vectors.forEach(function (vector) {
+            re.push(vector.x, vector.y);
+        });
+        return re;
+    };
+    Edge.prototype.labelContent = function () {
+        var _this = this;
+        var _a = this.context, color = _a.color, linesLayerRef = _a.refs.linesLayerRef;
+        var text = this.labelFormatter(this.props.data.label);
+        var textWidth = linesLayerRef.current
+            .getContext()
+            .measureText(text).width;
+        return (jsxRuntime.exports.jsxs(Label, __assign({ x: -textWidth / 2 - LABEL_PADDING, y: -TEXT_HEIGHT / 2, onClick: function (e) {
+                _this.context.sendEvent({
+                    type: "label:click",
+                    data: _this,
+                });
+            } }, { children: [jsxRuntime.exports.jsx(Tag, { fill: color.background }, void 0), jsxRuntime.exports.jsx(Text, { height: TEXT_HEIGHT, verticalAlign: "middle", text: this.labelFormatter(this.props.data.label), padding: LABEL_PADDING }, void 0)] }), void 0));
+    };
+    Edge.prototype.labelRender = function (anchors) {
+        var _this = this;
+        var text = this.labelFormatter(this.props.data.label);
+        return (jsxRuntime.exports.jsx(Group, __assign({ ref: function (label) {
+                if (!label)
+                    return;
+                [
+                    "mouseenter",
+                    "mouseleave",
+                    "mousedown",
+                    "mouseup",
+                    "dblclick",
+                    "click",
+                ].forEach(function (eventName) {
+                    label.on(eventName, function (e) {
+                        _this.context.sendEvent({
+                            type: "label:".concat(eventName),
+                            data: {
+                                e: e,
+                                cellData: _this.props.data,
+                            },
+                        });
+                    });
+                });
+            }, x: (anchors.source.x + anchors.target.x) / 2, y: (anchors.source.y + anchors.target.y) / 2 }, { children: text && this.labelContent() }), void 0));
+    };
+    Edge.prototype.labelFormatter = function (label) {
+        return label;
+    };
+    Edge.prototype.isLinking = function () {
+        return this.context.buffer.link.edge === this.props.data.id;
+    };
+    Edge.prototype.edgeRender = function (_a) {
+        var points = _a.points, isLinking = _a.isLinking;
+        var color = this.context.color;
+        return (jsxRuntime.exports.jsxs(Group, { children: [jsxRuntime.exports.jsx(Line, __assign({ stroke: color.deepGrey, points: points, strokeWidth: 3 }, this.getStroke(this.flowState), { lineCap: "round", dash: isLinking ? [10, 10] : undefined }), void 0), jsxRuntime.exports.jsx(Line, { stroke: "transparent", points: points, strokeWidth: 20, lineCap: "round" }, void 0)] }, void 0));
+    };
+    Edge.prototype.content = function () {
+        return (jsxRuntime.exports.jsxs(Interactor, __assign({ id: this.props.data.id, draggable: false }, { children: [this.edgeRender({
+                    points: this.getPoints(),
+                    isLinking: this.isLinking(),
+                }), this.labelRender(this.getAnchors())] }), void 0));
+    };
+    Edge.metaData = {
+        type: "edge",
+    };
+    return Edge;
+}(Cell$1));
 
 var registComponents = function (model) {
     CommonNode.regist(model);
@@ -19811,7 +19849,7 @@ function styleInject(css, ref) {
   }
 }
 
-var css_248z = ".style_toolbar__Knqd1 {\n  box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);\n  display: flex;\n  flex-direction: column;\n  list-style: none;\n  gap: 10px;\n  max-width: 400px;\n  border-radius: 10px;\n  padding: 14px;\n  position: absolute;\n  background-color: white;\n  z-index: 2;\n}\n.style_toolbar__item__fjUio:hover {\n  width: 100px;\n  cursor: pointer;\n  background-color: rgba(0, 0, 0, 0.1);\n}\n.style_toolbar__button__ybZwx {\n  line-height: 1.5715;\n  position: relative;\n  display: inline-block;\n  font-weight: 400;\n  white-space: nowrap;\n  text-align: center;\n  background-image: none;\n  border: 1px solid transparent;\n  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.015);\n  cursor: pointer;\n  transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);\n  -webkit-user-select: none;\n  -moz-user-select: none;\n  -ms-user-select: none;\n  user-select: none;\n  touch-action: manipulation;\n  height: 32px;\n  padding: 4px 15px;\n  font-size: 14px;\n  border-radius: 2px;\n  color: rgba(0, 0, 0, 0.85);\n  border-color: #d9d9d9;\n  background: #fff;\n}\n";
+var css_248z = ".style_toolbar__Knqd1 {\n  box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);\n  display: flex;\n  flex-direction: column;\n  list-style: none;\n  gap: 10px;\n  max-width: 400px;\n  border-radius: 6px;\n  padding: 14px;\n  position: absolute;\n  background-color: white;\n  z-index: 2;\n}\n.style_toolbar__item__fjUio:hover {\n  width: 100px;\n  cursor: pointer;\n  background-color: rgba(0, 0, 0, 0.1);\n}\n.style_toolbar__button__ybZwx {\n  line-height: 1.5715;\n  position: relative;\n  display: inline-block;\n  font-weight: 400;\n  white-space: nowrap;\n  text-align: center;\n  background-image: none;\n  border: 1px solid transparent;\n  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.015);\n  cursor: pointer;\n  transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);\n  -webkit-user-select: none;\n  -moz-user-select: none;\n  -ms-user-select: none;\n  user-select: none;\n  touch-action: manipulation;\n  height: 32px;\n  padding: 4px 15px;\n  font-size: 14px;\n  border-radius: 2px;\n  color: rgba(0, 0, 0, 0.85);\n  border-color: #d9d9d9;\n  background: #fff;\n}\n";
 var styles = {"toolbar":"style_toolbar__Knqd1","toolbar__item":"style_toolbar__item__fjUio","toolbar__button":"style_toolbar__button__ybZwx"};
 styleInject(css_248z);
 
@@ -19846,19 +19884,16 @@ var RightClickPanel = /** @class */ (function (_super) {
             _this.initStageEvent();
         });
     };
-    RightClickPanel.prototype.dele = function () {
-    };
-    RightClickPanel.prototype.add = function () { };
+    RightClickPanel.prototype.dele = function () { };
     RightClickPanel.prototype.moveToTop = function () { };
     RightClickPanel.prototype.render = function () {
-        var _this = this;
         var extra = this.props.extra;
         if (!this.context.buffer.rightClickPanel.visible)
             return jsxRuntime.exports.jsx(jsxRuntime.exports.Fragment, {}, void 0);
-        return (jsxRuntime.exports.jsxs("ul", __assign({ style: {
+        return (jsxRuntime.exports.jsx("ul", __assign({ style: {
                 top: this.state.pos.y,
                 left: this.state.pos.x,
-            }, className: styles["toolbar"] }, { children: [jsxRuntime.exports.jsx("button", __assign({ className: styles["toolbar__button"], onClick: function () { return _this.dele(); } }, { children: "\u5220\u9664" }), void 0), jsxRuntime.exports.jsx("button", __assign({ className: styles["toolbar__button"], onClick: function () { return _this.dele(); } }, { children: "\u79FB\u5230\u9876\u5C42" }), void 0), extra && extra(this.context)] }), void 0));
+            }, className: styles["toolbar"] }, { children: extra && extra(this.context) }), void 0));
     };
     RightClickPanel.contextType = FlowContext;
     RightClickPanel = __decorate([

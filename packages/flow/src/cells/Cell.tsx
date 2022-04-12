@@ -100,6 +100,10 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
     });
   }
 
+  isSelect() {
+    return this.flowState.isSelect;
+  }
+
   render() {
     return <Group ref={this.wrapperRef}>{this.content()}</Group>;
   }

@@ -79,7 +79,7 @@ class CommonNode extends Node<CommonNodeType, {}> {
   }
 
   getStroke = () => {
-    const isSelect = this.flowState.isSelect;
+    const isSelect = this.isSelect();
     const { color } = this.context;
 
     if (isSelect) {
