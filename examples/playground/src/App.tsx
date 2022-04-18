@@ -40,7 +40,7 @@ function App() {
       label: "NODE 1 Common",
     });
 
-    model.addCell("Edge", {
+    model.addCell("MyEdge", {
       label: "im edge",
       target: "port-5",
       source: "out-test",

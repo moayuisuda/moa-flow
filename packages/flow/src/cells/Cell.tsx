@@ -4,14 +4,16 @@ import Konva from "konva";
 import { FlowContext } from "../Context";
 import { cloneDeep } from "lodash";
 import { observer } from "mobx-react";
+import Model from "@/Model";
 
-export type CellType = { id: string; type: string };
+export type CellType = { id: string; cellType: string };
 
 // D: data, S: state, P: props
 abstract class Cell<D, S = {}, P = {}> extends React.Component<
   { data: D & CellType } & P,
   S
 > {
+  // 这样定义的是这个实例的属性，如this.xxx
   flowState: {
     isSelect: boolean;
   };
@@ -27,13 +29,13 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
     height: number;
   };
 
-  // 非static的abstract只能这样写
+  // 如果是content: () => xxx 对应的是instance property，这种写法是instance function
   abstract content(): JSX.Element;
   static metaData: any = { id: "" };
 
   wrapperRef: React.RefObject<any>;
 
-  constructor(props, context) {
+  constructor(props: any, context: Model) {
     super(props);
     context.cellsMap.set(props.data.id, this);
     this.flowState = {
@@ -74,7 +76,7 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
     return re;
   }
 
-  setCellData(data) {
+  setData(data) {
     this.context;
     this.context.setCellData(this.props.data.id, data);
   }

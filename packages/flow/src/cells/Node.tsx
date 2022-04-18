@@ -8,11 +8,11 @@ export type NodeType = {
   ports?: [];
 } & CellType;
 
-abstract class Node<P, S> extends Cell<P & NodeType, S> {
+abstract class Node<P = {}, S = {}> extends Cell<P & NodeType, S> {
   static metaData: any = {
     x: 0,
     y: 0,
-    type: "node",
+    cellType: "node",
   };
 }
 

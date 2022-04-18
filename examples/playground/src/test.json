@@ -5,7 +5,7 @@
   "cells": [
     {
       "id": "2",
-      "type": "node",
+      "cellType": "node",
       "component": "CommonNode",
       "x": 800,
       "y": 200,

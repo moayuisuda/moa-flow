@@ -1,8 +1,9 @@
 import React from "react";
 import { FlowContext } from "../Context";
+import Model from "@/Model";
 export declare type CellType = {
     id: string;
-    type: string;
+    cellType: string;
 };
 declare abstract class Cell<D, S = {}, P = {}> extends React.Component<{
     data: D & CellType;
@@ -10,7 +11,7 @@ declare abstract class Cell<D, S = {}, P = {}> extends React.Component<{
     flowState: {
         isSelect: boolean;
     };
-    static contextType: React.Context<import("../Model").FlowModel>;
+    static contextType: React.Context<Model>;
     context: React.ContextType<typeof FlowContext>;
     static getBounds: (cellData: any) => {
         x: number;
@@ -21,11 +22,13 @@ declare abstract class Cell<D, S = {}, P = {}> extends React.Component<{
     abstract content(): JSX.Element;
     static metaData: any;
     wrapperRef: React.RefObject<any>;
-    constructor(props: any, context: any);
+    constructor(props: any, context: Model);
     static regist(model: any): void;
-    static getMetaData(): any;
+    static getMetaData(): {
+        component: string;
+    };
     getStage(konvaNode: any): any;
-    setCellData(data: any): void;
+    setData(data: any): void;
     componentDidMount(): void;
     isSelect(): boolean;
     render(): JSX.Element;

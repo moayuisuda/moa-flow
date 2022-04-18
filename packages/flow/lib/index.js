@@ -1,7 +1,11 @@
+export { Html } from 'react-konva-utils';
 import React, { useContext, useState, useEffect, createRef } from 'react';
-import { Group, Rect, Text, Circle, Label, Tag, Line, Layer, Stage, useStrictMode } from 'react-konva';
+import { Group, Rect, Text, Circle, Label, Tag, Line, Layer, Stage, useStrictMode, Image as Image$1 } from 'react-konva';
+import * as reactKonva from 'react-konva';
+export { reactKonva as Graph };
 import { observer } from 'mobx-react';
 import { observable, action, makeObservable, autorun } from 'mobx';
+export { autorun } from 'mobx';
 import Konva from 'konva';
 
 /*! *****************************************************************************
@@ -18753,7 +18757,7 @@ var FlowModel = /** @class */ (function () {
         };
         this.setCellDataMap = function (cellData) {
             _this.cellsDataMap.set(cellData.id, cellData);
-            if (cellData.type === "node" && cellData.ports) {
+            if (cellData.cellType === "node" && cellData.ports) {
                 cellData.ports.forEach(function (portData) {
                     _this.setCellDataMap(portData);
                 });
@@ -18820,7 +18824,7 @@ var FlowModel = /** @class */ (function () {
             var re = [];
             _this.cellsMap.forEach(function (cell) {
                 var _a;
-                if (((_a = cell.props.data) === null || _a === void 0 ? void 0 : _a.type) === "node") {
+                if (((_a = cell.props.data) === null || _a === void 0 ? void 0 : _a.cellType) === "node") {
                     var instance = cell.wrapperRef.current;
                     var bounds = instance.getClientRect({
                         relativeTo: instance.getStage(instance),
@@ -18856,6 +18860,9 @@ var FlowModel = /** @class */ (function () {
         this.cellsDataMap = new Map();
         // 注册节点到model，方便动态引用
         this.componentsMap = new Map();
+        this.regist = function (component) {
+            _this.componentsMap.set(component.name, component);
+        };
         // 消息传递
         this.eventBus = {
             sender: undefined,
@@ -18884,7 +18891,8 @@ var FlowModel = /** @class */ (function () {
             _this.selectCells = [];
         };
         this.sendEvent = function (data) {
-            _this.eventBus.sender(data);
+            var _a, _b;
+            (_b = (_a = _this.eventBus).sender) === null || _b === void 0 ? void 0 : _b.call(_a, data);
         };
         this.setStageScale = function (x, y) {
             _this.canvasData.scale = {
@@ -18898,6 +18906,7 @@ var FlowModel = /** @class */ (function () {
         };
         this.setCanvasData = function (canvasData) {
             _this.canvasData = canvasData;
+            _this.setCellsDataMap();
         };
         this.setCellId = function (data) {
             data.id = v4();
@@ -18955,7 +18964,7 @@ var FlowModel = /** @class */ (function () {
             if (newCellData.ports) {
                 newCellData.ports.forEach(function (port) {
                     port.host = newCellData.id;
-                    port.type = "port";
+                    port.cellType = "port";
                     if (!port.id)
                         port.id = v4();
                 });
@@ -19087,6 +19096,8 @@ var FlowModel = /** @class */ (function () {
     ], FlowModel.prototype, "moveTo", null);
     return FlowModel;
 }());
+var a = new FlowModel();
+a.regist(Node);
 
 var Button = function (props) {
     var _a = props.x, x = _a === void 0 ? 0 : _a, _b = props.y, y = _b === void 0 ? 0 : _b, _c = props.width, width = _c === void 0 ? 100 : _c, _d = props.height, height = _d === void 0 ? 30 : _d;
@@ -19127,7 +19138,7 @@ var Cell = /** @class */ (function (_super) {
         }
         return re;
     };
-    Cell.prototype.setCellData = function (data) {
+    Cell.prototype.setData = function (data) {
         this.context;
         this.context.setCellData(this.props.data.id, data);
     };
@@ -19278,7 +19289,7 @@ var Interactor = /** @class */ (function (_super) {
 }(React.Component));
 Interactor.Port = Port$1;
 
-var Node = /** @class */ (function (_super) {
+var Node$1 = /** @class */ (function (_super) {
     __extends(Node, _super);
     function Node() {
         return _super !== null && _super.apply(this, arguments) || this;
@@ -19286,7 +19297,7 @@ var Node = /** @class */ (function (_super) {
     Node.metaData = {
         x: 0,
         y: 0,
-        type: "node",
+        cellType: "node",
     };
     return Node;
 }(Cell$1));
@@ -19321,10 +19332,11 @@ var CommonNode = /** @class */ (function (_super) {
         return _this;
     }
     CommonNode.getBounds = function (cellData) {
-        var outPorts = cellData.ports.filter(function (portData) { return portData.portType === "out"; });
-        var inPorts = cellData.ports.filter(function (portData) { return portData.portType === "in"; });
-        var controlOutPorts = cellData.ports.filter(function (portData) { return portData.portType === "control-out"; });
-        var controlInPorts = cellData.ports.filter(function (portData) { return portData.portType === "control-in"; });
+        var _a, _b, _c, _d;
+        var outPorts = ((_a = cellData.ports) === null || _a === void 0 ? void 0 : _a.filter(function (portData) { return portData.portType === "out"; })) || [];
+        var inPorts = ((_b = cellData.ports) === null || _b === void 0 ? void 0 : _b.filter(function (portData) { return portData.portType === "in"; })) || [];
+        var controlOutPorts = ((_c = cellData.ports) === null || _c === void 0 ? void 0 : _c.filter(function (portData) { return portData.portType === "control-out"; })) || [];
+        var controlInPorts = ((_d = cellData.ports) === null || _d === void 0 ? void 0 : _d.filter(function (portData) { return portData.portType === "control-in"; })) || [];
         var height = Math.max(outPorts.length + controlOutPorts.length, inPorts.length + controlInPorts.length) *
             SINGLE_PORT_HEIGHT +
             HEADER_HEIGHT +
@@ -19345,10 +19357,10 @@ var CommonNode = /** @class */ (function (_super) {
         var color = this.context.color;
         var getStroke = this.getStroke;
         var _a = this.props.data, label = _a.label, ports = _a.ports;
-        var outPorts = ports.filter(function (portData) { return portData.portType === "out"; });
-        var inPorts = ports.filter(function (portData) { return portData.portType === "in"; });
-        var controlOutPorts = ports.filter(function (portData) { return portData.portType === "control-out"; });
-        var controlInPorts = ports.filter(function (portData) { return portData.portType === "control-in"; });
+        var outPorts = (ports === null || ports === void 0 ? void 0 : ports.filter(function (portData) { return portData.portType === "out"; })) || [];
+        var inPorts = (ports === null || ports === void 0 ? void 0 : ports.filter(function (portData) { return portData.portType === "in"; })) || [];
+        var controlOutPorts = (ports === null || ports === void 0 ? void 0 : ports.filter(function (portData) { return portData.portType === "control-out"; })) || [];
+        var controlInPorts = (ports === null || ports === void 0 ? void 0 : ports.filter(function (portData) { return portData.portType === "control-in"; })) || [];
         var FULL_HEIGHT = CommonNode.getBounds(this.props.data).height;
         var data = this.props.data;
         return (jsxRuntime.exports.jsxs(Interactor, __assign({}, this.props.data, { topOnFocus: true }, { children: [jsxRuntime.exports.jsx(Rect, { width: WIDTH, height: FULL_HEIGHT, fill: "white", shadowColor: "black", shadowBlur: 10, shadowOpacity: 0.1, cornerRadius: 10 }, void 0), jsxRuntime.exports.jsxs(Group, { children: [jsxRuntime.exports.jsx(Rect, { cornerRadius: [10, 10, 0, 0], width: WIDTH, height: HEADER_HEIGHT, fill: color.grey }, void 0), jsxRuntime.exports.jsx(Text, { fontSize: 14, text: label, height: HEADER_HEIGHT, x: 20, verticalAlign: "middle" }, void 0), jsxRuntime.exports.jsx(Button, { x: WIDTH, width: 20, height: HEADER_HEIGHT, text: "\uFF0B", onClick: function (e) {
@@ -19390,7 +19402,7 @@ var CommonNode = /** @class */ (function (_super) {
         label: "",
     };
     return CommonNode;
-}(Node));
+}(Node$1));
 
 var TEXT_HEIGHT = 16;
 var LABEL_PADDING = 4;
@@ -19466,14 +19478,13 @@ var Edge = /** @class */ (function (_super) {
         return _this;
     }
     Edge.prototype.getPoints = function () {
+        var routeResult = this.route(this.getVectors());
+        return this.vectorsToPoints(routeResult);
+    };
+    Edge.prototype.getVectors = function () {
         var anchors = this.getAnchors();
         var verticies = this.props.data.verticies || [];
-        var routeResult = this.route(__spreadArray(__spreadArray([
-            anchors.source
-        ], verticies, true), [
-            anchors.target,
-        ], false));
-        return this.vectorsToPoints(routeResult);
+        return __spreadArray(__spreadArray([anchors.source], verticies, true), [anchors.target], false);
     };
     Edge.prototype.getLinkNodesData = function () {
         var data = this.props.data;
@@ -19552,7 +19563,7 @@ var Edge = /** @class */ (function (_super) {
     Edge.prototype.edgeRender = function (_a) {
         var points = _a.points, isLinking = _a.isLinking;
         var color = this.context.color;
-        return (jsxRuntime.exports.jsxs(Group, { children: [jsxRuntime.exports.jsx(Line, __assign({ stroke: color.deepGrey, points: points, strokeWidth: 3 }, this.getStroke(this.flowState), { lineCap: "round", dash: isLinking ? [10, 10] : undefined }), void 0), jsxRuntime.exports.jsx(Line, { stroke: "transparent", points: points, strokeWidth: 20, lineCap: "round" }, void 0)] }, void 0));
+        return (jsxRuntime.exports.jsxs(Group, { children: [jsxRuntime.exports.jsx(Line, __assign({ stroke: color.deepGrey, points: points, strokeWidth: 3 }, this.getStroke(this.flowState), { lineCap: "round", dash: isLinking ? [10, 10] : undefined }), void 0), jsxRuntime.exports.jsx(Line, { stroke: "transparent", points: points, strokeWidth: 20, lineCap: "round" }, void 0), this.lineExtra && this.lineExtra()] }, void 0));
     };
     Edge.prototype.content = function () {
         return (jsxRuntime.exports.jsxs(Interactor, __assign({ id: this.props.data.id, draggable: false }, { children: [this.edgeRender({
@@ -19561,7 +19572,7 @@ var Edge = /** @class */ (function (_super) {
                 }), this.labelRender(this.getAnchors())] }), void 0));
     };
     Edge.metaData = {
-        type: "edge",
+        cellType: "edge",
     };
     return Edge;
 }(Cell$1));
@@ -19629,12 +19640,11 @@ var initDrag = function (model, stage, layers) {
             model.selectCells.forEach(function (id) {
                 var cellData = model.getCellData(id);
                 var konvaNode = model.getCellInstance(id).wrapperRef.current;
-                if (cellData.type === 'node') {
+                if (cellData.cellType === 'node') {
                     if (!drag.movedToTop) {
                         zIndexCache[cellData.id] = konvaNode.zIndex();
                         konvaNode.moveTo(topLayer);
                     }
-                    console.log(e);
                     model.setCellData(cellData.id, {
                         x: cellData.x + movement.x / stage.scaleX(),
                         y: cellData.y + movement.y / stage.scaleY(),
@@ -19674,7 +19684,7 @@ var initDrag = function (model, stage, layers) {
             model.selectCells.forEach(function (id) {
                 var cellData = model.getCellData(id);
                 var konvaNode = model.getCellInstance(id).wrapperRef.current;
-                if (cellData.type === 'node') {
+                if (cellData.cellType === 'node') {
                     konvaNode.moveTo(nodesLayer);
                     konvaNode.zIndex(zIndexCache[cellData.id]);
                 }
@@ -19849,7 +19859,7 @@ function styleInject(css, ref) {
   }
 }
 
-var css_248z = ".style_toolbar__Knqd1 {\n  box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);\n  display: flex;\n  flex-direction: column;\n  list-style: none;\n  gap: 10px;\n  max-width: 400px;\n  border-radius: 6px;\n  padding: 14px;\n  position: absolute;\n  background-color: white;\n  z-index: 2;\n}\n.style_toolbar__item__fjUio:hover {\n  width: 100px;\n  cursor: pointer;\n  background-color: rgba(0, 0, 0, 0.1);\n}\n.style_toolbar__button__ybZwx {\n  line-height: 1.5715;\n  position: relative;\n  display: inline-block;\n  font-weight: 400;\n  white-space: nowrap;\n  text-align: center;\n  background-image: none;\n  border: 1px solid transparent;\n  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.015);\n  cursor: pointer;\n  transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);\n  -webkit-user-select: none;\n  -moz-user-select: none;\n  -ms-user-select: none;\n  user-select: none;\n  touch-action: manipulation;\n  height: 32px;\n  padding: 4px 15px;\n  font-size: 14px;\n  border-radius: 2px;\n  color: rgba(0, 0, 0, 0.85);\n  border-color: #d9d9d9;\n  background: #fff;\n}\n";
+var css_248z = ".style_toolbar__Knqd1 {\n  box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);\n  background-color: white;\n  z-index: 2;\n}\n.style_toolbar__item__fjUio:hover {\n  width: 100px;\n  cursor: pointer;\n  background-color: rgba(0, 0, 0, 0.1);\n}\n.style_toolbar__button__ybZwx {\n  line-height: 1.5715;\n  position: relative;\n  display: inline-block;\n  font-weight: 400;\n  white-space: nowrap;\n  text-align: center;\n  background-image: none;\n  border: 1px solid transparent;\n  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.015);\n  cursor: pointer;\n  transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);\n  -webkit-user-select: none;\n  -moz-user-select: none;\n  -ms-user-select: none;\n  user-select: none;\n  touch-action: manipulation;\n  height: 32px;\n  padding: 4px 15px;\n  font-size: 14px;\n  border-radius: 2px;\n  color: rgba(0, 0, 0, 0.85);\n  border-color: #d9d9d9;\n  background: #fff;\n}\n";
 var styles = {"toolbar":"style_toolbar__Knqd1","toolbar__item":"style_toolbar__item__fjUio","toolbar__button":"style_toolbar__button__ybZwx"};
 styleInject(css_248z);
 
@@ -19887,13 +19897,12 @@ var RightClickPanel = /** @class */ (function (_super) {
     RightClickPanel.prototype.dele = function () { };
     RightClickPanel.prototype.moveToTop = function () { };
     RightClickPanel.prototype.render = function () {
-        var extra = this.props.extra;
         if (!this.context.buffer.rightClickPanel.visible)
             return jsxRuntime.exports.jsx(jsxRuntime.exports.Fragment, {}, void 0);
-        return (jsxRuntime.exports.jsx("ul", __assign({ style: {
+        return (jsxRuntime.exports.jsx("ul", { style: {
                 top: this.state.pos.y,
                 left: this.state.pos.x,
-            }, className: styles["toolbar"] }, { children: extra && extra(this.context) }), void 0));
+            }, className: styles["toolbar"] }, void 0));
     };
     RightClickPanel.contextType = FlowContext;
     RightClickPanel = __decorate([
@@ -19916,7 +19925,7 @@ var renderComponent = function (cellData, model) {
 var Nodes = observer(function (props) {
     var nodesLayerRef = props.nodesLayerRef, model = props.model;
     var nodesData = model.canvasData.cells.filter(function (cellData) {
-        return cellData.type !== "edge";
+        return cellData.cellType !== "edge";
     });
     return (jsxRuntime.exports.jsx(Layer, __assign({ ref: nodesLayerRef, zIndex: 1 }, { children: nodesData.slice(0, nodesData.length).map(function (cellData) {
             return renderComponent(cellData, model);
@@ -19925,7 +19934,7 @@ var Nodes = observer(function (props) {
 var InteractTop = observer(function (props) {
     var model = props.model, topLayerRef = props.topLayerRef;
     model.canvasData.cells.filter(function (cellData) {
-        return cellData.type !== "edge";
+        return cellData.cellType !== "edge";
     });
     return (jsxRuntime.exports.jsxs(Layer, __assign({ zIndex: 2, ref: topLayerRef }, { children: [jsxRuntime.exports.jsx(LinkingEdge, { data: model.buffer.link }, void 0), jsxRuntime.exports.jsx(SelectBoundsRect, {}, void 0)] }), void 0));
 });
@@ -19935,7 +19944,7 @@ var Edges = observer(function (props) {
     useEffect(function () {
         setSecondRefresh(1);
     }, []);
-    var edgesData = model.canvasData.cells.filter(function (cellData) { return cellData.type === "edge"; });
+    var edgesData = model.canvasData.cells.filter(function (cellData) { return cellData.cellType === "edge"; });
     return (jsxRuntime.exports.jsx(Layer, __assign({ ref: linesLayerRef, zIndex: 0 }, { children: edgesData.map(function (cellData) {
             return renderComponent(cellData, model);
         }) }), void 0));
@@ -19980,20 +19989,25 @@ var Canvas = /** @class */ (function (_super) {
     };
     Canvas.prototype.render = function () {
         var model = this.props.model;
-        return (jsxRuntime.exports.jsx(Stage, __assign({ className: STAGE_CLASS_NAME, ref: this.stageRef, scale: model.canvasData.scale, x: model.canvasData.x, y: model.canvasData.y, width: window.innerWidth, height: window.innerHeight }, { children: jsxRuntime.exports.jsxs(FlowContext.Provider, __assign({ value: model }, { children: [jsxRuntime.exports.jsx(Nodes, { nodesLayerRef: this.nodesLayerRef, model: model }, void 0), jsxRuntime.exports.jsx(InteractTop, { topLayerRef: this.topLayerRef, model: model }, void 0), jsxRuntime.exports.jsx(Edges, { linesLayerRef: this.linesLayerRef, model: model }, void 0)] }), void 0) }), void 0));
+        return (jsxRuntime.exports.jsx(Stage, __assign({ className: STAGE_CLASS_NAME, ref: this.stageRef, scale: model.canvasData.scale, x: model.canvasData.x, y: model.canvasData.y, width: this.props.width || window.innerWidth, height: this.props.height || window.innerHeight }, { children: jsxRuntime.exports.jsxs(FlowContext.Provider, __assign({ value: model }, { children: [jsxRuntime.exports.jsx(Nodes, { nodesLayerRef: this.nodesLayerRef, model: model }, void 0), jsxRuntime.exports.jsx(InteractTop, { topLayerRef: this.topLayerRef, model: model }, void 0), jsxRuntime.exports.jsx(Edges, { linesLayerRef: this.linesLayerRef, model: model }, void 0)] }), void 0) }), void 0));
     };
     Canvas = __decorate([
         observer
     ], Canvas);
     return Canvas;
 }(React.Component));
+var DEFAULT_CANVAS_DATA = {
+    scale: { x: 1, y: 1 },
+    x: 0,
+    y: 0,
+    cells: [],
+};
 var Flow = /** @class */ (function (_super) {
     __extends(Flow, _super);
     function Flow(props) {
         var _this = _super.call(this, props) || this;
         _this.flowModel = new FlowModel(props.onEvent);
-        _this.flowModel.setCanvasData(_this.props.canvasData);
-        _this.flowModel.setCellsDataMap();
+        _this.flowModel.setCanvasData(_this.props.canvasData || DEFAULT_CANVAS_DATA);
         props.modelRef && (props.modelRef.current = _this.flowModel);
         props.onLoad && props.onLoad(_this.flowModel);
         registComponents(_this.flowModel);
@@ -20003,12 +20017,57 @@ var Flow = /** @class */ (function (_super) {
         var model = this.flowModel;
         return (jsxRuntime.exports.jsx("div", __assign({ style: {
                 position: "relative",
-            } }, { children: jsxRuntime.exports.jsxs(FlowContext.Provider, __assign({ value: model }, { children: [getRightClickPanel(this.props.children), jsxRuntime.exports.jsx(Canvas, { model: model }, void 0)] }), void 0) }), void 0));
+            } }, { children: jsxRuntime.exports.jsxs(FlowContext.Provider, __assign({ value: model }, { children: [getRightClickPanel(this.props.children), jsxRuntime.exports.jsx(Canvas, { model: model, width: this.props.width, height: this.props.height }, void 0)] }), void 0) }), void 0));
     };
     Flow = __decorate([
         observer
     ], Flow);
     return Flow;
+}(React.Component));
+
+var Image = /** @class */ (function (_super) {
+    __extends(Image, _super);
+    function Image() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.state = {
+            image: null,
+        };
+        _this.handleLoad = function () {
+            // after setState react-konva will update canvas and redraw the layer
+            // because "image" property is changed
+            _this.setState({
+                image: _this.image,
+            });
+            // if you keep same image object during source updates
+            // you will have to update layer manually:
+            // this.imageNode.getLayer().batchDraw();
+        };
+        return _this;
+    }
+    Image.prototype.componentDidMount = function () {
+        this.loadImage();
+    };
+    Image.prototype.componentDidUpdate = function (oldProps) {
+        if (oldProps.src !== this.props.src) {
+            this.loadImage();
+        }
+    };
+    Image.prototype.componentWillUnmount = function () {
+        this.image.removeEventListener("load", this.handleLoad);
+    };
+    Image.prototype.loadImage = function () {
+        // save to "this" to remove "load" handler on unmount
+        this.image = new window.Image();
+        this.image.src = this.props.src;
+        this.image.addEventListener("load", this.handleLoad);
+    };
+    Image.prototype.render = function () {
+        var _this = this;
+        return (jsxRuntime.exports.jsx(Image$1, __assign({ image: this.state.image, ref: function (node) {
+                _this.imageNode = node;
+            } }, this.props), void 0));
+    };
+    return Image;
 }(React.Component));
 
 var reactDom = {exports: {}};
@@ -47638,4 +47697,4 @@ var mountFlow = function (container, props) {
     return { modelRef: modelRef };
 };
 
-export { Cell$1 as Cell, Edge, Flow, Interactor, Node, Port$1 as Port, RightClickPanel, mountFlow };
+export { Cell$1 as Cell, Edge, Flow, Image, Interactor, Node$1 as Node, Port$1 as Port, RightClickPanel, mountFlow };

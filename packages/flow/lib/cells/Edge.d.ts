@@ -23,8 +23,12 @@ declare abstract class Edge<P = {}, S = {}> extends Cell<EdgeType & P, {
         stroke?: undefined;
     };
     protected formatVerticied: (verticies: any) => any;
-    private getAnchors;
+    getAnchors: () => {
+        source: any;
+        target: any;
+    };
     private getPoints;
+    getVectors(): any[];
     getLinkNodesData(): {
         source: any;
         target: any;
@@ -35,6 +39,7 @@ declare abstract class Edge<P = {}, S = {}> extends Cell<EdgeType & P, {
     protected labelRender(anchors: any): JSX.Element;
     labelFormatter(label: any): any;
     isLinking(): boolean;
+    lineExtra: () => JSX.Element;
     protected edgeRender({ points, isLinking }: {
         points: any;
         isLinking: any;

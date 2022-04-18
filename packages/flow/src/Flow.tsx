@@ -37,7 +37,7 @@ const Nodes = observer((props: { nodesLayerRef; model }) => {
   const { nodesLayerRef, model } = props;
 
   const nodesData = model.canvasData.cells.filter((cellData) => {
-    return cellData.type !== "edge";
+    return cellData.cellType !== "edge";
   });
 
   return (
@@ -53,7 +53,7 @@ const InteractTop = observer((props: { model; topLayerRef }) => {
   const { model, topLayerRef } = props;
 
   const nodesData = model.canvasData.cells.filter((cellData) => {
-    return cellData.type !== "edge";
+    return cellData.cellType !== "edge";
   });
 
   return (
@@ -73,7 +73,7 @@ const Edges = observer((props: { linesLayerRef; model }) => {
   }, []);
 
   const edgesData = model.canvasData.cells.filter(
-    (cellData) => cellData.type === "edge"
+    (cellData) => cellData.cellType === "edge"
   );
 
   return (
@@ -86,7 +86,11 @@ const Edges = observer((props: { linesLayerRef; model }) => {
 });
 
 @observer
-class Canvas extends React.Component<{ model: ModelType }> {
+class Canvas extends React.Component<{
+  model: ModelType;
+  width?: number;
+  height?: number;
+}> {
   stageRef;
   nodesLayerRef;
   linesLayerRef;
@@ -143,8 +147,8 @@ class Canvas extends React.Component<{ model: ModelType }> {
         scale={model.canvasData.scale}
         x={model.canvasData.x}
         y={model.canvasData.y}
-        width={window.innerWidth}
-        height={window.innerHeight}
+        width={this.props.width || window.innerWidth}
+        height={this.props.height || window.innerHeight}
       >
         {/* Provider需要在Stage内部，issue https://github.com/konvajs/react-konva/issues/188 */}
         <FlowContext.Provider value={model}>
@@ -159,10 +163,19 @@ class Canvas extends React.Component<{ model: ModelType }> {
 }
 
 type FlowProps = {
-  canvasData: any;
+  canvasData?: any;
   onEvent?: (e: { type: string; data: any }) => void;
   onLoad?: (model: FlowModel) => void;
   modelRef?: any;
+  width?: number;
+  height?: number;
+};
+
+const DEFAULT_CANVAS_DATA = {
+  scale: { x: 1, y: 1 },
+  x: 0,
+  y: 0,
+  cells: [],
 };
 @observer
 class Flow extends React.Component<FlowProps, {}> {
@@ -173,8 +186,7 @@ class Flow extends React.Component<FlowProps, {}> {
     super(props);
 
     this.flowModel = new FlowModel(props.onEvent);
-    this.flowModel.setCanvasData(this.props.canvasData);
-    this.flowModel.setCellsDataMap();
+    this.flowModel.setCanvasData(this.props.canvasData || DEFAULT_CANVAS_DATA);
 
     props.modelRef && (props.modelRef.current = this.flowModel);
     props.onLoad && props.onLoad(this.flowModel);
@@ -192,7 +204,11 @@ class Flow extends React.Component<FlowProps, {}> {
       >
         <FlowContext.Provider value={model}>
           {getRightClickPanel(this.props.children)}
-          <Canvas model={model} />
+          <Canvas
+            model={model}
+            width={this.props.width}
+            height={this.props.height}
+          />
         </FlowContext.Provider>
       </div>
     );

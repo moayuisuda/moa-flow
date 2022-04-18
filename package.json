@@ -23,7 +23,5 @@
     "packages/*",
     "examples/*"
   ],
-  "dependencies": {
-    "antd": "^4.19.1"
-  }
+  "dependencies": {}
 }

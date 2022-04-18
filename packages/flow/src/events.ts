@@ -67,13 +67,12 @@ export const initDrag = (model: ModelType, stage: Konva.Stage, layers: {
                 const cellData = model.getCellData(id) as NodeType & CellType
                 const konvaNode = model.getCellInstance(id).wrapperRef.current
 
-                if (cellData.type === 'node') {
+                if (cellData.cellType === 'node') {
                     if (!drag.movedToTop) {
                         zIndexCache[cellData.id] = konvaNode.zIndex()
                         konvaNode.moveTo(topLayer)
                     }
 
-                    console.log(e)
                     model.setCellData(cellData.id, {
                         x: cellData.x + movement.x / stage.scaleX(),
                         y: cellData.y + movement.y / stage.scaleY(),
@@ -118,7 +117,7 @@ export const initDrag = (model: ModelType, stage: Konva.Stage, layers: {
                 const cellData = model.getCellData(id) as NodeType & CellType
                 const konvaNode = model.getCellInstance(id).wrapperRef.current
 
-                if (cellData.type === 'node') {
+                if (cellData.cellType === 'node') {
                     konvaNode.moveTo(nodesLayer)
                     konvaNode.zIndex(zIndexCache[cellData.id])
                 }

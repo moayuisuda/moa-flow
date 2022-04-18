@@ -52,7 +52,6 @@ class RightClickPanel extends React.Component<
   moveToTop() {}
 
   render() {
-    const { extra } = this.props;
     if (!this.context.buffer.rightClickPanel.visible) return <></>;
     return (
       <ul
@@ -74,7 +73,8 @@ class RightClickPanel extends React.Component<
         >
           移到顶层
         </button> */}
-        {extra && extra(this.context)}
+        {/* @TODO */}
+        {/* {this.props.children(this.context)} */}
       </ul>
     );
   }

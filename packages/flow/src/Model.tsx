@@ -9,6 +9,7 @@ import { EdgeType } from "./cells/Edge";
 import { PortType } from "@/scaffold/Port";
 import { NodeType } from "./cells/Node";
 import Konva from "konva";
+import Cell from "@/cells/Cell";
 
 export class FlowModel {
   constructor(eventSender?) {
@@ -26,7 +27,7 @@ export class FlowModel {
   };
   setCellDataMap = (cellData) => {
     this.cellsDataMap.set(cellData.id, cellData);
-    if (cellData.type === "node" && cellData.ports) {
+    if (cellData.cellType === "node" && cellData.ports) {
       cellData.ports.forEach((portData) => {
         this.setCellDataMap(portData);
       });
@@ -103,7 +104,7 @@ export class FlowModel {
 
     const re = [];
     this.cellsMap.forEach((cell) => {
-      if (cell.props.data?.type === "node") {
+      if (cell.props.data?.cellType === "node") {
         const instance = cell.wrapperRef.current;
         const bounds = instance.getClientRect({
           relativeTo: instance.getStage(instance),
@@ -149,6 +150,9 @@ export class FlowModel {
 
   // 注册节点到model，方便动态引用
   componentsMap = new Map();
+  regist = (component: Cell) => {
+    this.componentsMap.set(component.name, component);
+  };
 
   // 消息传递
   eventBus = {
@@ -180,7 +184,7 @@ export class FlowModel {
   };
 
   sendEvent = (data) => {
-    this.eventBus.sender(data);
+    this.eventBus.sender?.(data);
   };
 
   @action setStageScale = (x, y) => {
@@ -197,6 +201,7 @@ export class FlowModel {
 
   @action setCanvasData = (canvasData) => {
     this.canvasData = canvasData;
+    this.setCellsDataMap();
   };
 
   @action setCellId = (data) => {
@@ -281,7 +286,7 @@ export class FlowModel {
     if (newCellData.ports) {
       newCellData.ports.forEach((port) => {
         port.host = newCellData.id;
-        port.type = "port";
+        port.cellType = "port";
         if (!port.id) port.id = v4();
       });
     }
@@ -349,3 +354,6 @@ export class FlowModel {
 }
 
 export default FlowModel;
+
+const a = new FlowModel();
+a.regist(Node);

@@ -1,7 +1,7 @@
-import { Rect, Text, Circle, Group } from "react-konva";
-import { Interactor, Node } from "flow";
+import { Interactor, Node, Html, Graph } from "flow";
 import type { PortType } from "flow";
-import { message } from "antd";
+import { message, Modal } from "antd";
+const { Rect, Text, Circle, Group } = Graph;
 
 type MyPortType = PortType & { label: string };
 type MyNodeType = {
@@ -97,6 +97,9 @@ class MyNode extends Node<MyNodeType, {}> {
             </Interactor.Port>
           ))}
         </Group>
+        {/* <Html>
+          <Modal visible={true}>hello</Modal>
+        </Html> */}
       </Interactor>
     );
   }

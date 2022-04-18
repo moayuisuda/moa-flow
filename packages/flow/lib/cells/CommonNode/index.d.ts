@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import type { FieldType } from "@/types/common";
 import { PortType } from "@/scaffold/Port";
 import Node from "../Node";

@@ -41,21 +41,21 @@ class CommonNode extends Node<CommonNodeType, {}> {
   };
 
   static getBounds(cellData) {
-    const outPorts = cellData.ports.filter(
-      (portData) => portData.portType === "out"
-    );
+    const outPorts =
+      cellData.ports?.filter((portData) => portData.portType === "out") || [];
 
-    const inPorts = cellData.ports.filter(
-      (portData) => portData.portType === "in"
-    );
+    const inPorts =
+      cellData.ports?.filter((portData) => portData.portType === "in") || [];
 
-    const controlOutPorts = cellData.ports.filter(
-      (portData) => portData.portType === "control-out"
-    );
+    const controlOutPorts =
+      cellData.ports?.filter(
+        (portData) => portData.portType === "control-out"
+      ) || [];
 
-    const controlInPorts = cellData.ports.filter(
-      (portData) => portData.portType === "control-in"
-    );
+    const controlInPorts =
+      cellData.ports?.filter(
+        (portData) => portData.portType === "control-in"
+      ) || [];
 
     const height =
       Math.max(
@@ -94,17 +94,17 @@ class CommonNode extends Node<CommonNodeType, {}> {
     const { getStroke } = this;
     const { label, ports } = this.props.data;
 
-    const outPorts = ports.filter((portData) => portData.portType === "out");
+    const outPorts =
+      ports?.filter((portData) => portData.portType === "out") || [];
 
-    const inPorts = ports.filter((portData) => portData.portType === "in");
+    const inPorts =
+      ports?.filter((portData) => portData.portType === "in") || [];
 
-    const controlOutPorts = ports.filter(
-      (portData) => portData.portType === "control-out"
-    );
+    const controlOutPorts =
+      ports?.filter((portData) => portData.portType === "control-out") || [];
 
-    const controlInPorts = ports.filter(
-      (portData) => portData.portType === "control-in"
-    );
+    const controlInPorts =
+      ports?.filter((portData) => portData.portType === "control-in") || [];
 
     const FULL_HEIGHT = CommonNode.getBounds(this.props.data).height;
 

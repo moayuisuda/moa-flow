@@ -1,7 +1,6 @@
-import { Edge } from "flow";
+import { Edge, autorun, Graph } from "flow";
 import { NodeFlowState } from "flow";
-import Konva from "konva";
-
+const { Group, Circle, Line } = Graph;
 class MyEdge extends Edge {
   getStroke = ({ isSelect }: NodeFlowState) => {
     if (isSelect) {
@@ -13,31 +12,55 @@ class MyEdge extends Edge {
 
   labelFormatter() {
     const { source, target } = this.getLinkNodesData();
-    console.log("myEdge", this.props.data, source, target);
 
     return `source:${source.id}`;
   }
 
-  route(vectors: Konva.Vector2d[]) {
-    const sourceAnchor = vectors[0];
-    const targetAnchor = vectors[vectors.length - 1];
-
-    const MIDDLE = (sourceAnchor.x + targetAnchor.x) / 2;
-
-    return [
-      sourceAnchor,
-      {
-        x: MIDDLE,
-        y: sourceAnchor.y,
-      },
-      {
-        x: MIDDLE,
-        y: targetAnchor.y,
-      },
-
-      targetAnchor,
-    ];
+  componentDidMount(): void {
+    const { source, target } = this.getAnchors();
+    this.setData({
+      verticies: [
+        {
+          x: (source.x + target.x) / 2,
+          y: source.y,
+        },
+        {
+          x: (source.x + target.x) / 2,
+          y: target.y,
+        },
+      ],
+    });
+    autorun(() => {});
   }
+
+  // route(vectors: Konva.Vector2d[]) {
+  //   const sourceAnchor = vectors[0];
+  //   const targetAnchor = vectors[vectors.length - 1];
+
+  //   const MIDDLE = (sourceAnchor.x + targetAnchor.x) / 2;
+
+  //   return [
+  //     sourceAnchor,
+  //     {
+  //       x: MIDDLE,
+  //       y: sourceAnchor.y,
+  //     },
+  //     {
+  //       x: MIDDLE,
+  //       y: targetAnchor.y,
+  //     },
+
+  //     targetAnchor,
+  //   ];
+  // }
+
+  lineExtra = () => {
+    return (
+      <Group>
+        <Line></Line>
+      </Group>
+    );
+  };
 }
 
 export default MyEdge;

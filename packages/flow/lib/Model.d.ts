@@ -68,6 +68,7 @@ export declare class FlowModel {
     cellsMap: Map<string | Symbol, any>;
     cellsDataMap: Map<string | Symbol, CellType>;
     componentsMap: Map<any, any>;
+    regist: (component: Cell) => void;
     eventBus: {
         sender: any;
         receiver: any;

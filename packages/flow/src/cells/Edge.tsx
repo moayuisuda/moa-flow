@@ -24,7 +24,7 @@ abstract class Edge<P = {}, S = {}> extends Cell<
   } & S
 > {
   static metaData: any = {
-    type: "edge",
+    cellType: "edge",
   };
   labelRef: React.RefObject<Konva.Group>;
 
@@ -82,7 +82,7 @@ abstract class Edge<P = {}, S = {}> extends Cell<
     return verticies;
   };
 
-  private getAnchors = () => {
+  getAnchors = () => {
     const { data } = this.props;
     let sourceAnchor;
     let targetAnchor;
@@ -109,16 +109,16 @@ abstract class Edge<P = {}, S = {}> extends Cell<
   };
 
   private getPoints() {
+    const routeResult = this.route(this.getVectors());
+
+    return this.vectorsToPoints(routeResult);
+  }
+
+  getVectors() {
     const anchors = this.getAnchors();
     const verticies = this.props.data.verticies || [];
 
-    const routeResult = this.route([
-      anchors.source,
-      ...verticies,
-      anchors.target,
-    ]);
-
-    return this.vectorsToPoints(routeResult);
+    return [anchors.source, ...verticies, anchors.target];
   }
 
   getLinkNodesData() {
@@ -236,6 +236,8 @@ abstract class Edge<P = {}, S = {}> extends Cell<
     return this.context.buffer.link.edge === this.props.data.id;
   }
 
+  lineExtra: () => JSX.Element;
+
   protected edgeRender({ points, isLinking }) {
     const { color } = this.context;
 
@@ -255,6 +257,7 @@ abstract class Edge<P = {}, S = {}> extends Cell<
           strokeWidth={20}
           lineCap="round"
         ></Line>
+        {this.lineExtra && this.lineExtra()}
       </Group>
     );
   }

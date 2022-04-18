@@ -1,3 +1,4 @@
+import { Html } from 'react-konva-utils';
 import Flow from "./Flow";
 import Cell from "./cells/Cell";
 import Node from './cells/Node';
@@ -7,12 +8,15 @@ import Port from "./scaffold/Port";
 import { PortType } from "./scaffold/Port";
 import Model from "./Model";
 import RightClickPanel from './components/RightClickPanel/index';
+import Image from './components/RightClickPanel/Image';
 import React from "react";
 import { NodeFlowState } from '@/types/common';
+import * as Graph from 'react-konva';
+import { autorun } from 'mobx';
 declare type ModelType = Model;
 declare const mountFlow: (container: Element, props: any) => {
     modelRef: React.RefObject<Model>;
 };
-export { mountFlow, Flow, Cell, Port, Node, Edge, Interactor, RightClickPanel, };
+export { Flow, Cell, Port, Node, Edge, Interactor, Image, RightClickPanel, Graph, mountFlow, autorun, Html, };
 export type { NodeFlowState };
 export type { PortType, ModelType };

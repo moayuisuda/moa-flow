@@ -30,5 +30,12 @@ export default {
       entries: resolveEntries(),
     }),
   ],
-  external: ["react-konva", "konva", "mobx", "react", "mobx-react"],
+  external: [
+    "react",
+    "konva",
+    "mobx",
+    "mobx-react",
+    "react-konva",
+    "react-konva-utils",
+  ],
 };

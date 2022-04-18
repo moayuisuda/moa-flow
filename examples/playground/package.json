@@ -10,6 +10,7 @@
     "@types/node": "^16.11.26",
     "@types/react": "^17.0.39",
     "@types/react-dom": "^17.0.12",
+    "antd": "^4.19.5",
     "flow": "^0.0.0",
     "flow-matrix-command": "^0.0.0",
     "react": "^17.0.2",
