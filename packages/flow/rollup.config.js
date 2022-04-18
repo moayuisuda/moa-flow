@@ -22,10 +22,14 @@ export default {
     "react-konva",
     "react-konva-utils",
   ],
+  globals: {
+    react: "React",
+  },
   input: "src/index.ts",
   output: {
     dir: "lib",
-    format: "es",
+    format: "umd",
+    name: "flowInfra",
   },
   plugins: [
     resolve(),

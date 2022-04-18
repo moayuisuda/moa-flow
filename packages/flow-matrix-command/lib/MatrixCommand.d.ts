@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { ModelType } from '@ali/flow-infra';
 declare type ModelRefType = React.MutableRefObject<ModelType | undefined | null>;
 declare type CommandResultType = {
