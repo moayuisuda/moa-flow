@@ -4,7 +4,7 @@ import { PageContainer } from '@alipay/tech-ui';
 import Guide from '@/components/Guide';
 import { trim } from '@/utils/format';
 import styles from './style.less';
-import { Flow, RightClickPanel } from 'flow';
+import { Flow, RightClickPanel } from '@ali/flow-infra';
 
 export default () => {
   const { name } = useModel('global');
@@ -13,36 +13,21 @@ export default () => {
       <Flow
         width={800}
         height={800}
-        onLoad={(flowModel) => {
-          // flowModel.regist(BizNode);
-          flowModel.setCanvasData({
-            scale: { x: 1, y: 1 },
-            x: 0,
-            y: 0,
-            cells: [
-              {
-                id: 'TEST_NODE',
-                component: 'CommonNode',
-                cellType: 'node',
-                x: 100,
-                y: 100,
-              },
-            ],
-          });
+        canvasData={{
+          scale: { x: 1, y: 1 },
+          x: 0,
+          y: 0,
+          cells: [
+            {
+              id: 'TEST_NODE',
+              component: 'CommonNode',
+              cellType: 'node',
+              x: 100,
+              y: 100,
+            },
+          ],
         }}
-      >
-        {/* <RightClickPanel>
-                    {(context: ModelType) => (
-                      <Button
-                        onClick={() => {
-                          console.log(context);
-                        }}
-                      >
-                        点击
-                      </Button>
-                    )}
-                  </RightClickPanel> */}
-      </Flow>
+      />
       <div className={styles.container}>
         <Guide name={trim(name)} />
       </div>

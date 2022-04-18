@@ -14,6 +14,14 @@ const resolveEntries = () => {
 };
 
 export default {
+  external: [
+    "react",
+    "konva",
+    "mobx",
+    "mobx-react",
+    "react-konva",
+    "react-konva-utils",
+  ],
   input: "src/index.ts",
   output: {
     dir: "lib",
@@ -30,14 +38,6 @@ export default {
     alias({
       entries: resolveEntries(),
     }),
-    uglify(),
-  ],
-  external: [
-    "react",
-    "konva",
-    "mobx",
-    "mobx-react",
-    "react-konva",
-    "react-konva-utils",
+    // uglify(),
   ],
 };

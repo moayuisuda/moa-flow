@@ -1,4 +1,4 @@
-import { ModelType } from 'flow'
+import { ModelType } from '@ali/flow-infra'
 
 // 提供具体的行为实现，相当于 react-dom
 

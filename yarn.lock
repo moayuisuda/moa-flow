@@ -14094,7 +14094,7 @@ jest-watcher@^27.0.0, jest-watcher@^27.5.1:
     jest-util "^27.5.1"
     string-length "^4.0.1"
 
-jest-worker@24.9.0, jest-worker@^24.9.0:
+jest-worker@24.9.0, jest-worker@^24.0.0, jest-worker@^24.9.0:
   version "24.9.0"
   resolved "https://registry.npm.alibaba-inc.com/jest-worker/download/jest-worker-24.9.0.tgz#5dbfdb5b2d322e98567898238a9697bcce67b3e5"
   integrity sha1-Xb/bWy0yLphWeJgjipaXvM5ns+U=
@@ -19655,14 +19655,6 @@ react-konva-utils@^0.2.0:
     react-konva "^17.0.2-4"
     use-image "^1.0.7"
 
-react-konva-utils@^0.3.0:
-  version "0.3.0"
-  resolved "https://registry.npm.alibaba-inc.com/react-konva-utils/download/react-konva-utils-0.3.0.tgz#d9099ad1a767286b24fb1b08377af2dfa5c9f176"
-  integrity sha512-yH5FVpDGQ8gHeClyHY533M4oSLjEfYuvn+Z29zXm9osjhuulhtJrh5k+wtyY6QSC0MG0ioqE0cjiudGl1WGB9A==
-  dependencies:
-    react-konva "^18.0.0-0"
-    use-image "^1.0.12"
-
 react-konva@^17.0.2-4:
   version "17.0.2-6"
   resolved "https://registry.npmmirror.com/react-konva/-/react-konva-17.0.2-6.tgz#80b3fdebfd915878eafe554c191bec282cdda0de"
@@ -19679,14 +19671,6 @@ react-konva@^17.0.2-5:
   dependencies:
     react-reconciler "~0.26.2"
     scheduler "^0.20.2"
-
-react-konva@^18.0.0-0:
-  version "18.0.0-0"
-  resolved "https://registry.npm.alibaba-inc.com/react-konva/download/react-konva-18.0.0-0.tgz#9beb720f78734d6aa45fca240b8ae50877779fa8"
-  integrity sha512-ft5gmzrHExYDhdrDDGqHPdUEJDXVTtkYoAncPMir1nR/Ib/ck7wfFz/UYNLIRzKEvbXlBvFNcW/RXp8xIB3bTw==
-  dependencies:
-    react-reconciler "~0.27.0"
-    scheduler "^0.21.0"
 
 react-lifecycles-compat@^3.0.4:
   version "3.0.4"
@@ -19710,14 +19694,6 @@ react-reconciler@~0.26.2:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
     scheduler "^0.20.2"
-
-react-reconciler@~0.27.0:
-  version "0.27.0"
-  resolved "https://registry.npm.alibaba-inc.com/react-reconciler/download/react-reconciler-0.27.0.tgz#360124fdf2d76447c7491ee5f0e04503ed9acf5b"
-  integrity sha512-HmMDKciQjYmBRGuuhIaKA1ba/7a+UsM5FzOZsMO2JYHt9Jh8reCb7j1eDC95NOyUlKM9KRyvdx0flBuDvYSBoA==
-  dependencies:
-    loose-envify "^1.1.0"
-    scheduler "^0.21.0"
 
 react-redux@^7.1.0:
   version "7.2.8"
@@ -20752,6 +20728,16 @@ rollup-plugin-terser@^7.0.0:
     serialize-javascript "^4.0.0"
     terser "^5.0.0"
 
+rollup-plugin-uglify@^6.0.4:
+  version "6.0.4"
+  resolved "https://registry.npm.alibaba-inc.com/rollup-plugin-uglify/download/rollup-plugin-uglify-6.0.4.tgz#65a0959d91586627f1e46a7db966fd504ec6c4e6"
+  integrity sha1-ZaCVnZFYZifx5Gp9uWb9UE7GxOY=
+  dependencies:
+    "@babel/code-frame" "^7.0.0"
+    jest-worker "^24.0.0"
+    serialize-javascript "^2.1.2"
+    uglify-js "^3.4.9"
+
 rollup-pluginutils@^2.8.2:
   version "2.8.2"
   resolved "https://registry.npmmirror.com/rollup-pluginutils/-/rollup-pluginutils-2.8.2.tgz#72f2af0748b592364dbd3389e600e5a9444a351e"
@@ -20901,13 +20887,6 @@ scheduler@^0.20.2:
   dependencies:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
-
-scheduler@^0.21.0:
-  version "0.21.0"
-  resolved "https://registry.npm.alibaba-inc.com/scheduler/download/scheduler-0.21.0.tgz#6fd2532ff5a6d877b6edb12f00d8ab7e8f308820"
-  integrity sha512-1r87x5fz9MXqswA2ERLo0EbOAU74DpIUO090gIasYTqlVoJeMcl+Z1Rg7WHz+qtPujhS/hGIt9kxZOYBV3faRQ==
-  dependencies:
-    loose-envify "^1.1.0"
 
 schema-utils@2.7.0:
   version "2.7.0"
@@ -21071,6 +21050,11 @@ sentence-case@^2.1.0:
   dependencies:
     no-case "^2.2.0"
     upper-case-first "^1.1.2"
+
+serialize-javascript@^2.1.2:
+  version "2.1.2"
+  resolved "https://registry.npm.alibaba-inc.com/serialize-javascript/download/serialize-javascript-2.1.2.tgz#ecec53b0e0317bdc95ef76ab7074b7384785fa61"
+  integrity sha1-7OxTsOAxe9yV73arcHS3OEeF+mE=
 
 serialize-javascript@^4.0.0:
   version "4.0.0"
@@ -22853,6 +22837,11 @@ uglify-js@^3.1.4:
   resolved "https://registry.npmmirror.com/uglify-js/-/uglify-js-3.15.1.tgz#9403dc6fa5695a6172a91bc983ea39f0f7c9086d"
   integrity sha512-FAGKF12fWdkpvNJZENacOH0e/83eG6JyVQyanIJaBXCN1J11TUQv1T1/z8S+Z0CG0ZPk1nPcreF/c7lrTd0TEQ==
 
+uglify-js@^3.4.9:
+  version "3.15.4"
+  resolved "https://registry.npm.alibaba-inc.com/uglify-js/download/uglify-js-3.15.4.tgz#fa95c257e88f85614915b906204b9623d4fa340d"
+  integrity sha512-vMOPGDuvXecPs34V74qDKk4iJ/SN4vL3Ow/23ixafENYvtrNvtbcgUeugTcUGRGsOF/5fU8/NYSL5Hyb3l1OJA==
+
 uid-number@0.0.6:
   version "0.0.6"
   resolved "https://registry.npmmirror.com/uid-number/-/uid-number-0.0.6.tgz#0ea10e8035e8eb5b8e4449f06da1c730663baa81"
@@ -23124,7 +23113,7 @@ use-callback-ref@^1.2.5:
   dependencies:
     tslib "^2.0.0"
 
-use-image@^1.0.12, use-image@^1.0.7:
+use-image@^1.0.7:
   version "1.0.12"
   resolved "https://registry.npmmirror.com/use-image/-/use-image-1.0.12.tgz#fe288ca0d24f873dd52b240857839f6b4d4787ff"
   integrity sha512-h6tCbHSvZOyrAKGkj4LTAyOUcMtL6NFyQdmP1M2spuClZrmyPe6nfB/NaFu135a2KKUt+7oGeUdvCiHcMdJerw==

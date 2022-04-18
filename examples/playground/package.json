@@ -11,7 +11,7 @@
     "@types/react": "^17.0.39",
     "@types/react-dom": "^17.0.12",
     "antd": "^4.19.5",
-    "flow": "^0.0.0",
+    "@ali/flow-infra": "^1.0.0",
     "flow-matrix-command": "^0.0.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
