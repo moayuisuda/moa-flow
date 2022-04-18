@@ -3,6 +3,7 @@ import commonjs from "@rollup/plugin-commonjs";
 import resolve from "@rollup/plugin-node-resolve";
 import alias from "@rollup/plugin-alias";
 import postcss from "rollup-plugin-postcss";
+import { uglify } from "rollup-plugin-uglify";
 
 import tsconfig from "./tsconfig.json";
 
@@ -29,6 +30,7 @@ export default {
     alias({
       entries: resolveEntries(),
     }),
+    uglify(),
   ],
   external: [
     "react",

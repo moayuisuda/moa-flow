@@ -1,6 +1,6 @@
 {
-  "name": "flow",
-  "version": "1.0.0",
+  "name": "@ali/flow-infra",
+  "version": "1.0.1",
   "description": "> TODO: description",
   "author": "anhaohui.ahh <anhaohui.ahh@antgroup.com>",
   "homepage": "",
@@ -42,6 +42,7 @@
     "less": "^4.1.2",
     "rollup": "^2.68.0",
     "rollup-plugin-postcss": "^4.0.2",
+    "rollup-plugin-uglify": "^6.0.4",
     "typescript": "^4.5.5"
   },
   "publishConfig": {
