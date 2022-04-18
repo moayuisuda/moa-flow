@@ -5,11 +5,13 @@ import Guide from '@/components/Guide';
 import { trim } from '@/utils/format';
 import styles from './style.less';
 import { Flow, RightClickPanel } from '@ali/flow-infra';
+import { Button } from 'antd';
 
 export default () => {
   const { name } = useModel('global');
   return (
     <PageContainer ghost>
+      <Button>HELLO</Button>
       <Flow
         width={800}
         height={800}

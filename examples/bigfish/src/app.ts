@@ -1,14 +1,12 @@
 // 运行时配置
 import { RequestConfig, RunTimeLayoutConfig } from '@alipay/bigfish';
-import services from '@/services/afs2demo';
 
 // 全局初始化数据配置，用于 Layout 用户信息和权限初始化
 // 更多信息见文档：https://bigfish.antfin-inc.com/doc/console-initial-state
-export async function getInitialState(): Promise<API.UserInfo> {
-  const { data } = await services.UserController.getUserDetail({
-    userId: '1',
-  });
-  return data;
+export async function getInitialState() {
+  return {
+    userId: '1'
+  };
 }
 
 // request 配置参考文档：https://bigfish.antfin-inc.com/doc/console-request

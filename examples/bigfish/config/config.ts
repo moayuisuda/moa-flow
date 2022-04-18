@@ -55,4 +55,8 @@ export default defineConfig({
   ignoreMomentLocale: true,
   // 混合研发配置
   ...hybrid,
+  headScripts: [
+    'https://gw.alipayobjects.com/os/lib/react/16.12.0/umd/react.production.min.js',
+    'https://gw.alipayobjects.com/os/lib/react-dom/16.12.0/umd/react-dom.production.min.js',
+  ],
 });
