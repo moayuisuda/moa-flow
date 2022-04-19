@@ -14,8 +14,8 @@ import Model from "./Model";
 import RightClickPanel from './components/RightClickPanel/index';
 import Image from './components/RightClickPanel/Image';
 
-import ReactDOM from 'react-dom';
-import React from "react";
+// import ReactDOM from 'react-dom';
+// import React from "react";
 import { NodeFlowState } from './types/common';
 
 import * as Graph from 'react-konva'
@@ -24,12 +24,12 @@ import { autorun } from 'mobx';
 
 type ModelType = Model
 
-const mountFlow = (container: Element, props) => {
-    const modelRef = React.createRef<ModelType>()
-    ReactDOM.render(React.createElement(Flow, { ...props, modelRef }), container)
+// const mountFlow = (container: Element, props) => {
+//     const modelRef = React.createRef<ModelType>()
+//     ReactDOM.render(React.createElement(Flow, { ...props, modelRef }), container)
 
-    return { modelRef }
-}
+//     return { modelRef }
+// }
 
 export {
     Flow,
@@ -41,7 +41,7 @@ export {
     Image,
     RightClickPanel,
     Graph,
-    mountFlow,
+    // mountFlow,
     autorun,
     Html,
 };

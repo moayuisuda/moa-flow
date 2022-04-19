@@ -9,6 +9,7 @@ var findIndex = function (arr, target) {
         if (curr === target)
             return i;
     }
+    return undefined;
 };
 var isRectsInterSect = function (boundsA, boundsB) {
     return !(boundsA.x + boundsA.width < boundsB.x ||

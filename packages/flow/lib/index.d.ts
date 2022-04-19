@@ -9,14 +9,10 @@ import { PortType } from "./scaffold/Port";
 import Model from "./Model";
 import RightClickPanel from './components/RightClickPanel/index';
 import Image from './components/RightClickPanel/Image';
-import React from "react";
 import { NodeFlowState } from './types/common';
 import * as Graph from 'react-konva';
 import { autorun } from 'mobx';
 declare type ModelType = Model;
-declare const mountFlow: (container: Element, props: any) => {
-    modelRef: React.RefObject<Model>;
-};
-export { Flow, Cell, Port, Node, Edge, Interactor, Image, RightClickPanel, Graph, mountFlow, autorun, Html, };
+export { Flow, Cell, Port, Node, Edge, Interactor, Image, RightClickPanel, Graph, autorun, Html, };
 export type { NodeFlowState };
 export type { PortType, ModelType };

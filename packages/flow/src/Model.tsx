@@ -9,13 +9,16 @@ import { EdgeType } from "./cells/Edge";
 import { PortType } from "./scaffold/Port";
 import { NodeType } from "./cells/Node";
 import Konva from "konva";
+import { CanvasDataType } from "./types/common";
+import Cell from "./cells/Cell";
 
+type EventSender = (data: any) => void;
 export class FlowModel {
-  constructor(eventSender?) {
+  constructor(eventSender?: EventSender) {
     makeObservable(this);
     if (eventSender) this.eventBus.sender = eventSender;
   }
-  setEventSender = (eventSender) => {
+  setEventSender = (eventSender: EventSender) => {
     this.eventBus.sender = eventSender;
   };
 
@@ -24,7 +27,7 @@ export class FlowModel {
       this.setCellDataMap(cellData);
     });
   };
-  setCellDataMap = (cellData) => {
+  setCellDataMap = (cellData: NodeType) => {
     this.cellsDataMap.set(cellData.id, cellData);
     if (cellData.cellType === "node" && cellData.ports) {
       cellData.ports.forEach((portData) => {
@@ -34,9 +37,9 @@ export class FlowModel {
   };
 
   refs = {
-    stageRef: undefined as React.RefObject<Konva.Stage>,
-    nodesLayerRef: undefined as React.RefObject<Konva.Layer>,
-    linesLayerRef: undefined as React.RefObject<Konva.Layer>,
+    stageRef: undefined as React.RefObject<Konva.Stage> | undefined,
+    nodesLayerRef: undefined as React.RefObject<Konva.Layer> | undefined,
+    linesLayerRef: undefined as React.RefObject<Konva.Layer> | undefined,
   };
 
   @observable
@@ -45,7 +48,10 @@ export class FlowModel {
     LeftMouseDown: false,
     Space: false,
   };
-  @action setHotKey = (key, value) => {
+  @action setHotKey = (
+    key: "RightMouseDown" | "LeftMouseDown" | "Space",
+    value: boolean
+  ) => {
     this.hotKey[key] = value;
   };
 
@@ -87,7 +93,14 @@ export class FlowModel {
     },
   };
 
-  @action setMultiSelect = (select, onlySetPosition = false) => {
+  @action setMultiSelect = (
+    select: {
+      isSelecting: boolean;
+      start: Konva.Vector2d;
+      end: Konva.Vector2d;
+    },
+    onlySetPosition = false
+  ) => {
     const {
       buffer: { select: bufferSelect },
     } = this;
@@ -101,7 +114,7 @@ export class FlowModel {
 
     if (onlySetPosition) return;
 
-    const re = [];
+    const re: string[] = [];
     this.cellsMap.forEach((cell) => {
       if (cell.props.data?.cellType === "node") {
         const instance = cell.wrapperRef.current;
@@ -155,7 +168,7 @@ export class FlowModel {
 
   // 消息传递
   eventBus = {
-    sender: undefined,
+    sender: undefined as EventSender | undefined,
     receiver: undefined,
   };
 
@@ -182,23 +195,23 @@ export class FlowModel {
     this.selectCells = [];
   };
 
-  sendEvent = (data) => {
+  sendEvent = (data: any) => {
     this.eventBus.sender?.(data);
   };
 
-  @action setStageScale = (x, y) => {
+  @action setStageScale = (x: number, y: number) => {
     this.canvasData.scale = {
       x,
       y,
     };
   };
 
-  @action setStagePosition = (x, y) => {
+  @action setStagePosition = (x: number, y: number) => {
     this.canvasData.x = x;
     this.canvasData.y = y;
   };
 
-  @action setCanvasData = (canvasData) => {
+  @action setCanvasData = (canvasData: CanvasDataType) => {
     this.canvasData = canvasData;
     this.setCellsDataMap();
   };

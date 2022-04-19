@@ -13,10 +13,7 @@
     "esModuleInterop": true,
     "baseUrl": "src/",
     "strict": false,
-    "experimentalDecorators": true,
-    "paths": {
-      "@/*": ["./src/*"]
-    }
+    "experimentalDecorators": true
   },
   "exclude": ["node_modules"]
 }

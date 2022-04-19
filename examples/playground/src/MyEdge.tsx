@@ -13,7 +13,7 @@ class MyEdge extends Edge {
   labelFormatter() {
     const { source, target } = this.getLinkNodesData();
 
-    return `source:${source.id}`;
+    return `source:${source?.id}`;
   }
 
   componentDidMount(): void {
