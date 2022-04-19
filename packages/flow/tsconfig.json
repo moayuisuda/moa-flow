@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "module": "esnext",
-    "target": "es5",
+    "target": "es6",
     "sourceMap": true,
     "jsx": "react",
     "moduleResolution": "node",
@@ -13,7 +13,10 @@
     "esModuleInterop": true,
     "baseUrl": "src/",
     "strict": false,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
   "exclude": ["node_modules"]
 }

@@ -3,6 +3,7 @@ import React from "react";
 
 import Cell from "../cells/Cell";
 import { CellType } from "../cells/Cell";
+import { KonvaEventObject } from "konva/lib/Node";
 
 export type PortType = {
   id: string;
@@ -49,7 +50,7 @@ class Port extends Cell<
     };
   }
 
-  onLinkStart(e) {
+  onLinkStart(e: KonvaEventObject<MouseEvent>) {
     e.cancelBubble = true;
 
     const {
@@ -69,7 +70,7 @@ class Port extends Cell<
     link.target = this.anchor();
   }
 
-  onLinkEnd(e) {
+  onLinkEnd(e: KonvaEventObject<MouseEvent>) {
     e.cancelBubble = true;
 
     const {
@@ -79,7 +80,7 @@ class Port extends Cell<
       },
     } = this;
 
-    const sourceInstance = context.cellsMap.get(link.source);
+    const sourceInstance = context.cellsMap.get(link.source as string);
 
     if (link.source === this.props.data.id) {
       context.clearLinkBuffer();

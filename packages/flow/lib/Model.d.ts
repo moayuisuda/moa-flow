@@ -50,8 +50,8 @@ export declare class FlowModel {
             };
         };
         link: {
-            edge: undefined;
-            source: undefined;
+            edge: string | undefined;
+            source: string | undefined;
             target: {
                 x: number;
                 y: number;
@@ -59,9 +59,9 @@ export declare class FlowModel {
         };
     };
     setMultiSelect: (select: {
-        isSelecting: boolean;
-        start: Konva.Vector2d;
-        end: Konva.Vector2d;
+        isSelecting?: boolean;
+        start?: Konva.Vector2d;
+        end?: Konva.Vector2d;
     }, onlySetPosition?: boolean) => void;
     clearLinkBuffer: () => void;
     color: {
@@ -73,8 +73,8 @@ export declare class FlowModel {
         deepGrey: string;
         background: string;
     };
-    cellsMap: Map<string | Symbol, any>;
-    cellsDataMap: Map<string | Symbol, CellType>;
+    cellsMap: Map<string, any>;
+    cellsDataMap: Map<string, CellType>;
     componentsMap: Map<any, any>;
     regist: (component: Cell) => void;
     eventBus: {

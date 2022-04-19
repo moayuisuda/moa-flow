@@ -179,7 +179,6 @@ const DEFAULT_CANVAS_DATA = {
 };
 @observer
 class Flow extends React.Component<FlowProps, {}> {
-  eventBus;
   flowModel;
 
   constructor(props: FlowProps) {

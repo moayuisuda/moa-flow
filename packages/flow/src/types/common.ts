@@ -22,3 +22,7 @@ export type CanvasDataType = {
     scale: { x: number, y: number },
     cells: any[]
 }
+
+export type CellType = {
+    
+}

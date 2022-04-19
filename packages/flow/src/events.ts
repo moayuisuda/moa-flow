@@ -288,12 +288,18 @@ export const initHotKeys = (model: ModelType, stage: Konva.Stage) => {
     })
 
     window.addEventListener('keydown', e => {
-        // e.preventDefault()
-        model.setHotKey(e.code, true)
+        switch (e.code) {
+            case 'Space':
+                e.preventDefault()
+                model.setHotKey(e.code, true)
+        }
     })
 
     window.addEventListener('keyup', e => {
-        // e.preventDefault()
-        model.setHotKey(e.code, false)
+        switch (e.code) {
+            case 'Space':
+                e.preventDefault()
+                model.setHotKey(e.code, false)
+        }
     })
 }

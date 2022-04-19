@@ -12,7 +12,6 @@ declare type FlowProps = {
     height?: number;
 };
 declare class Flow extends React.Component<FlowProps, {}> {
-    eventBus: any;
     flowModel: FlowModel;
     constructor(props: FlowProps);
     render(): JSX.Element;

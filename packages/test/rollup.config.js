@@ -24,6 +24,10 @@ export default {
     "react-konva-utils",
   ],
   input: "src/index.ts",
+  // output: [
+  //   { file: pkg.main, format: "cjs" },
+  //   { file: pkg.module, format: "es" },
+  // ],
   output: {
     dir: "lib",
     preserveModules: true,
