@@ -1,5 +1,5 @@
-import { Interactor, Node, Html, Graph } from "flow";
-import type { PortType } from "flow";
+import { Interactor, Node, Html, Graph } from "@ali/flow-infra";
+import type { PortType } from "@ali/flow-infra";
 import { message, Modal } from "antd";
 const { Rect, Text, Circle, Group } = Graph;
 

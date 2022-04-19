@@ -1,5 +1,5 @@
-import { Flow, RightClickPanel } from "flow";
-import type { ModelType } from "flow";
+import { Flow, RightClickPanel } from "@ali/flow-infra";
+import type { ModelType } from "@ali/flow-infra";
 
 import { useEffect, useRef } from "react";
 import testData from "./test.json";

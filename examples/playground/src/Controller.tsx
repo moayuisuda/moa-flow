@@ -1,6 +1,6 @@
 import React from "react";
 import { Card, Button, message, Divider } from "antd";
-import { ModelType } from "flow";
+import { ModelType } from "@ali/flow-infra";
 import Command from "flow-matrix-command";
 
 type ModelRefType = React.MutableRefObject<ModelType | undefined | null>;

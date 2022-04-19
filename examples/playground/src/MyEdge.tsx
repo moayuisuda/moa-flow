@@ -1,5 +1,5 @@
-import { Edge, autorun, Graph } from "flow";
-import { NodeFlowState } from "flow";
+import { Edge, autorun, Graph } from "@ali/flow-infra";
+import { NodeFlowState } from "@ali/flow-infra";
 const { Group, Circle, Line } = Graph;
 class MyEdge extends Edge {
   getStroke = ({ isSelect }: NodeFlowState) => {
