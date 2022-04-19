@@ -2,8 +2,8 @@ import { observer } from "mobx-react";
 import styles from "./style.less";
 import Konva from "konva";
 import React from "react";
-import { FlowContext } from "@/Context";
-import Model from "@/Model";
+import { FlowContext } from "../../Context";
+import Model from "../../Model";
 
 @observer
 class RightClickPanel extends React.Component<

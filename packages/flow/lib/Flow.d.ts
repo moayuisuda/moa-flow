@@ -13,7 +13,7 @@ declare type FlowProps = {
 };
 declare class Flow extends React.Component<FlowProps, {}> {
     eventBus: any;
-    flowModel: any;
+    flowModel: FlowModel;
     constructor(props: FlowProps);
     render(): JSX.Element;
 }

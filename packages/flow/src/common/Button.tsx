@@ -1,6 +1,6 @@
 import { Text, Rect, Group } from "react-konva";
 import { useContext } from "react";
-import { FlowContext } from "@/Context";
+import { FlowContext } from "../Context";
 
 type ButtonProps = {
   x?: number;

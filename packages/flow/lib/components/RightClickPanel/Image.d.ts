@@ -3,7 +3,7 @@ import Konva from "konva";
 import { ImageConfig } from "konva/lib/shapes/Image";
 declare class Image extends React.Component<Omit<ImageConfig, "image">> {
     state: {
-        image: any;
+        image: null;
     };
     image: HTMLImageElement;
     imageNode: Konva.Image;

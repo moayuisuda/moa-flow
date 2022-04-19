@@ -14,6 +14,7 @@ const resolveEntries = () => {
 };
 
 export default {
+  // 会有默认的key-value指明某个module对应的哪个模块
   external: [
     "react",
     "konva",
@@ -22,25 +23,28 @@ export default {
     "react-konva",
     "react-konva-utils",
   ],
-  globals: {
-    react: "React",
-  },
   input: "src/index.ts",
   output: {
     dir: "lib",
-    format: "umd",
-    name: "flowInfra",
+    preserveModules: true,
+    preserveModulesRoot: "src",
+    // tsconfig的module是项目使用的模块管理方式，target的是目标代码stage(如es5就是var)，format则是打包后的格式
+    format: "esm",
   },
   plugins: [
-    resolve(),
+    resolve(), // 解析外部依赖
+    typescript({
+      tsconfig: "./tsconfig.json",
+      declaration: true,
+      declarationDir: "lib",
+    }),
+    alias({
+      entries: resolveEntries(),
+    }),
     commonjs(),
     postcss({
       modules: true,
       plugins: [],
-    }),
-    typescript({ tsconfig: "./tsconfig.json" }),
-    alias({
-      entries: resolveEntries(),
     }),
     // uglify(),
   ],

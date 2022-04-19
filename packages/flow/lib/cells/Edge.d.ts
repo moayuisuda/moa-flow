@@ -1,8 +1,9 @@
 import Cell from "./Cell";
 import { CellType } from "./Cell";
-import { NodeFlowState } from "@/types/common";
+import { NodeFlowState } from "../types/common";
 import React from "react";
 import Konva from "konva";
+import { NodeType } from "./Node";
 export declare type EdgeType = {
     source: string | Konva.Vector2d;
     target: string | Konva.Vector2d;
@@ -30,8 +31,8 @@ declare abstract class Edge<P = {}, S = {}> extends Cell<EdgeType & P, {
     private getPoints;
     getVectors(): any[];
     getLinkNodesData(): {
-        source: any;
-        target: any;
+        source: NodeType | undefined;
+        target: NodeType | undefined;
     };
     protected route(vectors: Konva.Vector2d[]): import("konva/lib/types").Vector2d[];
     private vectorsToPoints;

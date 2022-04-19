@@ -4,7 +4,7 @@ import Konva from "konva";
 import { FlowContext } from "../Context";
 import { cloneDeep } from "lodash";
 import { observer } from "mobx-react";
-import Model from "@/Model";
+import Model from "../Model";
 
 export type CellType = { id: string; cellType: string };
 

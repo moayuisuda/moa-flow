@@ -1,6 +1,6 @@
 import React from "react";
 import { FlowContext } from "../Context";
-import Model from "@/Model";
+import Model from "../Model";
 export declare type CellType = {
     id: string;
     cellType: string;

@@ -1,8 +1,8 @@
-import type { FieldType } from "@/types/common";
-import { PortType } from "@/scaffold/Port";
+import type { FieldType } from "../..//types/common";
+import { PortType } from "../..//scaffold/Port";
 import { Rect, Text, Circle, Group } from "react-konva";
-import Button from "@/common/Button";
-import Interactor from "@/scaffold/Interactor";
+import Button from "../../common/Button";
+import Interactor from "../../scaffold/Interactor";
 import Node from "../Node";
 import { NodeType } from "../Node";
 const { Port } = Interactor;

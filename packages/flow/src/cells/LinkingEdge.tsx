@@ -1,6 +1,6 @@
 import { observer } from "mobx-react";
 import React from "react";
-import { FlowContext } from "@/Context";
+import { FlowContext } from "../Context";
 import { Group } from "react-konva";
 @observer
 class LinkingEdge extends React.Component<{ data: any }> {

@@ -2,12 +2,12 @@ import Cell from "./Cell";
 import { Line, Group, Label, Text, Tag } from "react-konva";
 import Interactor from "../scaffold/Interactor";
 import { CellType } from "./Cell";
-import { NodeFlowState } from "@/types/common";
+import { NodeFlowState } from "../types/common";
 import { PortType } from "../scaffold/Port";
 import React from "react";
 import Konva from "konva";
 import { NodeType } from "./Node";
-import { isVector2d } from "@/utils/util";
+import { isVector2d } from "../utils/util";
 
 export type EdgeType = {
   source: string | Konva.Vector2d;

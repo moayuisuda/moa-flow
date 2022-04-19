@@ -1,6 +1,6 @@
 import Konva from "konva";
 import React from "react";
-import Model from "@/Model";
+import Model from "../../Model";
 declare class RightClickPanel extends React.Component<{
     stage?: Konva.Stage;
     extra?: (context: Model) => React.ReactNode;
@@ -18,5 +18,5 @@ declare class RightClickPanel extends React.Component<{
     moveToTop(): void;
     render(): JSX.Element;
 }
-export declare const getRightClickPanel: (children: React.ReactNode[] | React.ReactNode) => React.ReactChild | React.ReactFragment | React.ReactPortal;
+export declare const getRightClickPanel: (children: React.ReactNode[] | React.ReactNode) => React.ReactChild | React.ReactFragment | React.ReactPortal | undefined;
 export default RightClickPanel;

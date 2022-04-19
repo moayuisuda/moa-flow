@@ -25,5 +25,5 @@ export default {
       entries: resolveEntries(),
     }),
   ],
-  external: ["flow"],
+  external: ["@ali/flow-infra"],
 };

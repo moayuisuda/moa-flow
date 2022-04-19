@@ -1,15 +1,14 @@
 import { action, observable, makeObservable } from "mobx";
 import React from "react";
 import { arrayMove, findIndex, isRectsInterSect } from "./utils/util";
-import { CellType } from "@/cells/Cell";
-import { color } from "@/theme/style";
+import { CellType } from "./cells/Cell";
+import { color } from "./theme/style";
 import { v4 } from "uuid";
 import { union, without, merge } from "lodash";
 import { EdgeType } from "./cells/Edge";
-import { PortType } from "@/scaffold/Port";
+import { PortType } from "./scaffold/Port";
 import { NodeType } from "./cells/Node";
 import Konva from "konva";
-import Cell from "@/cells/Cell";
 
 export class FlowModel {
   constructor(eventSender?) {

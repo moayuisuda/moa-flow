@@ -1,7 +1,7 @@
 import { Group } from "react-konva";
 import React from "react";
 
-import Cell from "@/cells/Cell";
+import Cell from "../cells/Cell";
 import { CellType } from "../cells/Cell";
 
 export type PortType = {

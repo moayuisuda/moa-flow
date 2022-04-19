@@ -1,5 +1,5 @@
 import React from "react";
-import Cell from "@/cells/Cell";
+import Cell from "../cells/Cell";
 import { CellType } from "../cells/Cell";
 export declare type PortType = {
     id: string;
@@ -19,8 +19,8 @@ declare class Port extends Cell<PortType, {}, {
     wrapperRef: React.RefObject<any>;
     static metaData: {
         type: string;
-        source: any;
-        target: any;
+        source: undefined;
+        target: undefined;
     };
     constructor(props: any, context: any);
     anchor(): {

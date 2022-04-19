@@ -1,4 +1,4 @@
-import { PortType } from "@/scaffold/Port"
+import { PortType } from "../scaffold/Port"
 
 export type FieldType = {
     label: string,

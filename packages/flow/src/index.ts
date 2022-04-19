@@ -16,7 +16,7 @@ import Image from './components/RightClickPanel/Image';
 
 import ReactDOM from 'react-dom';
 import React from "react";
-import { NodeFlowState } from '@/types/common';
+import { NodeFlowState } from './types/common';
 
 import * as Graph from 'react-konva'
 import { autorun } from 'mobx';

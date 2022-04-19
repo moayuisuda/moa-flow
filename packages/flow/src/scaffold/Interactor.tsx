@@ -3,9 +3,9 @@ import { Group } from "react-konva";
 import React from "react";
 import { observer } from "mobx-react";
 
-import { FlowContext } from "@/Context";
+import { FlowContext } from "../Context";
 import Port from "./Port";
-import { EVT_LEFTCLICK } from "@/constants";
+import { EVT_LEFTCLICK } from "../constants";
 
 type InteractorType = {
   x?: number;

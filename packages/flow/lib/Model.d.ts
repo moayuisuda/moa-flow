@@ -1,5 +1,5 @@
 import React from "react";
-import { CellType } from "@/cells/Cell";
+import { CellType } from "./cells/Cell";
 export declare class FlowModel {
     constructor(eventSender?: any);
     setEventSender: (eventSender: any) => void;
@@ -46,8 +46,8 @@ export declare class FlowModel {
             };
         };
         link: {
-            edge: any;
-            source: any;
+            edge: undefined;
+            source: undefined;
             target: {
                 x: number;
                 y: number;
@@ -70,8 +70,8 @@ export declare class FlowModel {
     componentsMap: Map<any, any>;
     regist: (component: Cell) => void;
     eventBus: {
-        sender: any;
-        receiver: any;
+        sender: undefined;
+        receiver: undefined;
     };
     selectCells: string[];
     setSelectedCells: (ids: string[], ifReplace?: boolean) => void;
@@ -82,7 +82,7 @@ export declare class FlowModel {
         };
         x: number;
         y: number;
-        cells: any[];
+        cells: never[];
     };
     clearSelect: () => void;
     sendEvent: (data: any) => void;
@@ -101,7 +101,7 @@ export declare class FlowModel {
     setLinkingPosition: (e: any) => void;
     link: (source: any, target: any) => void;
     moveTo(id: any, index: any): void;
-    getCellData: (id: any) => CellType;
+    getCellData: (id: any) => CellType | undefined;
     getCellInstance: (id: any) => any;
 }
 export default FlowModel;

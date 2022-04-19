@@ -10,7 +10,7 @@ import Model from "./Model";
 import RightClickPanel from './components/RightClickPanel/index';
 import Image from './components/RightClickPanel/Image';
 import React from "react";
-import { NodeFlowState } from '@/types/common';
+import { NodeFlowState } from './types/common';
 import * as Graph from 'react-konva';
 import { autorun } from 'mobx';
 declare type ModelType = Model;

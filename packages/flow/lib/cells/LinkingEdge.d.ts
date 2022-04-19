@@ -1,5 +1,5 @@
 import React from "react";
-import { FlowContext } from "@/Context";
+import { FlowContext } from "../Context";
 declare class LinkingEdge extends React.Component<{
     data: any;
 }> {

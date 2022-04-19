@@ -1,5 +1,5 @@
 import React from "react";
-import { FlowContext } from "@/Context";
+import { FlowContext } from "../Context";
 declare type InteractorType = {
     x?: number;
     y?: number;
