@@ -55,8 +55,15 @@ export default defineConfig({
   ignoreMomentLocale: true,
   // 混合研发配置
   ...hybrid,
+  externals: {
+    react: 'React',
+    'react-dom': 'ReactDOM',
+    '@alipay/bigfish/react': 'React',
+    '@alipay/bigfish/react-dom': 'ReactDOM',
+    aliyun: 'aliyun',
+  },
   headScripts: [
-    'https://gw.alipayobjects.com/os/lib/react/16.12.0/umd/react.production.min.js',
-    'https://gw.alipayobjects.com/os/lib/react-dom/16.12.0/umd/react-dom.production.min.js',
+    'https://gw.alipayobjects.com/os/lib/react/17.0.2/umd/react.production.min.js',
+    'https://gw.alipayobjects.com/os/lib/react-dom/17.0.2/umd/react-dom.production.min.js',
   ],
 });
