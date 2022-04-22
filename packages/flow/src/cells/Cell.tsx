@@ -5,24 +5,27 @@ import { FlowContext } from "../Context";
 import { cloneDeep } from "lodash";
 import { observer } from "mobx-react";
 import Model from "../Model";
+import { AllCellDataType } from "../types/common";
+import { titleCase } from "utils/string";
 
-export type CellType = { id: string; cellType: string };
+export type CellDataType = {
+  id: string;
+  cellType: string;
+  component: string;
+  [key: string]: any;
+};
 
 // D: data, S: state, P: props
 abstract class Cell<D, S = {}, P = {}> extends React.Component<
-  { data: D & CellType } & P,
+  { data: D & CellDataType } & P,
   S
 > {
-  // 这样定义的是这个实例的属性，如this.xxx
-  flowState: {
-    isSelect: boolean;
-  };
   static contextType = FlowContext;
   // vscode 无法推断 this.context 的类型，需要显式声明 this.context 的类型
   declare context: React.ContextType<typeof FlowContext>;
 
   // static方法可以这样写abstract方法
-  static getBounds: (cellData) => {
+  static getBounds: (cellData: AllCellDataType) => {
     x: number;
     y: number;
     width: number;
@@ -38,14 +41,11 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
   constructor(props: any, context: Model) {
     super(props);
     context.cellsMap.set(props.data.id, this);
-    this.flowState = {
-      isSelect: false,
-    };
 
     this.wrapperRef = React.createRef();
   }
 
-  static regist(model) {
+  static regist(model: Model) {
     model.componentsMap.set(this.name, this);
   }
 
@@ -66,7 +66,7 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
     };
   }
 
-  getStage(konvaNode) {
+  getStage(konvaNode: Konva.Node) {
     let re = konvaNode;
 
     while (re.__proto__.constructor !== Konva.Stage) {
@@ -76,10 +76,12 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
     return re;
   }
 
-  setData(data) {
+  setData(data: any) {
     this.context;
     this.context.setCellData(this.props.data.id, data);
   }
+
+  onMount: () => void;
 
   componentDidMount(): void {
     [
@@ -90,20 +92,35 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
       "dblclick",
       "click",
     ].forEach((eventName) => {
-      this.wrapperRef.current.on(eventName, (e) => {
-        this.context.sendEvent({
-          type: `cell:${eventName}`,
-          data: {
-            e,
-            cellData: this.props.data,
-          },
-        });
-      });
+      this.wrapperRef.current.on(
+        eventName,
+        (e: Konva.KonvaEventObject<MouseEvent>) => {
+          const instanceEventFn = this[`on${titleCase(eventName)}`];
+          instanceEventFn && instanceEventFn.call(this, e);
+
+          this.context.sendEvent({
+            type: `cell:${eventName}`,
+            data: {
+              e,
+              cellData: this.props.data,
+              cell: this,
+            },
+          });
+        }
+      );
     });
+
+    this.onMount && this.onMount();
+  }
+
+  getData() {
+    return this.props.data;
   }
 
   isSelect() {
-    return this.flowState.isSelect;
+    // return this.flowState.isSelect;
+    // @TODO 注入runtime的$state属性
+    return this.context.selectCells.includes(this.props.data.id);
   }
 
   render() {

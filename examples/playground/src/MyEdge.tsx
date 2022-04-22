@@ -2,7 +2,7 @@ import { Edge, autorun, Graph } from "@ali/flow-infra";
 import { NodeFlowState } from "@ali/flow-infra";
 const { Group, Circle, Line } = Graph;
 class MyEdge extends Edge {
-  getStroke = ({ isSelect }: NodeFlowState) => {
+  getStroke = ({ isSelect }: { isSelect: boolean }) => {
     if (isSelect) {
       return {
         stroke: "red",
@@ -16,7 +16,7 @@ class MyEdge extends Edge {
     return `source:${source?.id}`;
   }
 
-  componentDidMount(): void {
+  onMount = () => {
     const { source, target } = this.getAnchors();
     this.setData({
       verticies: [
@@ -31,7 +31,7 @@ class MyEdge extends Edge {
       ],
     });
     autorun(() => {});
-  }
+  };
 
   // route(vectors: Konva.Vector2d[]) {
   //   const sourceAnchor = vectors[0];
@@ -54,13 +54,13 @@ class MyEdge extends Edge {
   //   ];
   // }
 
-  lineExtra = () => {
-    return (
-      <Group>
-        <Line></Line>
-      </Group>
-    );
-  };
+  // lineExtra = () => {
+  //   return (
+  //     <Group>
+  //       <Line></Line>
+  //     </Group>
+  //   );
+  // };
 }
 
 export default MyEdge;

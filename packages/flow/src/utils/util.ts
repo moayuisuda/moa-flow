@@ -4,7 +4,7 @@ export const arrayMove = <T>(arr: T[], oldIndex: number, newIndex: number) => {
     return arr;
 }
 
-export const findIndex = (arr: [], target: any) => {
+export const findIndex = (arr: any[], target: any) => {
     let curr
     for (let i = 0; i < arr.length; i++) {
         curr = arr[i]
@@ -12,6 +12,10 @@ export const findIndex = (arr: [], target: any) => {
     }
 
     return undefined
+}
+
+export const remove = (arr: any[], target: any) => {
+    arr.splice(findIndex(arr, target) as number, 1)
 }
 
 export const isRectsInterSect = (boundsA: Bounds, boundsB: Bounds) => {

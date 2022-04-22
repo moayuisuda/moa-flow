@@ -6,6 +6,7 @@ import { observer } from "mobx-react";
 import { FlowContext } from "../Context";
 import Port from "./Port";
 import { EVT_LEFTCLICK } from "../constants";
+import { PortDataType } from "./Port";
 
 type InteractorType = {
   x?: number;
@@ -21,9 +22,9 @@ class Interactor extends React.Component<InteractorType> {
   static contextType = FlowContext;
   declare context: React.ContextType<typeof FlowContext>;
 
-  static Port;
+  static Port: typeof Port;
 
-  constructor(props) {
+  constructor(props: InteractorType) {
     super(props);
   }
 
@@ -35,7 +36,7 @@ class Interactor extends React.Component<InteractorType> {
         y,
         draggable = true,
         id,
-        topOnFocus,
+        topOnFocus = true,
         selectable = true,
         ...others
       },
@@ -57,6 +58,13 @@ class Interactor extends React.Component<InteractorType> {
 
             // drag
             if (e.evt.button === EVT_LEFTCLICK) {
+              // @TODO 和drag的默认行为有歧义
+              if (topOnFocus)
+                this.context.moveTo(
+                  this.props.id,
+                  this.context.canvasData.cells.length - 1
+                );
+
               select.isSelecting = true;
 
               drag.start.x = e.evt.x;

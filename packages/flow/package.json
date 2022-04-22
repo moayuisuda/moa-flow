@@ -1,6 +1,6 @@
 {
   "name": "@ali/flow-infra",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "> TODO: description",
   "author": "anhaohui.ahh <anhaohui.ahh@antgroup.com>",
   "homepage": "",
@@ -26,7 +26,6 @@
     "watch": "rollup -cw"
   },
   "dependencies": {
-    "konva": "^8.3.3",
     "lodash": "^4.17.21",
     "mobx": "^6.4.1",
     "mobx-react": "^7.3.0",

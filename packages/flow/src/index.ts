@@ -8,18 +8,19 @@ import Node from './cells/Node'
 import Edge from './cells/Edge'
 import Interactor from './scaffold/Interactor'
 import Port from "./scaffold/Port";
-import { PortType } from "./scaffold/Port";
+import { PortDataType } from "./scaffold/Port";
 import Model from "./Model";
 
 import RightClickPanel from './components/RightClickPanel/index';
-import Image from './components/RightClickPanel/Image';
+import Image from './components/Image';
 
 // import ReactDOM from 'react-dom';
 // import React from "react";
-import { NodeFlowState } from './types/common';
+import { NodeFlowState, FlowInfraEventType } from './types/common';
 
 import * as Graph from 'react-konva'
 import { autorun } from 'mobx';
+import { Vector2d } from 'konva/lib/types';
 
 
 type ModelType = Model
@@ -46,9 +47,4 @@ export {
     Html,
 };
 
-export type {
-    NodeFlowState
-}
-
-
-export type { PortType, ModelType };
+export type { PortDataType, ModelType, FlowInfraEventType, Vector2d };

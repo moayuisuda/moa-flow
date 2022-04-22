@@ -12,9 +12,10 @@ export declare const initScale: (model: ModelType, stage: Konva.Stage, layers: {
     linesLayer: Konva.Layer;
     nodesLayer: Konva.Layer;
 }) => void;
-export declare const initSelect: (model: ModelType, stage: Konva.Stage, layers: {
+export declare const initMultiSelect: (model: ModelType, stage: Konva.Stage, layers: {
     linesLayer: Konva.Layer;
     nodesLayer: Konva.Layer;
     topLayer: Konva.Layer;
 }) => void;
 export declare const initHotKeys: (model: ModelType, stage: Konva.Stage) => void;
+export declare const initDataChangeListener: (model: ModelType) => void;

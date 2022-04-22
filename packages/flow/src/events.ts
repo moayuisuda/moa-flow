@@ -3,9 +3,10 @@ import { Stage } from "konva/lib/Stage";
 import { ModelType } from ".";
 import { autorun } from "mobx"
 import { debounce, without } from 'lodash';
-import { NodeType } from "./cells/Node";
-import { CellType } from './cells/Cell';
+import { NodeDataType } from "./cells/Node";
+import { CellDataType } from './cells/Cell';
 import { STAGE_CLASS_NAME, EVT_LEFTCLICK, EVT_RIGHTCLICK } from './constants';
+import { Vector2d } from "konva/lib/types";
 
 export const initClearState = (model: ModelType, stage: Konva.Stage) => {
     stage.on('mousedown', (e) => {
@@ -42,7 +43,9 @@ export const initDrag = (model: ModelType, stage: Konva.Stage, layers: {
 
     // 移动选择的节点
     // 暂存节点原本的zIndex，方便还原到原本的layer
-    let zIndexCache = {}
+    let zIndexCache: {
+        [id: string]: number
+    } = {}
     const { drag, select } = model.buffer
 
     // 移动整个stage
@@ -55,8 +58,8 @@ export const initDrag = (model: ModelType, stage: Konva.Stage, layers: {
         if (model.hotKey["Space"] && model.hotKey['LeftMouseDown']) {
             // stage并不受scale的影响，不用处理
             model.setStagePosition(
-                model.canvasData.x + movement.x,
-                model.canvasData.y + movement.y
+                model.x() + movement.x,
+                model.y() + movement.y
             );
         }
 
@@ -64,7 +67,7 @@ export const initDrag = (model: ModelType, stage: Konva.Stage, layers: {
             if (stage.isListening()) stage.listening(false);
 
             model.selectCells.forEach(id => {
-                const cellData = model.getCellData(id) as NodeType & CellType
+                const cellData = model.getCellData(id) as NodeDataType & CellDataType
                 const konvaNode = model.getCellInstance(id).wrapperRef.current
 
                 if (cellData.cellType === 'node') {
@@ -114,12 +117,18 @@ export const initDrag = (model: ModelType, stage: Konva.Stage, layers: {
         if (select.isSelecting) {
             stage.listening(true)
             model.selectCells.forEach(id => {
-                const cellData = model.getCellData(id) as NodeType & CellType
+                const cellData = model.getCellData(id) as NodeDataType & CellDataType
                 const konvaNode = model.getCellInstance(id).wrapperRef.current
 
                 if (cellData.cellType === 'node') {
                     konvaNode.moveTo(nodesLayer)
                     konvaNode.zIndex(zIndexCache[cellData.id])
+
+                    if (model.grid)
+                        model.setCellData(cellData.id, model.snap({
+                            x: cellData.x,
+                            y: cellData.y
+                        }));
                 }
             })
 
@@ -134,7 +143,7 @@ export const initScale = (model: ModelType, stage: Konva.Stage, layers: {
     linesLayer: Konva.Layer,
     nodesLayer: Konva.Layer
 }) => {
-    let scaleBy = 1.03;
+    let scaleBy = 1.02;
     const { linesLayer, nodesLayer } = layers
 
     const debounceClearCache = debounce(() => {
@@ -159,12 +168,12 @@ export const initScale = (model: ModelType, stage: Konva.Stage, layers: {
         // stop default scrolling
         e.evt.preventDefault();
 
-        const oldScale = model.canvasData.scale.x;
-        const pointer = stage.getPointerPosition();
+        const oldScale = model.canvasData.scale;
+        const pointer = stage.getPointerPosition() as Vector2d;
 
         var mousePointTo = {
-            x: (pointer.x - model.canvasData.x) / oldScale,
-            y: (pointer.y - model.canvasData.y) / oldScale,
+            x: (pointer.x - model.x()) / oldScale,
+            y: (pointer.y - model.y()) / oldScale,
         };
 
         // how to scale? Zoom in? Or zoom out?
@@ -178,7 +187,7 @@ export const initScale = (model: ModelType, stage: Konva.Stage, layers: {
 
         const newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy;
 
-        model.setStageScale(newScale, newScale);
+        model.setStageScale(newScale);
 
         const newPos = {
             x: pointer.x - mousePointTo.x * newScale,
@@ -191,36 +200,37 @@ export const initScale = (model: ModelType, stage: Konva.Stage, layers: {
     });
 }
 
-export const initSelect = (model: ModelType, stage: Konva.Stage, layers: {
+export const initMultiSelect = (model: ModelType, stage: Konva.Stage, layers: {
     linesLayer: Konva.Layer,
     nodesLayer: Konva.Layer,
     topLayer: Konva.Layer
 }) => {
-    const { linesLayer, nodesLayer } = layers
 
-    // 非受控设置select的节点
-    let prevSelectCells = []
-    autorun(() => {
-        // 上次存在这次不存在的就是需要设置为false的
-        const toFalseCells = without(prevSelectCells, ...model.selectCells)
-        // 这次存在上次不存在的就是需要设置为true的
-        const toTrueCells = without(model.selectCells, ...prevSelectCells)
+    // // 非受控设置select的节点
+    // let prevSelectCells = []
+    // autorun(() => {
+    //     // 上次存在这次不存在的就是需要设置为false的
+    //     const toFalseCells = without(prevSelectCells, ...model.selectCells)
+    //     // 这次存在上次不存在的就是需要设置为true的
+    //     const toTrueCells = without(model.selectCells, ...prevSelectCells)
 
-        toFalseCells.forEach(cellId => {
-            const instance = model.getCellInstance(cellId)
-            instance.flowState.isSelect = false
-            instance.forceUpdate()
-        })
+    //     toFalseCells.forEach(cellId => {
+    //         const instance = model.getCellInstance(cellId)
+    //         instance.flowState.isSelect = false
+    //         instance.forceUpdate()
+    //     })
 
-        toTrueCells.forEach(cellId => {
-            const instance = model.getCellInstance(cellId)
-            instance.flowState.isSelect = true
-            instance.forceUpdate()
-        })
+    //     toTrueCells.forEach(cellId => {
+    //         const instance = model.getCellInstance(cellId)
+    //         instance.flowState.isSelect = true
+    //         instance.forceUpdate()
+    //     })
 
 
-        prevSelectCells = model.selectCells.slice();
-    })
+    //     prevSelectCells = model.selectCells.slice();
+    // })
+
+    if (model.hotKey['Space']) return
 
     // 设置多选矩形框起始点
     stage.on('mousedown', (e) => {
@@ -303,3 +313,5 @@ export const initHotKeys = (model: ModelType, stage: Konva.Stage) => {
         }
     })
 }
+
+export const initDataChangeListener = (model: ModelType) => { }

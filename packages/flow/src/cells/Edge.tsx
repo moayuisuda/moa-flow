@@ -1,28 +1,26 @@
 import Cell from "./Cell";
-import { Line, Group, Label, Text, Tag } from "react-konva";
+import { Line, Group, Label, Text, Tag, Arrow } from "react-konva";
 import Interactor from "../scaffold/Interactor";
-import { CellType } from "./Cell";
-import { NodeFlowState } from "../types/common";
-import { PortType } from "../scaffold/Port";
+import { CellDataType } from "./Cell";
+import { PortDataType } from "../scaffold/Port";
 import React from "react";
 import Konva from "konva";
-import { NodeType } from "./Node";
+import { NodeDataType } from "./Node";
 import { isVector2d } from "../utils/util";
+import { Vector2d } from "konva/lib/types";
+import FlowModel from "../Model";
+import { titleCase } from "utils/string";
+import { lineCenter } from "utils/vector";
 
-export type EdgeType = {
-  source: string | Konva.Vector2d;
-  target: string | Konva.Vector2d;
+export type EdgeDataType = {
+  source: string | Vector2d;
+  target: string | Vector2d;
   label: string;
-  verticies?: Konva.Vector2d[];
-} & CellType;
+  verticies?: Vector2d[];
+} & CellDataType;
 const TEXT_HEIGHT = 16;
 const LABEL_PADDING = 4;
-abstract class Edge<P = {}, S = {}> extends Cell<
-  EdgeType & P,
-  {
-    points: number[];
-  } & S
-> {
+abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
   static metaData: any = {
     cellType: "edge",
   };
@@ -54,21 +52,20 @@ abstract class Edge<P = {}, S = {}> extends Cell<
   // }
 
   protected bazier = true;
+  protected arrow = true;
   protected dash = false;
 
-  constructor(props, context) {
+  constructor(
+    props: {
+      data: EdgeDataType;
+    },
+    context: FlowModel
+  ) {
     super(props, context);
     this.labelRef = React.createRef();
-
-    this.state = {
-      points: [],
-    } as {
-      points: number[];
-    } & S;
   }
 
-  protected getStroke = (flowState: NodeFlowState) => {
-    const { isSelect } = flowState;
+  protected lineStyle({ isSelect }: { isSelect: boolean }) {
     const { color } = this.context;
 
     if (isSelect) {
@@ -76,10 +73,25 @@ abstract class Edge<P = {}, S = {}> extends Cell<
         stroke: color.active,
       };
     } else return {};
+  }
+
+  protected formatVerticied = (verticies: Vector2d[]) => {
+    return verticies;
   };
 
-  protected formatVerticied = (verticies) => {
-    return verticies;
+  getLinkPortsData = () => {
+    return {
+      source: isVector2d(this.props.data.source)
+        ? (this.props.data.source as Vector2d)
+        : (this.context.cellsDataMap.get(
+            this.props.data.source as string
+          ) as PortDataType),
+      target: isVector2d(this.props.data.target)
+        ? (this.props.data.target as Vector2d)
+        : (this.context.cellsDataMap.get(
+            this.props.data.target as string
+          ) as PortDataType),
+    };
   };
 
   getAnchors = () => {
@@ -129,15 +141,15 @@ abstract class Edge<P = {}, S = {}> extends Cell<
     if (!isVector2d(data.source)) {
       const sourcePort = this.context.cellsDataMap.get(
         data.source as string
-      ) as PortType;
-      source = this.context.cellsDataMap.get(sourcePort.host) as NodeType;
+      ) as PortDataType;
+      source = this.context.cellsDataMap.get(sourcePort.host) as NodeDataType;
     }
 
     if (!isVector2d(data.target)) {
       const targetPort = this.context.cellsDataMap.get(
         data.target as string
-      ) as PortType;
-      target = this.context.cellsDataMap.get(targetPort.host) as NodeType;
+      ) as PortDataType;
+      target = this.context.cellsDataMap.get(targetPort.host) as NodeDataType;
     }
 
     return {
@@ -151,8 +163,8 @@ abstract class Edge<P = {}, S = {}> extends Cell<
     return vectors;
   }
 
-  private vectorsToPoints(vectors) {
-    const re = [];
+  private vectorsToPoints(vectors: Vector2d[]) {
+    const re: number[] = [];
     vectors.forEach((vector) => {
       re.push(vector.x, vector.y);
     });
@@ -172,28 +184,34 @@ abstract class Edge<P = {}, S = {}> extends Cell<
       .measureText(text).width;
 
     return (
-      <Label
-        x={-textWidth / 2 - LABEL_PADDING}
-        y={-TEXT_HEIGHT / 2}
-        onClick={(e) => {
-          this.context.sendEvent({
-            type: "label:click",
-            data: this,
-          });
-        }}
-      >
+      <Label x={-textWidth / 2 - LABEL_PADDING} y={-TEXT_HEIGHT / 2}>
         <Tag fill={color.background} />
         <Text
           height={TEXT_HEIGHT}
           verticalAlign="middle"
           text={this.labelFormatter(this.props.data.label)}
           padding={LABEL_PADDING}
+          {...this.labelStyle()}
         />
       </Label>
     );
   }
 
-  protected labelRender(anchors) {
+  labelStyle() {
+    return {};
+  }
+
+  labelPosition() {
+    const points = this.getVectors().map((vector) => [vector.x, vector.y]);
+    const lineLenthCenter = lineCenter(points);
+
+    return {
+      x: lineLenthCenter[0],
+      y: lineLenthCenter[1],
+    };
+  }
+
+  protected labelRender() {
     const text = this.labelFormatter(this.props.data.label);
 
     return (
@@ -210,25 +228,28 @@ abstract class Edge<P = {}, S = {}> extends Cell<
             "click",
           ].forEach((eventName) => {
             label.on(eventName, (e) => {
+              const instanceEventFn = this[`onLabel${titleCase(eventName)}`];
+              instanceEventFn && instanceEventFn.call(this, e);
+
               this.context.sendEvent({
                 type: `label:${eventName}`,
                 data: {
                   e,
                   cellData: this.props.data,
+                  cell: this,
                 },
               });
             });
           });
         }}
-        x={(anchors.source.x + anchors.target.x) / 2}
-        y={(anchors.source.y + anchors.target.y) / 2}
+        {...this.labelPosition()}
       >
         {text && this.labelContent()}
       </Group>
     );
   }
 
-  labelFormatter(label) {
+  labelFormatter(label: string) {
     return label;
   }
 
@@ -238,24 +259,39 @@ abstract class Edge<P = {}, S = {}> extends Cell<
 
   lineExtra: () => JSX.Element;
 
-  protected edgeRender({ points, isLinking }) {
+  protected edgeRender({
+    points,
+    isLinking,
+  }: {
+    points: number[];
+    isLinking: boolean;
+  }) {
     const { color } = this.context;
+
+    const lineProps = {
+      lineCap: "round",
+      lineJoin: "round",
+      strokeWidth: 2.5,
+      points: points as number[],
+      stroke: color.deepGrey,
+      fill: color.deepGrey,
+      dash: isLinking ? [10, 10] : undefined,
+      ...this.lineStyle({ isSelect: this.isSelect() }),
+    } as any;
 
     return (
       <Group>
-        <Line
-          stroke={color.deepGrey}
-          points={points}
-          strokeWidth={3}
-          {...this.getStroke(this.flowState)}
-          lineCap="round"
-          dash={isLinking ? [10, 10] : undefined}
-        ></Line>
+        {this.arrow ? (
+          <Arrow {...lineProps} pointerWidth={10} />
+        ) : (
+          <Line {...lineProps} />
+        )}
         <Line
           stroke="transparent"
           points={points}
           strokeWidth={20}
           lineCap="round"
+          lineJoin="round"
         ></Line>
         {this.lineExtra && this.lineExtra()}
       </Group>
@@ -264,12 +300,12 @@ abstract class Edge<P = {}, S = {}> extends Cell<
 
   content() {
     return (
-      <Interactor id={this.props.data.id} draggable={false}>
+      <Interactor id={this.props.data.id} draggable={false} topOnFocus={true}>
         {this.edgeRender({
           points: this.getPoints(),
           isLinking: this.isLinking(),
         })}
-        {this.labelRender(this.getAnchors())}
+        {this.labelRender()}
       </Interactor>
     );
   }

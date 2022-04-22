@@ -1,9 +1,10 @@
-import { Stage, Layer, Group, useStrictMode } from "react-konva";
+import { Stage, Layer, Group, useStrictMode, Circle } from "react-konva";
 import LinkingEdge from "./cells/LinkingEdge";
 import React, { createRef } from "react";
 import FlowModel from "./Model";
 
 import { observer } from "mobx-react";
+import { computed } from "mobx";
 import { FlowContext } from "./Context";
 
 import { registComponents } from "./utils/registComponents";
@@ -12,16 +13,20 @@ import Konva from "konva";
 
 import {
   initDrag,
-  initSelect,
   initClearState,
   initLink,
   initScale,
   initHotKeys,
+  initDataChangeListener,
 } from "./events";
 import { ModelType } from ".";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { STAGE_CLASS_NAME } from "./constants";
 import { getRightClickPanel } from "./components/RightClickPanel/index";
+import { initMultiSelect } from "./events";
+import { Vector2d } from "konva/lib/types";
+import { dot } from "./utils/vector";
+import { color } from "./theme/style";
 
 const renderComponent = (cellData, model) => {
   return React.createElement(
@@ -33,6 +38,81 @@ const renderComponent = (cellData, model) => {
   );
 };
 
+const Dots = observer(() => {
+  const model = useContext(FlowContext);
+
+  const _dots = computed(() => {
+    const re = [];
+    // @TODO
+    for (let i = 0; i <= model.height(); i += model.grid as number) {
+      for (let j = 0; j <= model.width(); j += model.grid as number) {
+        re.push({
+          x: j,
+          y: i,
+        });
+      }
+    }
+
+    console.log(model.width());
+    return re;
+  }).get();
+
+  return (
+    <Group>
+      {_dots.map((dot) => {
+        return <Circle x={dot.x} y={dot.y} radius={1} fill={color.deepGrey} />;
+      })}
+    </Group>
+  );
+});
+@observer
+class Grid extends React.Component<{}> {
+  static contextType = FlowContext;
+  // vscode 无法推断 this.context 的类型，需要显式声明 this.context 的类型
+  declare context: React.ContextType<typeof FlowContext>;
+
+  render() {
+    const grid = this.context.grid as number;
+    const { canvasData } = this.context;
+
+    const _gridPos = computed(() => {
+      return {
+        x: -Math.round(canvasData.x / grid) * grid,
+        y: -Math.round(canvasData.y / grid) * grid,
+      };
+    }).get();
+
+    return (
+      <Layer zIndex={0} listening={false}>
+        <Group {..._gridPos}>
+          <Dots />
+        </Group>
+      </Layer>
+    );
+  }
+}
+
+const Edges = observer((props: { linesLayerRef; model }) => {
+  const { linesLayerRef, model } = props;
+  const [_, setSecondRefresh] = useState(0);
+
+  useEffect(() => {
+    setSecondRefresh(1);
+  }, []);
+
+  const edgesData = model.canvasData.cells.filter(
+    (cellData) => cellData.cellType === "edge"
+  );
+
+  return (
+    <Layer ref={linesLayerRef} zIndex={1}>
+      {edgesData.map((cellData) => {
+        return renderComponent(cellData, model);
+      })}
+    </Layer>
+  );
+});
+
 const Nodes = observer((props: { nodesLayerRef; model }) => {
   const { nodesLayerRef, model } = props;
 
@@ -41,7 +121,7 @@ const Nodes = observer((props: { nodesLayerRef; model }) => {
   });
 
   return (
-    <Layer ref={nodesLayerRef} zIndex={1}>
+    <Layer ref={nodesLayerRef} zIndex={2}>
       {nodesData.slice(0, nodesData.length).map((cellData) => {
         return renderComponent(cellData, model);
       })}
@@ -57,66 +137,68 @@ const InteractTop = observer((props: { model; topLayerRef }) => {
   });
 
   return (
-    <Layer zIndex={2} ref={topLayerRef}>
+    <Layer zIndex={3} ref={topLayerRef}>
       <LinkingEdge data={model.buffer.link}></LinkingEdge>
       <SelectBoundsRect />
     </Layer>
   );
 });
 
-const Edges = observer((props: { linesLayerRef; model }) => {
-  const { linesLayerRef, model } = props;
-  const [_, setSecondRefresh] = useState(0);
-
-  useEffect(() => {
-    setSecondRefresh(1);
-  }, []);
-
-  const edgesData = model.canvasData.cells.filter(
-    (cellData) => cellData.cellType === "edge"
-  );
-
-  return (
-    <Layer ref={linesLayerRef} zIndex={0}>
-      {edgesData.map((cellData) => {
-        return renderComponent(cellData, model);
-      })}
-    </Layer>
-  );
-});
-
-@observer
-class Canvas extends React.Component<{
-  model: ModelType;
+type FlowProps = {
+  canvasData?: any;
+  onEvent?: (e: { type: string; data: any }) => void;
+  onLoad?: (model: FlowModel) => void;
+  zoom?: boolean;
+  modelRef?: any;
   width?: number;
   height?: number;
-}> {
+  grid: number;
+  multiSelect?: boolean;
+};
+@observer
+class Flow extends React.Component<FlowProps, {}> {
+  flowModel;
   stageRef;
   nodesLayerRef;
   linesLayerRef;
   topLayerRef;
 
-  constructor(props) {
+  constructor(props: FlowProps) {
     super(props);
+
+    this.flowModel = new FlowModel(props.onEvent);
+    this.props.canvasData &&
+      this.flowModel.setCanvasData(this.props.canvasData);
+    this.props.grid && this.flowModel.setGrid(this.props.grid);
+
+    if (this.props.width && this.props.height) {
+      this.flowModel.setSize(this.props.width, this.props.height);
+    }
+
+    props.modelRef && (props.modelRef.current = this.flowModel);
+    props.onLoad && props.onLoad(this.flowModel);
 
     // 完全受控，https://github.com/konvajs/react-konva/blob/master/README.md#strict-mode
     useStrictMode(true);
 
-    const { refs } = this.props.model;
+    const { refs } = this.flowModel;
     this.stageRef = refs.stageRef = createRef<Konva.Stage>();
     this.nodesLayerRef = refs.nodesLayerRef = createRef<Konva.Layer>();
     this.linesLayerRef = refs.linesLayerRef = createRef<Konva.Layer>();
     this.topLayerRef = createRef<Konva.Layer>();
     // 第一次渲染zIndex失效，issue link https://github.com/konvajs/react-konva/issues/194
+
+    registComponents(this.flowModel);
   }
 
   componentDidMount(): void {
-    const { model } = this.props;
+    const { flowModel: model } = this;
 
-    const stage = this.stageRef.current;
-    const linesLayer = this.linesLayerRef.current;
-    const nodesLayer = this.nodesLayerRef.current;
-    const topLayer = this.topLayerRef.current;
+    const stage = this.stageRef.current as Konva.Stage;
+    const linesLayer = this.linesLayerRef.current as Konva.Layer;
+    const nodesLayer = this.nodesLayerRef.current as Konva.Layer;
+    const topLayer = this.topLayerRef.current as Konva.Layer;
+    const { zoom = true, multiSelect = false } = this.props;
 
     initClearState(model, stage);
     initLink(model, stage);
@@ -125,76 +207,27 @@ class Canvas extends React.Component<{
       nodesLayer,
       topLayer,
     });
-    initScale(model, stage, {
-      linesLayer,
-      nodesLayer,
-    });
-    initSelect(model, stage, {
-      linesLayer,
-      nodesLayer,
-      topLayer,
-    });
+
+    zoom &&
+      initScale(model, stage, {
+        linesLayer,
+        nodesLayer,
+      });
+
+    multiSelect &&
+      initMultiSelect(model, stage, {
+        linesLayer,
+        nodesLayer,
+        topLayer,
+      });
     initHotKeys(model, stage);
-  }
-
-  render() {
-    const { model } = this.props;
-
-    return (
-      <Stage
-        className={STAGE_CLASS_NAME}
-        ref={this.stageRef}
-        scale={model.canvasData.scale}
-        x={model.canvasData.x}
-        y={model.canvasData.y}
-        width={this.props.width || window.innerWidth}
-        height={this.props.height || window.innerHeight}
-      >
-        {/* Provider需要在Stage内部，issue https://github.com/konvajs/react-konva/issues/188 */}
-        <FlowContext.Provider value={model}>
-          {/* 先注册节点，后注册线，线的一些计算属性需要节点的map */}
-          <Nodes nodesLayerRef={this.nodesLayerRef} model={model} />
-          <InteractTop topLayerRef={this.topLayerRef} model={model} />
-          <Edges linesLayerRef={this.linesLayerRef} model={model} />
-        </FlowContext.Provider>
-      </Stage>
-    );
-  }
-}
-
-type FlowProps = {
-  canvasData?: any;
-  onEvent?: (e: { type: string; data: any }) => void;
-  onLoad?: (model: FlowModel) => void;
-  modelRef?: any;
-  width?: number;
-  height?: number;
-};
-
-const DEFAULT_CANVAS_DATA = {
-  scale: { x: 1, y: 1 },
-  x: 0,
-  y: 0,
-  cells: [],
-};
-@observer
-class Flow extends React.Component<FlowProps, {}> {
-  flowModel;
-
-  constructor(props: FlowProps) {
-    super(props);
-
-    this.flowModel = new FlowModel(props.onEvent);
-    this.flowModel.setCanvasData(this.props.canvasData || DEFAULT_CANVAS_DATA);
-
-    props.modelRef && (props.modelRef.current = this.flowModel);
-    props.onLoad && props.onLoad(this.flowModel);
-
-    registComponents(this.flowModel);
+    initHotKeys(model, stage);
+    initDataChangeListener(model);
   }
 
   render() {
     const { flowModel: model } = this;
+
     return (
       <div
         style={{
@@ -203,11 +236,24 @@ class Flow extends React.Component<FlowProps, {}> {
       >
         <FlowContext.Provider value={model}>
           {getRightClickPanel(this.props.children)}
-          <Canvas
-            model={model}
-            width={this.props.width}
-            height={this.props.height}
-          />
+          <Stage
+            className={STAGE_CLASS_NAME}
+            ref={this.stageRef}
+            scale={{ x: model.canvasData.scale, y: model.canvasData.scale }}
+            x={model.x()}
+            y={model.y()}
+            width={model.width()}
+            height={model.height()}
+          >
+            {/* Provider需要在Stage内部，issue https://github.com/konvajs/react-konva/issues/188 */}
+            <FlowContext.Provider value={model}>
+              {model.grid && model.scale() >= 1 && <Grid />}
+              {/* 先注册节点，后注册线，线的一些计算属性需要节点的map */}
+              <Nodes nodesLayerRef={this.nodesLayerRef} model={model} />
+              <InteractTop topLayerRef={this.topLayerRef} model={model} />
+              <Edges linesLayerRef={this.linesLayerRef} model={model} />
+            </FlowContext.Provider>
+          </Stage>
         </FlowContext.Provider>
       </div>
     );

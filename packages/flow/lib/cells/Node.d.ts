@@ -1,12 +1,12 @@
 import Cell from "./Cell";
-import { CellType } from "./Cell";
-export declare type NodeType = {
+import { CellDataType } from "./Cell";
+export declare type NodeDataType = {
     x: number;
     y: number;
     type: string;
     ports?: [];
-} & CellType;
-declare abstract class Node<P = {}, S = {}> extends Cell<P & NodeType, S> {
+} & CellDataType;
+declare abstract class Node<P = {}, S = {}> extends Cell<P & NodeDataType, S> {
     static metaData: any;
 }
 export default Node;

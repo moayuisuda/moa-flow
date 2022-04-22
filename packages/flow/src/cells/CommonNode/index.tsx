@@ -1,24 +1,26 @@
 import type { FieldType } from "../..//types/common";
-import { PortType } from "../..//scaffold/Port";
+import { PortDataType } from "../..//scaffold/Port";
 import { Rect, Text, Circle, Group } from "react-konva";
 import Button from "../../common/Button";
 import Interactor from "../../scaffold/Interactor";
 import Node from "../Node";
-import { NodeType } from "../Node";
+import { NodeDataType } from "../Node";
+import React from "react";
+
 const { Port } = Interactor;
 
-type CommonPortType = PortType & {
+type CommonPortDataType = PortDataType & {
   label: string;
   portType: "in" | "out" | "control-out" | "control-in";
 };
 
-type CommonNodeType = {
-  ports?: CommonPortType[];
+type CommonNodeDataType = {
+  ports?: CommonPortDataType[];
   fields?: FieldType[];
   x?: number;
   y?: number;
   label?: string;
-} & NodeType;
+} & NodeDataType;
 
 const WIDTH = 200;
 const HEADER_HEIGHT = 40;
@@ -34,7 +36,7 @@ const PORT_OFFSET = PORTS_OFFSET + SINGLE_PORT_HEIGHT / 2;
 const PORT_GRAPHIC_OFFSET =
   PORT_RADIUS + (SINGLE_PORT_HEIGHT - PORT_RADIUS * 2) / 2;
 
-class CommonNode extends Node<CommonNodeType, {}> {
+class CommonNode extends Node<CommonNodeDataType, {}> {
   static metaData = {
     fields: [{}],
     label: "",
@@ -111,7 +113,7 @@ class CommonNode extends Node<CommonNodeType, {}> {
     const { data } = this.props;
 
     return (
-      <Interactor {...this.props.data} topOnFocus>
+      <Interactor {...this.props.data}>
         <Rect
           width={WIDTH}
           height={FULL_HEIGHT}

@@ -1,50 +1,45 @@
-import { __extends, __assign } from '../../node_modules/tslib/tslib.es6.js';
 import { Image as Image$1 } from 'react-konva';
 import React from 'react';
 
-var Image = /** @class */ (function (_super) {
-    __extends(Image, _super);
-    function Image() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.state = {
-            image: null,
+class Image extends React.Component {
+    constructor() {
+        super(...arguments);
+        this.state = {
+            image: undefined,
         };
-        _this.handleLoad = function () {
+        this.handleLoad = () => {
             // after setState react-konva will update canvas and redraw the layer
             // because "image" property is changed
-            _this.setState({
-                image: _this.image,
+            this.setState({
+                image: this.image,
             });
             // if you keep same image object during source updates
             // you will have to update layer manually:
             // this.imageNode.getLayer().batchDraw();
         };
-        return _this;
     }
-    Image.prototype.componentDidMount = function () {
+    componentDidMount() {
         this.loadImage();
-    };
-    Image.prototype.componentDidUpdate = function (oldProps) {
+    }
+    componentDidUpdate(oldProps) {
         if (oldProps.src !== this.props.src) {
             this.loadImage();
         }
-    };
-    Image.prototype.componentWillUnmount = function () {
+    }
+    componentWillUnmount() {
         this.image.removeEventListener("load", this.handleLoad);
-    };
-    Image.prototype.loadImage = function () {
+    }
+    loadImage() {
         // save to "this" to remove "load" handler on unmount
         this.image = new window.Image();
         this.image.src = this.props.src;
         this.image.addEventListener("load", this.handleLoad);
-    };
-    Image.prototype.render = function () {
-        var _this = this;
-        return (React.createElement(Image$1, __assign({ image: this.state.image, ref: function (node) {
-                _this.imageNode = node;
+    }
+    render() {
+        return (React.createElement(Image$1, Object.assign({ image: this.state.image, ref: (node) => {
+                this.imageNode = node;
             } }, this.props)));
-    };
-    return Image;
-}(React.Component));
+    }
+}
 
 export { Image as default };

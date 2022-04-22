@@ -1,8 +1,10 @@
-import { PortType } from "../scaffold/Port"
+import { PortDataType } from "../scaffold/Port"
+import { NodeDataType } from '../cells/Node';
+import { EdgeDataType } from '../cells/Edge';
 
 export type FieldType = {
     label: string,
-    ports: PortType[]
+    ports: PortDataType[]
 }
 
 export type NodeFlowState = {
@@ -19,10 +21,13 @@ export type Bounds = {
 export type CanvasDataType = {
     x: number,
     y: number,
-    scale: { x: number, y: number },
+    scale: number,
     cells: any[]
 }
 
-export type CellType = {
-    
+export type AllCellDataType = NodeDataType | EdgeDataType;
+
+export type FlowInfraEventType = {
+    type: string,
+    data: any
 }

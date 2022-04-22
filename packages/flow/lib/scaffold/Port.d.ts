@@ -1,29 +1,34 @@
 import React from "react";
 import Cell from "../cells/Cell";
-import { CellType } from "../cells/Cell";
+import { CellDataType } from "../cells/Cell";
 import { KonvaEventObject } from "konva/lib/Node";
-export declare type PortType = {
-    id: string;
-    anchor: {
+import FlowModel from "../Model";
+export declare type PortDataType = {
+    edges?: string[];
+    host: string;
+} & CellDataType;
+declare type PortPropsType = {
+    link?: (source: any, target: any) => boolean;
+    x?: number;
+    y?: number;
+    anchor?: {
         x: number;
         y: number;
     } | (() => {
         x: number;
         y: number;
     });
-    edges?: string[];
-    host: string;
-} & CellType;
-declare class Port extends Cell<PortType, {}, {
-    link: (source: PortType & unknown, target: PortType & unknown) => boolean;
-}> {
+};
+declare class Port extends Cell<PortDataType, {}, PortPropsType> {
     wrapperRef: React.RefObject<any>;
     static metaData: {
         type: string;
         source: undefined;
         target: undefined;
     };
-    constructor(props: any, context: any);
+    constructor(props: PortPropsType & {
+        data: PortDataType;
+    }, context: FlowModel);
     anchor(): {
         x: any;
         y: any;

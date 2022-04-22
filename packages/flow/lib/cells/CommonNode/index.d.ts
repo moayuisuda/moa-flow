@@ -1,19 +1,19 @@
 import type { FieldType } from "../..//types/common";
-import { PortType } from "../..//scaffold/Port";
+import { PortDataType } from "../..//scaffold/Port";
 import Node from "../Node";
-import { NodeType } from "../Node";
-declare type CommonPortType = PortType & {
+import { NodeDataType } from "../Node";
+declare type CommonPortDataType = PortDataType & {
     label: string;
     portType: "in" | "out" | "control-out" | "control-in";
 };
-declare type CommonNodeType = {
-    ports?: CommonPortType[];
+declare type CommonNodeDataType = {
+    ports?: CommonPortDataType[];
     fields?: FieldType[];
     x?: number;
     y?: number;
     label?: string;
-} & NodeType;
-declare class CommonNode extends Node<CommonNodeType, {}> {
+} & NodeDataType;
+declare class CommonNode extends Node<CommonNodeDataType, {}> {
     static metaData: {
         fields: {}[];
         label: string;

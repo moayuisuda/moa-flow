@@ -9,6 +9,7 @@ import Controller from "./Controller";
 import "antd/dist/antd.css";
 import { message, Button } from "antd";
 import MyEdge from "./MyEdge";
+import FlowModel from "../../../packages/flow/lib/Model";
 
 const randomIn = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -22,8 +23,8 @@ function App() {
 
   useEffect(() => {
     // 注册自定义节点;
-    MyNode.regist(modelRef.current);
-    MyEdge.regist(modelRef.current);
+    MyNode.regist(modelRef.current as FlowModel);
+    MyEdge.regist(modelRef.current as FlowModel);
     const model = modelRef.current as ModelType;
     model.setLinkEdge("MyEdge");
 
@@ -103,6 +104,7 @@ function App() {
   return (
     <div className="App">
       {/* react组件引用 */}
+      <h1>111</h1>
       <Flow
         modelRef={modelRef}
         canvasData={testData}
@@ -110,19 +112,22 @@ function App() {
           // message.info(`[${e.type}]}`);
         }}
       >
-        <RightClickPanel
-          extra={(model: ModelType) => {
+        <RightClickPanel>
+          {(context: ModelType) => {
             return (
               <Button
                 onClick={() => {
-                  console.log({ model });
+                  console.log(JSON.stringify(context.canvasData));
+                  console.log({ context });
+                  context.deleCell(context.selectCells[0]);
+                  console.log(JSON.stringify(context.canvasData));
                 }}
               >
                 自定义按钮
               </Button>
             );
           }}
-        />
+        </RightClickPanel>
       </Flow>
       {/* 同Flow一样Controller也可封装ReactDOM.render */}
       {/* <Controller modelRef={modelRef}></Controller> */}

@@ -1,18 +1,17 @@
-import { __extends, __decorate } from '../../node_modules/tslib/tslib.es6.js';
+import { __decorate } from '../../node_modules/tslib/tslib.es6.js';
 import { observer } from 'mobx-react';
 import styles from './style.less.js';
 import React from 'react';
 import { FlowContext } from '../../Context.js';
 
-var RightClickPanel = /** @class */ (function (_super) {
-    __extends(RightClickPanel, _super);
-    function RightClickPanel(props) {
-        var _this = _super.call(this, props) || this;
-        _this.initStageEvent = function () {
-            _this.context.refs.stageRef.current.on("contextmenu", function (e) {
+let RightClickPanel = class RightClickPanel extends React.Component {
+    constructor(props) {
+        super(props);
+        this.initStageEvent = () => {
+            this.context.refs.stageRef.current.on("contextmenu", (e) => {
                 e.evt.preventDefault();
-                _this.context.buffer.rightClickPanel.visible = true;
-                _this.setState({
+                this.context.buffer.rightClickPanel.visible = true;
+                this.setState({
                     pos: {
                         x: e.evt.clientX,
                         y: e.evt.clientY,
@@ -20,41 +19,40 @@ var RightClickPanel = /** @class */ (function (_super) {
                 });
             });
         };
-        _this.state = {
+        this.state = {
             pos: {
                 x: 0,
                 y: 0,
             },
         };
-        return _this;
     }
-    RightClickPanel.prototype.componentDidMount = function () {
-        var _this = this;
+    componentDidMount() {
         // 子组件会在commit阶段先挂载触发didMount
-        Promise.resolve().then(function () {
-            _this.initStageEvent();
+        Promise.resolve().then(() => {
+            this.initStageEvent();
         });
-    };
-    RightClickPanel.prototype.dele = function () { };
-    RightClickPanel.prototype.moveToTop = function () { };
-    RightClickPanel.prototype.render = function () {
+    }
+    dele() { }
+    moveToTop() { }
+    render() {
         if (!this.context.buffer.rightClickPanel.visible)
             return React.createElement(React.Fragment, null);
-        return (React.createElement("ul", { style: {
+        console.log(this.props.children);
+        return (React.createElement("div", { style: {
                 top: this.state.pos.y,
                 left: this.state.pos.x,
-            }, className: styles["toolbar"] }));
-    };
-    RightClickPanel.contextType = FlowContext;
-    RightClickPanel = __decorate([
-        observer
-    ], RightClickPanel);
-    return RightClickPanel;
-}(React.Component));
-var getRightClickPanel = function (children) {
-    return React.Children.toArray(children).find(function (item) {
+            }, className: styles["toolbar"] }, this.props.children(this.context)));
+    }
+};
+RightClickPanel.contextType = FlowContext;
+RightClickPanel = __decorate([
+    observer
+], RightClickPanel);
+const getRightClickPanel = (children) => {
+    return React.Children.toArray(children).find((item) => {
         return item.type === RightClickPanel;
     });
 };
+var RightClickPanel$1 = RightClickPanel;
 
-export { RightClickPanel as default, getRightClickPanel };
+export { RightClickPanel$1 as default, getRightClickPanel };

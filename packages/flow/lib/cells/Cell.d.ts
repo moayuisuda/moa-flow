@@ -1,19 +1,20 @@
 import React from "react";
+import Konva from "konva";
 import { FlowContext } from "../Context";
 import Model from "../Model";
-export declare type CellType = {
+import { AllCellDataType } from "../types/common";
+export declare type CellDataType = {
     id: string;
     cellType: string;
+    component: string;
+    [key: string]: any;
 };
 declare abstract class Cell<D, S = {}, P = {}> extends React.Component<{
-    data: D & CellType;
+    data: D & CellDataType;
 } & P, S> {
-    flowState: {
-        isSelect: boolean;
-    };
     static contextType: React.Context<Model>;
     context: React.ContextType<typeof FlowContext>;
-    static getBounds: (cellData: any) => {
+    static getBounds: (cellData: AllCellDataType) => {
         x: number;
         y: number;
         width: number;
@@ -23,13 +24,17 @@ declare abstract class Cell<D, S = {}, P = {}> extends React.Component<{
     static metaData: any;
     wrapperRef: React.RefObject<any>;
     constructor(props: any, context: Model);
-    static regist(model: any): void;
+    static regist(model: Model): void;
     static getMetaData(): {
         component: string;
     };
-    getStage(konvaNode: any): any;
+    getStage(konvaNode: Konva.Node): import("konva/lib/Node").Node<import("konva/lib/Node").NodeConfig>;
     setData(data: any): void;
+    onMount: () => void;
     componentDidMount(): void;
+    getData(): ({
+        data: D & CellDataType;
+    } & P)["data"];
     isSelect(): boolean;
     render(): JSX.Element;
 }

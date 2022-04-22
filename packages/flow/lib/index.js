@@ -6,7 +6,7 @@ export { default as Edge } from './cells/Edge.js';
 export { default as Interactor } from './scaffold/Interactor.js';
 export { default as Port } from './scaffold/Port.js';
 export { default as RightClickPanel } from './components/RightClickPanel/index.js';
-export { default as Image } from './components/RightClickPanel/Image.js';
+export { default as Image } from './components/Image.js';
 import * as reactKonva from 'react-konva';
 export { reactKonva as Graph };
 export { autorun } from 'mobx';

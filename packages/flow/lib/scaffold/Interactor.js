@@ -1,4 +1,4 @@
-import { __extends, __rest, __assign, __decorate } from '../node_modules/tslib/tslib.es6.js';
+import { __rest, __decorate } from '../node_modules/tslib/tslib.es6.js';
 import { Group } from 'react-konva';
 import React from 'react';
 import { observer } from 'mobx-react';
@@ -6,21 +6,22 @@ import { FlowContext } from '../Context.js';
 import Port from './Port.js';
 import { EVT_LEFTCLICK } from '../constants.js';
 
-var Interactor = /** @class */ (function (_super) {
-    __extends(Interactor, _super);
-    function Interactor(props) {
-        return _super.call(this, props) || this;
+let Interactor = class Interactor extends React.Component {
+    constructor(props) {
+        super(props);
     }
-    Interactor.prototype.render = function () {
-        var _this = this;
-        var _a = this, context = _a.context, _b = _a.props, x = _b.x, y = _b.y; _b.draggable; var id = _b.id; _b.topOnFocus; var _d = _b.selectable, selectable = _d === void 0 ? true : _d, others = __rest(_b, ["x", "y", "draggable", "id", "topOnFocus", "selectable"]);
-        return (React.createElement(Group, __assign({ x: x, y: y, onMouseDown: function (e) {
-                var _a = _this.context, selectCells = _a.selectCells, _b = _a.buffer, select = _b.select, drag = _b.drag;
+    render() {
+        const _a = this, { context } = _a, _b = _a.props, { x, y, draggable = true, id, topOnFocus = true, selectable = true } = _b, others = __rest(_b, ["x", "y", "draggable", "id", "topOnFocus", "selectable"]);
+        return (React.createElement(Group, Object.assign({ x: x, y: y, onMouseDown: (e) => {
+                const { selectCells, buffer: { select, drag }, } = this.context;
                 if (selectable) {
-                    if (!selectCells.includes(_this.props.id))
+                    if (!selectCells.includes(this.props.id))
                         context.setSelectedCells([id]);
                     // drag
                     if (e.evt.button === EVT_LEFTCLICK) {
+                        // @TODO 和drag的默认行为有歧义
+                        if (topOnFocus)
+                            this.context.moveTo(this.props.id, this.context.canvasData.cells.length - 1);
                         select.isSelecting = true;
                         drag.start.x = e.evt.x;
                         drag.start.y = e.evt.y;
@@ -28,13 +29,13 @@ var Interactor = /** @class */ (function (_super) {
                     }
                 }
             } }, others), this.props.children));
-    };
-    Interactor.contextType = FlowContext;
-    Interactor = __decorate([
-        observer
-    ], Interactor);
-    return Interactor;
-}(React.Component));
+    }
+};
+Interactor.contextType = FlowContext;
+Interactor = __decorate([
+    observer
+], Interactor);
 Interactor.Port = Port;
+var Interactor$1 = Interactor;
 
-export { Interactor as default };
+export { Interactor$1 as default };

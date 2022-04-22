@@ -1,33 +1,39 @@
 .toolbar {
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  z-index: 2;
+  padding: 14px;
+  background-color: white;
   // display: flex;
   // flex-direction: column;
-  // list-style: none;
   // gap: 10px;
   // max-width: 400px;
-  // border-radius: 6px;
-  // padding: 14px;
-  // position: absolute;
-  background-color: white;
-  z-index: 2;
+  border-radius: 6px;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
 
   &__item {
     &:hover {
       width: 100px;
-      cursor: pointer;
       background-color: rgba(0, 0, 0, 0.1);
+      cursor: pointer;
     }
   }
 
   &__button {
-    line-height: 1.5715;
     position: relative;
     display: inline-block;
+    height: 32px;
+    padding: 4px 15px;
+    color: rgba(0, 0, 0, 0.85);
     font-weight: 400;
+    font-size: 14px;
+    line-height: 1.5715;
     white-space: nowrap;
     text-align: center;
+    background: #fff;
     background-image: none;
     border: 1px solid transparent;
+    border-color: #d9d9d9;
+    border-radius: 2px;
     box-shadow: 0 2px 0 rgba(0, 0, 0, 0.015);
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
@@ -36,12 +42,5 @@
     -ms-user-select: none;
     user-select: none;
     touch-action: manipulation;
-    height: 32px;
-    padding: 4px 15px;
-    font-size: 14px;
-    border-radius: 2px;
-    color: rgba(0, 0, 0, 0.85);
-    border-color: #d9d9d9;
-    background: #fff;
   }
 }

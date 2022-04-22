@@ -7,13 +7,21 @@ declare type FlowProps = {
         data: any;
     }) => void;
     onLoad?: (model: FlowModel) => void;
+    zoom?: boolean;
     modelRef?: any;
     width?: number;
     height?: number;
+    grid: number;
+    multiSelect?: boolean;
 };
 declare class Flow extends React.Component<FlowProps, {}> {
-    flowModel: FlowModel;
+    flowModel: any;
+    stageRef: React.RefObject<import("konva/lib/Stage").Stage>;
+    nodesLayerRef: React.RefObject<import("konva/lib/Layer").Layer>;
+    linesLayerRef: React.RefObject<import("konva/lib/Layer").Layer>;
+    topLayerRef: React.RefObject<import("konva/lib/Layer").Layer>;
     constructor(props: FlowProps);
+    componentDidMount(): void;
     render(): JSX.Element;
 }
 export default Flow;

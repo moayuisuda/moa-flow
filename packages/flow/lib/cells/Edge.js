@@ -1,16 +1,16 @@
-import { __extends, __spreadArray, __assign } from '../node_modules/tslib/tslib.es6.js';
 import Cell from './Cell.js';
-import { Label, Tag, Text, Group, Line } from 'react-konva';
+import { Label, Tag, Text, Group, Arrow, Line } from 'react-konva';
 import Interactor from '../scaffold/Interactor.js';
 import React from 'react';
 import { isVector2d } from '../utils/util.js';
+import { titleCase } from '../utils/string.js';
+import { lineCenter } from '../utils/vector.js';
 
-var TEXT_HEIGHT = 16;
-var LABEL_PADDING = 4;
-var Edge = /** @class */ (function (_super) {
-    __extends(Edge, _super);
-    function Edge(props, context) {
-        var _this = _super.call(this, props, context) || this;
+const TEXT_HEIGHT = 16;
+const LABEL_PADDING = 4;
+class Edge extends Cell {
+    constructor(props, context) {
+        super(props, context);
         // // 先不管线条的bounds
         // static getBounds(cellData) {
         //   const sourceInstance = flowModel.cellsMap.get(cellData.source);
@@ -31,30 +31,30 @@ var Edge = /** @class */ (function (_super) {
         //     y: top,
         //   };
         // }
-        _this.bazier = true;
-        _this.dash = false;
-        _this.getStroke = function (flowState) {
-            var isSelect = flowState.isSelect;
-            var color = _this.context.color;
-            if (isSelect) {
-                return {
-                    stroke: color.active,
-                };
-            }
-            else
-                return {};
-        };
-        _this.formatVerticied = function (verticies) {
+        this.bazier = true;
+        this.arrow = true;
+        this.dash = false;
+        this.formatVerticied = (verticies) => {
             return verticies;
         };
-        _this.getAnchors = function () {
-            var data = _this.props.data;
-            var sourceAnchor;
-            var targetAnchor;
+        this.getLinkPortsData = () => {
+            return {
+                source: isVector2d(this.props.data.source)
+                    ? this.props.data.source
+                    : this.context.cellsDataMap.get(this.props.data.source),
+                target: isVector2d(this.props.data.target)
+                    ? this.props.data.target
+                    : this.context.cellsDataMap.get(this.props.data.target),
+            };
+        };
+        this.getAnchors = () => {
+            const { data } = this.props;
+            let sourceAnchor;
+            let targetAnchor;
             if (isVector2d(data.source))
                 sourceAnchor = data.source;
             else {
-                var sourceInstance = _this.context.cellsMap.get(data.source);
+                const sourceInstance = this.context.cellsMap.get(data.source);
                 sourceAnchor =
                     (sourceInstance.props.anchor && sourceInstance.props.anchor()) ||
                         sourceInstance.anchor();
@@ -62,7 +62,7 @@ var Edge = /** @class */ (function (_super) {
             if (isVector2d(data.target))
                 targetAnchor = data.target;
             else {
-                var targetInstance = _this.context.cellsMap.get(data.target);
+                const targetInstance = this.context.cellsMap.get(data.target);
                 targetAnchor =
                     (targetInstance.props.anchor && targetInstance.props.anchor()) ||
                         targetInstance.anchor();
@@ -72,69 +72,79 @@ var Edge = /** @class */ (function (_super) {
                 target: targetAnchor,
             };
         };
-        _this.labelRef = React.createRef();
-        _this.state = {
-            points: [],
-        };
-        return _this;
+        this.labelRef = React.createRef();
     }
-    Edge.prototype.getPoints = function () {
-        var routeResult = this.route(this.getVectors());
+    lineStyle({ isSelect }) {
+        const { color } = this.context;
+        if (isSelect) {
+            return {
+                stroke: color.active,
+            };
+        }
+        else
+            return {};
+    }
+    getPoints() {
+        const routeResult = this.route(this.getVectors());
         return this.vectorsToPoints(routeResult);
-    };
-    Edge.prototype.getVectors = function () {
-        var anchors = this.getAnchors();
-        var verticies = this.props.data.verticies || [];
-        return __spreadArray(__spreadArray([anchors.source], verticies, true), [anchors.target], false);
-    };
-    Edge.prototype.getLinkNodesData = function () {
-        var data = this.props.data;
-        var source;
-        var target;
+    }
+    getVectors() {
+        const anchors = this.getAnchors();
+        const verticies = this.props.data.verticies || [];
+        return [anchors.source, ...verticies, anchors.target];
+    }
+    getLinkNodesData() {
+        const { data } = this.props;
+        let source;
+        let target;
         if (!isVector2d(data.source)) {
-            var sourcePort = this.context.cellsDataMap.get(data.source);
+            const sourcePort = this.context.cellsDataMap.get(data.source);
             source = this.context.cellsDataMap.get(sourcePort.host);
         }
         if (!isVector2d(data.target)) {
-            var targetPort = this.context.cellsDataMap.get(data.target);
+            const targetPort = this.context.cellsDataMap.get(data.target);
             target = this.context.cellsDataMap.get(targetPort.host);
         }
         return {
-            source: source,
-            target: target,
+            source,
+            target,
         };
-    };
+    }
     // 这个方法暴露出去，可自定义路由
-    Edge.prototype.route = function (vectors) {
+    route(vectors) {
         return vectors;
-    };
-    Edge.prototype.vectorsToPoints = function (vectors) {
-        var re = [];
-        vectors.forEach(function (vector) {
+    }
+    vectorsToPoints(vectors) {
+        const re = [];
+        vectors.forEach((vector) => {
             re.push(vector.x, vector.y);
         });
         return re;
-    };
-    Edge.prototype.labelContent = function () {
-        var _this = this;
-        var _a = this.context, color = _a.color, linesLayerRef = _a.refs.linesLayerRef;
-        var text = this.labelFormatter(this.props.data.label);
-        var textWidth = linesLayerRef.current
+    }
+    labelContent() {
+        const { color, refs: { linesLayerRef }, } = this.context;
+        const text = this.labelFormatter(this.props.data.label);
+        const textWidth = linesLayerRef.current
             .getContext()
             .measureText(text).width;
-        return (React.createElement(Label, { x: -textWidth / 2 - LABEL_PADDING, y: -TEXT_HEIGHT / 2, onClick: function (e) {
-                _this.context.sendEvent({
-                    type: "label:click",
-                    data: _this,
-                });
-            } },
+        return (React.createElement(Label, { x: -textWidth / 2 - LABEL_PADDING, y: -TEXT_HEIGHT / 2 },
             React.createElement(Tag, { fill: color.background }),
-            React.createElement(Text, { height: TEXT_HEIGHT, verticalAlign: "middle", text: this.labelFormatter(this.props.data.label), padding: LABEL_PADDING })));
-    };
-    Edge.prototype.labelRender = function (anchors) {
-        var _this = this;
-        var text = this.labelFormatter(this.props.data.label);
-        return (React.createElement(Group, { ref: function (label) {
+            React.createElement(Text, Object.assign({ height: TEXT_HEIGHT, verticalAlign: "middle", text: this.labelFormatter(this.props.data.label), padding: LABEL_PADDING }, this.labelStyle()))));
+    }
+    labelStyle() {
+        return {};
+    }
+    labelPosition() {
+        const points = this.getVectors().map((vector) => [vector.x, vector.y]);
+        const lineLenthCenter = lineCenter(points);
+        return {
+            x: lineLenthCenter[0],
+            y: lineLenthCenter[1],
+        };
+    }
+    labelRender() {
+        const text = this.labelFormatter(this.props.data.label);
+        return (React.createElement(Group, Object.assign({ ref: (label) => {
                 if (!label)
                     return;
                 [
@@ -144,45 +154,47 @@ var Edge = /** @class */ (function (_super) {
                     "mouseup",
                     "dblclick",
                     "click",
-                ].forEach(function (eventName) {
-                    label.on(eventName, function (e) {
-                        _this.context.sendEvent({
-                            type: "label:".concat(eventName),
+                ].forEach((eventName) => {
+                    label.on(eventName, (e) => {
+                        const instanceEventFn = this[`onLabel${titleCase(eventName)}`];
+                        instanceEventFn && instanceEventFn.call(this, e);
+                        this.context.sendEvent({
+                            type: `label:${eventName}`,
                             data: {
-                                e: e,
-                                cellData: _this.props.data,
+                                e,
+                                cellData: this.props.data,
+                                cell: this,
                             },
                         });
                     });
                 });
-            }, x: (anchors.source.x + anchors.target.x) / 2, y: (anchors.source.y + anchors.target.y) / 2 }, text && this.labelContent()));
-    };
-    Edge.prototype.labelFormatter = function (label) {
+            } }, this.labelPosition()), text && this.labelContent()));
+    }
+    labelFormatter(label) {
         return label;
-    };
-    Edge.prototype.isLinking = function () {
+    }
+    isLinking() {
         return this.context.buffer.link.edge === this.props.data.id;
-    };
-    Edge.prototype.edgeRender = function (_a) {
-        var points = _a.points, isLinking = _a.isLinking;
-        var color = this.context.color;
+    }
+    edgeRender({ points, isLinking, }) {
+        const { color } = this.context;
+        const lineProps = Object.assign({ lineCap: "round", lineJoin: "round", strokeWidth: 2.5, points: points, stroke: color.deepGrey, fill: color.deepGrey, dash: isLinking ? [10, 10] : undefined }, this.lineStyle({ isSelect: this.isSelect() }));
         return (React.createElement(Group, null,
-            React.createElement(Line, __assign({ stroke: color.deepGrey, points: points, strokeWidth: 3 }, this.getStroke(this.flowState), { lineCap: "round", dash: isLinking ? [10, 10] : undefined })),
-            React.createElement(Line, { stroke: "transparent", points: points, strokeWidth: 20, lineCap: "round" }),
+            this.arrow ? (React.createElement(Arrow, Object.assign({}, lineProps, { pointerWidth: 10 }))) : (React.createElement(Line, Object.assign({}, lineProps))),
+            React.createElement(Line, { stroke: "transparent", points: points, strokeWidth: 20, lineCap: "round", lineJoin: "round" }),
             this.lineExtra && this.lineExtra()));
-    };
-    Edge.prototype.content = function () {
-        return (React.createElement(Interactor, { id: this.props.data.id, draggable: false },
+    }
+    content() {
+        return (React.createElement(Interactor, { id: this.props.data.id, draggable: false, topOnFocus: true },
             this.edgeRender({
                 points: this.getPoints(),
                 isLinking: this.isLinking(),
             }),
-            this.labelRender(this.getAnchors())));
-    };
-    Edge.metaData = {
-        cellType: "edge",
-    };
-    return Edge;
-}(Cell));
+            this.labelRender()));
+    }
+}
+Edge.metaData = {
+    cellType: "edge",
+};
 
 export { Edge as default };

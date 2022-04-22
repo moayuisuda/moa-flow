@@ -1,20 +1,20 @@
 import { Interactor, Node, Html, Graph } from "@ali/flow-infra";
-import type { PortType } from "@ali/flow-infra";
+import type { PortDataType } from "@ali/flow-infra";
 import { message, Modal } from "antd";
 const { Rect, Text, Circle, Group } = Graph;
 
-type MyPortType = PortType & { label: string };
-type MyNodeType = {
-  ports?: MyPortType[];
-  x: number;
-  y: number;
+interface MyPortDataType extends PortDataType {
+  label: string;
+}
+
+type MyNodeDataType = {
   label?: string;
-};
+} & PortDataType;
 
 const WIDTH = 300;
 const HEIGHT = 160;
 
-class MyNode extends Node<MyNodeType, {}> {
+class MyNode extends Node<MyNodeDataType, {}> {
   // metaData决定了新增节点时的初始数据，会merge父类的metaData
   static metaData = {
     fields: [{}],
@@ -37,7 +37,7 @@ class MyNode extends Node<MyNodeType, {}> {
 
     return (
       // 这个组件提供交互能力，可以手动设置draggable（可拖拽），selectable（可被选择）
-      <Interactor {...this.props.data} topOnFocus>
+      <Interactor {...this.props.data}>
         <Rect
           width={WIDTH}
           height={HEIGHT}
@@ -78,7 +78,7 @@ class MyNode extends Node<MyNodeType, {}> {
               key={index}
               x={WIDTH - 50}
               y={20 + index * 30}
-              link={(source: MyPortType, target: MyPortType) => {
+              link={(source: MyPortDataType, target: MyPortDataType) => {
                 const adopt =
                   target.label === "father" || source.label === "father";
                 if (!adopt) message.warn("我只能链接father桩");
@@ -97,9 +97,7 @@ class MyNode extends Node<MyNodeType, {}> {
             </Interactor.Port>
           ))}
         </Group>
-        {/* <Html>
-          <Modal visible={true}>hello</Modal>
-        </Html> */}
+        <Html>{/* <Modal visible={true}>hello</Modal> */}</Html>
       </Interactor>
     );
   }

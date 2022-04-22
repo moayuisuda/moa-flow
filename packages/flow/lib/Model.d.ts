@@ -1,14 +1,20 @@
 import React from "react";
-import { CellType } from "./cells/Cell";
-import { NodeType } from "./cells/Node";
+import { CellDataType } from "./cells/Cell";
 import Konva from "konva";
-import { CanvasDataType } from "./types/common";
+import { CanvasDataType, AllCellDataType } from "./types/common";
 declare type EventSender = (data: any) => void;
 export declare class FlowModel {
     constructor(eventSender?: EventSender);
     setEventSender: (eventSender: EventSender) => void;
     setCellsDataMap: () => void;
-    setCellDataMap: (cellData: NodeType) => void;
+    setCellDataMap(cellData: AllCellDataType): void;
+    _width: number;
+    _height: number;
+    width: (width?: number | undefined) => number;
+    height: (height?: number | undefined) => number;
+    setSize: (width: number, height: number) => void;
+    grid: number | undefined;
+    setGrid: (grid: number) => void;
     refs: {
         stageRef: React.RefObject<import("konva/lib/Stage").Stage> | undefined;
         nodesLayerRef: React.RefObject<import("konva/lib/Layer").Layer> | undefined;
@@ -22,6 +28,7 @@ export declare class FlowModel {
     setHotKey: (key: "RightMouseDown" | "LeftMouseDown" | "Space", value: boolean) => void;
     linkEdge: string;
     setLinkEdge: (name: string) => void;
+    clearPortEdge: (edgeId: string) => void;
     buffer: {
         rightClickPanel: {
             visible: boolean;
@@ -74,42 +81,41 @@ export declare class FlowModel {
         background: string;
     };
     cellsMap: Map<string, any>;
-    cellsDataMap: Map<string, CellType>;
+    cellsDataMap: Map<string, CellDataType>;
     componentsMap: Map<any, any>;
-    regist: (component: Cell) => void;
+    regist: (...args: any) => void;
     eventBus: {
         sender: EventSender | undefined;
         receiver: undefined;
     };
     selectCells: string[];
     setSelectedCells: (ids: string[], ifReplace?: boolean) => void;
-    canvasData: {
-        scale: {
-            x: number;
-            y: number;
-        };
-        x: number;
-        y: number;
-        cells: never[];
-    };
+    canvasData: CanvasDataType;
     clearSelect: () => void;
     sendEvent: (data: any) => void;
-    setStageScale: (x: number, y: number) => void;
+    setStageScale: (scale: number) => void;
     setStagePosition: (x: number, y: number) => void;
     setCanvasData: (canvasData: CanvasDataType) => void;
-    setCellId: (data: any) => void;
-    setCellData: (id: any, data: any) => void;
-    getEdges: (id: any) => any[];
-    getLinkNodes: (id: any) => any[];
-    deleCell: (id: any) => any;
-    deleEdge: (id: any) => void;
-    setAutoLayout: (layoutOption: any) => void;
-    createCellData: (component: any, initOptions?: any) => any;
-    addCell: (componentName: any, initOptions: any) => any;
+    setCellId: (data: CellDataType) => void;
+    setCellData: (id: string, data: any) => void;
+    getEdges: (nodeId: string) => string[];
+    getLinkNodes: (id: string) => string[];
+    deleCell: (id: string) => any;
+    snap: (vector: Konva.Vector2d) => {
+        x: number;
+        y: number;
+    };
+    createCellData: (component: string, initOptions?: any) => any;
+    addCell: (componentName: string, initOptions: any) => any;
     setLinkingPosition: (e: any) => void;
-    link: (source: any, target: any) => void;
-    moveTo(id: any, index: any): void;
-    getCellData: (id: any) => CellType | undefined;
-    getCellInstance: (id: any) => any;
+    link: (source: string, target: string) => void;
+    scale: (scale?: number | undefined) => number;
+    x(x?: number): number;
+    y(y?: number): number;
+    moveTo(id: string, index: number): void;
+    getCell: (id: string) => any;
+    getCellData: (id: string) => CellDataType | undefined;
+    getCellInstance: (id: string) => any;
+    getCellsData: () => any[];
 }
 export default FlowModel;

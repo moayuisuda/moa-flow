@@ -53,8 +53,9 @@ class RightClickPanel extends React.Component<
 
   render() {
     if (!this.context.buffer.rightClickPanel.visible) return <></>;
+    console.log(this.props.children);
     return (
-      <ul
+      <div
         style={{
           top: this.state.pos.y,
           left: this.state.pos.x,
@@ -74,8 +75,8 @@ class RightClickPanel extends React.Component<
           移到顶层
         </button> */}
         {/* @TODO */}
-        {/* {this.props.children(this.context)} */}
-      </ul>
+        {this.props.children(this.context)}
+      </div>
     );
   }
 }

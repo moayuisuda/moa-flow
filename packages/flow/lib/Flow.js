@@ -1,132 +1,156 @@
-import { __extends, __decorate } from './node_modules/tslib/tslib.es6.js';
-import { Layer, Group, Stage, useStrictMode } from 'react-konva';
+import { __decorate } from './node_modules/tslib/tslib.es6.js';
+import { Group, Circle, Layer, useStrictMode, Stage } from 'react-konva';
 import LinkingEdge from './cells/LinkingEdge.js';
-import React, { useState, useEffect, createRef } from 'react';
+import React, { useContext, useState, useEffect, createRef } from 'react';
 import { FlowModel } from './Model.js';
 import { observer } from 'mobx-react';
+import { computed } from 'mobx';
 import { FlowContext } from './Context.js';
 import { registComponents } from './utils/registComponents.js';
 import SelectBoundsRect from './scaffold/SelectBoundsRect.js';
-import { initClearState, initLink, initDrag, initScale, initSelect, initHotKeys } from './events.js';
+import { initClearState, initLink, initDrag, initScale, initMultiSelect, initHotKeys } from './events.js';
 import { STAGE_CLASS_NAME } from './constants.js';
 import { getRightClickPanel } from './components/RightClickPanel/index.js';
+import { color } from './theme/style.js';
 
-var renderComponent = function (cellData, model) {
+const renderComponent = (cellData, model) => {
     return React.createElement(model.componentsMap.get(cellData.component) || Group, {
         data: cellData,
         key: cellData.id,
     });
 };
-var Nodes = observer(function (props) {
-    var nodesLayerRef = props.nodesLayerRef, model = props.model;
-    var nodesData = model.canvasData.cells.filter(function (cellData) {
-        return cellData.cellType !== "edge";
-    });
-    return (React.createElement(Layer, { ref: nodesLayerRef, zIndex: 1 }, nodesData.slice(0, nodesData.length).map(function (cellData) {
+const Dots = observer(() => {
+    const model = useContext(FlowContext);
+    const _dots = computed(() => {
+        const re = [];
+        // @TODO
+        for (let i = 0; i <= model.height(); i += model.grid) {
+            for (let j = 0; j <= model.width(); j += model.grid) {
+                re.push({
+                    x: j,
+                    y: i,
+                });
+            }
+        }
+        console.log(model.width());
+        return re;
+    }).get();
+    return (React.createElement(Group, null, _dots.map((dot) => {
+        return React.createElement(Circle, { x: dot.x, y: dot.y, radius: 1, fill: color.deepGrey });
+    })));
+});
+let Grid = class Grid extends React.Component {
+    render() {
+        const grid = this.context.grid;
+        const { canvasData } = this.context;
+        const _gridPos = computed(() => {
+            return {
+                x: -Math.round(canvasData.x / grid) * grid,
+                y: -Math.round(canvasData.y / grid) * grid,
+            };
+        }).get();
+        return (React.createElement(Layer, { zIndex: 0, listening: false },
+            React.createElement(Group, Object.assign({}, _gridPos),
+                React.createElement(Dots, null))));
+    }
+};
+Grid.contextType = FlowContext;
+Grid = __decorate([
+    observer
+], Grid);
+const Edges = observer((props) => {
+    const { linesLayerRef, model } = props;
+    const [_, setSecondRefresh] = useState(0);
+    useEffect(() => {
+        setSecondRefresh(1);
+    }, []);
+    const edgesData = model.canvasData.cells.filter((cellData) => cellData.cellType === "edge");
+    return (React.createElement(Layer, { ref: linesLayerRef, zIndex: 1 }, edgesData.map((cellData) => {
         return renderComponent(cellData, model);
     })));
 });
-var InteractTop = observer(function (props) {
-    var model = props.model, topLayerRef = props.topLayerRef;
-    model.canvasData.cells.filter(function (cellData) {
+const Nodes = observer((props) => {
+    const { nodesLayerRef, model } = props;
+    const nodesData = model.canvasData.cells.filter((cellData) => {
         return cellData.cellType !== "edge";
     });
-    return (React.createElement(Layer, { zIndex: 2, ref: topLayerRef },
+    return (React.createElement(Layer, { ref: nodesLayerRef, zIndex: 2 }, nodesData.slice(0, nodesData.length).map((cellData) => {
+        return renderComponent(cellData, model);
+    })));
+});
+const InteractTop = observer((props) => {
+    const { model, topLayerRef } = props;
+    model.canvasData.cells.filter((cellData) => {
+        return cellData.cellType !== "edge";
+    });
+    return (React.createElement(Layer, { zIndex: 3, ref: topLayerRef },
         React.createElement(LinkingEdge, { data: model.buffer.link }),
         React.createElement(SelectBoundsRect, null)));
 });
-var Edges = observer(function (props) {
-    var linesLayerRef = props.linesLayerRef, model = props.model;
-    var _a = useState(0); _a[0]; var setSecondRefresh = _a[1];
-    useEffect(function () {
-        setSecondRefresh(1);
-    }, []);
-    var edgesData = model.canvasData.cells.filter(function (cellData) { return cellData.cellType === "edge"; });
-    return (React.createElement(Layer, { ref: linesLayerRef, zIndex: 0 }, edgesData.map(function (cellData) {
-        return renderComponent(cellData, model);
-    })));
-});
-var Canvas = /** @class */ (function (_super) {
-    __extends(Canvas, _super);
-    function Canvas(props) {
-        var _this = _super.call(this, props) || this;
+let Flow = class Flow extends React.Component {
+    constructor(props) {
+        super(props);
+        this.flowModel = new FlowModel(props.onEvent);
+        this.props.canvasData &&
+            this.flowModel.setCanvasData(this.props.canvasData);
+        this.props.grid && this.flowModel.setGrid(this.props.grid);
+        if (this.props.width && this.props.height) {
+            this.flowModel.setSize(this.props.width, this.props.height);
+        }
+        props.modelRef && (props.modelRef.current = this.flowModel);
+        props.onLoad && props.onLoad(this.flowModel);
         // 完全受控，https://github.com/konvajs/react-konva/blob/master/README.md#strict-mode
         useStrictMode(true);
-        var refs = _this.props.model.refs;
-        _this.stageRef = refs.stageRef = createRef();
-        _this.nodesLayerRef = refs.nodesLayerRef = createRef();
-        _this.linesLayerRef = refs.linesLayerRef = createRef();
-        _this.topLayerRef = createRef();
-        return _this;
+        const { refs } = this.flowModel;
+        this.stageRef = refs.stageRef = createRef();
+        this.nodesLayerRef = refs.nodesLayerRef = createRef();
+        this.linesLayerRef = refs.linesLayerRef = createRef();
+        this.topLayerRef = createRef();
         // 第一次渲染zIndex失效，issue link https://github.com/konvajs/react-konva/issues/194
+        registComponents(this.flowModel);
     }
-    Canvas.prototype.componentDidMount = function () {
-        var model = this.props.model;
-        var stage = this.stageRef.current;
-        var linesLayer = this.linesLayerRef.current;
-        var nodesLayer = this.nodesLayerRef.current;
-        var topLayer = this.topLayerRef.current;
+    componentDidMount() {
+        const { flowModel: model } = this;
+        const stage = this.stageRef.current;
+        const linesLayer = this.linesLayerRef.current;
+        const nodesLayer = this.nodesLayerRef.current;
+        const topLayer = this.topLayerRef.current;
+        const { zoom = true, multiSelect = false } = this.props;
         initClearState(model, stage);
         initLink(model, stage);
         initDrag(model, stage, {
-            linesLayer: linesLayer,
-            nodesLayer: nodesLayer,
-            topLayer: topLayer,
+            linesLayer,
+            nodesLayer,
+            topLayer,
         });
-        initScale(model, stage, {
-            linesLayer: linesLayer,
-            nodesLayer: nodesLayer,
-        });
-        initSelect(model, stage, {
-            linesLayer: linesLayer,
-            nodesLayer: nodesLayer,
-            topLayer: topLayer,
-        });
+        zoom &&
+            initScale(model, stage, {
+                linesLayer,
+                nodesLayer,
+            });
+        multiSelect &&
+            initMultiSelect(model, stage);
         initHotKeys(model, stage);
-    };
-    Canvas.prototype.render = function () {
-        var model = this.props.model;
-        return (React.createElement(Stage, { className: STAGE_CLASS_NAME, ref: this.stageRef, scale: model.canvasData.scale, x: model.canvasData.x, y: model.canvasData.y, width: this.props.width || window.innerWidth, height: this.props.height || window.innerHeight },
-            React.createElement(FlowContext.Provider, { value: model },
-                React.createElement(Nodes, { nodesLayerRef: this.nodesLayerRef, model: model }),
-                React.createElement(InteractTop, { topLayerRef: this.topLayerRef, model: model }),
-                React.createElement(Edges, { linesLayerRef: this.linesLayerRef, model: model }))));
-    };
-    Canvas = __decorate([
-        observer
-    ], Canvas);
-    return Canvas;
-}(React.Component));
-var DEFAULT_CANVAS_DATA = {
-    scale: { x: 1, y: 1 },
-    x: 0,
-    y: 0,
-    cells: [],
-};
-var Flow = /** @class */ (function (_super) {
-    __extends(Flow, _super);
-    function Flow(props) {
-        var _this = _super.call(this, props) || this;
-        _this.flowModel = new FlowModel(props.onEvent);
-        _this.flowModel.setCanvasData(_this.props.canvasData || DEFAULT_CANVAS_DATA);
-        props.modelRef && (props.modelRef.current = _this.flowModel);
-        props.onLoad && props.onLoad(_this.flowModel);
-        registComponents(_this.flowModel);
-        return _this;
+        initHotKeys(model, stage);
     }
-    Flow.prototype.render = function () {
-        var model = this.flowModel;
+    render() {
+        const { flowModel: model } = this;
         return (React.createElement("div", { style: {
                 position: "relative",
             } },
             React.createElement(FlowContext.Provider, { value: model },
                 getRightClickPanel(this.props.children),
-                React.createElement(Canvas, { model: model, width: this.props.width, height: this.props.height }))));
-    };
-    Flow = __decorate([
-        observer
-    ], Flow);
-    return Flow;
-}(React.Component));
+                React.createElement(Stage, { className: STAGE_CLASS_NAME, ref: this.stageRef, scale: { x: model.canvasData.scale, y: model.canvasData.scale }, x: model.x(), y: model.y(), width: model.width(), height: model.height() },
+                    React.createElement(FlowContext.Provider, { value: model },
+                        model.grid && model.scale() >= 1 && React.createElement(Grid, null),
+                        React.createElement(Nodes, { nodesLayerRef: this.nodesLayerRef, model: model }),
+                        React.createElement(InteractTop, { topLayerRef: this.topLayerRef, model: model }),
+                        React.createElement(Edges, { linesLayerRef: this.linesLayerRef, model: model }))))));
+    }
+};
+Flow = __decorate([
+    observer
+], Flow);
+var Flow$1 = Flow;
 
-export { Flow as default };
+export { Flow$1 as default };

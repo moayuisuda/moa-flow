@@ -1,15 +1,15 @@
 import { action, observable, makeObservable } from "mobx";
 import React from "react";
-import { arrayMove, findIndex, isRectsInterSect } from "./utils/util";
-import { CellType } from "./cells/Cell";
+import { arrayMove, findIndex, isRectsInterSect, remove } from "./utils/util";
+import { CellDataType } from "./cells/Cell";
 import { color } from "./theme/style";
 import { v4 } from "uuid";
-import { union, without, merge } from "lodash";
-import { EdgeType } from "./cells/Edge";
-import { PortType } from "./scaffold/Port";
-import { NodeType } from "./cells/Node";
+import { union, without, merge, isUndefined } from "lodash";
+import { EdgeDataType } from "./cells/Edge";
+import { PortDataType } from "./scaffold/Port";
+import { NodeDataType } from "./cells/Node";
 import Konva from "konva";
-import { CanvasDataType } from "./types/common";
+import { CanvasDataType, AllCellDataType } from "./types/common";
 import Cell from "./cells/Cell";
 
 type EventSender = (data: any) => void;
@@ -27,13 +27,49 @@ export class FlowModel {
       this.setCellDataMap(cellData);
     });
   };
-  setCellDataMap = (cellData: NodeType) => {
+
+  setCellDataMap(cellData: AllCellDataType) {
     this.cellsDataMap.set(cellData.id, cellData);
-    if (cellData.cellType === "node" && cellData.ports) {
-      cellData.ports.forEach((portData) => {
-        this.setCellDataMap(portData);
-      });
+
+    function isNodeDataType(t: AllCellDataType): t is NodeDataType {
+      return t.cellType === "node";
     }
+
+    if (isNodeDataType(cellData)) {
+      if (cellData.ports) {
+        cellData.ports.forEach((portData: AllCellDataType) => {
+          this.setCellDataMap(portData);
+        });
+      }
+    }
+  }
+
+  @observable _width: number = 1000;
+  @observable _height: number = 600;
+  width = (width?: number) => {
+    if (isUndefined(width)) return this._width;
+    else {
+      this._width = width;
+      return width;
+    }
+  };
+  height = (height?: number) => {
+    if (isUndefined(height)) return this._height;
+    else {
+      this._height = height;
+      return height;
+    }
+  };
+  @action
+  setSize = (width: number, height: number) => {
+    this._width = width;
+    this._height = height;
+  };
+
+  @observable grid: number | undefined = 1;
+  @action
+  setGrid = (grid: number) => {
+    this.grid = grid;
   };
 
   refs = {
@@ -58,6 +94,18 @@ export class FlowModel {
   linkEdge = "Edge";
   @action setLinkEdge = (name: string) => {
     this.linkEdge = name;
+  };
+
+  @action clearPortEdge = (edgeId: string) => {
+    const edgeData = this.cellsDataMap.get(edgeId) as EdgeDataType;
+    const sourcePort = this.getCellData(
+      edgeData.source as string
+    ) as PortDataType;
+    const targetPort = this.getCellData(
+      edgeData.target as string
+    ) as PortDataType;
+    sourcePort.edges && remove(sourcePort.edges as string[], edgeId);
+    targetPort.edges && remove(targetPort.edges as string[], edgeId);
   };
 
   // 一些中间状态，比如连线中的开始节点的暂存，不应该让外部
@@ -158,12 +206,14 @@ export class FlowModel {
   // cell的<id, 实例>map，方便用id获取到组件实例
   cellsMap = new Map<string, React.Component<any, any> & any>();
   // cellData的<id, cellData>map，用来修改受控数据
-  cellsDataMap = new Map<string, CellType>();
+  cellsDataMap = new Map<string, CellDataType>();
 
   // 注册节点到model，方便动态引用
   componentsMap = new Map();
-  regist = (component: Cell) => {
-    this.componentsMap.set(component.name, component);
+  regist = (...args: any) => {
+    args.forEach((component: Cell) => {
+      this.componentsMap.set(component.name, component);
+    });
   };
 
   // 消息传递
@@ -184,8 +234,8 @@ export class FlowModel {
   };
 
   // 画布的渲染数据，之后的渲染大部分都为受控渲染，更改canvasData => 触发重新渲染
-  @observable canvasData = {
-    scale: { x: 1, y: 1 },
+  @observable canvasData: CanvasDataType = {
+    scale: 1,
     x: 0,
     y: 0,
     cells: [],
@@ -199,11 +249,8 @@ export class FlowModel {
     this.eventBus.sender?.(data);
   };
 
-  @action setStageScale = (x: number, y: number) => {
-    this.canvasData.scale = {
-      x,
-      y,
-    };
+  @action setStageScale = (scale: number) => {
+    this.canvasData.scale = scale;
   };
 
   @action setStagePosition = (x: number, y: number) => {
@@ -213,24 +260,30 @@ export class FlowModel {
 
   @action setCanvasData = (canvasData: CanvasDataType) => {
     this.canvasData = canvasData;
+    // @TODO
+    // this.cellsDataMap = new Map();
+    // this.cellsMap = new Map();
     this.setCellsDataMap();
   };
 
-  @action setCellId = (data) => {
+  @action setCellId = (data: CellDataType) => {
     data.id = v4();
   };
 
-  @action setCellData = (id, data) => {
+  @action setCellData = (id: string, data: any) => {
     const cellData = this.getCellData(id);
+    this.sendEvent({
+      type: "data:change",
+    });
 
     merge(cellData, data);
   };
 
-  getEdges = (id) => {
-    const re = [];
-    const nodeData = this.getCellData(id) as NodeType;
+  getEdges = (nodeId: string) => {
+    const re: string[] = [];
+    const nodeData = this.getCellData(nodeId) as NodeDataType;
     if (nodeData.ports)
-      nodeData.ports.forEach((port: PortType) => {
+      nodeData.ports.forEach((port: PortDataType) => {
         if (port.edges) {
           port.edges.forEach((edgeId) => {
             re.push(edgeId);
@@ -242,16 +295,20 @@ export class FlowModel {
   };
 
   // 获取某一个结点连接的其他节点
-  getLinkNodes = (id) => {
-    const re = [];
-    const nodeData = this.getCellData(id) as NodeType;
+  getLinkNodes = (id: string) => {
+    const re: string[] = [];
+    const nodeData = this.getCellData(id) as NodeDataType;
     if (nodeData.ports)
-      nodeData.ports.forEach((port: PortType) => {
+      nodeData.ports.forEach((port: PortDataType) => {
         if (port.edges) {
           port.edges.forEach((edgeId) => {
-            const edgeData = this.getCellData(edgeId) as EdgeType;
-            const sourcePort = this.getCellData(edgeData.source) as PortType;
-            const targetPort = this.getCellData(edgeData.target) as PortType;
+            const edgeData = this.getCellData(edgeId) as EdgeDataType;
+            const sourcePort = this.getCellData(
+              edgeData.source as string
+            ) as PortDataType;
+            const targetPort = this.getCellData(
+              edgeData.target as string
+            ) as PortDataType;
 
             re.push(
               ...without(union([sourcePort.host], [targetPort.host]), id)
@@ -263,23 +320,35 @@ export class FlowModel {
     return re;
   };
 
-  @action deleCell = (id) => {
-    const matchCell = this.canvasData.cells.find((cell) => cell.id === id);
-    this.canvasData.cells.splice(
-      findIndex(this.canvasData.cells, matchCell),
-      1
+  @action deleCell = (id: string) => {
+    const matchCell = this.canvasData.cells.find(
+      (cell: CellDataType) => cell.id === id
     );
+
+    if (!matchCell) {
+      console.error("[flow-infra] can not find match Cell");
+      return;
+    }
+
+    if (matchCell.cellType === "edge") this.clearPortEdge(matchCell.id);
+    remove(this.canvasData.cells, matchCell);
 
     return matchCell.id;
   };
 
-  @action deleEdge = (id) => {};
+  snap = (vector: Konva.Vector2d) => {
+    const grid = this.grid as number;
+    return {
+      x: Math.round(vector.x / grid) * grid,
+      y: Math.round(vector.y / grid) * grid,
+    };
+  };
 
   // 自动布局，用自动布局的三方库对每一个节点的x，y进行计算
-  @action setAutoLayout = (layoutOption) => {};
+  // @action setAutoLayout = (layoutOption) => {};
 
   // 创建新的节点数据
-  @action createCellData = (component, initOptions?) => {
+  @action createCellData = (component: string, initOptions?: any) => {
     const id = v4();
 
     const metaData = JSON.parse(
@@ -292,11 +361,11 @@ export class FlowModel {
     });
   };
 
-  @action addCell = (componentName, initOptions) => {
+  @action addCell = (componentName: string, initOptions: any) => {
     const newCellData = this.createCellData(componentName, initOptions);
 
     if (newCellData.ports) {
-      newCellData.ports.forEach((port) => {
+      newCellData.ports.forEach((port: PortDataType) => {
         port.host = newCellData.id;
         port.cellType = "port";
         if (!port.id) port.id = v4();
@@ -323,9 +392,9 @@ export class FlowModel {
     this.buffer.link.target.y = cursorPos.y;
   };
 
-  @action link = (source, target) => {
-    const sourceCellData = this.getCellData(source) as PortType;
-    const targetCellData = this.getCellData(target) as PortType;
+  @action link = (source: string, target: string) => {
+    const sourceCellData = this.getCellData(source) as PortDataType;
+    const targetCellData = this.getCellData(target) as PortDataType;
 
     const edgeId = this.addCell(this.linkEdge, {
       source,
@@ -350,22 +419,56 @@ export class FlowModel {
     this.clearLinkBuffer();
   };
 
+  scale = (scale?: number) => {
+    if (isUndefined(scale)) return this.canvasData.scale;
+    else {
+      this.setStageScale(scale);
+      return scale;
+    }
+  };
+
+  // @action
+  x(x?: number) {
+    if (isUndefined(x)) return this.canvasData.x;
+    else {
+      this.setStagePosition(x, this.canvasData.y);
+      return x;
+    }
+  }
+
+  // @action
+  y(y?: number) {
+    if (isUndefined(y)) return this.canvasData.y;
+    else {
+      this.setStagePosition(this.canvasData.x, y);
+      return y;
+    }
+  }
+
   @action
-  moveTo(id, index) {
-    const oldIndex = findIndex(this.canvasData.cells, this.getCellData(id));
+  moveTo(id: string, index: number) {
+    const oldIndex = findIndex(
+      this.canvasData.cells,
+      this.getCellData(id)
+    ) as number;
     arrayMove(this.canvasData.cells, oldIndex, index);
   }
 
-  getCellData = (id) => {
+  getCell = (id: string) => {
+    return this.cellsMap.get(id);
+  };
+
+  getCellData = (id: string) => {
     return this.cellsDataMap.get(id);
   };
 
-  getCellInstance = (id) => {
+  getCellInstance = (id: string) => {
     return this.cellsMap.get(id);
+  };
+
+  getCellsData = () => {
+    return this.canvasData.cells;
   };
 }
 
 export default FlowModel;
-
-const a = new FlowModel();
-a.regist(Node);
