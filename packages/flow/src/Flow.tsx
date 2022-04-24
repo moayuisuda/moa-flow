@@ -19,7 +19,6 @@ import {
   initHotKeys,
   initDataChangeListener,
 } from "./events";
-import { ModelType } from "./Model";
 import { useEffect, useState, useContext } from "react";
 import { STAGE_CLASS_NAME } from "./constants";
 import { getRightClickPanel } from "./components/RightClickPanel/index";
@@ -170,7 +169,7 @@ type FlowProps = {
 };
 @observer
 class Flow extends React.Component<FlowProps, {}> {
-  flowModel: ModelType;
+  flowModel: FlowModel;
   stageRef;
   nodesLayerRef;
   linesLayerRef;
