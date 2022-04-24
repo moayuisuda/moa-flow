@@ -19,14 +19,13 @@ import {
   initHotKeys,
   initDataChangeListener,
 } from "./events";
-import { ModelType } from ".";
+import { ModelType } from "./Model";
 import { useEffect, useState, useContext } from "react";
 import { STAGE_CLASS_NAME } from "./constants";
 import { getRightClickPanel } from "./components/RightClickPanel/index";
 import { initMultiSelect } from "./events";
-import { Vector2d } from "konva/lib/types";
-import { dot } from "./utils/vector";
 import { color } from "./theme/style";
+import { autorun } from "@ali/flow-infra";
 
 const renderComponent = (cellData, model) => {
   return React.createElement(
@@ -53,7 +52,6 @@ const Dots = observer(() => {
       }
     }
 
-    console.log(model.width());
     return re;
   }).get();
 
@@ -73,12 +71,9 @@ class Grid extends React.Component<{}> {
 
   componentDidMount() {
     // @TODO
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        {
-          this.gridRef.current.cache();
-        }
-      });
+    autorun(() => {
+      console.log(this.context.width(), this.context.height());
+      this.gridRef.current.cache();
     });
   }
 
@@ -175,7 +170,7 @@ type FlowProps = {
 };
 @observer
 class Flow extends React.Component<FlowProps, {}> {
-  flowModel;
+  flowModel: ModelType;
   stageRef;
   nodesLayerRef;
   linesLayerRef;
