@@ -71,6 +71,24 @@ class Grid extends React.Component<{}> {
   // vscode 无法推断 this.context 的类型，需要显式声明 this.context 的类型
   declare context: React.ContextType<typeof FlowContext>;
 
+  componentDidMount() {
+    // @TODO
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        {
+          this.gridRef.current.cache();
+        }
+      });
+    });
+  }
+
+  gridRef: any;
+
+  constructor(props) {
+    super(props);
+    this.gridRef = React.createRef();
+  }
+
   render() {
     const grid = this.context.grid as number;
     const { canvasData } = this.context;
@@ -84,7 +102,7 @@ class Grid extends React.Component<{}> {
 
     return (
       <Layer zIndex={0} listening={false}>
-        <Group {..._gridPos}>
+        <Group {..._gridPos} ref={this.gridRef}>
           <Dots />
         </Group>
       </Layer>

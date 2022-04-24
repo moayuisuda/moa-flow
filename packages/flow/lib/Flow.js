@@ -40,6 +40,20 @@ const Dots = observer(() => {
     })));
 });
 let Grid = class Grid extends React.Component {
+    constructor(props) {
+        super(props);
+        this.gridRef = React.createRef();
+    }
+    componentDidMount() {
+        // @TODO
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                {
+                    this.gridRef.current.cache();
+                }
+            });
+        });
+    }
     render() {
         const grid = this.context.grid;
         const { canvasData } = this.context;
@@ -50,7 +64,7 @@ let Grid = class Grid extends React.Component {
             };
         }).get();
         return (React.createElement(Layer, { zIndex: 0, listening: false },
-            React.createElement(Group, Object.assign({}, _gridPos),
+            React.createElement(Group, Object.assign({}, _gridPos, { ref: this.gridRef }),
                 React.createElement(Dots, null))));
     }
 };
