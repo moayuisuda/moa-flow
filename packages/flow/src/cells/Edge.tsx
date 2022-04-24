@@ -55,6 +55,8 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
   protected arrow = true;
   protected dash = false;
 
+  isMountEvents = false;
+
   constructor(
     props: {
       data: EdgeDataType;
@@ -64,6 +66,10 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
     super(props, context);
     this.labelRef = React.createRef();
   }
+
+  onMount = () => {
+    this.labelRef.current;
+  };
 
   protected lineStyle({ isSelect }: { isSelect: boolean }) {
     const { color } = this.context;
@@ -217,7 +223,7 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
     return (
       <Group
         ref={(label) => {
-          if (!label) return;
+          if (this.isMountEvents || !label) return;
 
           [
             "mouseenter",
@@ -231,6 +237,7 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
               const instanceEventFn = this[`onLabel${titleCase(eventName)}`];
               instanceEventFn && instanceEventFn.call(this, e);
 
+              console.log("send", eventName);
               this.context.sendEvent({
                 type: `label:${eventName}`,
                 data: {
@@ -241,6 +248,8 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
               });
             });
           });
+
+          this.isMountEvents = true;
         }}
         {...this.labelPosition()}
       >

@@ -8,6 +8,7 @@ import v4 from './packages/flow/node_modules/uuid/dist/esm-browser/v4.js';
 
 class FlowModel {
     constructor(eventSender) {
+        this.extraContext = {};
         this.setEventSender = (eventSender) => {
             this.eventBus.sender = eventSender;
         };

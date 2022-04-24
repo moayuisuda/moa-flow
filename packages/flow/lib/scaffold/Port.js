@@ -13,7 +13,7 @@ class Port extends Cell {
             return { x: 0, y: 0 };
         const rect = konvaNode.getClientRect({
             // 有relative不会caculate scale
-            relativeTo: this.getStage(konvaNode),
+            relativeTo: this.getStage(),
         });
         // 通过变换矩阵将坐标还原为标准坐标
         // const t = konvaNode.getAbsoluteTransform();

@@ -34,6 +34,10 @@ class Edge extends Cell {
         this.bazier = true;
         this.arrow = true;
         this.dash = false;
+        this.isMountEvents = false;
+        this.onMount = () => {
+            this.labelRef.current;
+        };
         this.formatVerticied = (verticies) => {
             return verticies;
         };
@@ -145,7 +149,7 @@ class Edge extends Cell {
     labelRender() {
         const text = this.labelFormatter(this.props.data.label);
         return (React.createElement(Group, Object.assign({ ref: (label) => {
-                if (!label)
+                if (this.isMountEvents || !label)
                     return;
                 [
                     "mouseenter",
@@ -158,6 +162,7 @@ class Edge extends Cell {
                     label.on(eventName, (e) => {
                         const instanceEventFn = this[`onLabel${titleCase(eventName)}`];
                         instanceEventFn && instanceEventFn.call(this, e);
+                        console.log("send", eventName);
                         this.context.sendEvent({
                             type: `label:${eventName}`,
                             data: {
@@ -168,6 +173,7 @@ class Edge extends Cell {
                         });
                     });
                 });
+                this.isMountEvents = true;
             } }, this.labelPosition()), text && this.labelContent()));
     }
     labelFormatter(label) {

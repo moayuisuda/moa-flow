@@ -69,7 +69,6 @@ class Grid extends React.Component<{}> {
   declare context: React.ContextType<typeof FlowContext>;
 
   componentDidMount() {
-    // @TODO
     autorun(() => {
       console.log(this.context.width(), this.context.height());
       this.gridRef.current && this.gridRef.current.cache();
@@ -262,8 +261,8 @@ class Flow extends React.Component<FlowProps, {}> {
               {model.grid && model.scale() >= 1 && <Grid />}
               {/* 先注册节点，后注册线，线的一些计算属性需要节点的map */}
               <Nodes nodesLayerRef={this.nodesLayerRef} model={model} />
-              <InteractTop topLayerRef={this.topLayerRef} model={model} />
               <Edges linesLayerRef={this.linesLayerRef} model={model} />
+              <InteractTop topLayerRef={this.topLayerRef} model={model} />
             </FlowContext.Provider>
           </Stage>
         </FlowContext.Provider>

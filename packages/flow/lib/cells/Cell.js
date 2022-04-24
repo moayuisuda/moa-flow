@@ -1,6 +1,5 @@
 import React from 'react';
 import { Group } from 'react-konva';
-import Konva from 'konva';
 import { FlowContext } from '../Context.js';
 import '../node_modules/lodash/lodash.js';
 import { observer } from 'mobx-react';
@@ -28,12 +27,9 @@ class Cell extends React.Component {
         }
         return Object.assign(Object.assign({}, lodash.exports.cloneDeep(re)), { component: componentName });
     }
-    getStage(konvaNode) {
-        let re = konvaNode;
-        while (re.__proto__.constructor !== Konva.Stage) {
-            re = re.parent;
-        }
-        return re;
+    getStage() {
+        var _a;
+        return (_a = this.context.refs.stageRef) === null || _a === void 0 ? void 0 : _a.current;
     }
     setData(data) {
         this.context;

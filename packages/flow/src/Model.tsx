@@ -14,6 +14,8 @@ import Cell from "./cells/Cell";
 
 type EventSender = (data: any) => void;
 export class FlowModel {
+  extraContext = {};
+
   constructor(eventSender?: EventSender) {
     makeObservable(this);
     if (eventSender) this.eventBus.sender = eventSender;

@@ -1,5 +1,4 @@
 import React from "react";
-import Konva from "konva";
 import { FlowContext } from "../Context";
 import Model from "../Model";
 import { AllCellDataType } from "../types/common";
@@ -28,7 +27,7 @@ declare abstract class Cell<D, S = {}, P = {}> extends React.Component<{
     static getMetaData(): {
         component: string;
     };
-    getStage(konvaNode: Konva.Node): import("konva/lib/Node").Node<import("konva/lib/Node").NodeConfig>;
+    getStage(): import("konva/lib/Stage").Stage | null | undefined;
     setData(data: any): void;
     onMount: () => void;
     componentDidMount(): void;

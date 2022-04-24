@@ -44,7 +44,6 @@ let Grid = class Grid extends React.Component {
         this.gridRef = React.createRef();
     }
     componentDidMount() {
-        // @TODO
         autorun(() => {
             console.log(this.context.width(), this.context.height());
             this.gridRef.current && this.gridRef.current.cache();
@@ -154,8 +153,8 @@ let Flow = class Flow extends React.Component {
                     React.createElement(FlowContext.Provider, { value: model },
                         model.grid && model.scale() >= 1 && React.createElement(Grid, null),
                         React.createElement(Nodes, { nodesLayerRef: this.nodesLayerRef, model: model }),
-                        React.createElement(InteractTop, { topLayerRef: this.topLayerRef, model: model }),
-                        React.createElement(Edges, { linesLayerRef: this.linesLayerRef, model: model }))))));
+                        React.createElement(Edges, { linesLayerRef: this.linesLayerRef, model: model }),
+                        React.createElement(InteractTop, { topLayerRef: this.topLayerRef, model: model }))))));
     }
 };
 Flow = __decorate([

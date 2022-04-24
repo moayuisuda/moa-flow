@@ -42,7 +42,7 @@ class Port extends Cell<PortDataType, {}, PortPropsType> {
 
     const rect = konvaNode.getClientRect({
       // 有relative不会caculate scale
-      relativeTo: this.getStage(konvaNode),
+      relativeTo: this.getStage(),
     });
 
     // 通过变换矩阵将坐标还原为标准坐标

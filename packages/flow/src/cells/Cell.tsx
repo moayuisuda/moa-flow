@@ -66,14 +66,8 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
     };
   }
 
-  getStage(konvaNode: Konva.Node) {
-    let re = konvaNode;
-
-    while (re.__proto__.constructor !== Konva.Stage) {
-      re = re.parent;
-    }
-
-    return re;
+  getStage() {
+    return this.context.refs.stageRef?.current;
   }
 
   setData(data: any) {

@@ -4,6 +4,7 @@ import Konva from "konva";
 import { CanvasDataType, AllCellDataType } from "./types/common";
 declare type EventSender = (data: any) => void;
 export declare class FlowModel {
+    extraContext: {};
     constructor(eventSender?: EventSender);
     setEventSender: (eventSender: EventSender) => void;
     setCellsDataMap: () => void;
