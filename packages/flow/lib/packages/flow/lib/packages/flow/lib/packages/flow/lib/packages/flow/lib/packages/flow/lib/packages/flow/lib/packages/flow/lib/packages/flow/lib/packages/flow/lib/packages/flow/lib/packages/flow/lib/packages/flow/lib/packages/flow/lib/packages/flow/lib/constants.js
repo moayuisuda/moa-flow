@@ -1,5 +1,0 @@
-const STAGE_CLASS_NAME = 'flow-stage';
-const EVT_LEFTCLICK = 0;
-const EVT_RIGHTCLICK = 2;
-
-export { EVT_LEFTCLICK, EVT_RIGHTCLICK, STAGE_CLASS_NAME };

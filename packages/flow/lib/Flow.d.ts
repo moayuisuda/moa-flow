@@ -1,6 +1,5 @@
 import React from "react";
 import FlowModel from "./Model";
-import { ModelType } from "./Model";
 declare type FlowProps = {
     canvasData?: any;
     onEvent?: (e: {
@@ -16,7 +15,7 @@ declare type FlowProps = {
     multiSelect?: boolean;
 };
 declare class Flow extends React.Component<FlowProps, {}> {
-    flowModel: ModelType;
+    flowModel: FlowModel;
     stageRef: React.RefObject<import("konva/lib/Stage").Stage>;
     nodesLayerRef: React.RefObject<import("konva/lib/Layer").Layer>;
     linesLayerRef: React.RefObject<import("konva/lib/Layer").Layer>;

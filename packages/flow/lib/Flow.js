@@ -4,7 +4,7 @@ import LinkingEdge from './cells/LinkingEdge.js';
 import React, { useContext, useState, useEffect, createRef } from 'react';
 import { FlowModel } from './Model.js';
 import { observer } from 'mobx-react';
-import { computed, autorun } from 'mobx';
+import { computed } from 'mobx';
 import { FlowContext } from './Context.js';
 import { registComponents } from './utils/registComponents.js';
 import SelectBoundsRect from './scaffold/SelectBoundsRect.js';
@@ -12,15 +12,7 @@ import { initClearState, initLink, initDrag, initScale, initMultiSelect, initHot
 import { STAGE_CLASS_NAME } from './constants.js';
 import { getRightClickPanel } from './components/RightClickPanel/index.js';
 import { color } from './theme/style.js';
-import 'react-konva-utils';
-import './packages/flow/lib/Flow.js';
-import './packages/flow/lib/cells/Cell.js';
-import './packages/flow/lib/cells/Node.js';
-import './packages/flow/lib/cells/Edge.js';
-import './packages/flow/lib/scaffold/Interactor.js';
-import './packages/flow/lib/scaffold/Port.js';
-import './packages/flow/lib/components/RightClickPanel/index.js';
-import './packages/flow/lib/components/Image.js';
+import { autorun } from '@ali/flow-infra';
 
 const renderComponent = (cellData, model) => {
     return React.createElement(model.componentsMap.get(cellData.component) || Group, {
