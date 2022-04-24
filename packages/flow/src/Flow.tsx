@@ -24,7 +24,7 @@ import { STAGE_CLASS_NAME } from "./constants";
 import { getRightClickPanel } from "./components/RightClickPanel/index";
 import { initMultiSelect } from "./events";
 import { color } from "./theme/style";
-import { autorun } from "@ali/flow-infra";
+import { autorun } from "mobx";
 
 const renderComponent = (cellData, model) => {
   return React.createElement(
@@ -72,7 +72,7 @@ class Grid extends React.Component<{}> {
     // @TODO
     autorun(() => {
       console.log(this.context.width(), this.context.height());
-      this.gridRef.current.cache();
+      this.gridRef.current && this.gridRef.current.cache();
     });
   }
 

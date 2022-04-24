@@ -4,7 +4,7 @@ import LinkingEdge from './cells/LinkingEdge.js';
 import React, { useContext, useState, useEffect, createRef } from 'react';
 import { FlowModel } from './Model.js';
 import { observer } from 'mobx-react';
-import { computed } from 'mobx';
+import { computed, autorun } from 'mobx';
 import { FlowContext } from './Context.js';
 import { registComponents } from './utils/registComponents.js';
 import SelectBoundsRect from './scaffold/SelectBoundsRect.js';
@@ -12,7 +12,6 @@ import { initClearState, initLink, initDrag, initScale, initMultiSelect, initHot
 import { STAGE_CLASS_NAME } from './constants.js';
 import { getRightClickPanel } from './components/RightClickPanel/index.js';
 import { color } from './theme/style.js';
-import { autorun } from '@ali/flow-infra';
 
 const renderComponent = (cellData, model) => {
     return React.createElement(model.componentsMap.get(cellData.component) || Group, {
@@ -48,7 +47,7 @@ let Grid = class Grid extends React.Component {
         // @TODO
         autorun(() => {
             console.log(this.context.width(), this.context.height());
-            this.gridRef.current.cache();
+            this.gridRef.current && this.gridRef.current.cache();
         });
     }
     render() {
