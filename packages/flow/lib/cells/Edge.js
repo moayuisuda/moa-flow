@@ -127,7 +127,6 @@ class Edge extends Cell {
     }
     labelContent() {
         const { color, refs: { linesLayerRef }, } = this.context;
-        console.log(this.context);
         const text = this.labelFormatter(this.props.data.label);
         const textWidth = linesLayerRef.current
             .getContext()

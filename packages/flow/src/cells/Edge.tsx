@@ -184,7 +184,6 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
       refs: { linesLayerRef },
     } = this.context;
 
-    console.log(this.context);
     const text = this.labelFormatter(this.props.data.label);
     const textWidth = linesLayerRef.current
       .getContext()

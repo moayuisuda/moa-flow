@@ -261,9 +261,9 @@ export class FlowModel {
 
   @action setCanvasData = (canvasData: CanvasDataType) => {
     this.canvasData = canvasData;
-    // @TODO
-    this.cellsDataMap.clear();
-    this.cellsMap.clear();
+    // 这里考虑到react会复用实例，所以不能简单地清除cellsMap
+    // this.cellsDataMap.clear();
+    // this.cellsMap.clear();
     this.setCellsDataMap();
   };
 

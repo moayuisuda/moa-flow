@@ -130,7 +130,6 @@ const initScale = (model, stage, layers) => {
             x: (pointer.x - model.x()) / oldScale,
             y: (pointer.y - model.y()) / oldScale,
         };
-        console.log(pointer, model.x());
         // how to scale? Zoom in? Or zoom out?
         let direction = e.evt.deltaY > 0 ? 1 : -1;
         // when we zoom on trackpad, e.evt.ctrlKey is true
@@ -140,11 +139,11 @@ const initScale = (model, stage, layers) => {
         }
         const newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy;
         model.setStageScale(newScale);
-        ({
+        const newPos = {
             x: pointer.x - mousePointTo.x * newScale,
             y: pointer.y - mousePointTo.y * newScale,
-        });
-        // model.setStagePosition(newPos.x, newPos.y);
+        };
+        model.setStagePosition(newPos.x, newPos.y);
         debounceClearCache();
     });
 };
