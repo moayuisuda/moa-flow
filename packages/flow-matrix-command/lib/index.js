@@ -31,7 +31,7 @@ var MatrixCommand = /** @class */ (function () {
         }
         else {
             var nodeData = model.cellsDataMap.get(model.selectCells[0]);
-            for (var _i = 0, _a = model.getEdges(nodeData.id); _i < _a.length; _i++) {
+            for (var _i = 0, _a = model.getNodeEdges(nodeData.id); _i < _a.length; _i++) {
                 var edge = _a[_i];
                 model.deleCell(edge);
             }

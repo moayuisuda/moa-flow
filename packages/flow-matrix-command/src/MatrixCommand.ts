@@ -49,7 +49,7 @@ class MatrixCommand {
         } else {
             const nodeData = model.cellsDataMap.get(model.selectCells[0])
 
-            for (let edge of model.getEdges(nodeData.id)) {
+            for (let edge of model.getNodeEdges(nodeData.id)) {
                 model.deleCell(edge);
             }
 

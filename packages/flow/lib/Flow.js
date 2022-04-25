@@ -21,11 +21,13 @@ const renderComponent = (cellData, model) => {
 };
 const Dots = observer(() => {
     const model = useContext(FlowContext);
+    // const EXTRA = model.grid as number;
+    const EXTRA = 0;
     const _dots = computed(() => {
         const re = [];
         // @TODO
-        for (let i = 0; i <= model.height(); i += model.grid) {
-            for (let j = 0; j <= model.width(); j += model.grid) {
+        for (let i = -EXTRA; i <= model.height() + EXTRA; i += model.grid) {
+            for (let j = -EXTRA; j <= model.width() + EXTRA; j += model.grid) {
                 re.push({
                     x: j,
                     y: i,
@@ -51,15 +53,14 @@ let Grid = class Grid extends React.Component {
     }
     render() {
         const grid = this.context.grid;
-        const { canvasData } = this.context;
         const _gridPos = computed(() => {
             return {
-                x: -Math.round(canvasData.x / grid) * grid,
-                y: -Math.round(canvasData.y / grid) * grid,
+                x: -Math.round(this.context.x() / this.context.scale() / grid) * grid,
+                y: -Math.round(this.context.y() / this.context.scale() / grid) * grid,
             };
         }).get();
         return (React.createElement(Layer, { zIndex: 0, listening: false },
-            React.createElement(Group, Object.assign({}, _gridPos, { ref: this.gridRef }),
+            React.createElement(Group, Object.assign({}, _gridPos, { ref: this.gridRef, visible: !!(this.context.grid && this.context.scale() >= 1) }),
                 React.createElement(Dots, null))));
     }
 };
@@ -151,7 +152,7 @@ let Flow = class Flow extends React.Component {
                 getRightClickPanel(this.props.children),
                 React.createElement(Stage, { className: STAGE_CLASS_NAME, ref: this.stageRef, scale: { x: model.canvasData.scale, y: model.canvasData.scale }, x: model.x(), y: model.y(), width: model.width(), height: model.height() },
                     React.createElement(FlowContext.Provider, { value: model },
-                        model.grid && model.scale() >= 1 && React.createElement(Grid, null),
+                        React.createElement(Grid, null),
                         React.createElement(Nodes, { nodesLayerRef: this.nodesLayerRef, model: model }),
                         React.createElement(Edges, { linesLayerRef: this.linesLayerRef, model: model }),
                         React.createElement(InteractTop, { topLayerRef: this.topLayerRef, model: model }))))));

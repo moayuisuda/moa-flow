@@ -23,10 +23,8 @@ declare abstract class Cell<D, S = {}, P = {}> extends React.Component<{
     static metaData: any;
     wrapperRef: React.RefObject<any>;
     constructor(props: any, context: Model);
-    static regist(model: Model): void;
-    static getMetaData(): {
-        component: string;
-    };
+    static regist(name: string, model: Model): void;
+    static getMetaData(): {};
     getStage(): import("konva/lib/Stage").Stage | null | undefined;
     setData(data: any): void;
     onMount: () => void;

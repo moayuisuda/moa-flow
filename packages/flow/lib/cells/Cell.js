@@ -4,6 +4,7 @@ import { FlowContext } from '../Context.js';
 import '../node_modules/lodash/lodash.js';
 import { observer } from 'mobx-react';
 import { titleCase } from '../utils/string.js';
+import { computed } from 'mobx';
 import { l as lodash } from '../_virtual/lodash.js';
 
 // D: data, S: state, P: props
@@ -13,19 +14,18 @@ class Cell extends React.Component {
         context.cellsMap.set(props.data.id, this);
         this.wrapperRef = React.createRef();
     }
-    static regist(model) {
-        model.componentsMap.set(this.name, this);
+    static regist(name, model) {
+        model.componentsMap.set(name, this);
     }
     static getMetaData() {
         const re = {};
         let curr = this;
-        const componentName = this.name;
         // 合并父类metaData
         while (curr !== React.Component) {
             Object.assign(re, curr.metaData);
             curr = curr.__proto__;
         }
-        return Object.assign(Object.assign({}, lodash.exports.cloneDeep(re)), { component: componentName });
+        return lodash.exports.cloneDeep(re);
     }
     getStage() {
         var _a;
@@ -65,7 +65,9 @@ class Cell extends React.Component {
     isSelect() {
         // return this.flowState.isSelect;
         // @TODO 注入runtime的$state属性
-        return this.context.selectCells.includes(this.props.data.id);
+        return computed(() => {
+            return this.context.selectCells.includes(this.props.data.id);
+        }).get();
     }
     render() {
         return React.createElement(Group, { ref: this.wrapperRef }, this.content());

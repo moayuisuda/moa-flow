@@ -127,6 +127,7 @@ class Edge extends Cell {
     }
     labelContent() {
         const { color, refs: { linesLayerRef }, } = this.context;
+        console.log(this.context);
         const text = this.labelFormatter(this.props.data.label);
         const textWidth = linesLayerRef.current
             .getContext()
@@ -162,7 +163,6 @@ class Edge extends Cell {
                     label.on(eventName, (e) => {
                         const instanceEventFn = this[`onLabel${titleCase(eventName)}`];
                         instanceEventFn && instanceEventFn.call(this, e);
-                        console.log("send", eventName);
                         this.context.sendEvent({
                             type: `label:${eventName}`,
                             data: {
@@ -187,8 +187,7 @@ class Edge extends Cell {
         const lineProps = Object.assign({ lineCap: "round", lineJoin: "round", strokeWidth: 2.5, points: points, stroke: color.deepGrey, fill: color.deepGrey, dash: isLinking ? [10, 10] : undefined }, this.lineStyle({ isSelect: this.isSelect() }));
         return (React.createElement(Group, null,
             this.arrow ? (React.createElement(Arrow, Object.assign({}, lineProps, { pointerWidth: 10 }))) : (React.createElement(Line, Object.assign({}, lineProps))),
-            React.createElement(Line, { stroke: "transparent", points: points, strokeWidth: 20, lineCap: "round", lineJoin: "round" }),
-            this.lineExtra && this.lineExtra()));
+            React.createElement(Line, { stroke: "transparent", points: points, strokeWidth: 20, lineCap: "round", lineJoin: "round" })));
     }
     content() {
         return (React.createElement(Interactor, { id: this.props.data.id, draggable: false, topOnFocus: true },
@@ -196,7 +195,8 @@ class Edge extends Cell {
                 points: this.getPoints(),
                 isLinking: this.isLinking(),
             }),
-            this.labelRender()));
+            this.labelRender(),
+            this.lineExtra && this.lineExtra()));
     }
 }
 Edge.metaData = {

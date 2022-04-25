@@ -7,6 +7,7 @@ import { observer } from "mobx-react";
 import Model from "../Model";
 import { AllCellDataType } from "../types/common";
 import { titleCase } from "utils/string";
+import { computed } from "mobx";
 
 export type CellDataType = {
   id: string;
@@ -45,25 +46,21 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
     this.wrapperRef = React.createRef();
   }
 
-  static regist(model: Model) {
-    model.componentsMap.set(this.name, this);
+  static regist(name: string, model: Model) {
+    model.componentsMap.set(name, this);
   }
 
   static getMetaData() {
     const re = {};
     let curr = this as any;
 
-    const componentName = this.name;
     // 合并父类metaData
     while (curr !== (React.Component as any)) {
       Object.assign(re, curr.metaData);
       curr = curr.__proto__;
     }
 
-    return {
-      ...cloneDeep(re),
-      component: componentName,
-    };
+    return cloneDeep(re);
   }
 
   getStage() {
@@ -114,7 +111,9 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
   isSelect() {
     // return this.flowState.isSelect;
     // @TODO 注入runtime的$state属性
-    return this.context.selectCells.includes(this.props.data.id);
+    return computed(() => {
+      return this.context.selectCells.includes(this.props.data.id);
+    }).get();
   }
 
   render() {

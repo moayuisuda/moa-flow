@@ -176,6 +176,8 @@ export const initScale = (model: ModelType, stage: Konva.Stage, layers: {
             y: (pointer.y - model.y()) / oldScale,
         };
 
+        console.log(pointer, model.x())
+
         // how to scale? Zoom in? Or zoom out?
         let direction = e.evt.deltaY > 0 ? 1 : -1;
 
@@ -194,7 +196,7 @@ export const initScale = (model: ModelType, stage: Konva.Stage, layers: {
             y: pointer.y - mousePointTo.y * newScale,
         };
 
-        model.setStagePosition(newPos.x, newPos.y);
+        // model.setStagePosition(newPos.x, newPos.y);
 
         debounceClearCache()
     });

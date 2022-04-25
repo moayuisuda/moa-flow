@@ -62,6 +62,7 @@ export class FlowModel {
       return height;
     }
   };
+
   @action
   setSize = (width: number, height: number) => {
     this._width = width;
@@ -99,7 +100,7 @@ export class FlowModel {
   };
 
   @action clearPortEdge = (edgeId: string) => {
-    const edgeData = this.cellsDataMap.get(edgeId) as EdgeDataType;
+    const edgeData = this.getCellData(edgeId) as EdgeDataType;
     const sourcePort = this.getCellData(
       edgeData.source as string
     ) as PortDataType;
@@ -212,10 +213,8 @@ export class FlowModel {
 
   // 注册节点到model，方便动态引用
   componentsMap = new Map();
-  regist = (...args: any) => {
-    args.forEach((component: Cell) => {
-      this.componentsMap.set(component.name, component);
-    });
+  regist = (name: string, component: Cell) => {
+    this.componentsMap.set(name, component);
   };
 
   // 消息传递
@@ -263,8 +262,8 @@ export class FlowModel {
   @action setCanvasData = (canvasData: CanvasDataType) => {
     this.canvasData = canvasData;
     // @TODO
-    // this.cellsDataMap = new Map();
-    // this.cellsMap = new Map();
+    this.cellsDataMap.clear();
+    this.cellsMap.clear();
     this.setCellsDataMap();
   };
 
@@ -281,7 +280,7 @@ export class FlowModel {
     merge(cellData, data);
   };
 
-  getEdges = (nodeId: string) => {
+  getNodeEdges = (nodeId: string) => {
     const re: string[] = [];
     const nodeData = this.getCellData(nodeId) as NodeDataType;
     if (nodeData.ports)
@@ -323,17 +322,21 @@ export class FlowModel {
   };
 
   @action deleCell = (id: string) => {
-    const matchCell = this.canvasData.cells.find(
-      (cell: CellDataType) => cell.id === id
-    );
-
+    const matchCell = this.getCellData(id);
     if (!matchCell) {
-      console.error("[flow-infra] can not find match Cell");
+      console.error("[flow-infra] can not find match dele Cell");
       return;
     }
 
     if (matchCell.cellType === "edge") this.clearPortEdge(matchCell.id);
+
     remove(this.canvasData.cells, matchCell);
+    this.cellsMap.delete(id);
+    this.cellsDataMap.delete(id);
+
+    this.sendEvent({
+      type: "data:change",
+    });
 
     return matchCell.id;
   };
@@ -353,8 +356,12 @@ export class FlowModel {
   @action createCellData = (component: string, initOptions?: any) => {
     const id = v4();
 
-    const metaData = JSON.parse(
-      JSON.stringify(this.componentsMap.get(component).getMetaData())
+    console.log({ componentMap: this.componentsMap, component });
+    const metaData = Object.assign(
+      this.componentsMap.get(component).getMetaData(),
+      {
+        component,
+      }
     );
 
     return Object.assign(metaData, {
@@ -383,6 +390,10 @@ export class FlowModel {
     //   newCellData,
     //   this.canvasData.cells[this.canvasData.cells.length - 1]
     // ); // 两者不是一个对象，后者是proxy
+
+    this.sendEvent({
+      type: "data:change",
+    });
 
     return newCellData.id;
   };

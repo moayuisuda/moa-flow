@@ -11,7 +11,7 @@ declare type FlowProps = {
     modelRef?: any;
     width?: number;
     height?: number;
-    grid: number;
+    grid?: number;
     multiSelect?: boolean;
 };
 declare class Flow extends React.Component<FlowProps, {}> {

@@ -184,6 +184,7 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
       refs: { linesLayerRef },
     } = this.context;
 
+    console.log(this.context);
     const text = this.labelFormatter(this.props.data.label);
     const textWidth = linesLayerRef.current
       .getContext()
@@ -237,7 +238,6 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
               const instanceEventFn = this[`onLabel${titleCase(eventName)}`];
               instanceEventFn && instanceEventFn.call(this, e);
 
-              console.log("send", eventName);
               this.context.sendEvent({
                 type: `label:${eventName}`,
                 data: {
@@ -302,7 +302,6 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
           lineCap="round"
           lineJoin="round"
         ></Line>
-        {this.lineExtra && this.lineExtra()}
       </Group>
     );
   }
@@ -315,6 +314,7 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
           isLinking: this.isLinking(),
         })}
         {this.labelRender()}
+        {this.lineExtra && this.lineExtra()}
       </Interactor>
     );
   }

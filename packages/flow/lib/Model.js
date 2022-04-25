@@ -61,7 +61,7 @@ class FlowModel {
             this.linkEdge = name;
         };
         this.clearPortEdge = (edgeId) => {
-            const edgeData = this.cellsDataMap.get(edgeId);
+            const edgeData = this.getCellData(edgeId);
             const sourcePort = this.getCellData(edgeData.source);
             const targetPort = this.getCellData(edgeData.target);
             sourcePort.edges && remove(sourcePort.edges, edgeId);
@@ -146,10 +146,8 @@ class FlowModel {
         this.cellsDataMap = new Map();
         // 注册节点到model，方便动态引用
         this.componentsMap = new Map();
-        this.regist = (...args) => {
-            args.forEach((component) => {
-                this.componentsMap.set(component.name, component);
-            });
+        this.regist = (name, component) => {
+            this.componentsMap.set(name, component);
         };
         // 消息传递
         this.eventBus = {
@@ -191,8 +189,8 @@ class FlowModel {
         this.setCanvasData = (canvasData) => {
             this.canvasData = canvasData;
             // @TODO
-            // this.cellsDataMap = new Map();
-            // this.cellsMap = new Map();
+            this.cellsDataMap.clear();
+            this.cellsMap.clear();
             this.setCellsDataMap();
         };
         this.setCellId = (data) => {
@@ -205,7 +203,7 @@ class FlowModel {
             });
             lodash.exports.merge(cellData, data);
         };
-        this.getEdges = (nodeId) => {
+        this.getNodeEdges = (nodeId) => {
             const re = [];
             const nodeData = this.getCellData(nodeId);
             if (nodeData.ports)
@@ -236,14 +234,19 @@ class FlowModel {
             return re;
         };
         this.deleCell = (id) => {
-            const matchCell = this.canvasData.cells.find((cell) => cell.id === id);
+            const matchCell = this.getCellData(id);
             if (!matchCell) {
-                console.error("[flow-infra] can not find match Cell");
+                console.error("[flow-infra] can not find match dele Cell");
                 return;
             }
             if (matchCell.cellType === "edge")
                 this.clearPortEdge(matchCell.id);
             remove(this.canvasData.cells, matchCell);
+            this.cellsMap.delete(id);
+            this.cellsDataMap.delete(id);
+            this.sendEvent({
+                type: "data:change",
+            });
             return matchCell.id;
         };
         this.snap = (vector) => {
@@ -258,7 +261,10 @@ class FlowModel {
         // 创建新的节点数据
         this.createCellData = (component, initOptions) => {
             const id = v4();
-            const metaData = JSON.parse(JSON.stringify(this.componentsMap.get(component).getMetaData()));
+            console.log({ componentMap: this.componentsMap, component });
+            const metaData = Object.assign(this.componentsMap.get(component).getMetaData(), {
+                component,
+            });
             return Object.assign(metaData, Object.assign({ id }, initOptions));
         };
         this.addCell = (componentName, initOptions) => {
@@ -277,6 +283,9 @@ class FlowModel {
             //   newCellData,
             //   this.canvasData.cells[this.canvasData.cells.length - 1]
             // ); // 两者不是一个对象，后者是proxy
+            this.sendEvent({
+                type: "data:change",
+            });
             return newCellData.id;
         };
         this.setLinkingPosition = (e) => {

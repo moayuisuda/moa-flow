@@ -1,4 +1,4 @@
-import { Stage, Layer, Group, useStrictMode, Circle } from "react-konva";
+import { Stage, Layer, Group, useStrictMode, Circle, Rect } from "react-konva";
 import LinkingEdge from "./cells/LinkingEdge";
 import React, { createRef } from "react";
 import FlowModel from "./Model";
@@ -38,12 +38,22 @@ const renderComponent = (cellData, model) => {
 
 const Dots = observer(() => {
   const model = useContext(FlowContext);
+  // const EXTRA = model.grid as number;
+  const EXTRA = 0;
 
   const _dots = computed(() => {
     const re = [];
     // @TODO
-    for (let i = 0; i <= model.height(); i += model.grid as number) {
-      for (let j = 0; j <= model.width(); j += model.grid as number) {
+    for (
+      let i = -EXTRA;
+      i <= model.height() + EXTRA;
+      i += model.grid as number
+    ) {
+      for (
+        let j = -EXTRA;
+        j <= model.width() + EXTRA;
+        j += model.grid as number
+      ) {
         re.push({
           x: j,
           y: i,
@@ -77,25 +87,28 @@ class Grid extends React.Component<{}> {
 
   gridRef: any;
 
-  constructor(props) {
+  constructor(props: any) {
     super(props);
     this.gridRef = React.createRef();
   }
 
   render() {
     const grid = this.context.grid as number;
-    const { canvasData } = this.context;
 
     const _gridPos = computed(() => {
       return {
-        x: -Math.round(canvasData.x / grid) * grid,
-        y: -Math.round(canvasData.y / grid) * grid,
+        x: -Math.round(this.context.x() / this.context.scale() / grid) * grid,
+        y: -Math.round(this.context.y() / this.context.scale() / grid) * grid,
       };
     }).get();
 
     return (
       <Layer zIndex={0} listening={false}>
-        <Group {..._gridPos} ref={this.gridRef}>
+        <Group
+          {..._gridPos}
+          ref={this.gridRef}
+          visible={!!(this.context.grid && this.context.scale() >= 1)}
+        >
           <Dots />
         </Group>
       </Layer>
@@ -163,7 +176,7 @@ type FlowProps = {
   modelRef?: any;
   width?: number;
   height?: number;
-  grid: number;
+  grid?: number;
   multiSelect?: boolean;
 };
 @observer
@@ -258,7 +271,7 @@ class Flow extends React.Component<FlowProps, {}> {
           >
             {/* Provider需要在Stage内部，issue https://github.com/konvajs/react-konva/issues/188 */}
             <FlowContext.Provider value={model}>
-              {model.grid && model.scale() >= 1 && <Grid />}
+              <Grid />
               {/* 先注册节点，后注册线，线的一些计算属性需要节点的map */}
               <Nodes nodesLayerRef={this.nodesLayerRef} model={model} />
               <Edges linesLayerRef={this.linesLayerRef} model={model} />

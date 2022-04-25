@@ -84,7 +84,7 @@ export declare class FlowModel {
     cellsMap: Map<string, any>;
     cellsDataMap: Map<string, CellDataType>;
     componentsMap: Map<any, any>;
-    regist: (...args: any) => void;
+    regist: (name: string, component: Cell) => void;
     eventBus: {
         sender: EventSender | undefined;
         receiver: undefined;
@@ -99,9 +99,9 @@ export declare class FlowModel {
     setCanvasData: (canvasData: CanvasDataType) => void;
     setCellId: (data: CellDataType) => void;
     setCellData: (id: string, data: any) => void;
-    getEdges: (nodeId: string) => string[];
+    getNodeEdges: (nodeId: string) => string[];
     getLinkNodes: (id: string) => string[];
-    deleCell: (id: string) => any;
+    deleCell: (id: string) => string | undefined;
     snap: (vector: Konva.Vector2d) => {
         x: number;
         y: number;

@@ -3,13 +3,9 @@ import type { ModelType } from "@ali/flow-infra";
 
 import { useEffect, useRef } from "react";
 import testData from "./test.json";
-import MyNode from "./MyNode";
-import Controller from "./Controller";
 
 import "antd/dist/antd.css";
-import { message, Button } from "antd";
-import MyEdge from "./MyEdge";
-import FlowModel from "../../../packages/flow/lib/Model";
+import { Button } from "antd";
 
 const randomIn = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -23,39 +19,20 @@ function App() {
 
   useEffect(() => {
     // 注册自定义节点;
-    MyNode.regist(modelRef.current as FlowModel);
-    MyEdge.regist(modelRef.current as FlowModel);
     const model = modelRef.current as ModelType;
-    model.setLinkEdge("MyEdge");
 
     model.addCell("CommonNode", {
       x: 200,
       y: 500,
-      ports: [
-        {
-          id: "out-test",
-          label: "grandfa",
-          portType: "control-out",
-        },
-      ],
+      ports: [],
       label: "NODE 1 Common",
     });
 
-    model.addCell("MyEdge", {
-      label: "im edge",
-      target: "port-5",
-      source: "out-test",
-    });
-
-    model.addCell("MyNode", {
-      x: 0,
-      y: 0,
-      ports: [
-        {
-          label: "grandfa",
-          portType: "control-out",
-        },
-      ],
+    model.addCell("CommonNode", {
+      x: 600,
+      y: 600,
+      ports: [],
+      label: "NODE 2 Common",
     });
 
     // for (let i = 0; i < 200; i++) {
