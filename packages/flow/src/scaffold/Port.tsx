@@ -8,7 +8,7 @@ import FlowModel from "../Model";
 
 export type PortDataType = {
   edges?: string[];
-  host: string;
+  host?: string;
 } & CellDataType;
 
 type PortPropsType = {
@@ -23,7 +23,7 @@ type PortPropsType = {
 class Port extends Cell<PortDataType, {}, PortPropsType> {
   wrapperRef: React.RefObject<any>;
   static metaData = {
-    type: "port",
+    cellType: "port",
     source: undefined,
     target: undefined,
   };

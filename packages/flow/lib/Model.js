@@ -17,7 +17,7 @@ class FlowModel {
                 this.setCellDataMap(cellData);
             });
         };
-        this._width = 1000;
+        this._width = 500;
         this._height = 600;
         this.width = (width) => {
             if (lodash.exports.isUndefined(width))

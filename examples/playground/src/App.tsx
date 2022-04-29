@@ -24,16 +24,21 @@ function App() {
     model.addCell("CommonNode", {
       x: 200,
       y: 500,
-      ports: [],
+      ports: [
+        {
+          label: "haha",
+          portType: "out",
+        },
+      ],
       label: "NODE 1 Common",
     });
 
-    model.addCell("CommonNode", {
-      x: 600,
-      y: 600,
-      ports: [],
-      label: "NODE 2 Common",
-    });
+    // model.addCell("CommonNode", {
+    //   x: 600,
+    //   y: 600,
+    //   ports: [],
+    //   label: "NODE 2 Common",
+    // });
 
     // for (let i = 0; i < 200; i++) {
     //   model.addCell("CommonNode", {

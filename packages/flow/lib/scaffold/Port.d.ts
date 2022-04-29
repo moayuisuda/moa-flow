@@ -5,7 +5,7 @@ import { KonvaEventObject } from "konva/lib/Node";
 import FlowModel from "../Model";
 export declare type PortDataType = {
     edges?: string[];
-    host: string;
+    host?: string;
 } & CellDataType;
 declare type PortPropsType = {
     link?: (source: any, target: any) => boolean;
@@ -22,7 +22,7 @@ declare type PortPropsType = {
 declare class Port extends Cell<PortDataType, {}, PortPropsType> {
     wrapperRef: React.RefObject<any>;
     static metaData: {
-        type: string;
+        cellType: string;
         source: undefined;
         target: undefined;
     };

@@ -81,7 +81,13 @@ class Grid extends React.Component<{}> {
   componentDidMount() {
     autorun(() => {
       console.log(this.context.width(), this.context.height());
-      this.gridRef.current && this.gridRef.current.cache();
+
+      requestAnimationFrame(() => {
+        if (this.gridRef.current) {
+          this.gridRef.current.isCached() && this.gridRef.current.clearCache();
+          this.gridRef.current.cache();
+        }
+      });
     });
   }
 
@@ -103,12 +109,13 @@ class Grid extends React.Component<{}> {
     }).get();
 
     return (
-      <Layer zIndex={0} listening={false}>
-        <Group
-          {..._gridPos}
-          ref={this.gridRef}
-          visible={!!(this.context.grid && this.context.scale() >= 1)}
-        >
+      <Layer
+        zIndex={0}
+        listening={false}
+        ref={this.gridRef}
+        visible={!!(this.context.grid && this.context.scale() >= 1)}
+      >
+        <Group {..._gridPos}>
           <Dots />
         </Group>
       </Layer>

@@ -46,7 +46,7 @@ export class FlowModel {
     }
   }
 
-  @observable _width: number = 1000;
+  @observable _width: number = 500;
   @observable _height: number = 600;
   width = (width?: number) => {
     if (isUndefined(width)) return this._width;

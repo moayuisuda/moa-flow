@@ -71,7 +71,7 @@ class Port extends Cell {
     }
 }
 Port.metaData = {
-    type: "port",
+    cellType: "port",
     source: undefined,
     target: undefined,
 };

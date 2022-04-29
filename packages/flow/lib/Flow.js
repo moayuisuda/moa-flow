@@ -48,7 +48,12 @@ let Grid = class Grid extends React.Component {
     componentDidMount() {
         autorun(() => {
             console.log(this.context.width(), this.context.height());
-            this.gridRef.current && this.gridRef.current.cache();
+            requestAnimationFrame(() => {
+                if (this.gridRef.current) {
+                    this.gridRef.current.isCached() && this.gridRef.current.clearCache();
+                    this.gridRef.current.cache();
+                }
+            });
         });
     }
     render() {
@@ -59,8 +64,8 @@ let Grid = class Grid extends React.Component {
                 y: -Math.round(this.context.y() / this.context.scale() / grid) * grid,
             };
         }).get();
-        return (React.createElement(Layer, { zIndex: 0, listening: false },
-            React.createElement(Group, Object.assign({}, _gridPos, { ref: this.gridRef, visible: !!(this.context.grid && this.context.scale() >= 1) }),
+        return (React.createElement(Layer, { zIndex: 0, listening: false, ref: this.gridRef, visible: !!(this.context.grid && this.context.scale() >= 1) },
+            React.createElement(Group, Object.assign({}, _gridPos),
                 React.createElement(Dots, null))));
     }
 };

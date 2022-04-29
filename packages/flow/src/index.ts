@@ -21,6 +21,8 @@ import { NodeFlowState, FlowInfraEventType } from './types/common';
 import * as Graph from 'react-konva'
 import { autorun } from 'mobx';
 import { Vector2d } from 'konva/lib/types';
+import { CellDataType } from './cells/Cell';
+import { EdgeDataType } from './cells/Edge';
 
 
 type ModelType = Model
@@ -47,4 +49,4 @@ export {
     Html,
 };
 
-export type { PortDataType, ModelType, FlowInfraEventType, Vector2d };
+export type { ModelType, FlowInfraEventType, Vector2d, CellDataType, EdgeDataType, PortDataType };
