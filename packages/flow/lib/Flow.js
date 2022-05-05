@@ -64,9 +64,8 @@ let Grid = class Grid extends React.Component {
                 y: -Math.round(this.context.y() / this.context.scale() / grid) * grid,
             };
         }).get();
-        return (React.createElement(Layer, { zIndex: 0, listening: false, ref: this.gridRef, visible: !!(this.context.grid && this.context.scale() >= 1) },
-            React.createElement(Group, Object.assign({}, _gridPos),
-                React.createElement(Dots, null))));
+        return (React.createElement(Layer, Object.assign({}, _gridPos, { zIndex: 0, listening: false, ref: this.gridRef, visible: !!(this.context.grid && this.context.scale() >= 1) }),
+            React.createElement(Dots, null)));
     }
 };
 Grid.contextType = FlowContext;
@@ -157,7 +156,7 @@ let Flow = class Flow extends React.Component {
                 getRightClickPanel(this.props.children),
                 React.createElement(Stage, { className: STAGE_CLASS_NAME, ref: this.stageRef, scale: { x: model.canvasData.scale, y: model.canvasData.scale }, x: model.x(), y: model.y(), width: model.width(), height: model.height() },
                     React.createElement(FlowContext.Provider, { value: model },
-                        React.createElement(Grid, null),
+                        this.props.grid && React.createElement(Grid, null),
                         React.createElement(Nodes, { nodesLayerRef: this.nodesLayerRef, model: model }),
                         React.createElement(Edges, { linesLayerRef: this.linesLayerRef, model: model }),
                         React.createElement(InteractTop, { topLayerRef: this.topLayerRef, model: model }))))));
