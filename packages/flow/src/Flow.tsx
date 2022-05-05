@@ -278,7 +278,7 @@ class Flow extends React.Component<FlowProps, {}> {
           >
             {/* Provider需要在Stage内部，issue https://github.com/konvajs/react-konva/issues/188 */}
             <FlowContext.Provider value={model}>
-              <Grid />
+              {this.props.grid && <Grid />}
               {/* 先注册节点，后注册线，线的一些计算属性需要节点的map */}
               <Nodes nodesLayerRef={this.nodesLayerRef} model={model} />
               <Edges linesLayerRef={this.linesLayerRef} model={model} />

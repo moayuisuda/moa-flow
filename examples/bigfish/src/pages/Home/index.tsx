@@ -16,7 +16,7 @@ export default () => {
         width={800}
         height={800}
         canvasData={{
-          scale: { x: 1, y: 1 },
+          scale: 1,
           x: 0,
           y: 0,
           cells: [

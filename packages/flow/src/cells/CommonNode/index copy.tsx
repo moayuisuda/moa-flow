@@ -113,7 +113,7 @@ class CommonNode extends Node<CommonNodeDataType, {}> {
     const { data } = this.props;
 
     return (
-      <Interactor {...this.props.data} topOnFocus>
+      <Interactor {...this.props.data}>
         <Rect
           width={WIDTH}
           height={FULL_HEIGHT}

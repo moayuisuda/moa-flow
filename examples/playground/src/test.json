@@ -1,25 +1,24 @@
 {
-  "scale": { "x": 1, "y": 1 },
+  "scale": 1,
   "x": 0,
   "y": 0,
   "cells": [
     {
       "id": "2",
-      "CellDataType": "node",
+      "cellType": "node",
       "component": "CommonNode",
-      "x": 800,
+      "x": 100,
       "y": 200,
-      "data": {},
       "ports": [
         {
-          "type": "port",
+          "cellType": "port",
           "label": "age",
           "id": "port-5",
           "portType": "in",
           "host": "2"
         },
         {
-          "type": "port",
+          "cellType": "port",
           "label": "father",
           "id": "port-6",
           "portType": "in",

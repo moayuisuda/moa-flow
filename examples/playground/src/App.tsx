@@ -21,17 +21,12 @@ function App() {
     // 注册自定义节点;
     const model = modelRef.current as ModelType;
 
-    model.addCell("CommonNode", {
-      x: 200,
-      y: 500,
-      ports: [
-        {
-          label: "haha",
-          portType: "out",
-        },
-      ],
-      label: "NODE 1 Common",
-    });
+    // model.addCell("CommonNode", {
+    //   x: 200,
+    //   y: 500,
+    //   ports: [],
+    //   label: "NODE 1 Common",
+    // });
 
     // model.addCell("CommonNode", {
     //   x: 600,
@@ -94,7 +89,7 @@ function App() {
           // message.info(`[${e.type}]}`);
         }}
       >
-        <RightClickPanel>
+        {/* <RightClickPanel>
           {(context: ModelType) => {
             return (
               <Button
@@ -109,7 +104,7 @@ function App() {
               </Button>
             );
           }}
-        </RightClickPanel>
+        </RightClickPanel> */}
       </Flow>
       {/* 同Flow一样Controller也可封装ReactDOM.render */}
       {/* <Controller modelRef={modelRef}></Controller> */}

@@ -60,10 +60,9 @@ export default defineConfig({
     'react-dom': 'ReactDOM',
     '@alipay/bigfish/react': 'React',
     '@alipay/bigfish/react-dom': 'ReactDOM',
-    aliyun: 'aliyun',
   },
   headScripts: [
-    'https://gw.alipayobjects.com/os/lib/react/17.0.2/umd/react.production.min.js',
-    'https://gw.alipayobjects.com/os/lib/react-dom/17.0.2/umd/react-dom.production.min.js',
+    'https://gw.alipayobjects.com/os/lib/react/17.0.2/umd/react.development.js',
+    'https://gw.alipayobjects.com/os/lib/react-dom/17.0.2/umd/react-dom.development.js',
   ],
 });
