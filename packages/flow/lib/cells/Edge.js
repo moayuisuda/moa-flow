@@ -35,9 +35,6 @@ class Edge extends Cell {
         this.arrow = true;
         this.dash = false;
         this.isMountEvents = false;
-        this.onMount = () => {
-            this.labelRef.current;
-        };
         this.formatVerticied = (verticies) => {
             return verticies;
         };

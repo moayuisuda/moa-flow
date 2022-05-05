@@ -40,19 +40,19 @@ function App() {
     //   label: "NODE 2 Common",
     // });
 
-    // for (let i = 0; i < 200; i++) {
-    //   model.addCell("CommonNode", {
-    //     x: randomIn(0, 3000),
-    //     y: randomIn(0, 3000),
-    //     label: `${1} ${Math.random()}`,
-    //     ports: [
-    //       {
-    //         label: "haha",
-    //         portType: "out",
-    //       },
-    //     ],
-    //   });
-    // }
+    for (let i = 0; i < 200; i++) {
+      model.addCell("CommonNode", {
+        x: randomIn(0, 3000),
+        y: randomIn(0, 3000),
+        label: `${1} ${Math.random()}`,
+        ports: [
+          {
+            label: "haha",
+            portType: "out",
+          },
+        ],
+      });
+    }
 
     // //------------------- 非react组件引用 ------------------
     // const { modelRef } = mountFlow(document.querySelector(".App") as Element, {
@@ -88,6 +88,7 @@ function App() {
       {/* react组件引用 */}
       <h1>111</h1>
       <Flow
+        multiSelect
         modelRef={modelRef}
         canvasData={testData}
         onEvent={(e) => {

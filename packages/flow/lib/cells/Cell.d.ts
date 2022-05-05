@@ -32,7 +32,7 @@ declare abstract class Cell<D, S = {}, P = {}> extends React.Component<{
     getData(): ({
         data: D & CellDataType;
     } & P)["data"];
-    isSelect(): boolean;
+    isSelect(): any;
     render(): JSX.Element;
 }
 declare const _default: typeof Cell;

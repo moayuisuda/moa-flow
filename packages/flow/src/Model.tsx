@@ -46,7 +46,7 @@ export class FlowModel {
     }
   }
 
-  @observable _width: number = 500;
+  @observable _width: number = 1000;
   @observable _height: number = 600;
   width = (width?: number) => {
     if (isUndefined(width)) return this._width;
@@ -259,7 +259,17 @@ export class FlowModel {
     this.canvasData.y = y;
   };
 
+  insertRuntimeState = (cellData: CellDataType) => {
+    cellData.$state = {
+      isSelect: false,
+    };
+  };
+
   @action setCanvasData = (canvasData: CanvasDataType) => {
+    canvasData.cells.forEach((cellData) => {
+      this.insertRuntimeState(cellData);
+    });
+
     this.canvasData = canvasData;
     // 这里考虑到react会复用实例，所以不能简单地清除cellsMap
     // this.cellsDataMap.clear();
@@ -356,13 +366,14 @@ export class FlowModel {
   @action createCellData = (component: string, initOptions?: any) => {
     const id = v4();
 
-    console.log({ componentMap: this.componentsMap, component });
     const metaData = Object.assign(
       this.componentsMap.get(component).getMetaData(),
       {
         component,
       }
     );
+
+    this.insertRuntimeState(metaData);
 
     return Object.assign(metaData, {
       id,

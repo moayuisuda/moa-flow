@@ -22,7 +22,7 @@ import {
 import { useEffect, useState, useContext } from "react";
 import { STAGE_CLASS_NAME } from "./constants";
 import { getRightClickPanel } from "./components/RightClickPanel/index";
-import { initMultiSelect } from "./events";
+import { initMultiSelect, initSelect } from "./events";
 import { color } from "./theme/style";
 import { autorun } from "mobx";
 
@@ -237,6 +237,7 @@ class Flow extends React.Component<FlowProps, {}> {
       nodesLayer,
       topLayer,
     });
+    initSelect(model);
 
     zoom &&
       initScale(model, stage, {

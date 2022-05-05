@@ -109,11 +109,8 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
   }
 
   isSelect() {
-    // return this.flowState.isSelect;
-    // @TODO 注入runtime的$state属性
-    return computed(() => {
-      return this.context.selectCells.includes(this.props.data.id);
-    }).get();
+    console.log("asd");
+    return this.props.data.$state.isSelect;
   }
 
   render() {

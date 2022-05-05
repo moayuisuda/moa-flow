@@ -67,10 +67,6 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
     this.labelRef = React.createRef();
   }
 
-  onMount = () => {
-    this.labelRef.current;
-  };
-
   protected lineStyle({ isSelect }: { isSelect: boolean }) {
     const { color } = this.context;
 

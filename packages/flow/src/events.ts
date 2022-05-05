@@ -33,6 +33,29 @@ export const initLink = (model: ModelType, stage: Konva.Stage) => {
     })
 }
 
+export const initSelect = (model: ModelType) => {
+    // 非受控设置select的节点
+    let prevSelectCells: string[] = []
+    autorun(() => {
+        // 上次存在这次不存在的就是需要设置为false的
+        const toFalseCells = without(prevSelectCells, ...model.selectCells)
+        // 这次存在上次不存在的就是需要设置为true的
+        const toTrueCells = without(model.selectCells, ...prevSelectCells)
+
+        toFalseCells.forEach(cellId => {
+            const cellData = model.getCellData(cellId) as CellDataType
+            cellData.$state.isSelect = false
+        })
+
+        toTrueCells.forEach(cellId => {
+            const cellData = model.getCellData(cellId) as CellDataType
+            cellData.$state.isSelect = true
+        })
+
+        prevSelectCells = model.selectCells.slice();
+    })
+}
+
 export const initDrag = (model: ModelType, stage: Konva.Stage, layers: {
     linesLayer: Konva.Layer,
     nodesLayer: Konva.Layer,
@@ -206,30 +229,6 @@ export const initMultiSelect = (model: ModelType, stage: Konva.Stage, layers: {
     nodesLayer: Konva.Layer,
     topLayer: Konva.Layer
 }) => {
-
-    // // 非受控设置select的节点
-    // let prevSelectCells = []
-    // autorun(() => {
-    //     // 上次存在这次不存在的就是需要设置为false的
-    //     const toFalseCells = without(prevSelectCells, ...model.selectCells)
-    //     // 这次存在上次不存在的就是需要设置为true的
-    //     const toTrueCells = without(model.selectCells, ...prevSelectCells)
-
-    //     toFalseCells.forEach(cellId => {
-    //         const instance = model.getCellInstance(cellId)
-    //         instance.flowState.isSelect = false
-    //         instance.forceUpdate()
-    //     })
-
-    //     toTrueCells.forEach(cellId => {
-    //         const instance = model.getCellInstance(cellId)
-    //         instance.flowState.isSelect = true
-    //         instance.forceUpdate()
-    //     })
-
-
-    //     prevSelectCells = model.selectCells.slice();
-    // })
 
     if (model.hotKey['Space']) return
 

@@ -8,7 +8,7 @@ import { computed, autorun } from 'mobx';
 import { FlowContext } from './Context.js';
 import { registComponents } from './utils/registComponents.js';
 import SelectBoundsRect from './scaffold/SelectBoundsRect.js';
-import { initClearState, initLink, initDrag, initScale, initMultiSelect, initHotKeys } from './events.js';
+import { initClearState, initLink, initDrag, initSelect, initScale, initMultiSelect, initHotKeys } from './events.js';
 import { STAGE_CLASS_NAME } from './constants.js';
 import { getRightClickPanel } from './components/RightClickPanel/index.js';
 import { color } from './theme/style.js';
@@ -137,6 +137,7 @@ let Flow = class Flow extends React.Component {
             nodesLayer,
             topLayer,
         });
+        initSelect(model);
         zoom &&
             initScale(model, stage, {
                 linesLayer,

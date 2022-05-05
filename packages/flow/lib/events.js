@@ -23,6 +23,25 @@ const initLink = (model, stage) => {
         model.setLinkingPosition(e);
     });
 };
+const initSelect = (model) => {
+    // 非受控设置select的节点
+    let prevSelectCells = [];
+    autorun(() => {
+        // 上次存在这次不存在的就是需要设置为false的
+        const toFalseCells = lodash.exports.without(prevSelectCells, ...model.selectCells);
+        // 这次存在上次不存在的就是需要设置为true的
+        const toTrueCells = lodash.exports.without(model.selectCells, ...prevSelectCells);
+        toFalseCells.forEach(cellId => {
+            const cellData = model.getCellData(cellId);
+            cellData.$state.isSelect = false;
+        });
+        toTrueCells.forEach(cellId => {
+            const cellData = model.getCellData(cellId);
+            cellData.$state.isSelect = true;
+        });
+        prevSelectCells = model.selectCells.slice();
+    });
+};
 const initDrag = (model, stage, layers) => {
     const { linesLayer, nodesLayer, topLayer } = layers;
     // 移动选择的节点
@@ -148,25 +167,6 @@ const initScale = (model, stage, layers) => {
     });
 };
 const initMultiSelect = (model, stage, layers) => {
-    // // 非受控设置select的节点
-    // let prevSelectCells = []
-    // autorun(() => {
-    //     // 上次存在这次不存在的就是需要设置为false的
-    //     const toFalseCells = without(prevSelectCells, ...model.selectCells)
-    //     // 这次存在上次不存在的就是需要设置为true的
-    //     const toTrueCells = without(model.selectCells, ...prevSelectCells)
-    //     toFalseCells.forEach(cellId => {
-    //         const instance = model.getCellInstance(cellId)
-    //         instance.flowState.isSelect = false
-    //         instance.forceUpdate()
-    //     })
-    //     toTrueCells.forEach(cellId => {
-    //         const instance = model.getCellInstance(cellId)
-    //         instance.flowState.isSelect = true
-    //         instance.forceUpdate()
-    //     })
-    //     prevSelectCells = model.selectCells.slice();
-    // })
     if (model.hotKey['Space'])
         return;
     // 设置多选矩形框起始点
@@ -249,4 +249,4 @@ const initHotKeys = (model, stage) => {
     });
 };
 
-export { initClearState, initDrag, initHotKeys, initLink, initMultiSelect, initScale };
+export { initClearState, initDrag, initHotKeys, initLink, initMultiSelect, initScale, initSelect };
