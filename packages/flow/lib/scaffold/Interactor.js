@@ -1,5 +1,5 @@
-import { __rest, __decorate } from '../node_modules/tslib/tslib.es6.js';
-import { Group } from 'react-konva';
+import { __rest, __decorate } from '../packages/flow/node_modules/_tslib@2.4.0@tslib/tslib.es6.js';
+import { Group } from '@antv/react-g';
 import React from 'react';
 import { observer } from 'mobx-react';
 import { FlowContext } from '../Context.js';

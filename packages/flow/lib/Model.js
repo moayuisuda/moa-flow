@@ -1,4 +1,4 @@
-import { __decorate } from './node_modules/tslib/tslib.es6.js';
+import { __decorate } from './packages/flow/node_modules/_tslib@2.4.0@tslib/tslib.es6.js';
 import { observable, action, makeObservable } from 'mobx';
 import { remove, isRectsInterSect, findIndex, arrayMove } from './utils/util.js';
 import { color } from './theme/style.js';
@@ -17,7 +17,7 @@ class FlowModel {
                 this.setCellDataMap(cellData);
             });
         };
-        this._width = 500;
+        this._width = 1000;
         this._height = 600;
         this.width = (width) => {
             if (lodash.exports.isUndefined(width))
@@ -186,7 +186,15 @@ class FlowModel {
             this.canvasData.x = x;
             this.canvasData.y = y;
         };
+        this.insertRuntimeState = (cellData) => {
+            cellData.$state = {
+                isSelect: false,
+            };
+        };
         this.setCanvasData = (canvasData) => {
+            canvasData.cells.forEach((cellData) => {
+                this.insertRuntimeState(cellData);
+            });
             this.canvasData = canvasData;
             // 这里考虑到react会复用实例，所以不能简单地清除cellsMap
             // this.cellsDataMap.clear();
@@ -261,10 +269,10 @@ class FlowModel {
         // 创建新的节点数据
         this.createCellData = (component, initOptions) => {
             const id = v4();
-            console.log({ componentMap: this.componentsMap, component });
             const metaData = Object.assign(this.componentsMap.get(component).getMetaData(), {
                 component,
             });
+            this.insertRuntimeState(metaData);
             return Object.assign(metaData, Object.assign({ id }, initOptions));
         };
         this.addCell = (componentName, initOptions) => {

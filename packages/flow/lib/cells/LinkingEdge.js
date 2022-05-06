@@ -1,8 +1,8 @@
-import { __decorate } from '../node_modules/tslib/tslib.es6.js';
+import { __decorate } from '../packages/flow/node_modules/_tslib@2.4.0@tslib/tslib.es6.js';
 import { observer } from 'mobx-react';
 import React from 'react';
 import { FlowContext } from '../Context.js';
-import { Group } from 'react-konva';
+import { Group } from '@antv/react-g';
 
 let LinkingEdge = class LinkingEdge extends React.Component {
     render() {
@@ -12,7 +12,7 @@ let LinkingEdge = class LinkingEdge extends React.Component {
         if (!data.source)
             return React.createElement(React.Fragment, null);
         this.context.buffer.link.edge = id;
-        return (React.createElement(Group, { listening: false }, React.createElement(RegistedEdge, {
+        return (React.createElement(Group, null, React.createElement(RegistedEdge, {
             data: Object.assign({ id }, this.props.data),
         })));
     }

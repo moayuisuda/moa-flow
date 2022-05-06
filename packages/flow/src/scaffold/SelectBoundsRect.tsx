@@ -1,4 +1,4 @@
-import { Rect } from "react-konva";
+import { Rect } from "@antv/react-g";
 import React from "react";
 import { FlowContext } from "../Context";
 import { observer } from "mobx-react";

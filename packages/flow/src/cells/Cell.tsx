@@ -1,13 +1,11 @@
 import React from "react";
-import { Group } from "react-konva";
-import Konva from "konva";
+import { Group } from "@antv/react-g";
 import { FlowContext } from "../Context";
 import { cloneDeep } from "lodash";
 import { observer } from "mobx-react";
 import Model from "../Model";
 import { AllCellDataType } from "../types/common";
 import { titleCase } from "utils/string";
-import { computed } from "mobx";
 
 export type CellDataType = {
   id: string;
@@ -109,11 +107,8 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
   }
 
   isSelect() {
-    // return this.flowState.isSelect;
-    // @TODO 注入runtime的$state属性
-    return computed(() => {
-      return this.context.selectCells.includes(this.props.data.id);
-    }).get();
+    console.log("asd");
+    return this.props.data.$state.isSelect;
   }
 
   render() {

@@ -1,7 +1,8 @@
-import { Stage, Layer, Group, useStrictMode, Circle, Rect } from "react-konva";
+import { Canvas, Group, Circle, Rect } from "@antv/react-g";
 import LinkingEdge from "./cells/LinkingEdge";
 import React, { createRef } from "react";
 import FlowModel from "./Model";
+import { Renderer as CanvasRenderer } from "@antv/g-canvas";
 
 import { observer } from "mobx-react";
 import { computed } from "mobx";
@@ -22,9 +23,11 @@ import {
 import { useEffect, useState, useContext } from "react";
 import { STAGE_CLASS_NAME } from "./constants";
 import { getRightClickPanel } from "./components/RightClickPanel/index";
-import { initMultiSelect } from "./events";
+import { initMultiSelect, initSelect } from "./events";
 import { color } from "./theme/style";
 import { autorun } from "mobx";
+
+const renderer = new CanvasRenderer();
 
 const renderComponent = (cellData, model) => {
   return React.createElement(
@@ -67,7 +70,7 @@ const Dots = observer(() => {
   return (
     <Group>
       {_dots.map((dot) => {
-        return <Circle x={dot.x} y={dot.y} radius={1} fill={color.deepGrey} />;
+        return <Circle x={dot.x} y={dot.y} r={1} fill={color.deepGrey} />;
       })}
     </Group>
   );
@@ -109,16 +112,14 @@ class Grid extends React.Component<{}> {
     }).get();
 
     return (
-      <Layer
+      <Group
+        {..._gridPos}
         zIndex={0}
-        listening={false}
         ref={this.gridRef}
         visible={!!(this.context.grid && this.context.scale() >= 1)}
       >
-        <Group {..._gridPos}>
-          <Dots />
-        </Group>
-      </Layer>
+        <Dots />
+      </Group>
     );
   }
 }
@@ -136,11 +137,11 @@ const Edges = observer((props: { linesLayerRef; model }) => {
   );
 
   return (
-    <Layer ref={linesLayerRef} zIndex={1}>
+    <Group ref={linesLayerRef} zIndex={1}>
       {edgesData.map((cellData) => {
         return renderComponent(cellData, model);
       })}
-    </Layer>
+    </Group>
   );
 });
 
@@ -152,11 +153,11 @@ const Nodes = observer((props: { nodesLayerRef; model }) => {
   });
 
   return (
-    <Layer ref={nodesLayerRef} zIndex={2}>
+    <Group ref={nodesLayerRef} zIndex={2}>
       {nodesData.slice(0, nodesData.length).map((cellData) => {
         return renderComponent(cellData, model);
       })}
-    </Layer>
+    </Group>
   );
 });
 
@@ -168,10 +169,10 @@ const InteractTop = observer((props: { model; topLayerRef }) => {
   });
 
   return (
-    <Layer zIndex={3} ref={topLayerRef}>
+    <Group zIndex={3} ref={topLayerRef}>
       <LinkingEdge data={model.buffer.link}></LinkingEdge>
       <SelectBoundsRect />
-    </Layer>
+    </Group>
   );
 });
 
@@ -209,9 +210,6 @@ class Flow extends React.Component<FlowProps, {}> {
     props.modelRef && (props.modelRef.current = this.flowModel);
     props.onLoad && props.onLoad(this.flowModel);
 
-    // 完全受控，https://github.com/konvajs/react-konva/blob/master/README.md#strict-mode
-    useStrictMode(true);
-
     const { refs } = this.flowModel;
     this.stageRef = refs.stageRef = createRef<Konva.Stage>();
     this.nodesLayerRef = refs.nodesLayerRef = createRef<Konva.Layer>();
@@ -238,6 +236,7 @@ class Flow extends React.Component<FlowProps, {}> {
       nodesLayer,
       topLayer,
     });
+    initSelect(model);
 
     zoom &&
       initScale(model, stage, {
@@ -267,7 +266,8 @@ class Flow extends React.Component<FlowProps, {}> {
       >
         <FlowContext.Provider value={model}>
           {getRightClickPanel(this.props.children)}
-          <Stage
+          <Canvas
+            renderer={renderer}
             className={STAGE_CLASS_NAME}
             ref={this.stageRef}
             scale={{ x: model.canvasData.scale, y: model.canvasData.scale }}
@@ -284,7 +284,7 @@ class Flow extends React.Component<FlowProps, {}> {
               <Edges linesLayerRef={this.linesLayerRef} model={model} />
               <InteractTop topLayerRef={this.topLayerRef} model={model} />
             </FlowContext.Provider>
-          </Stage>
+          </Canvas>
         </FlowContext.Provider>
       </div>
     );

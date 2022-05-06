@@ -1,5 +1,5 @@
 import Cell from './Cell.js';
-import { Label, Tag, Text, Group, Arrow, Line } from 'react-konva';
+import { Group, Text, Polyline } from '@antv/react-g';
 import Interactor from '../scaffold/Interactor.js';
 import React from 'react';
 import { isVector2d } from '../utils/util.js';
@@ -32,12 +32,9 @@ class Edge extends Cell {
         //   };
         // }
         this.bazier = true;
-        this.arrow = true;
+        this.arrow = false;
         this.dash = false;
         this.isMountEvents = false;
-        this.onMount = () => {
-            this.labelRef.current;
-        };
         this.formatVerticied = (verticies) => {
             return verticies;
         };
@@ -131,9 +128,14 @@ class Edge extends Cell {
         const textWidth = linesLayerRef.current
             .getContext()
             .measureText(text).width;
-        return (React.createElement(Label, { x: -textWidth / 2 - LABEL_PADDING, y: -TEXT_HEIGHT / 2 },
-            React.createElement(Tag, { fill: color.background }),
-            React.createElement(Text, Object.assign({ height: TEXT_HEIGHT, verticalAlign: "middle", text: this.labelFormatter(this.props.data.label), padding: LABEL_PADDING }, this.labelStyle()))));
+        return (React.createElement(Group, { x: -textWidth / 2 - LABEL_PADDING, y: -TEXT_HEIGHT / 2 },
+            React.createElement(Text
+            // height={TEXT_HEIGHT}
+            // verticalAlign="middle"
+            , Object.assign({ 
+                // height={TEXT_HEIGHT}
+                // verticalAlign="middle"
+                text: this.labelFormatter(this.props.data.label) }, this.labelStyle()))));
     }
     labelStyle() {
         return {};
@@ -185,8 +187,10 @@ class Edge extends Cell {
         const { color } = this.context;
         const lineProps = Object.assign({ lineCap: "round", lineJoin: "round", strokeWidth: 2.5, points: points, stroke: color.deepGrey, fill: color.deepGrey, dash: isLinking ? [10, 10] : undefined }, this.lineStyle({ isSelect: this.isSelect() }));
         return (React.createElement(Group, null,
-            this.arrow ? (React.createElement(Arrow, Object.assign({}, lineProps, { pointerWidth: 10 }))) : (React.createElement(Line, Object.assign({}, lineProps))),
-            React.createElement(Line, { stroke: "transparent", points: points, strokeWidth: 20, lineCap: "round", lineJoin: "round" })));
+            this.arrow ? (
+            // <Arrow {...lineProps} pointerWidth={10} />
+            React.createElement(React.Fragment, null)) : (React.createElement(Polyline, Object.assign({}, lineProps))),
+            React.createElement(Polyline, { stroke: "transparent", points: points, strokeWidth: 20, lineCap: "round", lineJoin: "round" })));
     }
     content() {
         return (React.createElement(Interactor, { id: this.props.data.id, draggable: false, topOnFocus: true },

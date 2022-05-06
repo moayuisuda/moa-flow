@@ -1,6 +1,6 @@
 import type { FieldType } from "../..//types/common";
 import { PortDataType } from "../..//scaffold/Port";
-import { Rect, Text, Circle, Group } from "react-konva";
+import { Rect, Text, Circle, Group } from "@antv/react-g";
 import Button from "../../common/Button";
 import Interactor from "../../scaffold/Interactor";
 import Node from "../Node";
@@ -113,7 +113,7 @@ class CommonNode extends Node<CommonNodeDataType, {}> {
     const { data } = this.props;
 
     return (
-      <Interactor {...this.props.data} topOnFocus>
+      <Interactor {...this.props.data} topOnFocus={false}>
         <Rect
           width={WIDTH}
           height={FULL_HEIGHT}

@@ -22,6 +22,8 @@ export default {
     "mobx-react",
     "react-konva",
     "react-konva-utils",
+    "@antv/react-g",
+    "@antv/g-canvas",
   ],
   input: "src/index.ts",
   output: {

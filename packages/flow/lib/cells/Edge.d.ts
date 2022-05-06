@@ -22,7 +22,6 @@ declare abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & 
     constructor(props: {
         data: EdgeDataType;
     }, context: FlowModel);
-    onMount: () => void;
     protected lineStyle({ isSelect }: {
         isSelect: boolean;
     }): {

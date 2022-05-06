@@ -96,6 +96,7 @@ export declare class FlowModel {
     sendEvent: (data: any) => void;
     setStageScale: (scale: number) => void;
     setStagePosition: (x: number, y: number) => void;
+    insertRuntimeState: (cellData: CellDataType) => void;
     setCanvasData: (canvasData: CanvasDataType) => void;
     setCellId: (data: CellDataType) => void;
     setCellData: (id: string, data: any) => void;

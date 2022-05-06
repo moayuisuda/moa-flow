@@ -1,5 +1,5 @@
 import Cell from "./Cell";
-import { Line, Group, Label, Text, Tag, Arrow } from "react-konva";
+import { Polyline as Line, Group, Text } from "@antv/react-g";
 import Interactor from "../scaffold/Interactor";
 import { CellDataType } from "./Cell";
 import { PortDataType } from "../scaffold/Port";
@@ -52,7 +52,7 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
   // }
 
   protected bazier = true;
-  protected arrow = true;
+  protected arrow = false;
   protected dash = false;
 
   isMountEvents = false;
@@ -66,10 +66,6 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
     super(props, context);
     this.labelRef = React.createRef();
   }
-
-  onMount = () => {
-    this.labelRef.current;
-  };
 
   protected lineStyle({ isSelect }: { isSelect: boolean }) {
     const { color } = this.context;
@@ -190,16 +186,15 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
       .measureText(text).width;
 
     return (
-      <Label x={-textWidth / 2 - LABEL_PADDING} y={-TEXT_HEIGHT / 2}>
-        <Tag fill={color.background} />
+      <Group x={-textWidth / 2 - LABEL_PADDING} y={-TEXT_HEIGHT / 2}>
         <Text
-          height={TEXT_HEIGHT}
-          verticalAlign="middle"
+          // height={TEXT_HEIGHT}
+          // verticalAlign="middle"
           text={this.labelFormatter(this.props.data.label)}
-          padding={LABEL_PADDING}
+          // padding={LABEL_PADDING}
           {...this.labelStyle()}
         />
-      </Label>
+      </Group>
     );
   }
 
@@ -290,7 +285,8 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
     return (
       <Group>
         {this.arrow ? (
-          <Arrow {...lineProps} pointerWidth={10} />
+          // <Arrow {...lineProps} pointerWidth={10} />
+          <></>
         ) : (
           <Line {...lineProps} />
         )}

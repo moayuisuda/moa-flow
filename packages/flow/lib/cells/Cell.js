@@ -1,10 +1,9 @@
 import React from 'react';
-import { Group } from 'react-konva';
+import { Group } from '@antv/react-g';
 import { FlowContext } from '../Context.js';
 import '../node_modules/lodash/lodash.js';
 import { observer } from 'mobx-react';
 import { titleCase } from '../utils/string.js';
-import { computed } from 'mobx';
 import { l as lodash } from '../_virtual/lodash.js';
 
 // D: data, S: state, P: props
@@ -63,11 +62,8 @@ class Cell extends React.Component {
         return this.props.data;
     }
     isSelect() {
-        // return this.flowState.isSelect;
-        // @TODO 注入runtime的$state属性
-        return computed(() => {
-            return this.context.selectCells.includes(this.props.data.id);
-        }).get();
+        console.log("asd");
+        return this.props.data.$state.isSelect;
     }
     render() {
         return React.createElement(Group, { ref: this.wrapperRef }, this.content());

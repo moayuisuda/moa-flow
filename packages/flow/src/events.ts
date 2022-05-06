@@ -33,6 +33,29 @@ export const initLink = (model: ModelType, stage: Konva.Stage) => {
     })
 }
 
+export const initSelect = (model: ModelType) => {
+    // 非受控设置select的节点
+    let prevSelectCells: string[] = []
+    autorun(() => {
+        // 上次存在这次不存在的就是需要设置为false的
+        const toFalseCells = without(prevSelectCells, ...model.selectCells)
+        // 这次存在上次不存在的就是需要设置为true的
+        const toTrueCells = without(model.selectCells, ...prevSelectCells)
+
+        toFalseCells.forEach(cellId => {
+            const cellData = model.getCellData(cellId) as CellDataType
+            cellData.$state.isSelect = false
+        })
+
+        toTrueCells.forEach(cellId => {
+            const cellData = model.getCellData(cellId) as CellDataType
+            cellData.$state.isSelect = true
+        })
+
+        prevSelectCells = model.selectCells.slice();
+    })
+}
+
 export const initDrag = (model: ModelType, stage: Konva.Stage, layers: {
     linesLayer: Konva.Layer,
     nodesLayer: Konva.Layer,
@@ -64,17 +87,17 @@ export const initDrag = (model: ModelType, stage: Konva.Stage, layers: {
         }
 
         if (select.isSelecting) {
-            if (stage.isListening()) stage.listening(false);
+            // if (stage.isListening()) stage.listening(false);
 
             model.selectCells.forEach(id => {
                 const cellData = model.getCellData(id) as NodeDataType & CellDataType
                 const konvaNode = model.getCellInstance(id).wrapperRef.current
 
                 if (cellData.cellType === 'node') {
-                    if (!drag.movedToTop) {
-                        zIndexCache[cellData.id] = konvaNode.zIndex()
-                        konvaNode.moveTo(topLayer)
-                    }
+                    // if (!drag.movedToTop) {
+                    //     zIndexCache[cellData.id] = konvaNode.zIndex()
+                    //     konvaNode.moveTo(topLayer)
+                    // }
 
                     model.setCellData(cellData.id, {
                         x: cellData.x + movement.x / stage.scaleX(),
@@ -92,26 +115,26 @@ export const initDrag = (model: ModelType, stage: Konva.Stage, layers: {
 
     // 空格键的时候触发缓存
     const stageDom = document.querySelector(`.${STAGE_CLASS_NAME}`) as HTMLDivElement
-    autorun(() => {
-        if (!model.buffer.isWheeling) {
-            // @TODO requestIdleCallbak 分片缓存
-            if (model.hotKey["Space"] && !nodesLayer.isCached()) {
-                stageDom.style.cursor = 'pointer'
-                linesLayer.cache()
-                nodesLayer.cache()
+    // autorun(() => {
+    //     if (!model.buffer.isWheeling) {
+    //         // @TODO requestIdleCallbak 分片缓存
+    //         if (model.hotKey["Space"] && !nodesLayer.isCached()) {
+    //             stageDom.style.cursor = 'pointer'
+    //             linesLayer.cache()
+    //             nodesLayer.cache()
 
-                /* 对于stage完全不需要调用`getIntersection`检测交互碰撞，因为它就是根组件不需要检测交互碰撞，逻辑上也是
-                这样的，禁用了listening也能触发事件，实际应该就是禁用了hitGraph */
-                stage.listening(false)
-            } else {
-                stageDom.style.cursor = ''
-                linesLayer.clearCache()
-                nodesLayer.clearCache()
-                // listening语义上更倾向于之前的api`hitGraphEnabled`，但stage并不需要hitGraph
-                stage.listening(true)
-            }
-        }
-    })
+    //             /* 对于stage完全不需要调用`getIntersection`检测交互碰撞，因为它就是根组件不需要检测交互碰撞，逻辑上也是
+    //             这样的，禁用了listening也能触发事件，实际应该就是禁用了hitGraph */
+    //             stage.listening(false)
+    //         } else {
+    //             stageDom.style.cursor = ''
+    //             linesLayer.clearCache()
+    //             nodesLayer.clearCache()
+    //             // listening语义上更倾向于之前的api`hitGraphEnabled`，但stage并不需要hitGraph
+    //             stage.listening(true)
+    //         }
+    //     }
+    // })
 
     stage.on('mouseup', () => {
         if (select.isSelecting) {
@@ -146,23 +169,23 @@ export const initScale = (model: ModelType, stage: Konva.Stage, layers: {
     let scaleBy = 1.02;
     const { linesLayer, nodesLayer } = layers
 
-    const debounceClearCache = debounce(() => {
-        linesLayer.clearCache()
-        nodesLayer.clearCache()
-        linesLayer.listening(true)
-        nodesLayer.listening(true)
+    // const debounceClearCache = debounce(() => {
+    //     linesLayer.clearCache()
+    //     nodesLayer.clearCache()
+    //     linesLayer.listening(true)
+    //     nodesLayer.listening(true)
 
-        model.buffer.isWheeling = false
-    }, 300)
+    //     model.buffer.isWheeling = false
+    // }, 300)
 
     stage.on('wheel', (e) => {
-        if (!nodesLayer.isCached()) {
-            model.buffer.isWheeling = true
-            linesLayer.cache()
-            nodesLayer.cache()
-            linesLayer.listening(false)
-            nodesLayer.listening(false)
-        }
+        // if (!nodesLayer.isCached()) {
+        //     model.buffer.isWheeling = true
+        //     linesLayer.cache()
+        //     nodesLayer.cache()
+        //     linesLayer.listening(false)
+        //     nodesLayer.listening(false)
+        // }
 
 
         // stop default scrolling
@@ -197,7 +220,7 @@ export const initScale = (model: ModelType, stage: Konva.Stage, layers: {
 
         model.setStagePosition(newPos.x, newPos.y);
 
-        debounceClearCache()
+        // debounceClearCache()
     });
 }
 
@@ -206,30 +229,6 @@ export const initMultiSelect = (model: ModelType, stage: Konva.Stage, layers: {
     nodesLayer: Konva.Layer,
     topLayer: Konva.Layer
 }) => {
-
-    // // 非受控设置select的节点
-    // let prevSelectCells = []
-    // autorun(() => {
-    //     // 上次存在这次不存在的就是需要设置为false的
-    //     const toFalseCells = without(prevSelectCells, ...model.selectCells)
-    //     // 这次存在上次不存在的就是需要设置为true的
-    //     const toTrueCells = without(model.selectCells, ...prevSelectCells)
-
-    //     toFalseCells.forEach(cellId => {
-    //         const instance = model.getCellInstance(cellId)
-    //         instance.flowState.isSelect = false
-    //         instance.forceUpdate()
-    //     })
-
-    //     toTrueCells.forEach(cellId => {
-    //         const instance = model.getCellInstance(cellId)
-    //         instance.flowState.isSelect = true
-    //         instance.forceUpdate()
-    //     })
-
-
-    //     prevSelectCells = model.selectCells.slice();
-    // })
 
     if (model.hotKey['Space']) return
 

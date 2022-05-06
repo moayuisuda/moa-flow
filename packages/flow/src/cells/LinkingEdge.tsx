@@ -1,7 +1,7 @@
 import { observer } from "mobx-react";
 import React from "react";
 import { FlowContext } from "../Context";
-import { Group } from "react-konva";
+import { Group } from "@antv/react-g";
 @observer
 class LinkingEdge extends React.Component<{ data: any }> {
   static contextType = FlowContext;
@@ -18,7 +18,7 @@ class LinkingEdge extends React.Component<{ data: any }> {
     this.context.buffer.link.edge = id;
 
     return (
-      <Group listening={false}>
+      <Group>
         {React.createElement(RegistedEdge, {
           data: {
             id,

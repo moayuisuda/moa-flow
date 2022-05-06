@@ -1,4 +1,4 @@
-import { Group } from "react-konva";
+import { Group } from "@antv/react-g";
 import React from "react";
 
 import Cell from "../cells/Cell";

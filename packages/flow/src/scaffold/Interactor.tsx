@@ -1,5 +1,5 @@
 // 这不是node的基类，只是一个外层wrapper用来包裹内容，并按需提供选中、拖拽等功能
-import { Group } from "react-konva";
+import { Group } from "@antv/react-g";
 import React from "react";
 import { observer } from "mobx-react";
 

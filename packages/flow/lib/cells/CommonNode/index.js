@@ -1,4 +1,4 @@
-import { Rect, Group, Text, Circle } from 'react-konva';
+import { Rect, Group, Text, Circle } from '@antv/react-g';
 import Button from '../../common/Button.js';
 import Interactor from '../../scaffold/Interactor.js';
 import Node from '../Node.js';
@@ -62,7 +62,7 @@ class CommonNode extends Node {
         const controlInPorts = (ports === null || ports === void 0 ? void 0 : ports.filter((portData) => portData.portType === "control-in")) || [];
         const FULL_HEIGHT = CommonNode.getBounds(this.props.data).height;
         const { data } = this.props;
-        return (React.createElement(Interactor, Object.assign({}, this.props.data, { topOnFocus: true }),
+        return (React.createElement(Interactor, Object.assign({}, this.props.data, { topOnFocus: false }),
             React.createElement(Rect, { width: WIDTH, height: FULL_HEIGHT, fill: "white", shadowColor: "black", shadowBlur: 10, shadowOpacity: 0.1, cornerRadius: 10 }),
             React.createElement(Group, null,
                 React.createElement(Rect, { cornerRadius: [10, 10, 0, 0], width: WIDTH, height: HEADER_HEIGHT, fill: color.grey }),
