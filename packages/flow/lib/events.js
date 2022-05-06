@@ -33,11 +33,11 @@ const initSelect = (model) => {
         const toTrueCells = lodash.exports.without(model.selectCells, ...prevSelectCells);
         toFalseCells.forEach(cellId => {
             const cellData = model.getCellData(cellId);
-            cellData.$state.isSelect = false;
+            cellData && (cellData.$state.isSelect = false);
         });
         toTrueCells.forEach(cellId => {
             const cellData = model.getCellData(cellId);
-            cellData.$state.isSelect = true;
+            cellData && (cellData.$state.isSelect = true);
         });
         prevSelectCells = model.selectCells.slice();
     });

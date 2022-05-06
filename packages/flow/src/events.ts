@@ -44,12 +44,12 @@ export const initSelect = (model: ModelType) => {
 
         toFalseCells.forEach(cellId => {
             const cellData = model.getCellData(cellId) as CellDataType
-            cellData.$state.isSelect = false
+            cellData && (cellData.$state.isSelect = false)
         })
 
         toTrueCells.forEach(cellId => {
             const cellData = model.getCellData(cellId) as CellDataType
-            cellData.$state.isSelect = true
+            cellData && (cellData.$state.isSelect = true)
         })
 
         prevSelectCells = model.selectCells.slice();

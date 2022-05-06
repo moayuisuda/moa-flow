@@ -251,6 +251,7 @@ class FlowModel {
             }
             if (matchCell.cellType === "edge")
                 this.clearPortEdge(matchCell.id);
+            this.selectCells.includes(id) && remove(this.selectCells, id);
             remove(this.canvasData.cells, matchCell);
             this.cellsMap.delete(id);
             this.cellsDataMap.delete(id);
