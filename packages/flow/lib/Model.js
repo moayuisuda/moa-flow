@@ -1,4 +1,4 @@
-import { __decorate } from './node_modules/tslib/tslib.es6.js';
+import { __decorate } from './packages/flow/node_modules/_tslib@2.4.0@tslib/tslib.es6.js';
 import { observable, action, makeObservable } from 'mobx';
 import { remove, isRectsInterSect, findIndex, arrayMove } from './utils/util.js';
 import { color } from './theme/style.js';
