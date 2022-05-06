@@ -1019,6 +1019,24 @@
   dependencies:
     tslib "^2.3.1"
 
+"@antv/g@^5.0.22":
+  version "5.0.22"
+  resolved "https://registry.npm.alibaba-inc.com/@antv/g/download/@antv/g-5.0.22.tgz#ebe3b3cf47765da719218f7db93230d8d64a0d0e"
+  integrity sha512-eQEgder/7eRvaTJ1MKeKZZpd5pR1RRUw2BvDehB9h8Y1dAR79AqynZ8CQF1WksP4kwhQBhdr3HOOp+47LEpTqQ==
+  dependencies:
+    "@antv/g-math" "^1.0.19"
+    "@antv/path-util" "^3.0.1"
+    "@types/offscreencanvas" "^2019.6.4"
+    d3-color "^1.4.0"
+    eventemitter3 "^4.0.0"
+    gl-matrix "^3.1.0"
+    lodash-es "^4.17.21"
+    mana-syringe "^0.3.0"
+    reflect-metadata "^0.1.13"
+    request-animation-frame-polyfill "^1.1.2"
+    tapable "^2.2.1"
+    tslib "^2.3.1"
+
 "@antv/path-util@^3.0.1":
   version "3.0.1"
   resolved "https://registry.npm.alibaba-inc.com/@antv/path-util/download/@antv/path-util-3.0.1.tgz#42fd84222824e8ad8d1bde70f164a05924870d4a"
@@ -1027,6 +1045,16 @@
     gl-matrix "^3.1.0"
     lodash-es "^4.17.21"
     tslib "^2.0.3"
+
+"@antv/react-g@^1.0.15":
+  version "1.0.15"
+  resolved "https://registry.npm.alibaba-inc.com/@antv/react-g/download/@antv/react-g-1.0.15.tgz#92b834ccdf3a195661713c18e3b49e4e9a19b843"
+  integrity sha512-Y5g5DFqjH4RzH1+S3ylTeU3rCByQ7XiHEWsdTL8++BA2tPZnZsQETFf/Mw9Wlq0ST2Q8RaGu45CtGYzT3XpJSA==
+  dependencies:
+    "@antv/g" "^5.0.22"
+    react-reconciler "^0.26.2"
+    scheduler "^0.20.2"
+    tslib "^2.3.1"
 
 "@apideck/better-ajv-errors@^0.3.1":
   version "0.3.3"
@@ -4495,6 +4523,11 @@
   version "2.4.1"
   resolved "https://registry.npmmirror.com/@types/normalize-package-data/-/normalize-package-data-2.4.1.tgz#d3357479a0fdfdd5907fe67e17e0a85c906e1301"
   integrity sha512-Gj7cI7z+98M282Tqmp2K5EIsoouUEzbBJhQQzDE3jSIRk6r9gsz0oUokqIUR4u1R3dMHo0pDHM7sNOHyhulypw==
+
+"@types/offscreencanvas@^2019.6.4":
+  version "2019.6.4"
+  resolved "https://registry.npm.alibaba-inc.com/@types/offscreencanvas/download/@types/offscreencanvas-2019.6.4.tgz#64f6d120b53925028299c744fcdd32d2cd525963"
+  integrity sha1-ZPbRILU5JQKCmcdE/N0y0s1SWWM=
 
 "@types/parse-json@^4.0.0":
   version "4.0.0"
@@ -8867,6 +8900,11 @@ currently-unhandled@^0.4.1:
   dependencies:
     array-find-index "^1.0.1"
 
+d3-color@^1.4.0:
+  version "1.4.1"
+  resolved "https://registry.npm.alibaba-inc.com/d3-color/download/d3-color-1.4.1.tgz#c52002bf8846ada4424d55d97982fef26eb3bc8a"
+  integrity sha1-xSACv4hGraRCTVXZeYL+8m6zvIo=
+
 d@1, d@^1.0.1:
   version "1.0.1"
   resolved "https://registry.npm.alibaba-inc.com/d/download/d-1.0.1.tgz#8698095372d58dbee346ffd0c7093f99f8f9eb5a"
@@ -12677,6 +12715,11 @@ invariant@^2.2.1, invariant@^2.2.4:
   dependencies:
     loose-envify "^1.0.0"
 
+inversify@^5.0.1:
+  version "5.1.1"
+  resolved "https://registry.npm.alibaba-inc.com/inversify/download/inversify-5.1.1.tgz#6fbd668c591337404e005a1946bfe0d802c08730"
+  integrity sha1-b71mjFkTN0BOAFoZRr/g2ALAhzA=
+
 invert-kv@^3.0.0:
   version "3.0.1"
   resolved "https://registry.npm.alibaba-inc.com/invert-kv/download/invert-kv-3.0.1.tgz#a93c7a3d4386a1dc8325b97da9bb1620c0282523"
@@ -14585,11 +14628,6 @@ konva@8.3.5:
   resolved "https://registry.npm.alibaba-inc.com/konva/download/konva-8.3.5.tgz#017799db93f70ef6437eaa8e7776a4b32648344b"
   integrity sha512-RjaZN8PwZN3n/AlqLmtPNozLRXd6pPo11UawTJpvuOAKEkSQSXI1EHntDRIPnrrJ/j4gU0VmPzWs7/ZgLZnAPQ==
 
-konva@^8.3.3:
-  version "8.3.3"
-  resolved "https://registry.npmmirror.com/konva/-/konva-8.3.3.tgz#409c811a7aa474e075e8928b8a931cf12d4dd517"
-  integrity sha512-S/v9JW3gNr4mweRwk4JLiJSnQAWs3aZBU4SY9pXGgCFxIvSDbKTnXTDYb2IMxFnurh3ItiR249RG0NvozHd1OA==
-
 language-subtag-registry@~0.3.2:
   version "0.3.21"
   resolved "https://registry.npmmirror.com/language-subtag-registry/-/language-subtag-registry-0.3.21.tgz#04ac218bea46f04cb039084602c6da9e788dd45a"
@@ -15383,6 +15421,13 @@ makeerror@1.0.12:
   dependencies:
     tmpl "1.0.5"
 
+mana-syringe@^0.3.0:
+  version "0.3.1"
+  resolved "https://registry.npm.alibaba-inc.com/mana-syringe/download/mana-syringe-0.3.1.tgz#e6c74b3320d92ad63baddba934a105e86a7c900d"
+  integrity sha512-27Gd/Yd9PAOP7JOYYLQmhZMxvt8sIbSqCHAamSVXbrWFe+KNkIE+78mloPfl/YSMPlooBO9abcB5j0ZozQ7fkg==
+  dependencies:
+    inversify "^5.0.1"
+
 map-age-cleaner@^0.1.3:
   version "0.1.3"
   resolved "https://registry.npm.alibaba-inc.com/map-age-cleaner/download/map-age-cleaner-0.1.3.tgz#7d583a7306434c055fe474b0f45078e6e1b4b92a"
@@ -15914,14 +15959,14 @@ mobx-react-lite@^3.3.0:
   resolved "https://registry.npmmirror.com/mobx-react-lite/-/mobx-react-lite-3.3.0.tgz#7174e807201943beff6f9d3701492314c9fc0db3"
   integrity sha512-U/kMSFtV/bNVgY01FuiGWpRkaQVHozBq5CEBZltFvPt4FcV111hEWkgwqVg9GPPZSEuEdV438PEz8mk8mKpYlA==
 
-mobx-react@7.3.0, mobx-react@^7.3.0:
+mobx-react@7.3.0:
   version "7.3.0"
   resolved "https://registry.npmmirror.com/mobx-react/-/mobx-react-7.3.0.tgz#a17dedb71b75dad2337e3f95eb753179f6cfe732"
   integrity sha512-RGEcwZokopqyJE5JPwXKB9FWMSqFM9NJVO2QPI+z6laJTJeBHqvPicjnKgY5mvihxTeXB1+72TnooqUePeGV1g==
   dependencies:
     mobx-react-lite "^3.3.0"
 
-mobx@6.4.1, mobx@^6.4.1:
+mobx@6.4.1:
   version "6.4.1"
   resolved "https://registry.npmmirror.com/mobx/-/mobx-6.4.1.tgz#c1d0eeb37ceb31bb2020a85f6bf856782d47fe60"
   integrity sha512-NFXx0uMbGBgsa0uxhH099L8cMuoRQWh01q6Sf0ZX/3hFU7svJ7yfTD+1LnLMa5wzY/b7gImAeMsR1p0wordDnA==
@@ -19914,7 +19959,7 @@ react-json-view@~1.20.0:
     react-lifecycles-compat "^3.0.4"
     react-textarea-autosize "^6.1.0"
 
-react-konva-utils@0.2.0, react-konva-utils@^0.2.0:
+react-konva-utils@0.2.0:
   version "0.2.0"
   resolved "https://registry.npmmirror.com/react-konva-utils/-/react-konva-utils-0.2.0.tgz#e79ed7776edd50f40c152d8d49d2693ff12e910b"
   integrity sha512-xjxhmuZnRJthInyb5wLwdgtO5gQnUvCpEutMoFwQtnwL4s4JFNLTq+fjlmCGhP+TxiJXiztzwinptL+wxP16pg==
@@ -19922,7 +19967,7 @@ react-konva-utils@0.2.0, react-konva-utils@^0.2.0:
     react-konva "^17.0.2-4"
     use-image "^1.0.7"
 
-react-konva@17.0.2-5, react-konva@^17.0.2-5:
+react-konva@17.0.2-5:
   version "17.0.2-5"
   resolved "https://registry.npmmirror.com/react-konva/-/react-konva-17.0.2-5.tgz#e70b0acf323402de0a540f27b300fbe7ed151849"
   integrity sha512-IyzdfqRDK8r1ulp/jbLPX18AuO+n5yNtL0+4T0QEUsgArRqIl/VRCG1imA5mYJBk0cBNC5+fWDHN+HWEW62ZEQ==
@@ -19953,7 +19998,7 @@ react-native-swipeout@^2.2.2:
     prop-types "^15.5.10"
     react-tween-state "^0.1.5"
 
-react-reconciler@~0.26.2:
+react-reconciler@^0.26.2, react-reconciler@~0.26.2:
   version "0.26.2"
   resolved "https://registry.npmmirror.com/react-reconciler/-/react-reconciler-0.26.2.tgz#bbad0e2d1309423f76cf3c3309ac6c96e05e9d91"
   integrity sha512-nK6kgY28HwrMNwDnMui3dvm3rCFjZrcGiuwLc5COUipBK5hWHLOxMJhSnSomirqWwjPBJKV1QcbkI0VJr7Gl1Q==
@@ -20354,6 +20399,11 @@ redux@^4.0.0, redux@^4.0.1:
   dependencies:
     "@babel/runtime" "^7.9.2"
 
+reflect-metadata@^0.1.13:
+  version "0.1.13"
+  resolved "https://registry.npm.alibaba-inc.com/reflect-metadata/download/reflect-metadata-0.1.13.tgz#67ae3ca57c972a2aa1642b10fe363fe32d49dc08"
+  integrity sha1-Z648pXyXKiqhZCsQ/jY/4y1J3Ag=
+
 regenerate-unicode-properties@9.0.0:
   version "9.0.0"
   resolved "https://registry.npm.alibaba-inc.com/regenerate-unicode-properties/download/regenerate-unicode-properties-9.0.0.tgz#54d09c7115e1f53dc2314a974b32c1c344efe326"
@@ -20537,6 +20587,11 @@ replace-ext@^1.0.0:
   version "1.0.1"
   resolved "https://registry.npm.alibaba-inc.com/replace-ext/download/replace-ext-1.0.1.tgz#2d6d996d04a15855d967443631dd5f77825b016a"
   integrity sha1-LW2ZbQShWFXZZ0Q2Md1fd4JbAWo=
+
+request-animation-frame-polyfill@^1.1.2:
+  version "1.1.2"
+  resolved "https://registry.npm.alibaba-inc.com/request-animation-frame-polyfill/download/request-animation-frame-polyfill-1.1.2.tgz#b5f98bd2a4baabbd385989acedb1b66c3e5b51c3"
+  integrity sha1-tfmL0qS6q704WYms7bG2bD5bUcM=
 
 request-promise-core@1.1.4:
   version "1.1.4"
@@ -22430,7 +22485,7 @@ tapable@^1.0.0:
   resolved "https://registry.npmmirror.com/tapable/-/tapable-1.1.3.tgz#a1fccc06b58db61fd7a45da2da44f5f3a3e67ba2"
   integrity sha512-4WK/bYZmj8xLr+HUCODHGF1ZFzsYffasLUgEiMBY4fgtltdO6B4WJtlSbPaDTLpYTcGVwM2qLnFTICEcNxs3kA==
 
-tapable@^2.0.0, tapable@^2.1.1, tapable@^2.2.0:
+tapable@^2.0.0, tapable@^2.1.1, tapable@^2.2.0, tapable@^2.2.1:
   version "2.2.1"
   resolved "https://registry.npmmirror.com/tapable/-/tapable-2.2.1.tgz#1967a73ef4060a82f12ab96af86d52fdb76eeca0"
   integrity sha512-GNzQvQTOIP6RyTfE2Qxb8ZVlNmw0n88vp1szwWRimP02mnTsx3Wtn5qRdqY9w2XduFNUgvOwhNnQsjwCp+kqaQ==

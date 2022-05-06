@@ -61,10 +61,6 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
     return cloneDeep(re);
   }
 
-  getStage() {
-    return this.context.refs.stageRef?.current;
-  }
-
   setData(data: any) {
     this.context;
     this.context.setCellData(this.props.data.id, data);
@@ -81,22 +77,19 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
       "dblclick",
       "click",
     ].forEach((eventName) => {
-      this.wrapperRef.current.on(
-        eventName,
-        (e: Konva.KonvaEventObject<MouseEvent>) => {
-          const instanceEventFn = this[`on${titleCase(eventName)}`];
-          instanceEventFn && instanceEventFn.call(this, e);
+      this.wrapperRef.current.on(eventName, (e: any) => {
+        const instanceEventFn = this[`on${titleCase(eventName)}`];
+        instanceEventFn && instanceEventFn.call(this, e);
 
-          this.context.sendEvent({
-            type: `cell:${eventName}`,
-            data: {
-              e,
-              cellData: this.props.data,
-              cell: this,
-            },
-          });
-        }
-      );
+        this.context.sendEvent({
+          type: `cell:${eventName}`,
+          data: {
+            e,
+            cellData: this.props.data,
+            cell: this,
+          },
+        });
+      });
     });
 
     this.onMount && this.onMount();
@@ -107,7 +100,6 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
   }
 
   isSelect() {
-    console.log("asd");
     return this.props.data.$state.isSelect;
   }
 

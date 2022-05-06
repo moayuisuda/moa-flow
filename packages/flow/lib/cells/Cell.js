@@ -26,10 +26,6 @@ class Cell extends React.Component {
         }
         return lodash.exports.cloneDeep(re);
     }
-    getStage() {
-        var _a;
-        return (_a = this.context.refs.stageRef) === null || _a === void 0 ? void 0 : _a.current;
-    }
     setData(data) {
         this.context;
         this.context.setCellData(this.props.data.id, data);
@@ -62,7 +58,6 @@ class Cell extends React.Component {
         return this.props.data;
     }
     isSelect() {
-        console.log("asd");
         return this.props.data.$state.isSelect;
     }
     render() {

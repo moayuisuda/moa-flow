@@ -1,7 +1,5 @@
 "use strict";
 
-import { Html } from 'react-konva-utils'
-
 import Flow from "./Flow";
 import Cell from "./cells/Cell";
 import Node from './cells/Node'
@@ -18,7 +16,7 @@ import Image from './components/Image';
 // import React from "react";
 import { NodeFlowState, FlowInfraEventType } from './types/common';
 
-import * as Graph from 'react-konva'
+import * as Graph from '@antv/react-g'
 import { autorun } from 'mobx';
 import { Vector2d } from 'konva/lib/types';
 import { CellDataType } from './cells/Cell';
@@ -46,7 +44,6 @@ export {
     Graph,
     // mountFlow,
     autorun,
-    Html,
 };
 
 export type { ModelType, FlowInfraEventType, Vector2d, CellDataType, EdgeDataType, PortDataType };

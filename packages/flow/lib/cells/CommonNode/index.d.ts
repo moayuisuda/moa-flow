@@ -18,11 +18,9 @@ declare class CommonNode extends Node<CommonNodeDataType, {}> {
         fields: {}[];
         label: string;
     };
-    static getBounds(cellData: any): {
+    static getBounds(): {
         width: number;
         height: number;
-        x: number;
-        y: any;
     };
     getStroke: () => {
         stroke: string;

@@ -25,7 +25,6 @@ declare abstract class Cell<D, S = {}, P = {}> extends React.Component<{
     constructor(props: any, context: Model);
     static regist(name: string, model: Model): void;
     static getMetaData(): {};
-    getStage(): import("konva/lib/Stage").Stage | null | undefined;
     setData(data: any): void;
     onMount: () => void;
     componentDidMount(): void;

@@ -1,4 +1,3 @@
-import { Html } from 'react-konva-utils';
 import Flow from "./Flow";
 import Cell from "./cells/Cell";
 import Node from './cells/Node';
@@ -10,11 +9,11 @@ import Model from "./Model";
 import RightClickPanel from './components/RightClickPanel/index';
 import Image from './components/Image';
 import { FlowInfraEventType } from './types/common';
-import * as Graph from 'react-konva';
+import * as Graph from '@antv/react-g';
 import { autorun } from 'mobx';
 import { Vector2d } from 'konva/lib/types';
 import { CellDataType } from './cells/Cell';
 import { EdgeDataType } from './cells/Edge';
 declare type ModelType = Model;
-export { Flow, Cell, Port, Node, Edge, Interactor, Image, RightClickPanel, Graph, autorun, Html, };
+export { Flow, Cell, Port, Node, Edge, Interactor, Image, RightClickPanel, Graph, autorun, };
 export type { ModelType, FlowInfraEventType, Vector2d, CellDataType, EdgeDataType, PortDataType };

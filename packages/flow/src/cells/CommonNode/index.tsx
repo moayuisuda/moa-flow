@@ -42,41 +42,10 @@ class CommonNode extends Node<CommonNodeDataType, {}> {
     label: "",
   };
 
-  static getBounds(cellData) {
-    const outPorts =
-      cellData.ports?.filter((portData) => portData.portType === "out") || [];
-
-    const inPorts =
-      cellData.ports?.filter((portData) => portData.portType === "in") || [];
-
-    const controlOutPorts =
-      cellData.ports?.filter(
-        (portData) => portData.portType === "control-out"
-      ) || [];
-
-    const controlInPorts =
-      cellData.ports?.filter(
-        (portData) => portData.portType === "control-in"
-      ) || [];
-
-    const height =
-      Math.max(
-        outPorts.length + controlOutPorts.length,
-        inPorts.length + controlInPorts.length
-      ) *
-        SINGLE_PORT_HEIGHT +
-      HEADER_HEIGHT +
-      HEADER_MARGIN +
-      BOTTOM_PADDING;
-    const width = WIDTH;
-    const x = cellData.x - PORT_RADIUS * 0.5;
-    const y = cellData.y;
-
+  static getBounds() {
     return {
-      width,
-      height,
-      x,
-      y,
+      width: 200,
+      height: 100,
     };
   }
 
@@ -93,22 +62,12 @@ class CommonNode extends Node<CommonNodeDataType, {}> {
 
   content() {
     const { color } = this.context;
-    const { getStroke } = this;
     const { label, ports } = this.props.data;
 
     const outPorts =
       ports?.filter((portData) => portData.portType === "out") || [];
 
-    const inPorts =
-      ports?.filter((portData) => portData.portType === "in") || [];
-
-    const controlOutPorts =
-      ports?.filter((portData) => portData.portType === "control-out") || [];
-
-    const controlInPorts =
-      ports?.filter((portData) => portData.portType === "control-in") || [];
-
-    const FULL_HEIGHT = CommonNode.getBounds(this.props.data).height;
+    const FULL_HEIGHT = CommonNode.getBounds().height;
 
     const { data } = this.props;
 
@@ -118,185 +77,41 @@ class CommonNode extends Node<CommonNodeDataType, {}> {
           width={WIDTH}
           height={FULL_HEIGHT}
           fill="white"
-          shadowColor="black"
+          shadowColor="rgba(0,0,0,0.1)"
           shadowBlur={10}
-          shadowOpacity={0.1}
-          cornerRadius={10}
+          radius={10}
         />
 
-        <Group>
-          <Rect
-            cornerRadius={[10, 10, 0, 0]}
-            width={WIDTH}
-            height={HEADER_HEIGHT}
-            fill={color.grey}
-          />
-          <Text
-            fontSize={14}
-            text={label}
-            height={HEADER_HEIGHT}
-            x={20}
-            verticalAlign="middle"
-          ></Text>
-          <Button
-            x={WIDTH}
-            width={20}
-            height={HEADER_HEIGHT}
-            text="＋"
-            onClick={(e) => {
-              const id = this.context.addCell("CommonNode", {
-                x: this.props.data.x + 300,
-                y: this.props.data.y,
-                label: "new node",
-                ports: [
-                  {
-                    label: "new",
-                    portType: "in",
-                  },
-                ],
-              });
-
-              // this.context.sendEvent({
-              //   type: "chore",
-              //   data: `cell [${id}] has been added`,
-              // });
-            }}
-          />
-        </Group>
-
-        {/* // border */}
-        <Rect
-          width={WIDTH}
-          height={FULL_HEIGHT}
-          {...getStroke()}
-          cornerRadius={10}
-        />
-
-        <Group y={PORTS_OFFSET}>
-          {/* in的port */}
-          {inPorts.map((portData, index) => (
-            <Group x={0} y={index * SINGLE_PORT_HEIGHT} key={portData.label}>
-              <Port
-                data={portData}
-                anchor={() => ({
-                  x: data.x,
-                  y: data.y + PORT_OFFSET + index * SINGLE_PORT_HEIGHT,
-                })}
-              >
-                <Circle
-                  stroke={color.primary}
-                  fill="white"
-                  radius={PORT_RADIUS}
-                  y={PORT_GRAPHIC_OFFSET}
-                ></Circle>
-              </Port>
-              <Text
-                x={PORT_RADIUS + PORT_TEXT_MARGIN}
-                height={SINGLE_PORT_HEIGHT}
-                verticalAlign="middle"
-                text={portData.label}
-              ></Text>
-            </Group>
-          ))}
-          {/* control-in的port */}
-          {controlInPorts.map((portData, index) => (
-            <Group
-              y={(inPorts.length + index) * SINGLE_PORT_HEIGHT}
-              key={portData.label}
+        {/* out的port */}
+        {outPorts.map((portData, index) => (
+          <Group
+            x={WIDTH - TEXT_WIDTH - PORT_TEXT_MARGIN - PORT_RADIUS}
+            y={index * SINGLE_PORT_HEIGHT}
+            key={portData.label}
+          >
+            <Text
+              text={portData.label}
+              textAlign="right"
+              // height={SINGLE_PORT_HEIGHT}
+              textBaseline="middle"
+            ></Text>
+            <Port
+              data={portData}
+              anchor={() => ({
+                x: data.x + WIDTH,
+                y: data.y + PORT_OFFSET + index * SINGLE_PORT_HEIGHT,
+              })}
             >
-              <Port
-                data={portData}
-                anchor={() => ({
-                  x: data.x,
-                  y:
-                    data.y +
-                    PORT_OFFSET +
-                    (inPorts.length + index) * SINGLE_PORT_HEIGHT,
-                })}
-              >
-                <Rect
-                  fill={color.primary}
-                  x={-PORT_RADIUS}
-                  y={PORT_GRAPHIC_OFFSET - PORT_RADIUS}
-                  width={PORT_RADIUS * 2}
-                  height={PORT_RADIUS * 2}
-                ></Rect>
-              </Port>
-              <Text
-                x={PORT_RADIUS + PORT_TEXT_MARGIN}
-                height={SINGLE_PORT_HEIGHT}
-                verticalAlign="middle"
-                text={portData.label}
-              ></Text>
-            </Group>
-          ))}
-
-          {/* out的port */}
-          {outPorts.map((portData, index) => (
-            <Group
-              x={WIDTH - TEXT_WIDTH - PORT_TEXT_MARGIN - PORT_RADIUS}
-              y={index * SINGLE_PORT_HEIGHT}
-              key={portData.label}
-            >
-              <Text
-                text={portData.label}
-                align="right"
-                height={SINGLE_PORT_HEIGHT}
-                verticalAlign="middle"
-                width={TEXT_WIDTH}
-              ></Text>
-              <Port
-                data={portData}
-                anchor={() => ({
-                  x: data.x + WIDTH,
-                  y: data.y + PORT_OFFSET + index * SINGLE_PORT_HEIGHT,
-                })}
-              >
-                <Circle
-                  stroke={color.primary}
-                  fill="white"
-                  x={TEXT_WIDTH + PORT_RADIUS + PORT_TEXT_MARGIN}
-                  y={PORT_GRAPHIC_OFFSET}
-                  radius={PORT_RADIUS}
-                ></Circle>
-              </Port>
-            </Group>
-          ))}
-          {/* control-out的port */}
-          {controlOutPorts.map((portData, index) => (
-            <Group
-              x={WIDTH - TEXT_WIDTH - PORT_RADIUS - PORT_TEXT_MARGIN}
-              y={(outPorts.length + index) * SINGLE_PORT_HEIGHT}
-              key={portData.label}
-            >
-              <Text
-                text={portData.label}
-                align="right"
-                height={SINGLE_PORT_HEIGHT}
-                verticalAlign="middle"
-                width={TEXT_WIDTH}
-              ></Text>
-              <Port
-                data={portData}
-                anchor={() => ({
-                  x: data.x + WIDTH,
-                  y:
-                    data.y +
-                    PORT_OFFSET +
-                    (outPorts.length + index) * SINGLE_PORT_HEIGHT,
-                })}
-              >
-                <Rect
-                  fill={color.primary}
-                  x={TEXT_WIDTH + PORT_TEXT_MARGIN}
-                  y={PORT_GRAPHIC_OFFSET - PORT_RADIUS}
-                  width={PORT_RADIUS * 2}
-                  height={PORT_RADIUS * 2}
-                ></Rect>
-              </Port>
-            </Group>
-          ))}
-        </Group>
+              <Circle
+                stroke={color.primary}
+                fill="white"
+                x={TEXT_WIDTH + PORT_RADIUS + PORT_TEXT_MARGIN}
+                y={PORT_GRAPHIC_OFFSET}
+                r={PORT_RADIUS}
+              ></Circle>
+            </Port>
+          </Group>
+        ))}
       </Interactor>
     );
   }
