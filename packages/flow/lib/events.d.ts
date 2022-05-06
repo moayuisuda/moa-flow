@@ -4,7 +4,7 @@ import { ModelType } from ".";
 export declare const initClearState: (model: ModelType, stage: Konva.Stage) => void;
 export declare const initLink: (model: ModelType, stage: Konva.Stage) => void;
 export declare const initSelect: (model: ModelType) => void;
-export declare const initDrag: (model: ModelType, stage: Konva.Stage, layers: {
+export declare const initDrag: (model: ModelType, stage: any, layers: {
     linesLayer: Konva.Layer;
     nodesLayer: Konva.Layer;
     topLayer: Konva.Layer;

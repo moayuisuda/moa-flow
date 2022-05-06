@@ -43,7 +43,6 @@ export declare class FlowModel {
                 x: number;
                 y: number;
             };
-            movedToTop: boolean;
         };
         isWheeling: boolean;
         select: {
@@ -58,6 +57,9 @@ export declare class FlowModel {
             };
         };
         link: {
+            $state: {
+                isSelect: boolean;
+            };
             edge: string | undefined;
             source: string | undefined;
             target: {

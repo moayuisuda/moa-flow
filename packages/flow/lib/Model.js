@@ -81,7 +81,6 @@ class FlowModel {
                     x: 0,
                     y: 0,
                 },
-                movedToTop: false,
             },
             isWheeling: false,
             select: {
@@ -90,6 +89,9 @@ class FlowModel {
                 end: { x: 0, y: 0 },
             },
             link: {
+                $state: {
+                    isSelect: false,
+                },
                 edge: undefined,
                 source: undefined,
                 target: {
@@ -129,14 +131,14 @@ class FlowModel {
             this.setSelectedCells(re);
         };
         this.clearLinkBuffer = () => {
-            this.buffer.link = {
+            Object.assign(this.buffer.link, {
                 edge: undefined,
                 source: undefined,
                 target: {
                     x: 0,
                     y: 0,
                 },
-            };
+            });
         };
         // 全局颜色，可以由用户自定义
         this.color = color;

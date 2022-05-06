@@ -126,17 +126,13 @@ let Flow = class Flow extends React.Component {
     componentDidMount() {
         const { flowModel: model } = this;
         const stage = this.stageRef.current;
-        const linesLayer = this.linesLayerRef.current;
-        const nodesLayer = this.nodesLayerRef.current;
-        const topLayer = this.topLayerRef.current;
+        this.linesLayerRef.current;
+        this.nodesLayerRef.current;
+        this.topLayerRef.current;
         const { zoom = true, multiSelect = false } = this.props;
         initClearState(model, stage);
         initLink(model, stage);
-        initDrag(model, stage, {
-            linesLayer,
-            nodesLayer,
-            topLayer,
-        });
+        initDrag(model, stage);
         initSelect(model);
         zoom &&
             initScale(model, stage);
@@ -152,12 +148,13 @@ let Flow = class Flow extends React.Component {
             } },
             React.createElement(FlowContext.Provider, { value: model },
                 getRightClickPanel(this.props.children),
-                React.createElement(Canvas, { renderer: renderer, className: STAGE_CLASS_NAME, ref: this.stageRef, scale: { x: model.canvasData.scale, y: model.canvasData.scale }, x: model.x(), y: model.y(), width: model.width(), height: model.height() },
-                    React.createElement(FlowContext.Provider, { value: model },
-                        this.props.grid && React.createElement(Grid, null),
-                        React.createElement(Nodes, { nodesLayerRef: this.nodesLayerRef, model: model }),
-                        React.createElement(Edges, { linesLayerRef: this.linesLayerRef, model: model }),
-                        React.createElement(InteractTop, { topLayerRef: this.topLayerRef, model: model }))))));
+                React.createElement(Canvas, { renderer: renderer, className: STAGE_CLASS_NAME, ref: this.stageRef, width: model.width(), height: model.height() },
+                    React.createElement(Group, { scale: model.canvasData.scale, x: model.x(), y: model.y() },
+                        React.createElement(FlowContext.Provider, { value: model },
+                            this.props.grid && React.createElement(Grid, null),
+                            React.createElement(Nodes, { nodesLayerRef: this.nodesLayerRef, model: model }),
+                            React.createElement(Edges, { linesLayerRef: this.linesLayerRef, model: model }),
+                            React.createElement(InteractTop, { topLayerRef: this.topLayerRef, model: model })))))));
     }
 };
 Flow = __decorate([

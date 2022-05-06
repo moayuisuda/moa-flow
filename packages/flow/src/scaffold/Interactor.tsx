@@ -57,8 +57,7 @@ class Interactor extends React.Component<InteractorType> {
               context.setSelectedCells([id]);
 
             // drag
-            if (e.evt.button === EVT_LEFTCLICK) {
-              // @TODO 和drag的默认行为有歧义
+            if (e.button === EVT_LEFTCLICK) {
               if (topOnFocus)
                 this.context.moveTo(
                   this.props.id,
@@ -67,10 +66,8 @@ class Interactor extends React.Component<InteractorType> {
 
               select.isSelecting = true;
 
-              drag.start.x = e.evt.x;
-              drag.start.y = e.evt.y;
-
-              drag.movedToTop = false;
+              drag.start.x = e.canvas.x;
+              drag.start.y = e.canvas.y;
             }
           }
         }}

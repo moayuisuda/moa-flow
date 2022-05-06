@@ -17,13 +17,13 @@ class RightClickPanel extends React.Component<
 
   initStageEvent = () => {
     this.context.refs.stageRef.current.on("contextmenu", (e) => {
-      e.evt.preventDefault();
+      e.preventDefault();
       this.context.buffer.rightClickPanel.visible = true;
 
       this.setState({
         pos: {
-          x: e.evt.clientX,
-          y: e.evt.clientY,
+          x: e.clientX,
+          y: e.clientY,
         },
       });
     });

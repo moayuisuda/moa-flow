@@ -18,14 +18,12 @@ let Interactor = class Interactor extends React.Component {
                     if (!selectCells.includes(this.props.id))
                         context.setSelectedCells([id]);
                     // drag
-                    if (e.evt.button === EVT_LEFTCLICK) {
-                        // @TODO 和drag的默认行为有歧义
+                    if (e.button === EVT_LEFTCLICK) {
                         if (topOnFocus)
                             this.context.moveTo(this.props.id, this.context.canvasData.cells.length - 1);
                         select.isSelecting = true;
-                        drag.start.x = e.evt.x;
-                        drag.start.y = e.evt.y;
-                        drag.movedToTop = false;
+                        drag.start.x = e.canvas.x;
+                        drag.start.y = e.canvas.y;
                     }
                 }
             } }, others), this.props.children));

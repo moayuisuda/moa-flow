@@ -270,20 +270,19 @@ class Flow extends React.Component<FlowProps, {}> {
             renderer={renderer}
             className={STAGE_CLASS_NAME}
             ref={this.stageRef}
-            scale={{ x: model.canvasData.scale, y: model.canvasData.scale }}
-            x={model.x()}
-            y={model.y()}
             width={model.width()}
             height={model.height()}
           >
-            {/* Provider需要在Stage内部，issue https://github.com/konvajs/react-konva/issues/188 */}
-            <FlowContext.Provider value={model}>
-              {this.props.grid && <Grid />}
-              {/* 先注册节点，后注册线，线的一些计算属性需要节点的map */}
-              <Nodes nodesLayerRef={this.nodesLayerRef} model={model} />
-              <Edges linesLayerRef={this.linesLayerRef} model={model} />
-              <InteractTop topLayerRef={this.topLayerRef} model={model} />
-            </FlowContext.Provider>
+            <Group scale={model.canvasData.scale} x={model.x()} y={model.y()}>
+              {/* Provider需要在Stage内部，issue https://github.com/konvajs/react-konva/issues/188 */}
+              <FlowContext.Provider value={model}>
+                {this.props.grid && <Grid />}
+                {/* 先注册节点，后注册线，线的一些计算属性需要节点的map */}
+                <Nodes nodesLayerRef={this.nodesLayerRef} model={model} />
+                <Edges linesLayerRef={this.linesLayerRef} model={model} />
+                <InteractTop topLayerRef={this.topLayerRef} model={model} />
+              </FlowContext.Provider>
+            </Group>
           </Canvas>
         </FlowContext.Provider>
       </div>
