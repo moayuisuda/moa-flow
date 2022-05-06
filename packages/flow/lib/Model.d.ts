@@ -58,6 +58,9 @@ export declare class FlowModel {
             };
         };
         link: {
+            $state: {
+                isSelect: boolean;
+            };
             edge: string | undefined;
             source: string | undefined;
             target: {

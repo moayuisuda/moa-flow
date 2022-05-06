@@ -135,6 +135,9 @@ export class FlowModel {
       end: { x: 0, y: 0 },
     },
     link: {
+      $state: {
+        isSelect: false,
+      },
       edge: undefined as undefined | string,
       source: undefined as undefined | string,
       target: {
@@ -193,14 +196,14 @@ export class FlowModel {
   };
 
   @action clearLinkBuffer = () => {
-    this.buffer.link = {
+    Object.assign(this.buffer.link, {
       edge: undefined,
       source: undefined,
       target: {
         x: 0,
         y: 0,
       },
-    };
+    });
   };
 
   // 全局颜色，可以由用户自定义
@@ -226,7 +229,6 @@ export class FlowModel {
   // 选中的cell
   @observable selectCells: string[] = [];
   @action setSelectedCells = (ids: string[], ifReplace = true) => {
-    // @TODO select感觉只能放在私有属性，否则每次更新要diff全部的节点
     if (ifReplace) {
       this.selectCells = ids;
     } else {
@@ -424,6 +426,8 @@ export class FlowModel {
       source,
       target,
     });
+
+    this.setSelectedCells([edgeId]);
 
     if (sourceCellData.edges) {
       sourceCellData.edges.push(edgeId);

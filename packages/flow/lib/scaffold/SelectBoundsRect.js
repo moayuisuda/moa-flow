@@ -1,4 +1,4 @@
-import { __decorate } from '../packages/flow/node_modules/_tslib@2.4.0@tslib/tslib.es6.js';
+import { __decorate } from '../node_modules/tslib/tslib.es6.js';
 import { Rect } from 'react-konva';
 import React from 'react';
 import { FlowContext } from '../Context.js';

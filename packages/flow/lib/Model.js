@@ -1,4 +1,4 @@
-import { __decorate } from './packages/flow/node_modules/_tslib@2.4.0@tslib/tslib.es6.js';
+import { __decorate } from './node_modules/tslib/tslib.es6.js';
 import { observable, action, makeObservable } from 'mobx';
 import { remove, isRectsInterSect, findIndex, arrayMove } from './utils/util.js';
 import { color } from './theme/style.js';
@@ -90,6 +90,9 @@ class FlowModel {
                 end: { x: 0, y: 0 },
             },
             link: {
+                $state: {
+                    isSelect: false,
+                },
                 edge: undefined,
                 source: undefined,
                 target: {
@@ -129,14 +132,14 @@ class FlowModel {
             this.setSelectedCells(re);
         };
         this.clearLinkBuffer = () => {
-            this.buffer.link = {
+            Object.assign(this.buffer.link, {
                 edge: undefined,
                 source: undefined,
                 target: {
                     x: 0,
                     y: 0,
                 },
-            };
+            });
         };
         // 全局颜色，可以由用户自定义
         this.color = color;
@@ -157,7 +160,6 @@ class FlowModel {
         // 选中的cell
         this.selectCells = [];
         this.setSelectedCells = (ids, ifReplace = true) => {
-            // @TODO select感觉只能放在私有属性，否则每次更新要diff全部的节点
             if (ifReplace) {
                 this.selectCells = ids;
             }
@@ -308,6 +310,7 @@ class FlowModel {
                 source,
                 target,
             });
+            this.setSelectedCells([edgeId]);
             if (sourceCellData.edges) {
                 sourceCellData.edges.push(edgeId);
             }

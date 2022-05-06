@@ -1,4 +1,4 @@
-import { __decorate } from '../../packages/flow/node_modules/_tslib@2.4.0@tslib/tslib.es6.js';
+import { __decorate } from '../../node_modules/tslib/tslib.es6.js';
 import { observer } from 'mobx-react';
 import styles from './style.less.js';
 import React from 'react';

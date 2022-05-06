@@ -109,7 +109,6 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
   }
 
   isSelect() {
-    console.log("asd");
     return this.props.data.$state.isSelect;
   }
 

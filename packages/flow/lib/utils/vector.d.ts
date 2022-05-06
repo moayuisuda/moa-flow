@@ -28,4 +28,7 @@ declare function generateConnectionPoints({ entryPoint, entryDirection, entryExt
     type: string;
 })[];
 export default generateConnectionPoints;
-export declare const lineCenter: (points: [number, number][], intercept?: number) => number[] | undefined;
+export declare const lineCenter: (points: [
+    number,
+    number
+][], intercept?: number) => number[] | undefined;

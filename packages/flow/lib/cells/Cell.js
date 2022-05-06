@@ -62,7 +62,6 @@ class Cell extends React.Component {
         return this.props.data;
     }
     isSelect() {
-        console.log("asd");
         return this.props.data.$state.isSelect;
     }
     render() {
