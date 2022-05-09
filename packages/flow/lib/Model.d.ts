@@ -2,6 +2,7 @@ import React from "react";
 import { CellDataType } from "./cells/Cell";
 import Konva from "konva";
 import { CanvasDataType, AllCellDataType } from "./types/common";
+import { InteractivePointerEvent } from "@antv/g";
 declare type EventSender = (data: any) => void;
 export declare class FlowModel {
     extraContext: {};
@@ -59,6 +60,7 @@ export declare class FlowModel {
         link: {
             $state: {
                 isSelect: boolean;
+                isLinking: boolean;
             };
             edge: string | undefined;
             source: string | undefined;
@@ -111,7 +113,7 @@ export declare class FlowModel {
     };
     createCellData: (component: string, initOptions?: any) => any;
     addCell: (componentName: string, initOptions: any) => any;
-    setLinkingPosition: (e: any) => void;
+    setLinkingPosition: (e: InteractivePointerEvent) => void;
     link: (source: string, target: string) => void;
     scale: (scale?: number | undefined) => number;
     x(x?: number): number;
@@ -121,5 +123,9 @@ export declare class FlowModel {
     getCellData: (id: string) => CellDataType | undefined;
     getCellInstance: (id: string) => any;
     getCellsData: () => any[];
+    getStageCursor: (e: InteractivePointerEvent) => {
+        x: number;
+        y: number;
+    };
 }
 export default FlowModel;

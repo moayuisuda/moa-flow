@@ -89,8 +89,10 @@ class FlowModel {
                 end: { x: 0, y: 0 },
             },
             link: {
+                // 只是为了统一渲染，加$state
                 $state: {
                     isSelect: false,
+                    isLinking: true,
                 },
                 edge: undefined,
                 source: undefined,
@@ -189,6 +191,7 @@ class FlowModel {
         this.insertRuntimeState = (cellData) => {
             cellData.$state = {
                 isSelect: false,
+                isLinking: false,
             };
         };
         this.setCanvasData = (canvasData) => {
@@ -298,7 +301,7 @@ class FlowModel {
             return newCellData.id;
         };
         this.setLinkingPosition = (e) => {
-            const cursorPos = e.canvas;
+            const cursorPos = this.getStageCursor(e);
             this.buffer.link.target.x = cursorPos.x;
             this.buffer.link.target.y = cursorPos.y;
         };
@@ -347,6 +350,12 @@ class FlowModel {
         };
         this.getCellsData = () => {
             return this.canvasData.cells;
+        };
+        this.getStageCursor = (e) => {
+            return {
+                x: (e.canvas.x - this.x()) / this.scale(),
+                y: (e.canvas.y - this.y()) / this.scale(),
+            };
         };
         makeObservable(this);
         if (eventSender)

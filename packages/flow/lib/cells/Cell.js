@@ -62,7 +62,6 @@ class Cell extends React.Component {
     }
     render() {
         return (React.createElement(Group, { ref: (ref) => {
-                console.log("getRef", ref);
                 this.wrapperRef.current = ref;
             } }, this.content()));
     }

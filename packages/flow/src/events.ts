@@ -1,15 +1,15 @@
 import Konva from "konva";
-import { Stage } from "konva/lib/Stage";
 import { ModelType } from ".";
 import { autorun } from "mobx"
-import { debounce, without } from 'lodash';
+import { without } from 'lodash';
 import { NodeDataType } from "./cells/Node";
 import { CellDataType } from './cells/Cell';
-import { STAGE_CLASS_NAME, EVT_LEFTCLICK, EVT_RIGHTCLICK } from './constants';
+import { EVT_LEFTCLICK, EVT_RIGHTCLICK } from './constants';
 import { Vector2d } from "konva/lib/types";
+import { InteractivePointerEvent, Canvas } from '@antv/g';
 
-export const initClearState = (model: ModelType, stage: Konva.Stage) => {
-    stage.on('mousedown', (e) => {
+export const initClearState = (model: ModelType, stage: Canvas) => {
+    stage.on('mousedown', (e: InteractivePointerEvent) => {
         if (e.button === EVT_LEFTCLICK) {
             model.buffer.rightClickPanel.visible = false
         }
@@ -18,12 +18,12 @@ export const initClearState = (model: ModelType, stage: Konva.Stage) => {
     })
 }
 
-export const initLink = (model: ModelType, stage: Konva.Stage) => {
-    stage.on('mouseup', () => {
+export const initLink = (model: ModelType, stage: Canvas) => {
+    stage.on('mouseup', (e) => {
         model.clearLinkBuffer();
     })
 
-    stage.on('mousemove', e => {
+    stage.on('mousemove', (e: InteractivePointerEvent) => {
         const {
             buffer: { link },
         } = model;
@@ -56,7 +56,7 @@ export const initSelect = (model: ModelType) => {
     })
 }
 
-export const initDrag = (model: ModelType, stage: any, layers: {
+export const initDrag = (model: ModelType, stage: Canvas, layers: {
     linesLayer: Konva.Layer,
     nodesLayer: Konva.Layer,
     topLayer: Konva.Layer
@@ -72,7 +72,7 @@ export const initDrag = (model: ModelType, stage: any, layers: {
     const { drag, select } = model.buffer
 
     // 移动整个stage
-    stage.on('mousemove', e => {
+    stage.on('mousemove', (e: InteractivePointerEvent) => {
         const movement = {
             x: (e.canvas.x - drag.start.x),
             y: (e.canvas.y - drag.start.y)
@@ -93,11 +93,6 @@ export const initDrag = (model: ModelType, stage: any, layers: {
                 const cellData = model.getCellData(id) as NodeDataType & CellDataType
 
                 if (cellData.cellType === 'node') {
-                    // if (!drag.movedToTop) {
-                    //     zIndexCache[cellData.id] = konvaNode.zIndex()
-                    //     konvaNode.moveTo(topLayer)
-                    // }
-
                     model.setCellData(cellData.id, {
                         x: cellData.x + movement.x / model.scale(),
                         y: cellData.y + movement.y / model.scale(),
@@ -129,13 +124,10 @@ export const initDrag = (model: ModelType, stage: any, layers: {
     })
 }
 
-export const initScale = (model: ModelType, stage: Konva.Stage, layers: {
-    linesLayer: Konva.Layer,
-    nodesLayer: Konva.Layer
-}) => {
+export const initScale = (model: ModelType, stage: Canvas) => {
     let scaleBy = 1.02;
 
-    stage.on('wheel', (e) => {
+    stage.on('wheel', (e: InteractivePointerEvent) => {
 
         // stop default scrolling
         e.preventDefault();
@@ -172,16 +164,12 @@ export const initScale = (model: ModelType, stage: Konva.Stage, layers: {
     });
 }
 
-export const initMultiSelect = (model: ModelType, stage: Konva.Stage, layers: {
-    linesLayer: Konva.Layer,
-    nodesLayer: Konva.Layer,
-    topLayer: Konva.Layer
-}) => {
+export const initMultiSelect = (model: ModelType, stage: Canvas) => {
 
     if (model.hotKey['Space']) return
 
     // 设置多选矩形框起始点
-    stage.on('mousedown', (e: any) => {
+    stage.on('mousedown', (e: InteractivePointerEvent) => {
         if (model.buffer.select.isSelecting) return
         if (!model.hotKey["Space"] && e.button === EVT_LEFTCLICK) {
             const pos = e.canvas;
@@ -199,7 +187,7 @@ export const initMultiSelect = (model: ModelType, stage: Konva.Stage, layers: {
     })
 
     // 矩形多选框 鼠标up时
-    stage.on('mouseup', (e: any) => {
+    stage.on('mouseup', (e: InteractivePointerEvent) => {
         if (model.buffer.select.isSelecting) return
         const pos = e.canvas
         model.setMultiSelect({
@@ -215,7 +203,7 @@ export const initMultiSelect = (model: ModelType, stage: Konva.Stage, layers: {
     })
 
     // 动态设置多选矩形框大小
-    stage.on('mousemove', (e: any) => {
+    stage.on('mousemove', (e: InteractivePointerEvent) => {
         if (model.buffer.select.isSelecting) return
         if (!model.hotKey["Space"] && model.hotKey["LeftMouseDown"]) {
             const pos = e.canvas;
@@ -229,7 +217,7 @@ export const initMultiSelect = (model: ModelType, stage: Konva.Stage, layers: {
     })
 }
 
-export const initHotKeys = (model: ModelType, stage: Konva.Stage) => {
+export const initHotKeys = (model: ModelType, stage: Canvas) => {
     stage.on('mousedown', e => {
         e.preventDefault()
 

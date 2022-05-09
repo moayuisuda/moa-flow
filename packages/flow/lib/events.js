@@ -13,10 +13,10 @@ const initClearState = (model, stage) => {
     });
 };
 const initLink = (model, stage) => {
-    stage.on('mouseup', () => {
+    stage.on('mouseup', (e) => {
         model.clearLinkBuffer();
     });
-    stage.on('mousemove', e => {
+    stage.on('mousemove', (e) => {
         const { buffer: { link }, } = model;
         if (!link.source)
             return;
@@ -45,7 +45,7 @@ const initSelect = (model) => {
 const initDrag = (model, stage, layers) => {
     const { drag, select } = model.buffer;
     // 移动整个stage
-    stage.on('mousemove', e => {
+    stage.on('mousemove', (e) => {
         const movement = {
             x: (e.canvas.x - drag.start.x),
             y: (e.canvas.y - drag.start.y)
@@ -59,10 +59,6 @@ const initDrag = (model, stage, layers) => {
             model.selectCells.forEach(id => {
                 const cellData = model.getCellData(id);
                 if (cellData.cellType === 'node') {
-                    // if (!drag.movedToTop) {
-                    //     zIndexCache[cellData.id] = konvaNode.zIndex()
-                    //     konvaNode.moveTo(topLayer)
-                    // }
                     model.setCellData(cellData.id, {
                         x: cellData.x + movement.x / model.scale(),
                         y: cellData.y + movement.y / model.scale(),
@@ -89,7 +85,7 @@ const initDrag = (model, stage, layers) => {
         }
     });
 };
-const initScale = (model, stage, layers) => {
+const initScale = (model, stage) => {
     let scaleBy = 1.02;
     stage.on('wheel', (e) => {
         // stop default scrolling
@@ -116,7 +112,7 @@ const initScale = (model, stage, layers) => {
         // debounceClearCache()
     });
 };
-const initMultiSelect = (model, stage, layers) => {
+const initMultiSelect = (model, stage) => {
     if (model.hotKey['Space'])
         return;
     // 设置多选矩形框起始点

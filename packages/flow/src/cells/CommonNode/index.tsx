@@ -86,7 +86,15 @@ class CommonNode extends Node<CommonNodeDataType, {}> {
 
         {/* out的port */}
         {inPorts.map((portData, index) => (
-          <Port y={70} data={portData} key={portData.label}>
+          <Port
+            y={70}
+            data={portData}
+            key={portData.label}
+            anchor={{
+              x: data.x,
+              y: data.y + 70,
+            }}
+          >
             <Circle
               lineWidth={4}
               stroke={color.primary}
@@ -98,7 +106,16 @@ class CommonNode extends Node<CommonNodeDataType, {}> {
 
         {/* out的port */}
         {outPorts.map((portData, index) => (
-          <Port x={width} y={70} data={portData} key={portData.label}>
+          <Port
+            x={width}
+            y={70}
+            data={portData}
+            key={portData.label}
+            anchor={{
+              x: data.x + width,
+              y: data.y + 70,
+            }}
+          >
             <Circle
               lineWidth={4}
               stroke={color.primary}

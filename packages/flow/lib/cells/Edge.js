@@ -1,31 +1,11 @@
 import Cell from './Cell.js';
-import { Text, Group, Polyline } from '@antv/react-g';
+import { Group, Text, Polyline } from '@antv/react-g';
+import Interactor from '../scaffold/Interacotr.js';
 import React from 'react';
 import { isVector2d } from '../utils/util.js';
 import { titleCase } from '../utils/string.js';
 import { lineCenter } from '../utils/vector.js';
 
-class ErrorBoundary extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = { hasError: false };
-    }
-    static getDerivedStateFromError(error) {
-        // Update state so the next render will show the fallback UI.
-        return { hasError: true };
-    }
-    componentDidCatch(error, errorInfo) {
-        // You can also log the error to an error reporting service
-        console.log(error, errorInfo);
-    }
-    render() {
-        if (this.state.hasError) {
-            // You can render any custom fallback UI
-            return React.createElement(Text, { text: "Something went wrong." });
-        }
-        return this.props.children;
-    }
-}
 const TEXT_HEIGHT = 16;
 const LABEL_PADDING = 4;
 class Edge extends Cell {
@@ -56,17 +36,13 @@ class Edge extends Cell {
                 sourceAnchor = data.source;
             else {
                 const sourceInstance = this.context.cellsMap.get(data.source);
-                sourceAnchor =
-                    (sourceInstance.props.anchor && sourceInstance.props.anchor()) ||
-                        sourceInstance.anchor();
+                sourceAnchor = sourceInstance.anchor();
             }
             if (isVector2d(data.target))
                 targetAnchor = data.target;
             else {
                 const targetInstance = this.context.cellsMap.get(data.target);
-                targetAnchor =
-                    (targetInstance.props.anchor && targetInstance.props.anchor()) ||
-                        targetInstance.anchor();
+                targetAnchor = targetInstance.anchor();
             }
             return {
                 source: sourceAnchor,
@@ -181,24 +157,24 @@ class Edge extends Cell {
         return label;
     }
     isLinking() {
-        return this.context.buffer.link.edge === this.props.data.id;
+        return this.props.data.$state.isLinking;
     }
     edgeRender({ points, isLinking, }) {
         const { color } = this.context;
-        const lineProps = Object.assign({ lineCap: "round", lineJoin: "round", lineWidth: 2.5, points: points, stroke: color.deepGrey, fill: color.deepGrey }, this.lineStyle({ isSelect: this.isSelect() }));
-        console.log(points);
+        const lineProps = Object.assign({ lineCap: "round", lineJoin: "round", lineWidth: 2.5, points: points, stroke: color.deepGrey, fill: color.deepGrey, dash: isLinking ? [10, 10] : undefined }, this.lineStyle({ isSelect: this.isSelect() }));
         return (React.createElement(Group, null,
             this.arrow ? (
             // <Arrow {...lineProps} pointerWidth={10} />
-            React.createElement(React.Fragment, null)) : (React.createElement(Polyline, Object.assign({}, lineProps))),
+            React.createElement(Text, { text: "asdasd" })) : (React.createElement(Polyline, Object.assign({}, lineProps))),
             React.createElement(Polyline, { stroke: "transparent", points: points, lineWidth: 20, lineCap: "round", lineJoin: "round" })));
     }
     content() {
-        console.log("render edge content");
-        return (React.createElement(ErrorBoundary, null, this.edgeRender({
-            points: this.getPoints(),
-            isLinking: this.isLinking(),
-        })));
+        return (React.createElement(Interactor, { id: this.props.data.id, draggable: false },
+            this.edgeRender({
+                points: this.getPoints(),
+                isLinking: this.isLinking(),
+            }),
+            this.lineExtra && this.lineExtra()));
     }
 }
 Edge.metaData = {

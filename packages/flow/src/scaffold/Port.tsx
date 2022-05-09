@@ -1,10 +1,11 @@
 import { Group } from "@antv/react-g";
+import { InteractivePointerEvent } from "@antv/g";
 import React from "react";
 
 import Cell from "../cells/Cell";
 import { CellDataType } from "../cells/Cell";
-import { KonvaEventObject } from "konva/lib/Node";
 import FlowModel from "../Model";
+import { isFunction } from "lodash";
 
 export type PortDataType = {
   edges?: string[];
@@ -17,7 +18,7 @@ type PortPropsType = {
   link?: (source: any, target: any) => boolean;
   x?: number;
   y?: number;
-  anchor?: { x: number; y: number } | (() => { x: number; y: number });
+  anchor: { x: number; y: number } | (() => { x: number; y: number });
 };
 
 class Port extends Cell<PortDataType, {}, PortPropsType> {
@@ -35,25 +36,13 @@ class Port extends Cell<PortDataType, {}, PortPropsType> {
     super(props, context);
   }
 
-  // 暂时废弃
   anchor() {
-    // @TODO 下次强制刷新
-    console.log("wrapperRef", this.wrapperRef);
-    const konvaNode = this.wrapperRef.current;
-    if (!konvaNode) return { x: 0, y: 0 };
-
-    const rect = konvaNode.getBBox();
-
-    // 通过变换矩阵将坐标还原为标准坐标
-    // const t = konvaNode.getAbsoluteTransform();
-
-    return {
-      x: rect.left + rect.width / 2,
-      y: rect.top + rect.height / 2,
-    };
+    return isFunction(this.props.anchor)
+      ? this.props.anchor()
+      : this.props.anchor;
   }
 
-  onLinkStart(e: any) {
+  onLinkStart(e: InteractivePointerEvent) {
     e.stopPropagation();
 
     const {
@@ -73,7 +62,7 @@ class Port extends Cell<PortDataType, {}, PortPropsType> {
     link.target = this.anchor();
   }
 
-  onLinkEnd(e: any) {
+  onLinkEnd(e: InteractivePointerEvent) {
     e.stopPropagation();
 
     const {
@@ -114,9 +103,10 @@ class Port extends Cell<PortDataType, {}, PortPropsType> {
   content() {
     return (
       <Group
-        onMouseDown={(e) => this.onLinkStart(e)}
-        onMouseUp={(e) => this.onLinkEnd(e)}
-        {...this.props}
+        onMousedown={(e: InteractivePointerEvent) => this.onLinkStart(e)}
+        onMouseup={(e: InteractivePointerEvent) => this.onLinkEnd(e)}
+        x={this.props.x || 0}
+        y={this.props.y || 0}
       >
         {this.props.children}
       </Group>

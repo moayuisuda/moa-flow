@@ -11,6 +11,7 @@ import { NodeDataType } from "./cells/Node";
 import Konva from "konva";
 import { CanvasDataType, AllCellDataType } from "./types/common";
 import Cell from "./cells/Cell";
+import { InteractivePointerEvent } from "@antv/g";
 
 type EventSender = (data: any) => void;
 export class FlowModel {
@@ -134,8 +135,10 @@ export class FlowModel {
       end: { x: 0, y: 0 },
     },
     link: {
+      // 只是为了统一渲染，加$state
       $state: {
         isSelect: false,
+        isLinking: true,
       },
       edge: undefined as undefined | string,
       source: undefined as undefined | string,
@@ -262,6 +265,7 @@ export class FlowModel {
   insertRuntimeState = (cellData: CellDataType) => {
     cellData.$state = {
       isSelect: false,
+      isLinking: false,
     };
   };
 
@@ -322,7 +326,10 @@ export class FlowModel {
             ) as PortDataType;
 
             re.push(
-              ...without(union([sourcePort.host], [targetPort.host]), id)
+              ...without(
+                union([sourcePort.host as string], [targetPort.host as string]),
+                id
+              )
             );
           });
         }
@@ -410,8 +417,8 @@ export class FlowModel {
     return newCellData.id;
   };
 
-  @action setLinkingPosition = (e) => {
-    const cursorPos = e.canvas;
+  @action setLinkingPosition = (e: InteractivePointerEvent) => {
+    const cursorPos = this.getStageCursor(e);
 
     this.buffer.link.target.x = cursorPos.x;
     this.buffer.link.target.y = cursorPos.y;
@@ -493,6 +500,13 @@ export class FlowModel {
 
   getCellsData = () => {
     return this.canvasData.cells;
+  };
+
+  getStageCursor = (e: InteractivePointerEvent) => {
+    return {
+      x: (e.canvas.x - this.x()) / this.scale(),
+      y: (e.canvas.y - this.y()) / this.scale(),
+    };
   };
 }
 

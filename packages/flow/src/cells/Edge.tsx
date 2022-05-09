@@ -1,42 +1,18 @@
 import Cell from "./Cell";
 import { Polyline, Group, Text } from "@antv/react-g";
-import Interactor from "../scaffold/Interactor";
+import * as G from "@antv/g";
+import Interactor from "../scaffold/Interacotr";
 import { CellDataType } from "./Cell";
 import { PortDataType } from "../scaffold/Port";
 import React from "react";
-import Konva from "konva";
 import { NodeDataType } from "./Node";
 import { isVector2d } from "../utils/util";
-import { Vector2d } from "konva/lib/types";
 import FlowModel from "../Model";
 import { titleCase } from "utils/string";
 import { lineCenter } from "utils/vector";
-
-class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError(error) {
-    // Update state so the next render will show the fallback UI.
-    return { hasError: true };
-  }
-
-  componentDidCatch(error, errorInfo) {
-    // You can also log the error to an error reporting service
-    console.log(error, errorInfo);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      // You can render any custom fallback UI
-      return <Text text="Something went wrong." />;
-    }
-
-    return this.props.children;
-  }
-}
+import { isFunction } from "lodash";
+import ErrorBoundary from "../ErrorBoundary";
+import { Vector2d } from "../types/common";
 
 export type EdgeDataType = {
   source: string | Vector2d;
@@ -50,7 +26,7 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
   static metaData: any = {
     cellType: "edge",
   };
-  labelRef: React.RefObject<Konva.Group>;
+  labelRef: React.RefObject<G.Group>;
 
   protected bazier = true;
   protected arrow = false;
@@ -105,16 +81,12 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
     if (isVector2d(data.source)) sourceAnchor = data.source;
     else {
       const sourceInstance = this.context.cellsMap.get(data.source as string);
-      sourceAnchor =
-        (sourceInstance.props.anchor && sourceInstance.props.anchor()) ||
-        sourceInstance.anchor();
+      sourceAnchor = sourceInstance.anchor();
     }
     if (isVector2d(data.target)) targetAnchor = data.target;
     else {
       const targetInstance = this.context.cellsMap.get(data.target as string);
-      targetAnchor =
-        (targetInstance.props.anchor && targetInstance.props.anchor()) ||
-        targetInstance.anchor();
+      targetAnchor = targetInstance.anchor();
     }
 
     return {
@@ -162,7 +134,7 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
   }
 
   // 这个方法暴露出去，可自定义路由
-  protected route(vectors: Konva.Vector2d[]) {
+  protected route(vectors: Vector2d[]) {
     return vectors;
   }
 
@@ -258,7 +230,7 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
   }
 
   isLinking() {
-    return this.context.buffer.link.edge === this.props.data.id;
+    return this.props.data.$state.isLinking;
   }
 
   lineExtra: () => JSX.Element;
@@ -279,16 +251,15 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
       points: points as [number, number][],
       stroke: color.deepGrey,
       fill: color.deepGrey,
-      // dash: isLinking ? [10, 10] : undefined,
+      dash: isLinking ? [10, 10] : undefined,
       ...this.lineStyle({ isSelect: this.isSelect() }),
     } as any;
 
-    console.log(points);
     return (
       <Group>
         {this.arrow ? (
           // <Arrow {...lineProps} pointerWidth={10} />
-          <></>
+          <Text text="asdasd" />
         ) : (
           <Polyline {...lineProps} />
         )}
@@ -304,18 +275,16 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
   }
 
   content() {
-    console.log("render edge content");
     return (
-      <ErrorBoundary>
-        {/* <Interactor id={this.props.data.id} draggable={false}> */}
+      <Interactor id={this.props.data.id} draggable={false}>
         {this.edgeRender({
           points: this.getPoints(),
           isLinking: this.isLinking(),
         })}
-        {/* {this.labelRender()}
-          {this.lineExtra && this.lineExtra()} */}
-        {/* </Interactor> */}
-      </ErrorBoundary>
+        {/* TODO */}
+        {/* {this.labelRender()} */}
+        {this.lineExtra && this.lineExtra()}
+      </Interactor>
     );
   }
 }

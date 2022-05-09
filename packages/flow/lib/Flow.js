@@ -65,7 +65,7 @@ let Grid = class Grid extends React.Component {
                 y: -Math.round(this.context.y() / this.context.scale() / grid) * grid,
             };
         }).get();
-        return (React.createElement(Group, Object.assign({}, _gridPos, { zIndex: 0, ref: this.gridRef, visible: !!(this.context.grid && this.context.scale() >= 1) }),
+        return (React.createElement(Group, Object.assign({}, _gridPos, { zIndex: 0, ref: this.gridRef, visibility: !!(this.context.grid && this.context.scale() >= 1) }),
             React.createElement(Dots, null)));
     }
 };

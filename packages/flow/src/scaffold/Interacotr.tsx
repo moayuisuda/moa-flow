@@ -31,8 +31,8 @@ class Interactor extends React.Component<InteractorType> {
     const {
       context,
       props: {
-        x,
-        y,
+        x = 0,
+        y = 0,
         draggable = true,
         id,
         topOnFocus = true,
@@ -45,7 +45,7 @@ class Interactor extends React.Component<InteractorType> {
       <Group
         x={x}
         y={y}
-        onMouseDown={(e) => {
+        onMousedown={(e) => {
           const {
             selectCells,
             buffer: { select, drag },

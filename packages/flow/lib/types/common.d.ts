@@ -25,3 +25,7 @@ export declare type FlowInfraEventType = {
     type: string;
     data: any;
 };
+export declare type Vector2d = {
+    x: number;
+    y: number;
+};

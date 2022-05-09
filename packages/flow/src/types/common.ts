@@ -1,6 +1,7 @@
 import { PortDataType } from "../scaffold/Port"
 import { NodeDataType } from '../cells/Node';
 import { EdgeDataType } from '../cells/Edge';
+import { Vector2d } from 'konva/lib/types';
 
 export type FieldType = {
     label: string,
@@ -30,4 +31,9 @@ export type AllCellDataType = NodeDataType | EdgeDataType;
 export type FlowInfraEventType = {
     type: string,
     data: any
+}
+
+export type Vector2d = {
+    x: number;
+    y: number
 }

@@ -1,11 +1,11 @@
 import Cell from "./Cell";
+import * as G from "@antv/g";
 import { CellDataType } from "./Cell";
 import { PortDataType } from "../scaffold/Port";
 import React from "react";
-import Konva from "konva";
 import { NodeDataType } from "./Node";
-import { Vector2d } from "konva/lib/types";
 import FlowModel from "../Model";
+import { Vector2d } from "../types/common";
 export declare type EdgeDataType = {
     source: string | Vector2d;
     target: string | Vector2d;
@@ -14,7 +14,7 @@ export declare type EdgeDataType = {
 } & CellDataType;
 declare abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
     static metaData: any;
-    labelRef: React.RefObject<Konva.Group>;
+    labelRef: React.RefObject<G.Group>;
     protected bazier: boolean;
     protected arrow: boolean;
     protected dash: boolean;
@@ -31,8 +31,8 @@ declare abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & 
     };
     protected formatVerticied: (verticies: Vector2d[]) => Vector2d[];
     getLinkPortsData: () => {
-        source: Vector2d | PortDataType;
-        target: Vector2d | PortDataType;
+        source: PortDataType | Vector2d;
+        target: PortDataType | Vector2d;
     };
     getAnchors: () => {
         source: any;
@@ -44,7 +44,7 @@ declare abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & 
         source: NodeDataType | undefined;
         target: NodeDataType | undefined;
     };
-    protected route(vectors: Konva.Vector2d[]): Vector2d[];
+    protected route(vectors: Vector2d[]): Vector2d[];
     private vectorsToPoints;
     labelContent(): JSX.Element;
     labelStyle(): {};
@@ -54,7 +54,7 @@ declare abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & 
     };
     protected labelRender(): JSX.Element;
     labelFormatter(label: string): string;
-    isLinking(): boolean;
+    isLinking(): any;
     lineExtra: () => JSX.Element;
     protected edgeRender({ points, isLinking, }: {
         points: [number, number][];

@@ -1,3 +1,4 @@
+import { InteractivePointerEvent } from "@antv/g";
 import React from "react";
 import Cell from "../cells/Cell";
 import { CellDataType } from "../cells/Cell";
@@ -10,7 +11,7 @@ declare type PortPropsType = {
     link?: (source: any, target: any) => boolean;
     x?: number;
     y?: number;
-    anchor?: {
+    anchor: {
         x: number;
         y: number;
     } | (() => {
@@ -29,11 +30,11 @@ declare class Port extends Cell<PortDataType, {}, PortPropsType> {
         data: PortDataType;
     }, context: FlowModel);
     anchor(): {
-        x: any;
-        y: any;
+        x: number;
+        y: number;
     };
-    onLinkStart(e: any): void;
-    onLinkEnd(e: any): void;
+    onLinkStart(e: InteractivePointerEvent): void;
+    onLinkEnd(e: InteractivePointerEvent): void;
     content(): JSX.Element;
 }
 export default Port;

@@ -1,5 +1,5 @@
 {
-  "scale": 0.8,
+  "scale": 1,
   "x": 0,
   "y": 0,
   "cells": [
@@ -32,7 +32,7 @@
       "id": "3",
       "cellType": "node",
       "component": "CommonNode",
-      "x": 400,
+      "x": 200,
       "y": 100,
       "ports": [
         {

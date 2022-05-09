@@ -116,7 +116,7 @@ class Grid extends React.Component<{}> {
         {..._gridPos}
         zIndex={0}
         ref={this.gridRef}
-        visible={!!(this.context.grid && this.context.scale() >= 1)}
+        visibility={!!(this.context.grid && this.context.scale() >= 1)}
       >
         <Dots />
       </Group>
@@ -166,7 +166,7 @@ const InteractTop = observer((props: { model; topLayerRef }) => {
 
   return (
     <Group zIndex={3} ref={topLayerRef}>
-      <LinkingEdge data={model.buffer.link}></LinkingEdge>
+      <LinkingEdge data={model.buffer.link} />
       {/* <SelectBoundsRect /> */}
     </Group>
   );

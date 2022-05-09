@@ -6,6 +6,7 @@ import { observer } from "mobx-react";
 import Model from "../Model";
 import { AllCellDataType } from "../types/common";
 import { titleCase } from "utils/string";
+import { InteractivePointerEvent } from "@antv/g";
 
 export type CellDataType = {
   id: string;
@@ -77,7 +78,7 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
       "dblclick",
       "click",
     ].forEach((eventName) => {
-      this.wrapperRef.current.on(eventName, (e: any) => {
+      this.wrapperRef.current.on(eventName, (e: InteractivePointerEvent) => {
         const instanceEventFn = this[`on${titleCase(eventName)}`];
         instanceEventFn && instanceEventFn.call(this, e);
 
@@ -107,7 +108,6 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
     return (
       <Group
         ref={(ref) => {
-          console.log("getRef", ref);
           this.wrapperRef.current = ref;
         }}
       >

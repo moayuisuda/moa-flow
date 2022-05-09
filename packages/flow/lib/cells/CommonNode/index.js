@@ -42,9 +42,15 @@ class CommonNode extends Node {
             React.createElement(Rect, Object.assign({ width: width, height: height, fill: "white", shadowColor: "rgba(0,0,0,0.1)", shadowBlur: 10, radius: 10 }, this.getStroke())),
             React.createElement(Rect, { width: width, height: 40, fill: color.deepGrey, radius: 10 }),
             React.createElement(Text, { x: 10, y: 10, fontWeight: "bold", textBaseline: "top", text: label, fill: "white" }),
-            inPorts.map((portData, index) => (React.createElement(Port, { y: 70, data: portData, key: portData.label },
+            inPorts.map((portData, index) => (React.createElement(Port, { y: 70, data: portData, key: portData.label, anchor: {
+                    x: data.x,
+                    y: data.y + 70,
+                } },
                 React.createElement(Circle, { lineWidth: 4, stroke: color.primary, fill: "white", r: 10 })))),
-            outPorts.map((portData, index) => (React.createElement(Port, { x: width, y: 70, data: portData, key: portData.label },
+            outPorts.map((portData, index) => (React.createElement(Port, { x: width, y: 70, data: portData, key: portData.label, anchor: {
+                    x: data.x + width,
+                    y: data.y + 70,
+                } },
                 React.createElement(Circle, { lineWidth: 4, stroke: color.primary, fill: "white", r: 10 }))))));
     }
 }
