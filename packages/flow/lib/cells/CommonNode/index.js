@@ -87,10 +87,7 @@ class CommonNode extends Node {
             React.createElement(Rect, Object.assign({ width: WIDTH, height: FULL_HEIGHT }, getStroke(), { cornerRadius: 10 })),
             React.createElement(Group, { y: PORTS_OFFSET },
                 inPorts.map((portData, index) => (React.createElement(Group, { x: 0, y: index * SINGLE_PORT_HEIGHT, key: portData.label },
-                    React.createElement(Port, { data: portData, anchor: () => ({
-                            x: data.x,
-                            y: data.y + PORT_OFFSET + index * SINGLE_PORT_HEIGHT,
-                        }) },
+                    React.createElement(Port, { data: portData },
                         React.createElement(Circle, { stroke: color.primary, fill: "white", radius: PORT_RADIUS, y: PORT_GRAPHIC_OFFSET })),
                     React.createElement(Text, { x: PORT_RADIUS + PORT_TEXT_MARGIN, height: SINGLE_PORT_HEIGHT, verticalAlign: "middle", text: portData.label })))),
                 controlInPorts.map((portData, index) => (React.createElement(Group, { y: (inPorts.length + index) * SINGLE_PORT_HEIGHT, key: portData.label },

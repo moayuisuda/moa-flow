@@ -6,7 +6,7 @@ class Port extends Cell {
     constructor(props, context) {
         super(props, context);
     }
-    // 暂时废弃
+    // deprecated
     anchor() {
         const konvaNode = this.wrapperRef.current;
         if (!konvaNode)

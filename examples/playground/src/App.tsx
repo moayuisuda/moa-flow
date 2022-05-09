@@ -21,17 +21,17 @@ function App() {
     // 注册自定义节点;
     const model = modelRef.current as ModelType;
 
-    model.addCell("CommonNode", {
-      x: 200,
-      y: 500,
-      ports: [
-        {
-          label: "haha",
-          portType: "out",
-        },
-      ],
-      label: "NODE 1 Common",
-    });
+    // model.addCell("CommonNode", {
+    //   x: 200,
+    //   y: 500,
+    //   ports: [
+    //     {
+    //       label: "haha",
+    //       portType: "out",
+    //     },
+    //   ],
+    //   label: "NODE 1 Common",
+    // });
 
     // model.addCell("CommonNode", {
     //   x: 600,
@@ -40,19 +40,19 @@ function App() {
     //   label: "NODE 2 Common",
     // });
 
-    for (let i = 0; i < 200; i++) {
-      model.addCell("CommonNode", {
-        x: randomIn(0, 3000),
-        y: randomIn(0, 3000),
-        label: `${1} ${Math.random()}`,
-        ports: [
-          {
-            label: "haha",
-            portType: "out",
-          },
-        ],
-      });
-    }
+    // for (let i = 0; i < 200; i++) {
+    //   model.addCell("CommonNode", {
+    //     x: randomIn(0, 3000),
+    //     y: randomIn(0, 3000),
+    //     label: `${1} ${Math.random()}`,
+    //     ports: [
+    //       {
+    //         label: "haha",
+    //         portType: "out",
+    //       },
+    //     ],
+    //   });
+    // }
 
     // //------------------- 非react组件引用 ------------------
     // const { modelRef } = mountFlow(document.querySelector(".App") as Element, {

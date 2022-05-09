@@ -178,10 +178,10 @@ class CommonNode extends Node<CommonNodeDataType, {}> {
             <Group x={0} y={index * SINGLE_PORT_HEIGHT} key={portData.label}>
               <Port
                 data={portData}
-                anchor={() => ({
-                  x: data.x,
-                  y: data.y + PORT_OFFSET + index * SINGLE_PORT_HEIGHT,
-                })}
+                // anchor={() => ({
+                //   x: data.x,
+                //   y: data.y + PORT_OFFSET + index * SINGLE_PORT_HEIGHT,
+                // })}
               >
                 <Circle
                   stroke={color.primary}
