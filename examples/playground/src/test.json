@@ -1,7 +1,7 @@
 {
-  "scale": 0.5,
-  "x": 150,
-  "y": 100,
+  "scale": 0.8,
+  "x": 0,
+  "y": 0,
   "cells": [
     {
       "id": "2",
@@ -13,19 +13,45 @@
         {
           "cellType": "port",
           "label": "age",
-          "id": "port-5",
+          "id": "2-0",
           "portType": "in",
           "host": "2"
         },
         {
           "cellType": "port",
           "label": "father",
-          "id": "port-6",
-          "portType": "in",
-          "host": "2"
+          "id": "2-1",
+          "portType": "out",
+          "host": "2",
+          "edges": ["EDGE"]
         }
       ],
       "label": "NODE 3 Matrix"
+    },
+    {
+      "id": "3",
+      "cellType": "node",
+      "component": "CommonNode",
+      "x": 400,
+      "y": 100,
+      "ports": [
+        {
+          "cellType": "port",
+          "label": "age",
+          "id": "3-0",
+          "portType": "in",
+          "host": "3",
+          "edges": ["EDGE"]
+        }
+      ],
+      "label": "NODE 3 Matrix"
+    },
+    {
+      "cellType": "edge",
+      "component": "Edge",
+      "source": "2-1",
+      "target": "3-0",
+      "id": "EDGE"
     }
   ]
 }
