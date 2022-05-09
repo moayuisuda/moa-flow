@@ -1,7 +1,6 @@
 import type { FieldType } from "../..//types/common";
 import { PortDataType } from "../..//scaffold/Port";
 import { Rect, Text, Circle, Group } from "@antv/react-g";
-import Button from "../../common/Button";
 import Interactor from "../../scaffold/Interactor";
 import Node from "../Node";
 import { NodeDataType } from "../Node";
@@ -21,29 +20,15 @@ type CommonNodeDataType = {
   y?: number;
   label?: string;
 } & NodeDataType;
-
-const WIDTH = 200;
-const HEADER_HEIGHT = 40;
-const SINGLE_PORT_HEIGHT = 30;
-const HEADER_MARGIN = 20;
-const PORT_RADIUS = 10;
-const TEXT_WIDTH = 70;
-const PORT_TEXT_MARGIN = 10;
-const BOTTOM_PADDING = 10;
-
-const PORTS_OFFSET = HEADER_HEIGHT + HEADER_MARGIN;
-const PORT_OFFSET = PORTS_OFFSET + SINGLE_PORT_HEIGHT / 2;
-const PORT_GRAPHIC_OFFSET =
-  PORT_RADIUS + (SINGLE_PORT_HEIGHT - PORT_RADIUS * 2) / 2;
-
 class CommonNode extends Node<CommonNodeDataType, {}> {
   static metaData = {
-    fields: [{}],
     label: "",
   };
 
-  static getBounds() {
+  static getBounds(cellData: NodeDataType) {
     return {
+      x: cellData.x,
+      y: cellData.y,
       width: 200,
       height: 100,
     };
@@ -56,61 +41,71 @@ class CommonNode extends Node<CommonNodeDataType, {}> {
     if (isSelect) {
       return {
         stroke: color.active,
+        lineWidth: 3,
       };
-    } else return {};
+    } else
+      return {
+        stroke: undefined,
+        lineWidth: 0,
+      };
   };
 
   content() {
     const { color } = this.context;
-    const { label, ports } = this.props.data;
+    const { data } = this.props;
+    const { label, ports } = data;
+    const { width, height } = CommonNode.getBounds(data);
 
+    const inPorts =
+      ports?.filter((portData) => portData.portType === "in") || [];
     const outPorts =
       ports?.filter((portData) => portData.portType === "out") || [];
 
-    const FULL_HEIGHT = CommonNode.getBounds().height;
-
-    const { data } = this.props;
-
     return (
-      <Interactor {...this.props.data} topOnFocus={false}>
+      <Interactor {...this.props.data}>
         <Rect
-          width={WIDTH}
-          height={FULL_HEIGHT}
+          width={width}
+          height={height}
           fill="white"
           shadowColor="rgba(0,0,0,0.1)"
           shadowBlur={10}
           radius={10}
+          {...this.getStroke()}
+        />
+
+        <Rect width={width} height={40} fill={color.deepGrey} radius={10} />
+
+        <Text
+          x={10}
+          y={10}
+          fontWeight="bold"
+          textBaseline="top"
+          text={label}
+          fill="white"
         />
 
         {/* out的port */}
+        {inPorts.map((portData, index) => (
+          <Port y={70} data={portData} key={portData.label}>
+            <Circle
+              lineWidth={4}
+              stroke={color.primary}
+              fill="white"
+              r={10}
+            ></Circle>
+          </Port>
+        ))}
+
+        {/* out的port */}
         {outPorts.map((portData, index) => (
-          <Group
-            x={WIDTH - TEXT_WIDTH - PORT_TEXT_MARGIN - PORT_RADIUS}
-            y={index * SINGLE_PORT_HEIGHT}
-            key={portData.label}
-          >
-            <Text
-              text={portData.label}
-              textAlign="right"
-              // height={SINGLE_PORT_HEIGHT}
-              textBaseline="middle"
-            ></Text>
-            <Port
-              data={portData}
-              anchor={() => ({
-                x: data.x + WIDTH,
-                y: data.y + PORT_OFFSET + index * SINGLE_PORT_HEIGHT,
-              })}
-            >
-              <Circle
-                stroke={color.primary}
-                fill="white"
-                x={TEXT_WIDTH + PORT_RADIUS + PORT_TEXT_MARGIN}
-                y={PORT_GRAPHIC_OFFSET}
-                r={PORT_RADIUS}
-              ></Circle>
-            </Port>
-          </Group>
+          <Port x={width} y={70} data={portData} key={portData.label}>
+            <Circle
+              lineWidth={4}
+              stroke={color.primary}
+              fill="white"
+              r={10}
+            ></Circle>
+          </Port>
         ))}
       </Interactor>
     );

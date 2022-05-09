@@ -31,8 +31,8 @@ declare abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & 
     };
     protected formatVerticied: (verticies: Vector2d[]) => Vector2d[];
     getLinkPortsData: () => {
-        source: PortDataType | Vector2d;
-        target: PortDataType | Vector2d;
+        source: Vector2d | PortDataType;
+        target: Vector2d | PortDataType;
     };
     getAnchors: () => {
         source: any;
@@ -57,7 +57,7 @@ declare abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & 
     isLinking(): boolean;
     lineExtra: () => JSX.Element;
     protected edgeRender({ points, isLinking, }: {
-        points: number[];
+        points: [number, number][];
         isLinking: boolean;
     }): JSX.Element;
     content(): JSX.Element;

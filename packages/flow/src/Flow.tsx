@@ -164,14 +164,10 @@ const Nodes = observer((props: { nodesLayerRef; model }) => {
 const InteractTop = observer((props: { model; topLayerRef }) => {
   const { model, topLayerRef } = props;
 
-  const nodesData = model.canvasData.cells.filter((cellData) => {
-    return cellData.cellType !== "edge";
-  });
-
   return (
     <Group zIndex={3} ref={topLayerRef}>
       <LinkingEdge data={model.buffer.link}></LinkingEdge>
-      <SelectBoundsRect />
+      {/* <SelectBoundsRect /> */}
     </Group>
   );
 });
@@ -273,7 +269,11 @@ class Flow extends React.Component<FlowProps, {}> {
             width={model.width()}
             height={model.height()}
           >
-            <Group scale={model.canvasData.scale} x={model.x()} y={model.y()}>
+            <Group
+              transform={`scale(${model.scale()}, ${model.scale()})`}
+              x={model.x()}
+              y={model.y()}
+            >
               {/* Provider需要在Stage内部，issue https://github.com/konvajs/react-konva/issues/188 */}
               <FlowContext.Provider value={model}>
                 {this.props.grid && <Grid />}

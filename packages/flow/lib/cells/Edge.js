@@ -1,36 +1,36 @@
 import Cell from './Cell.js';
-import { Group, Text, Polyline } from '@antv/react-g';
-import Interactor from '../scaffold/Interactor.js';
+import { Text, Group, Polyline } from '@antv/react-g';
 import React from 'react';
 import { isVector2d } from '../utils/util.js';
 import { titleCase } from '../utils/string.js';
 import { lineCenter } from '../utils/vector.js';
 
+class ErrorBoundary extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { hasError: false };
+    }
+    static getDerivedStateFromError(error) {
+        // Update state so the next render will show the fallback UI.
+        return { hasError: true };
+    }
+    componentDidCatch(error, errorInfo) {
+        // You can also log the error to an error reporting service
+        console.log(error, errorInfo);
+    }
+    render() {
+        if (this.state.hasError) {
+            // You can render any custom fallback UI
+            return React.createElement(Text, { text: "Something went wrong." });
+        }
+        return this.props.children;
+    }
+}
 const TEXT_HEIGHT = 16;
 const LABEL_PADDING = 4;
 class Edge extends Cell {
     constructor(props, context) {
         super(props, context);
-        // // 先不管线条的bounds
-        // static getBounds(cellData) {
-        //   const sourceInstance = flowModel.cellsMap.get(cellData.source);
-        //   const targetInstance = flowModel.cellsMap.get(cellData.target);
-        //   const sourceAnchor =
-        //     sourceInstance.props.anchor && sourceInstance.props.anchor();
-        //   // || sourceInstance.anchor();
-        //   const targetAnchor =
-        //     targetInstance.props.anchor && targetInstance.props.anchor();
-        //   const left = Math.min(sourceAnchor.x, targetAnchor.x);
-        //   const right = Math.max(sourceAnchor.x, targetAnchor.x);
-        //   const top = Math.min(sourceAnchor.y, targetAnchor.y);
-        //   const bottom = Math.max(sourceAnchor.y, targetAnchor.y);
-        //   return {
-        //     width: right - left,
-        //     height: bottom - top,
-        //     x: left,
-        //     y: top,
-        //   };
-        // }
         this.bazier = true;
         this.arrow = false;
         this.dash = false;
@@ -118,7 +118,7 @@ class Edge extends Cell {
     vectorsToPoints(vectors) {
         const re = [];
         vectors.forEach((vector) => {
-            re.push(vector.x, vector.y);
+            re.push([vector.x, vector.y]);
         });
         return re;
     }
@@ -185,21 +185,20 @@ class Edge extends Cell {
     }
     edgeRender({ points, isLinking, }) {
         const { color } = this.context;
-        const lineProps = Object.assign({ lineCap: "round", lineJoin: "round", strokeWidth: 2.5, points: points, stroke: color.deepGrey, fill: color.deepGrey, dash: isLinking ? [10, 10] : undefined }, this.lineStyle({ isSelect: this.isSelect() }));
+        const lineProps = Object.assign({ lineCap: "round", lineJoin: "round", lineWidth: 2.5, points: points, stroke: color.deepGrey, fill: color.deepGrey }, this.lineStyle({ isSelect: this.isSelect() }));
+        console.log(points);
         return (React.createElement(Group, null,
             this.arrow ? (
             // <Arrow {...lineProps} pointerWidth={10} />
             React.createElement(React.Fragment, null)) : (React.createElement(Polyline, Object.assign({}, lineProps))),
-            React.createElement(Polyline, { stroke: "transparent", points: points, strokeWidth: 20, lineCap: "round", lineJoin: "round" })));
+            React.createElement(Polyline, { stroke: "transparent", points: points, lineWidth: 20, lineCap: "round", lineJoin: "round" })));
     }
     content() {
-        return (React.createElement(Interactor, { id: this.props.data.id, draggable: false, topOnFocus: true },
-            this.edgeRender({
-                points: this.getPoints(),
-                isLinking: this.isLinking(),
-            }),
-            this.labelRender(),
-            this.lineExtra && this.lineExtra()));
+        console.log("render edge content");
+        return (React.createElement(ErrorBoundary, null, this.edgeRender({
+            points: this.getPoints(),
+            isLinking: this.isLinking(),
+        })));
     }
 }
 Edge.metaData = {

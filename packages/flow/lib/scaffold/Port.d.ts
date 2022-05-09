@@ -1,7 +1,6 @@
 import React from "react";
 import Cell from "../cells/Cell";
 import { CellDataType } from "../cells/Cell";
-import { KonvaEventObject } from "konva/lib/Node";
 import FlowModel from "../Model";
 export declare type PortDataType = {
     edges?: string[];
@@ -33,8 +32,8 @@ declare class Port extends Cell<PortDataType, {}, PortPropsType> {
         x: any;
         y: any;
     };
-    onLinkStart(e: KonvaEventObject<MouseEvent>): void;
-    onLinkEnd(e: KonvaEventObject<MouseEvent>): void;
+    onLinkStart(e: any): void;
+    onLinkEnd(e: any): void;
     content(): JSX.Element;
 }
 export default Port;

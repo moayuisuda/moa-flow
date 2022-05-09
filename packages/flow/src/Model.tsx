@@ -171,9 +171,7 @@ export class FlowModel {
     this.cellsMap.forEach((cell) => {
       if (cell.props.data?.cellType === "node") {
         const instance = cell.wrapperRef.current;
-        const bounds = instance.getClientRect({
-          relativeTo: instance.getStage(instance),
-        });
+        const bounds = instance.getBBox();
         // 判断矩形是否相交
         if (
           isRectsInterSect(
@@ -342,6 +340,7 @@ export class FlowModel {
 
     if (matchCell.cellType === "edge") this.clearPortEdge(matchCell.id);
 
+    this.selectCells.includes(id) && remove(this.selectCells, id);
     remove(this.canvasData.cells, matchCell);
     this.cellsMap.delete(id);
     this.cellsDataMap.delete(id);
@@ -412,7 +411,7 @@ export class FlowModel {
   };
 
   @action setLinkingPosition = (e) => {
-    const cursorPos = e.currentTarget.getRelativePointerPosition();
+    const cursorPos = e.canvas;
 
     this.buffer.link.target.x = cursorPos.x;
     this.buffer.link.target.y = cursorPos.y;

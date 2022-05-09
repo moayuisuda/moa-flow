@@ -44,12 +44,12 @@ export const initSelect = (model: ModelType) => {
 
         toFalseCells.forEach(cellId => {
             const cellData = model.getCellData(cellId) as CellDataType
-            cellData.$state.isSelect = false
+            cellData && (cellData.$state.isSelect = false)
         })
 
         toTrueCells.forEach(cellId => {
             const cellData = model.getCellData(cellId) as CellDataType
-            cellData.$state.isSelect = true
+            cellData && (cellData.$state.isSelect = true)
         })
 
         prevSelectCells = model.selectCells.slice();
@@ -73,7 +73,6 @@ export const initDrag = (model: ModelType, stage: any, layers: {
 
     // 移动整个stage
     stage.on('mousemove', e => {
-        console.log(e)
         const movement = {
             x: (e.canvas.x - drag.start.x),
             y: (e.canvas.y - drag.start.y)
@@ -99,10 +98,9 @@ export const initDrag = (model: ModelType, stage: any, layers: {
                     //     konvaNode.moveTo(topLayer)
                     // }
 
-                    console.log(stage.getMatrix)
                     model.setCellData(cellData.id, {
-                        x: cellData.x + movement.x,
-                        y: cellData.y + movement.y,
+                        x: cellData.x + movement.x / model.scale(),
+                        y: cellData.y + movement.y / model.scale(),
                     });
                 }
             })

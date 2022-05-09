@@ -1,5 +1,5 @@
 import Cell from "./Cell";
-import { Polyline as Line, Group, Text } from "@antv/react-g";
+import { Polyline, Group, Text } from "@antv/react-g";
 import Interactor from "../scaffold/Interactor";
 import { CellDataType } from "./Cell";
 import { PortDataType } from "../scaffold/Port";
@@ -11,6 +11,32 @@ import { Vector2d } from "konva/lib/types";
 import FlowModel from "../Model";
 import { titleCase } from "utils/string";
 import { lineCenter } from "utils/vector";
+
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error) {
+    // Update state so the next render will show the fallback UI.
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    // You can also log the error to an error reporting service
+    console.log(error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      // You can render any custom fallback UI
+      return <Text text="Something went wrong." />;
+    }
+
+    return this.props.children;
+  }
+}
 
 export type EdgeDataType = {
   source: string | Vector2d;
@@ -25,31 +51,6 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
     cellType: "edge",
   };
   labelRef: React.RefObject<Konva.Group>;
-
-  // // 先不管线条的bounds
-  // static getBounds(cellData) {
-  //   const sourceInstance = flowModel.cellsMap.get(cellData.source);
-  //   const targetInstance = flowModel.cellsMap.get(cellData.target);
-
-  //   const sourceAnchor =
-  //     sourceInstance.props.anchor && sourceInstance.props.anchor();
-  //   // || sourceInstance.anchor();
-
-  //   const targetAnchor =
-  //     targetInstance.props.anchor && targetInstance.props.anchor();
-
-  //   const left = Math.min(sourceAnchor.x, targetAnchor.x);
-  //   const right = Math.max(sourceAnchor.x, targetAnchor.x);
-  //   const top = Math.min(sourceAnchor.y, targetAnchor.y);
-  //   const bottom = Math.max(sourceAnchor.y, targetAnchor.y);
-
-  //   return {
-  //     width: right - left,
-  //     height: bottom - top,
-  //     x: left,
-  //     y: top,
-  //   };
-  // }
 
   protected bazier = true;
   protected arrow = false;
@@ -166,9 +167,9 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
   }
 
   private vectorsToPoints(vectors: Vector2d[]) {
-    const re: number[] = [];
+    const re: [number, number][] = [];
     vectors.forEach((vector) => {
-      re.push(vector.x, vector.y);
+      re.push([vector.x, vector.y]);
     });
 
     return re;
@@ -266,7 +267,7 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
     points,
     isLinking,
   }: {
-    points: number[];
+    points: [number, number][];
     isLinking: boolean;
   }) {
     const { color } = this.context;
@@ -274,43 +275,47 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
     const lineProps = {
       lineCap: "round",
       lineJoin: "round",
-      strokeWidth: 2.5,
-      points: points as number[],
+      lineWidth: 2.5,
+      points: points as [number, number][],
       stroke: color.deepGrey,
       fill: color.deepGrey,
-      dash: isLinking ? [10, 10] : undefined,
+      // dash: isLinking ? [10, 10] : undefined,
       ...this.lineStyle({ isSelect: this.isSelect() }),
     } as any;
 
+    console.log(points);
     return (
       <Group>
         {this.arrow ? (
           // <Arrow {...lineProps} pointerWidth={10} />
           <></>
         ) : (
-          <Line {...lineProps} />
+          <Polyline {...lineProps} />
         )}
-        <Line
+        <Polyline
           stroke="transparent"
           points={points}
-          strokeWidth={20}
+          lineWidth={20}
           lineCap="round"
           lineJoin="round"
-        ></Line>
+        ></Polyline>
       </Group>
     );
   }
 
   content() {
+    console.log("render edge content");
     return (
-      <Interactor id={this.props.data.id} draggable={false} topOnFocus={true}>
+      <ErrorBoundary>
+        {/* <Interactor id={this.props.data.id} draggable={false}> */}
         {this.edgeRender({
           points: this.getPoints(),
           isLinking: this.isLinking(),
         })}
-        {this.labelRender()}
-        {this.lineExtra && this.lineExtra()}
-      </Interactor>
+        {/* {this.labelRender()}
+          {this.lineExtra && this.lineExtra()} */}
+        {/* </Interactor> */}
+      </ErrorBoundary>
     );
   }
 }

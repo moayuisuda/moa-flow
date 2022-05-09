@@ -8,7 +8,6 @@ import { observer } from 'mobx-react';
 import { computed, autorun } from 'mobx';
 import { FlowContext } from './Context.js';
 import { registComponents } from './utils/registComponents.js';
-import SelectBoundsRect from './scaffold/SelectBoundsRect.js';
 import { initClearState, initLink, initDrag, initSelect, initScale, initMultiSelect, initHotKeys } from './events.js';
 import { STAGE_CLASS_NAME } from './constants.js';
 import { getRightClickPanel } from './components/RightClickPanel/index.js';
@@ -96,12 +95,8 @@ const Nodes = observer((props) => {
 });
 const InteractTop = observer((props) => {
     const { model, topLayerRef } = props;
-    model.canvasData.cells.filter((cellData) => {
-        return cellData.cellType !== "edge";
-    });
     return (React.createElement(Group, { zIndex: 3, ref: topLayerRef },
-        React.createElement(LinkingEdge, { data: model.buffer.link }),
-        React.createElement(SelectBoundsRect, null)));
+        React.createElement(LinkingEdge, { data: model.buffer.link })));
 });
 let Flow = class Flow extends React.Component {
     constructor(props) {
@@ -149,7 +144,7 @@ let Flow = class Flow extends React.Component {
             React.createElement(FlowContext.Provider, { value: model },
                 getRightClickPanel(this.props.children),
                 React.createElement(Canvas, { renderer: renderer, className: STAGE_CLASS_NAME, ref: this.stageRef, width: model.width(), height: model.height() },
-                    React.createElement(Group, { scale: model.canvasData.scale, x: model.x(), y: model.y() },
+                    React.createElement(Group, { transform: `scale(${model.scale()}, ${model.scale()})`, x: model.x(), y: model.y() },
                         React.createElement(FlowContext.Provider, { value: model },
                             this.props.grid && React.createElement(Grid, null),
                             React.createElement(Nodes, { nodesLayerRef: this.nodesLayerRef, model: model }),

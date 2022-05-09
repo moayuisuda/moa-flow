@@ -104,7 +104,16 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
   }
 
   render() {
-    return <Group ref={this.wrapperRef}>{this.content()}</Group>;
+    return (
+      <Group
+        ref={(ref) => {
+          console.log("getRef", ref);
+          this.wrapperRef.current = ref;
+        }}
+      >
+        {this.content()}
+      </Group>
+    );
   }
 }
 

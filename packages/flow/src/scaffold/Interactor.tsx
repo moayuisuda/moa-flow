@@ -6,7 +6,6 @@ import { observer } from "mobx-react";
 import { FlowContext } from "../Context";
 import Port from "./Port";
 import { EVT_LEFTCLICK } from "../constants";
-import { PortDataType } from "./Port";
 
 type InteractorType = {
   x?: number;

@@ -1,4 +1,5 @@
 import { Bounds } from '../types/common';
+import { isUndefined } from 'lodash';
 export const arrayMove = <T>(arr: T[], oldIndex: number, newIndex: number) => {
     arr.splice(newIndex, 0, arr.splice(oldIndex, 1)[0]);
     return arr;
@@ -15,7 +16,8 @@ export const findIndex = (arr: any[], target: any) => {
 }
 
 export const remove = (arr: any[], target: any) => {
-    arr.splice(findIndex(arr, target) as number, 1)
+    const index = findIndex(arr, target) as number
+    !isUndefined(index) && arr.splice(index, 1)
 }
 
 export const isRectsInterSect = (boundsA: Bounds, boundsB: Bounds) => {

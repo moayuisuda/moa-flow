@@ -1,3 +1,3 @@
-var _scheduler_0_20_2_scheduler = {exports: {}};
+var reactReconciler = {exports: {}};
 
-export { _scheduler_0_20_2_scheduler as _ };
+export { reactReconciler as r };

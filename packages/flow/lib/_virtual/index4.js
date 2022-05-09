@@ -1,3 +1,3 @@
-var _eventemitter3_4_0_7_eventemitter3 = {exports: {}};
+var eventemitter3 = {exports: {}};
 
-export { _eventemitter3_4_0_7_eventemitter3 as _ };
+export { eventemitter3 as e };

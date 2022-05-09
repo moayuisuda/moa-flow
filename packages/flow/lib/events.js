@@ -33,11 +33,11 @@ const initSelect = (model) => {
         const toTrueCells = lodash.exports.without(model.selectCells, ...prevSelectCells);
         toFalseCells.forEach(cellId => {
             const cellData = model.getCellData(cellId);
-            cellData.$state.isSelect = false;
+            cellData && (cellData.$state.isSelect = false);
         });
         toTrueCells.forEach(cellId => {
             const cellData = model.getCellData(cellId);
-            cellData.$state.isSelect = true;
+            cellData && (cellData.$state.isSelect = true);
         });
         prevSelectCells = model.selectCells.slice();
     });
@@ -46,7 +46,6 @@ const initDrag = (model, stage, layers) => {
     const { drag, select } = model.buffer;
     // 移动整个stage
     stage.on('mousemove', e => {
-        console.log(e);
         const movement = {
             x: (e.canvas.x - drag.start.x),
             y: (e.canvas.y - drag.start.y)
@@ -64,10 +63,9 @@ const initDrag = (model, stage, layers) => {
                     //     zIndexCache[cellData.id] = konvaNode.zIndex()
                     //     konvaNode.moveTo(topLayer)
                     // }
-                    console.log(stage.getMatrix);
                     model.setCellData(cellData.id, {
-                        x: cellData.x + movement.x,
-                        y: cellData.y + movement.y,
+                        x: cellData.x + movement.x / model.scale(),
+                        y: cellData.y + movement.y / model.scale(),
                     });
                 }
             });

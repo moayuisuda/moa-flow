@@ -1,3 +1,3 @@
-var _reactReconciler_0_26_2_reactReconciler = {exports: {}};
+var scheduler = {exports: {}};
 
-export { _reactReconciler_0_26_2_reactReconciler as _ };
+export { scheduler as s };

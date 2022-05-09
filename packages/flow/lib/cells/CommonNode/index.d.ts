@@ -15,17 +15,20 @@ declare type CommonNodeDataType = {
 } & NodeDataType;
 declare class CommonNode extends Node<CommonNodeDataType, {}> {
     static metaData: {
-        fields: {}[];
         label: string;
     };
-    static getBounds(): {
+    static getBounds(cellData: NodeDataType): {
+        x: number;
+        y: number;
         width: number;
         height: number;
     };
     getStroke: () => {
         stroke: string;
+        lineWidth: number;
     } | {
-        stroke?: undefined;
+        stroke: undefined;
+        lineWidth: number;
     };
     content(): JSX.Element;
 }

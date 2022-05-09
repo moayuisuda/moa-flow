@@ -37,25 +37,24 @@ class Port extends Cell<PortDataType, {}, PortPropsType> {
 
   // 暂时废弃
   anchor() {
+    // @TODO 下次强制刷新
+    console.log("wrapperRef", this.wrapperRef);
     const konvaNode = this.wrapperRef.current;
     if (!konvaNode) return { x: 0, y: 0 };
 
-    const rect = konvaNode.getClientRect({
-      // 有relative不会caculate scale
-      relativeTo: this.getStage(),
-    });
+    const rect = konvaNode.getBBox();
 
     // 通过变换矩阵将坐标还原为标准坐标
     // const t = konvaNode.getAbsoluteTransform();
 
     return {
-      x: rect.x + rect.width / 2,
-      y: rect.y + rect.height / 2,
+      x: rect.left + rect.width / 2,
+      y: rect.top + rect.height / 2,
     };
   }
 
-  onLinkStart(e: KonvaEventObject<MouseEvent>) {
-    e.cancelBubble = true;
+  onLinkStart(e: any) {
+    e.stopPropagation();
 
     const {
       context: {
@@ -74,8 +73,8 @@ class Port extends Cell<PortDataType, {}, PortPropsType> {
     link.target = this.anchor();
   }
 
-  onLinkEnd(e: KonvaEventObject<MouseEvent>) {
-    e.cancelBubble = true;
+  onLinkEnd(e: any) {
+    e.stopPropagation();
 
     const {
       context,

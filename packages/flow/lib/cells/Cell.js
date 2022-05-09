@@ -61,7 +61,10 @@ class Cell extends React.Component {
         return this.props.data.$state.isSelect;
     }
     render() {
-        return React.createElement(Group, { ref: this.wrapperRef }, this.content());
+        return (React.createElement(Group, { ref: (ref) => {
+                console.log("getRef", ref);
+                this.wrapperRef.current = ref;
+            } }, this.content()));
     }
 }
 Cell.contextType = FlowContext;

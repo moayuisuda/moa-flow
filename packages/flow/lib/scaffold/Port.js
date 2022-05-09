@@ -8,22 +8,21 @@ class Port extends Cell {
     }
     // 暂时废弃
     anchor() {
+        // @TODO 下次强制刷新
+        console.log("wrapperRef", this.wrapperRef);
         const konvaNode = this.wrapperRef.current;
         if (!konvaNode)
             return { x: 0, y: 0 };
-        const rect = konvaNode.getClientRect({
-            // 有relative不会caculate scale
-            relativeTo: this.getStage(),
-        });
+        const rect = konvaNode.getBBox();
         // 通过变换矩阵将坐标还原为标准坐标
         // const t = konvaNode.getAbsoluteTransform();
         return {
-            x: rect.x + rect.width / 2,
-            y: rect.y + rect.height / 2,
+            x: rect.left + rect.width / 2,
+            y: rect.top + rect.height / 2,
         };
     }
     onLinkStart(e) {
-        e.cancelBubble = true;
+        e.stopPropagation();
         const { context: { buffer: { link }, }, } = this;
         this.context.sendEvent({
             type: "beforeLink",
@@ -35,7 +34,7 @@ class Port extends Cell {
         link.target = this.anchor();
     }
     onLinkEnd(e) {
-        e.cancelBubble = true;
+        e.stopPropagation();
         const { context, context: { buffer: { link }, }, } = this;
         const sourceInstance = context.cellsMap.get(link.source);
         if (link.source === this.props.data.id) {

@@ -1,3 +1,6 @@
+import '../node_modules/lodash/lodash.js';
+import { l as lodash } from '../_virtual/lodash.js';
+
 const arrayMove = (arr, oldIndex, newIndex) => {
     arr.splice(newIndex, 0, arr.splice(oldIndex, 1)[0]);
     return arr;
@@ -12,7 +15,8 @@ const findIndex = (arr, target) => {
     return undefined;
 };
 const remove = (arr, target) => {
-    arr.splice(findIndex(arr, target), 1);
+    const index = findIndex(arr, target);
+    !lodash.exports.isUndefined(index) && arr.splice(index, 1);
 };
 const isRectsInterSect = (boundsA, boundsB) => {
     return !(boundsA.x + boundsA.width < boundsB.x ||
