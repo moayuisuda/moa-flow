@@ -1,5 +1,6 @@
 import React from "react";
 import FlowModel from "./Model";
+import * as G from "@antv/g";
 declare type FlowProps = {
     canvasData?: any;
     onEvent?: (e: {
@@ -16,10 +17,10 @@ declare type FlowProps = {
 };
 declare class Flow extends React.Component<FlowProps, {}> {
     flowModel: FlowModel;
-    stageRef: React.RefObject<import("konva/lib/Stage").Stage>;
-    nodesLayerRef: React.RefObject<import("konva/lib/Layer").Layer>;
-    linesLayerRef: React.RefObject<import("konva/lib/Layer").Layer>;
-    topLayerRef: React.RefObject<import("konva/lib/Layer").Layer>;
+    stageRef: React.RefObject<G.Canvas>;
+    nodesLayerRef: React.RefObject<G.Group>;
+    linesLayerRef: React.RefObject<G.Group>;
+    topLayerRef: React.RefObject<G.Group>;
     constructor(props: FlowProps);
     componentDidMount(): void;
     render(): JSX.Element;

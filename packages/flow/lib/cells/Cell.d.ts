@@ -1,7 +1,6 @@
 import React from "react";
 import { FlowContext } from "../Context";
 import Model from "../Model";
-import { AllCellDataType } from "../types/common";
 export declare type CellDataType = {
     id: string;
     cellType: string;
@@ -13,7 +12,7 @@ declare abstract class Cell<D, S = {}, P = {}> extends React.Component<{
 } & P, S> {
     static contextType: React.Context<Model>;
     context: React.ContextType<typeof FlowContext>;
-    static getBounds: (cellData: AllCellDataType) => {
+    static getBounds: (cellData: any) => {
         x: number;
         y: number;
         width: number;

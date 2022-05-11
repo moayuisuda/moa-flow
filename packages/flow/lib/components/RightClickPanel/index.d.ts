@@ -1,8 +1,8 @@
-import Konva from "konva";
+import * as G from "@antv/g";
 import React from "react";
 import Model from "../../Model";
 declare class RightClickPanel extends React.Component<{
-    stage?: Konva.Stage;
+    stage?: G.Canvas;
     extra?: (context: Model) => React.ReactNode;
 }, {
     pos: {

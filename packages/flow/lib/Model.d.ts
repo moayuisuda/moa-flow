@@ -1,7 +1,7 @@
 import React from "react";
 import { CellDataType } from "./cells/Cell";
-import Konva from "konva";
-import { CanvasDataType, AllCellDataType } from "./types/common";
+import G from "@antv/g";
+import { CanvasDataType, AllCellDataType, Vector2d } from "./types/common";
 import { InteractivePointerEvent } from "@antv/g";
 declare type EventSender = (data: any) => void;
 export declare class FlowModel {
@@ -18,9 +18,9 @@ export declare class FlowModel {
     grid: number | undefined;
     setGrid: (grid: number) => void;
     refs: {
-        stageRef: React.RefObject<import("konva/lib/Stage").Stage> | undefined;
-        nodesLayerRef: React.RefObject<import("konva/lib/Layer").Layer> | undefined;
-        linesLayerRef: React.RefObject<import("konva/lib/Layer").Layer> | undefined;
+        stageRef: React.RefObject<G.Canvas> | undefined;
+        nodesLayerRef: React.RefObject<G.Group> | undefined;
+        linesLayerRef: React.RefObject<G.Group> | undefined;
     };
     hotKey: {
         RightMouseDown: boolean;
@@ -72,8 +72,8 @@ export declare class FlowModel {
     };
     setMultiSelect: (select: {
         isSelecting?: boolean;
-        start?: Konva.Vector2d;
-        end?: Konva.Vector2d;
+        start?: Vector2d;
+        end?: Vector2d;
     }, onlySetPosition?: boolean) => void;
     clearLinkBuffer: () => void;
     color: {
@@ -101,13 +101,19 @@ export declare class FlowModel {
     setStageScale: (scale: number) => void;
     setStagePosition: (x: number, y: number) => void;
     insertRuntimeState: (cellData: CellDataType) => void;
+    getLocalBBox: (id: string) => {
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+    };
     setCanvasData: (canvasData: CanvasDataType) => void;
     setCellId: (data: CellDataType) => void;
     setCellData: (id: string, data: any) => void;
     getNodeEdges: (nodeId: string) => string[];
     getLinkNodes: (id: string) => string[];
     deleCell: (id: string) => string | undefined;
-    snap: (vector: Konva.Vector2d) => {
+    snap: (vector: Vector2d) => {
         x: number;
         y: number;
     };

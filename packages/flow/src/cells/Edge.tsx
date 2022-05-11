@@ -1,5 +1,5 @@
 import Cell from "./Cell";
-import { Polyline, Group, Text } from "@antv/react-g";
+import { Polyline, Group, Text, Rect, Path } from "@antv/react-g";
 import * as G from "@antv/g";
 import Interactor from "../scaffold/Interacotr";
 import { CellDataType } from "./Cell";
@@ -10,9 +10,9 @@ import { isVector2d } from "../utils/util";
 import FlowModel from "../Model";
 import { titleCase } from "utils/string";
 import { lineCenter } from "utils/vector";
-import { isFunction } from "lodash";
-import ErrorBoundary from "../ErrorBoundary";
 import { Vector2d } from "../types/common";
+import Arrow from "../components/Arrow";
+import { InteractivePointerEvent } from '@antv/g';
 
 export type EdgeDataType = {
   source: string | Vector2d;
@@ -28,9 +28,8 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
   };
   labelRef: React.RefObject<G.Group>;
 
-  protected bazier = true;
+  protected bazier = false;
   protected arrow = false;
-  protected dash = false;
 
   isMountEvents = false;
 
@@ -117,14 +116,18 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
       const sourcePort = this.context.cellsDataMap.get(
         data.source as string
       ) as PortDataType;
-      source = this.context.cellsDataMap.get(sourcePort.host) as NodeDataType;
+      source = this.context.cellsDataMap.get(
+        sourcePort.host as string
+      ) as NodeDataType;
     }
 
     if (!isVector2d(data.target)) {
       const targetPort = this.context.cellsDataMap.get(
         data.target as string
       ) as PortDataType;
-      target = this.context.cellsDataMap.get(targetPort.host) as NodeDataType;
+      target = this.context.cellsDataMap.get(
+        targetPort.host as string
+      ) as NodeDataType;
     }
 
     return {
@@ -150,23 +153,36 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
   labelContent() {
     const {
       color,
-      refs: { linesLayerRef },
+      refs: { stageRef },
     } = this.context;
 
     const text = this.labelFormatter(this.props.data.label);
-    const textWidth = linesLayerRef.current
-      .getContext()
-      .measureText(text).width;
+    if (!text) return <></>;
+
+    const props = {
+      text,
+      textBaseline: "top" as "top",
+      ...this.labelStyle(),
+    };
+    const textInstance = new G.Text({
+      style: props,
+    });
+
+    stageRef?.current?.appendChild(textInstance);
+    const textBounds = textInstance.getBBox();
+    stageRef?.current?.removeChild(textInstance);
 
     return (
-      <Group x={-textWidth / 2 - LABEL_PADDING} y={-TEXT_HEIGHT / 2}>
-        <Text
-          // height={TEXT_HEIGHT}
-          // verticalAlign="middle"
-          text={this.labelFormatter(this.props.data.label)}
-          // padding={LABEL_PADDING}
-          {...this.labelStyle()}
-        />
+      <Group
+        x={-(textBounds.width + LABEL_PADDING) / 2}
+        y={-(TEXT_HEIGHT + LABEL_PADDING) / 2}
+      >
+        <Rect
+          width={textBounds.width + LABEL_PADDING * 2}
+          height={TEXT_HEIGHT + LABEL_PADDING * 2}
+          fill="white"
+        ></Rect>
+        <Text x={LABEL_PADDING} y={LABEL_PADDING} {...props} />
       </Group>
     );
   }
@@ -176,12 +192,15 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
   }
 
   labelPosition() {
-    const points = this.getVectors().map((vector) => [vector.x, vector.y]);
+    const points = this.getVectors().map((vector) => [vector.x, vector.y]) as [
+      number,
+      number
+    ][];
     const lineLenthCenter = lineCenter(points);
 
     return {
-      x: lineLenthCenter[0],
-      y: lineLenthCenter[1],
+      x: lineLenthCenter[0] || points[0][0],
+      y: lineLenthCenter[1] || points[0][0],
     };
   }
 
@@ -201,7 +220,7 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
             "dblclick",
             "click",
           ].forEach((eventName) => {
-            label.on(eventName, (e) => {
+            label.on(eventName, (e: InteractivePointerEvent) => {
               const instanceEventFn = this[`onLabel${titleCase(eventName)}`];
               instanceEventFn && instanceEventFn.call(this, e);
 
@@ -233,6 +252,15 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
     return this.props.data.$state.isLinking;
   }
 
+  getBazierPath() {
+    const { source, target } = this.getAnchors();
+    const LENGTH = (source.x - target.x) * 0.5;
+
+    return `M${source.x},${source.y} 
+    C${source.x - LENGTH},${source.y} ${target.x + LENGTH},${target.y} 
+    ${target.x},${target.y}`;
+  }
+
   lineExtra: () => JSX.Element;
 
   protected edgeRender({
@@ -247,29 +275,29 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
     const lineProps = {
       lineCap: "round",
       lineJoin: "round",
-      lineWidth: 2.5,
-      points: points as [number, number][],
+      lineWidth: 3,
       stroke: color.deepGrey,
-      fill: color.deepGrey,
-      dash: isLinking ? [10, 10] : undefined,
       ...this.lineStyle({ isSelect: this.isSelect() }),
     } as any;
 
+    const bazierProps = {
+      type: "Path",
+      path: this.getBazierPath(),
+    };
+
+    const polyLineProps = {
+      type: "Polyline",
+      points,
+    };
+
     return (
       <Group>
-        {this.arrow ? (
-          // <Arrow {...lineProps} pointerWidth={10} />
-          <Text text="asdasd" />
-        ) : (
-          <Polyline {...lineProps} />
-        )}
-        <Polyline
-          stroke="transparent"
+        <Arrow
+          {...(this.bazier ? bazierProps : polyLineProps)}
           points={points}
-          lineWidth={20}
-          lineCap="round"
-          lineJoin="round"
-        ></Polyline>
+          {...lineProps}
+          endHead={true}
+        />
       </Group>
     );
   }
@@ -281,8 +309,7 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
           points: this.getPoints(),
           isLinking: this.isLinking(),
         })}
-        {/* TODO */}
-        {/* {this.labelRender()} */}
+        {this.labelRender()}
         {this.lineExtra && this.lineExtra()}
       </Interactor>
     );

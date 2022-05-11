@@ -1,3 +1,4 @@
+import { __extends } from '../node_modules/tslib/tslib.es6.js';
 import React from 'react';
 import { Group } from '@antv/react-g';
 import { FlowContext } from '../Context.js';
@@ -7,30 +8,33 @@ import { titleCase } from '../utils/string.js';
 import { l as lodash } from '../_virtual/lodash.js';
 
 // D: data, S: state, P: props
-class Cell extends React.Component {
-    constructor(props, context) {
-        super(props);
-        context.cellsMap.set(props.data.id, this);
-        this.wrapperRef = React.createRef();
+var Cell = /** @class */ (function (_super) {
+    __extends(Cell, _super);
+    function Cell(props, context) {
+        var _this = _super.call(this, props) || this;
+        context.cellsMap.set(props.data.id, _this);
+        _this.wrapperRef = React.createRef();
+        return _this;
     }
-    static regist(name, model) {
+    Cell.regist = function (name, model) {
         model.componentsMap.set(name, this);
-    }
-    static getMetaData() {
-        const re = {};
-        let curr = this;
+    };
+    Cell.getMetaData = function () {
+        var re = {};
+        var curr = this;
         // 合并父类metaData
         while (curr !== React.Component) {
             Object.assign(re, curr.metaData);
             curr = curr.__proto__;
         }
         return lodash.exports.cloneDeep(re);
-    }
-    setData(data) {
+    };
+    Cell.prototype.setData = function (data) {
         this.context;
         this.context.setCellData(this.props.data.id, data);
-    }
-    componentDidMount() {
+    };
+    Cell.prototype.componentDidMount = function () {
+        var _this = this;
         [
             "mouseenter",
             "mouseleave",
@@ -38,36 +42,38 @@ class Cell extends React.Component {
             "mouseup",
             "dblclick",
             "click",
-        ].forEach((eventName) => {
-            this.wrapperRef.current.on(eventName, (e) => {
-                const instanceEventFn = this[`on${titleCase(eventName)}`];
-                instanceEventFn && instanceEventFn.call(this, e);
-                this.context.sendEvent({
-                    type: `cell:${eventName}`,
+        ].forEach(function (eventName) {
+            _this.wrapperRef.current.on(eventName, function (e) {
+                var instanceEventFn = _this["on".concat(titleCase(eventName))];
+                instanceEventFn && instanceEventFn.call(_this, e);
+                _this.context.sendEvent({
+                    type: "cell:".concat(eventName),
                     data: {
-                        e,
-                        cellData: this.props.data,
-                        cell: this,
+                        e: e,
+                        cellData: _this.props.data,
+                        cell: _this,
                     },
                 });
             });
         });
         this.onMount && this.onMount();
-    }
-    getData() {
+    };
+    Cell.prototype.getData = function () {
         return this.props.data;
-    }
-    isSelect() {
+    };
+    Cell.prototype.isSelect = function () {
         return this.props.data.$state.isSelect;
-    }
-    render() {
-        return (React.createElement(Group, { ref: (ref) => {
-                this.wrapperRef.current = ref;
+    };
+    Cell.prototype.render = function () {
+        var _this = this;
+        return (React.createElement(Group, { ref: function (ref) {
+                _this.wrapperRef.current = ref;
             } }, this.content()));
-    }
-}
-Cell.contextType = FlowContext;
-Cell.metaData = { id: "" };
+    };
+    Cell.contextType = FlowContext;
+    Cell.metaData = { id: "" };
+    return Cell;
+}(React.Component));
 var Cell$1 = observer(Cell);
 
 export { Cell$1 as default };

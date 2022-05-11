@@ -1,10 +1,13 @@
-import type { FieldType } from "../../types/common";
-import { PortDataType } from "../../scaffold/Port";
-import { Rect, Text, Circle, Group } from "@antv/react-g";
-import Interactor from "../../scaffold/Interacotr";
-import Node from "../Node";
-import { NodeDataType } from "../Node";
 import React from "react";
+import {
+  PortDataType,
+  Graph,
+  Interactor,
+  Node,
+  NodeDataType,
+} from "@ali/flow-infra-g";
+import { message, Modal } from "antd";
+const { Rect, Text, Circle, Group } = Graph;
 
 const { Port } = Interactor;
 
@@ -13,19 +16,18 @@ type CommonPortDataType = PortDataType & {
   portType: "in" | "out" | "control-out" | "control-in";
 };
 
-type CommonNodeDataType = {
+type BizNodeDataType = {
   ports?: CommonPortDataType[];
-  fields?: FieldType[];
   x?: number;
   y?: number;
   label?: string;
 } & NodeDataType;
-class CommonNode extends Node<CommonNodeDataType, {}> {
+class BizNode extends Node<BizNodeDataType, {}> {
   static metaData = {
     label: "",
   };
 
-  static getBounds(cellData: NodeDataType) {
+  static getBounds(cellData: BizNodeDataType) {
     return {
       x: cellData.x,
       y: cellData.y,
@@ -54,7 +56,7 @@ class CommonNode extends Node<CommonNodeDataType, {}> {
     const { color } = this.context;
     const { data } = this.props;
     const { label, ports } = data;
-    const { width, height } = CommonNode.getBounds(data);
+    const { width, height } = BizNode.getBounds(data);
 
     const inPorts =
       ports?.filter((portData) => portData.portType === "in") || [];
@@ -80,7 +82,7 @@ class CommonNode extends Node<CommonNodeDataType, {}> {
           y={10}
           fontWeight="bold"
           textBaseline={"top"}
-          text={label}
+          text={label || ""}
           fill="white"
         />
 
@@ -115,6 +117,10 @@ class CommonNode extends Node<CommonNodeDataType, {}> {
               x: data.x + width + 20,
               y: data.y + 70,
             }}
+            link={(target, source) => {
+              message.info(JSON.stringify(target));
+              return true;
+            }}
           >
             <Circle
               lineWidth={4}
@@ -129,4 +135,4 @@ class CommonNode extends Node<CommonNodeDataType, {}> {
   }
 }
 
-export default CommonNode;
+export default BizNode;

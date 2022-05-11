@@ -5,7 +5,7 @@
 ## Usage
 
 ```
-import flow from '@ali/flow-infra';
+import flow from '@ali/flow-infra-g';
 
 // 引用
 <Flow

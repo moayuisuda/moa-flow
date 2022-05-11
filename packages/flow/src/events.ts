@@ -1,11 +1,10 @@
-import Konva from "konva";
 import { ModelType } from ".";
 import { autorun } from "mobx"
 import { without } from 'lodash';
 import { NodeDataType } from "./cells/Node";
 import { CellDataType } from './cells/Cell';
 import { EVT_LEFTCLICK, EVT_RIGHTCLICK } from './constants';
-import { Vector2d } from "konva/lib/types";
+import { Vector2d } from "./types/common";
 import { InteractivePointerEvent, Canvas } from '@antv/g';
 
 export const initClearState = (model: ModelType, stage: Canvas) => {
@@ -56,14 +55,7 @@ export const initSelect = (model: ModelType) => {
     })
 }
 
-export const initDrag = (model: ModelType, stage: Canvas, layers: {
-    linesLayer: Konva.Layer,
-    nodesLayer: Konva.Layer,
-    topLayer: Konva.Layer
-}
-) => {
-    const { linesLayer, nodesLayer, topLayer } = layers
-
+export const initDrag = (model: ModelType, stage: Canvas) => {
     // 移动选择的节点
     // 暂存节点原本的zIndex，方便还原到原本的layer
     let zIndexCache: {
@@ -131,6 +123,7 @@ export const initScale = (model: ModelType, stage: Canvas) => {
 
         // stop default scrolling
         e.preventDefault();
+        e.stopPropagation()
 
         const oldScale = model.canvasData.scale;
         const pointer = e.canvas as Vector2d;
@@ -159,8 +152,6 @@ export const initScale = (model: ModelType, stage: Canvas) => {
         };
 
         model.setStagePosition(newPos.x, newPos.y);
-
-        // debounceClearCache()
     });
 }
 
@@ -172,7 +163,7 @@ export const initMultiSelect = (model: ModelType, stage: Canvas) => {
     stage.on('mousedown', (e: InteractivePointerEvent) => {
         if (model.buffer.select.isSelecting) return
         if (!model.hotKey["Space"] && e.button === EVT_LEFTCLICK) {
-            const pos = e.canvas;
+            const pos = model.getStageCursor(e);
             model.setMultiSelect({
                 start: {
                     x: pos.x,
@@ -189,7 +180,7 @@ export const initMultiSelect = (model: ModelType, stage: Canvas) => {
     // 矩形多选框 鼠标up时
     stage.on('mouseup', (e: InteractivePointerEvent) => {
         if (model.buffer.select.isSelecting) return
-        const pos = e.canvas
+        const pos = model.getStageCursor(e)
         model.setMultiSelect({
             start: {
                 x: pos.x,
@@ -206,7 +197,7 @@ export const initMultiSelect = (model: ModelType, stage: Canvas) => {
     stage.on('mousemove', (e: InteractivePointerEvent) => {
         if (model.buffer.select.isSelecting) return
         if (!model.hotKey["Space"] && model.hotKey["LeftMouseDown"]) {
-            const pos = e.canvas;
+            const pos = model.getStageCursor(e);
             model.setMultiSelect({
                 end: {
                     x: pos.x,

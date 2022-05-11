@@ -13,8 +13,6 @@ export type PortDataType = {
 } & CellDataType;
 
 type PortPropsType = {
-  // link: (source: PortDataType, target: PortDataType) => boolean;
-  // @TODO
   link?: (source: any, target: any) => boolean;
   x?: number;
   y?: number;
@@ -63,7 +61,7 @@ class Port extends Cell<PortDataType, {}, PortPropsType> {
   }
 
   onLinkEnd(e: InteractivePointerEvent) {
-    e.stopPropagation();
+    e.stopPropagation(); 
 
     const {
       context,

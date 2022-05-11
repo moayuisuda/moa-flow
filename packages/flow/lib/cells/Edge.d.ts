@@ -17,7 +17,6 @@ declare abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & 
     labelRef: React.RefObject<G.Group>;
     protected bazier: boolean;
     protected arrow: boolean;
-    protected dash: boolean;
     isMountEvents: boolean;
     constructor(props: {
         data: EdgeDataType;
@@ -55,6 +54,7 @@ declare abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & 
     protected labelRender(): JSX.Element;
     labelFormatter(label: string): string;
     isLinking(): any;
+    getBazierPath(): string;
     lineExtra: () => JSX.Element;
     protected edgeRender({ points, isLinking, }: {
         points: [number, number][];

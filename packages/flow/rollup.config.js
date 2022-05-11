@@ -17,12 +17,10 @@ export default {
   // 会有默认的key-value指明某个module对应的哪个模块
   external: [
     "react",
-    "konva",
     "mobx",
     "mobx-react",
-    "react-konva",
-    "react-konva-utils",
     "@antv/react-g",
+    "@antv/g",
     "@antv/g-canvas",
   ],
   input: "src/index.ts",

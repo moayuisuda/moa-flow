@@ -4,7 +4,7 @@ import Flow from "./Flow";
 import Cell from "./cells/Cell";
 import Node from './cells/Node'
 import Edge from './cells/Edge'
-import Interactor from './scaffold/Interactor'
+import Interactor from './scaffold/Interacotr'
 import Port from "./scaffold/Port";
 import { PortDataType } from "./scaffold/Port";
 import Model from "./Model";
@@ -12,15 +12,14 @@ import Model from "./Model";
 import RightClickPanel from './components/RightClickPanel/index';
 import Image from './components/Image';
 
-// import ReactDOM from 'react-dom';
-// import React from "react";
-import { NodeFlowState, FlowInfraEventType } from './types/common';
+import { FlowInfraEventType } from './types/common';
 
 import * as Graph from '@antv/react-g'
 import { autorun } from 'mobx';
-import { Vector2d } from 'konva/lib/types';
+import { Vector2d } from './types/common';
 import { CellDataType } from './cells/Cell';
 import { EdgeDataType } from './cells/Edge';
+import { NodeDataType } from './cells/Node';
 
 
 type ModelType = Model
@@ -46,4 +45,4 @@ export {
     autorun,
 };
 
-export type { ModelType, FlowInfraEventType, Vector2d, CellDataType, EdgeDataType, PortDataType };
+export type { ModelType, FlowInfraEventType, Vector2d, CellDataType, EdgeDataType, PortDataType, NodeDataType };

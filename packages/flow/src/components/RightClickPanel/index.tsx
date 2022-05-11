@@ -1,14 +1,15 @@
 import { observer } from "mobx-react";
 import styles from "./style.less";
-import Konva from "konva";
+import * as G from "@antv/g";
 import React from "react";
 import { FlowContext } from "../../Context";
 import Model from "../../Model";
+import { EVT_RIGHTCLICK, STAGE_CLASS_NAME } from "../../constants";
 
 @observer
 class RightClickPanel extends React.Component<
   {
-    stage?: Konva.Stage;
+    stage?: G.Canvas;
     extra?: (context: Model) => React.ReactNode;
   },
   { pos: { x: number; y: number } }
@@ -16,17 +17,19 @@ class RightClickPanel extends React.Component<
   static contextType = FlowContext;
 
   initStageEvent = () => {
-    this.context.refs.stageRef.current.on("contextmenu", (e) => {
-      e.preventDefault();
-      this.context.buffer.rightClickPanel.visible = true;
+    document
+      .querySelector("#" + STAGE_CLASS_NAME)
+      ?.addEventListener("contextmenu", (e) => {
+        e.preventDefault();
+        this.context.buffer.rightClickPanel.visible = true;
 
-      this.setState({
-        pos: {
-          x: e.clientX,
-          y: e.clientY,
-        },
+        this.setState({
+          pos: {
+            x: e.clientX,
+            y: e.clientY,
+          },
+        });
       });
-    });
   };
 
   componentDidMount(): void {

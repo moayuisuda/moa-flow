@@ -1,4 +1,4 @@
-const color = {
+var color = {
     primary: 'rgb(255, 108, 55)',
     active: 'rgb(255, 108, 55)',
     grey: 'rgb(242, 242, 242)',

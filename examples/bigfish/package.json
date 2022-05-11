@@ -29,7 +29,7 @@
     }
   },
   "dependencies": {
-    "@ali/flow-infra": "^1.0.0",
+    "@ali/flow-infra-g": "^1.0.0",
     "@alipay/bigfish": "^3.0.0",
     "@alipay/tech-ui": "^2.0.0",
     "antd": "4.17.0",

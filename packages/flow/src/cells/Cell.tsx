@@ -25,7 +25,7 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
   declare context: React.ContextType<typeof FlowContext>;
 
   // static方法可以这样写abstract方法
-  static getBounds: (cellData: AllCellDataType) => {
+  static getBounds: (cellData: any) => {
     x: number;
     y: number;
     width: number;

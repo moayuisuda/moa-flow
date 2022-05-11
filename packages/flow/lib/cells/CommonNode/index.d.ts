@@ -1,5 +1,5 @@
-import type { FieldType } from "../..//types/common";
-import { PortDataType } from "../..//scaffold/Port";
+import type { FieldType } from "../../types/common";
+import { PortDataType } from "../../scaffold/Port";
 import Node from "../Node";
 import { NodeDataType } from "../Node";
 declare type CommonPortDataType = PortDataType & {

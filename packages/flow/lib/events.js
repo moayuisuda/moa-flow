@@ -1,10 +1,11 @@
+import { __spreadArray } from './node_modules/tslib/tslib.es6.js';
 import { autorun } from 'mobx';
 import './node_modules/lodash/lodash.js';
 import { EVT_LEFTCLICK, EVT_RIGHTCLICK } from './constants.js';
 import { l as lodash } from './_virtual/lodash.js';
 
-const initClearState = (model, stage) => {
-    stage.on('mousedown', (e) => {
+var initClearState = function (model, stage) {
+    stage.on('mousedown', function (e) {
         if (e.button === EVT_LEFTCLICK) {
             model.buffer.rightClickPanel.visible = false;
         }
@@ -12,41 +13,41 @@ const initClearState = (model, stage) => {
             model.clearSelect();
     });
 };
-const initLink = (model, stage) => {
-    stage.on('mouseup', (e) => {
+var initLink = function (model, stage) {
+    stage.on('mouseup', function (e) {
         model.clearLinkBuffer();
     });
-    stage.on('mousemove', (e) => {
-        const { buffer: { link }, } = model;
+    stage.on('mousemove', function (e) {
+        var link = model.buffer.link;
         if (!link.source)
             return;
         model.setLinkingPosition(e);
     });
 };
-const initSelect = (model) => {
+var initSelect = function (model) {
     // 非受控设置select的节点
-    let prevSelectCells = [];
-    autorun(() => {
+    var prevSelectCells = [];
+    autorun(function () {
         // 上次存在这次不存在的就是需要设置为false的
-        const toFalseCells = lodash.exports.without(prevSelectCells, ...model.selectCells);
+        var toFalseCells = lodash.exports.without.apply(void 0, __spreadArray([prevSelectCells], model.selectCells, false));
         // 这次存在上次不存在的就是需要设置为true的
-        const toTrueCells = lodash.exports.without(model.selectCells, ...prevSelectCells);
-        toFalseCells.forEach(cellId => {
-            const cellData = model.getCellData(cellId);
+        var toTrueCells = lodash.exports.without.apply(void 0, __spreadArray([model.selectCells], prevSelectCells, false));
+        toFalseCells.forEach(function (cellId) {
+            var cellData = model.getCellData(cellId);
             cellData && (cellData.$state.isSelect = false);
         });
-        toTrueCells.forEach(cellId => {
-            const cellData = model.getCellData(cellId);
+        toTrueCells.forEach(function (cellId) {
+            var cellData = model.getCellData(cellId);
             cellData && (cellData.$state.isSelect = true);
         });
         prevSelectCells = model.selectCells.slice();
     });
 };
-const initDrag = (model, stage, layers) => {
-    const { drag, select } = model.buffer;
+var initDrag = function (model, stage) {
+    var _a = model.buffer, drag = _a.drag, select = _a.select;
     // 移动整个stage
-    stage.on('mousemove', (e) => {
-        const movement = {
+    stage.on('mousemove', function (e) {
+        var movement = {
             x: (e.canvas.x - drag.start.x),
             y: (e.canvas.y - drag.start.y)
         };
@@ -56,8 +57,8 @@ const initDrag = (model, stage, layers) => {
         }
         if (select.isSelecting) {
             // if (stage.isListening()) stage.listening(false);
-            model.selectCells.forEach(id => {
-                const cellData = model.getCellData(id);
+            model.selectCells.forEach(function (id) {
+                var cellData = model.getCellData(id);
                 if (cellData.cellType === 'node') {
                     model.setCellData(cellData.id, {
                         x: cellData.x + movement.x / model.scale(),
@@ -69,10 +70,10 @@ const initDrag = (model, stage, layers) => {
         drag.start.x = e.canvas.x;
         drag.start.y = e.canvas.y;
     });
-    stage.on('mouseup', () => {
+    stage.on('mouseup', function () {
         if (select.isSelecting) {
-            model.selectCells.forEach(id => {
-                const cellData = model.getCellData(id);
+            model.selectCells.forEach(function (id) {
+                var cellData = model.getCellData(id);
                 if (cellData.cellType === 'node') {
                     if (model.grid)
                         model.setCellData(cellData.id, model.snap({
@@ -85,42 +86,42 @@ const initDrag = (model, stage, layers) => {
         }
     });
 };
-const initScale = (model, stage) => {
-    let scaleBy = 1.02;
-    stage.on('wheel', (e) => {
+var initScale = function (model, stage) {
+    var scaleBy = 1.02;
+    stage.on('wheel', function (e) {
         // stop default scrolling
         e.preventDefault();
-        const oldScale = model.canvasData.scale;
-        const pointer = e.canvas;
+        e.stopPropagation();
+        var oldScale = model.canvasData.scale;
+        var pointer = e.canvas;
         var mousePointTo = {
             x: (pointer.x - model.x()) / oldScale,
             y: (pointer.y - model.y()) / oldScale,
         };
         // how to scale? Zoom in? Or zoom out?
-        let direction = e.deltaY > 0 ? 1 : -1;
+        var direction = e.deltaY > 0 ? 1 : -1;
         // in that case lets revert direction
         if (e.ctrlKey) {
             direction = -direction;
         }
-        const newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy;
+        var newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy;
         model.setStageScale(newScale);
-        const newPos = {
+        var newPos = {
             x: pointer.x - mousePointTo.x * newScale,
             y: pointer.y - mousePointTo.y * newScale,
         };
         model.setStagePosition(newPos.x, newPos.y);
-        // debounceClearCache()
     });
 };
-const initMultiSelect = (model, stage) => {
+var initMultiSelect = function (model, stage) {
     if (model.hotKey['Space'])
         return;
     // 设置多选矩形框起始点
-    stage.on('mousedown', (e) => {
+    stage.on('mousedown', function (e) {
         if (model.buffer.select.isSelecting)
             return;
         if (!model.hotKey["Space"] && e.button === EVT_LEFTCLICK) {
-            const pos = e.canvas;
+            var pos = model.getStageCursor(e);
             model.setMultiSelect({
                 start: {
                     x: pos.x,
@@ -134,10 +135,10 @@ const initMultiSelect = (model, stage) => {
         }
     });
     // 矩形多选框 鼠标up时
-    stage.on('mouseup', (e) => {
+    stage.on('mouseup', function (e) {
         if (model.buffer.select.isSelecting)
             return;
-        const pos = e.canvas;
+        var pos = model.getStageCursor(e);
         model.setMultiSelect({
             start: {
                 x: pos.x,
@@ -150,11 +151,11 @@ const initMultiSelect = (model, stage) => {
         }, true);
     });
     // 动态设置多选矩形框大小
-    stage.on('mousemove', (e) => {
+    stage.on('mousemove', function (e) {
         if (model.buffer.select.isSelecting)
             return;
         if (!model.hotKey["Space"] && model.hotKey["LeftMouseDown"]) {
-            const pos = e.canvas;
+            var pos = model.getStageCursor(e);
             model.setMultiSelect({
                 end: {
                     x: pos.x,
@@ -164,8 +165,8 @@ const initMultiSelect = (model, stage) => {
         }
     });
 };
-const initHotKeys = (model, stage) => {
-    stage.on('mousedown', e => {
+var initHotKeys = function (model, stage) {
+    stage.on('mousedown', function (e) {
         e.preventDefault();
         switch (e.button) {
             case EVT_LEFTCLICK:
@@ -174,19 +175,19 @@ const initHotKeys = (model, stage) => {
             case EVT_RIGHTCLICK: model.setHotKey('RightMouseDown', true);
         }
     });
-    stage.on('mouseup', e => {
+    stage.on('mouseup', function (e) {
         switch (e.button) {
             case EVT_LEFTCLICK: model.setHotKey('LeftMouseDown', false);
         }
     });
-    window.addEventListener('keydown', e => {
+    window.addEventListener('keydown', function (e) {
         switch (e.code) {
             case 'Space':
                 e.preventDefault();
                 model.setHotKey(e.code, true);
         }
     });
-    window.addEventListener('keyup', e => {
+    window.addEventListener('keyup', function (e) {
         switch (e.code) {
             case 'Space':
                 e.preventDefault();

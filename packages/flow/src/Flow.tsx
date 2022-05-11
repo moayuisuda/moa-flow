@@ -10,7 +10,7 @@ import { FlowContext } from "./Context";
 
 import { registComponents } from "./utils/registComponents";
 import SelectBoundsRect from "./scaffold/SelectBoundsRect";
-import Konva from "konva";
+import * as G from "@antv/g";
 
 import {
   initDrag,
@@ -26,6 +26,7 @@ import { getRightClickPanel } from "./components/RightClickPanel/index";
 import { initMultiSelect, initSelect } from "./events";
 import { color } from "./theme/style";
 import { autorun } from "mobx";
+import { CellDataType } from "./cells/Cell";
 
 const renderer = new CanvasRenderer();
 
@@ -83,14 +84,13 @@ class Grid extends React.Component<{}> {
 
   componentDidMount() {
     autorun(() => {
-      console.log(this.context.width(), this.context.height());
-
-      requestAnimationFrame(() => {
-        if (this.gridRef.current) {
-          this.gridRef.current.isCached() && this.gridRef.current.clearCache();
-          this.gridRef.current.cache();
-        }
-      });
+      // console.log(this.context.width(), this.context.height());
+      // requestAnimationFrame(() => {
+      //   if (this.gridRef.current) {
+      //     this.gridRef.current.isCached() && this.gridRef.current.clearCache();
+      //     this.gridRef.current.cache();
+      //   }
+      // });
     });
   }
 
@@ -116,7 +116,9 @@ class Grid extends React.Component<{}> {
         {..._gridPos}
         zIndex={0}
         ref={this.gridRef}
-        visibility={!!(this.context.grid && this.context.scale() >= 1)}
+        visibility={
+          this.context.grid && this.context.scale() >= 1 ? "visible" : "hidden"
+        }
       >
         <Dots />
       </Group>
@@ -133,12 +135,12 @@ const Edges = observer((props: { linesLayerRef; model }) => {
   }, []);
 
   const edgesData = model.canvasData.cells.filter(
-    (cellData) => cellData.cellType === "edge"
+    (cellData: CellDataType) => cellData.cellType === "edge"
   );
 
   return (
     <Group ref={linesLayerRef} zIndex={1}>
-      {edgesData.map((cellData) => {
+      {edgesData.map((cellData: CellDataType) => {
         return renderComponent(cellData, model);
       })}
     </Group>
@@ -167,7 +169,7 @@ const InteractTop = observer((props: { model; topLayerRef }) => {
   return (
     <Group zIndex={3} ref={topLayerRef}>
       <LinkingEdge data={model.buffer.link} />
-      {/* <SelectBoundsRect /> */}
+      <SelectBoundsRect />
     </Group>
   );
 });
@@ -207,11 +209,10 @@ class Flow extends React.Component<FlowProps, {}> {
     props.onLoad && props.onLoad(this.flowModel);
 
     const { refs } = this.flowModel;
-    this.stageRef = refs.stageRef = createRef<Konva.Stage>();
-    this.nodesLayerRef = refs.nodesLayerRef = createRef<Konva.Layer>();
-    this.linesLayerRef = refs.linesLayerRef = createRef<Konva.Layer>();
-    this.topLayerRef = createRef<Konva.Layer>();
-    // 第一次渲染zIndex失效，issue link https://github.com/konvajs/react-konva/issues/194
+    this.stageRef = refs.stageRef = createRef<G.Canvas>();
+    this.nodesLayerRef = refs.nodesLayerRef = createRef<G.Group>();
+    this.linesLayerRef = refs.linesLayerRef = createRef<G.Group>();
+    this.topLayerRef = createRef<G.Group>();
 
     registComponents(this.flowModel);
   }
@@ -219,33 +220,17 @@ class Flow extends React.Component<FlowProps, {}> {
   componentDidMount(): void {
     const { flowModel: model } = this;
 
-    const stage = this.stageRef.current as Konva.Stage;
-    const linesLayer = this.linesLayerRef.current as Konva.Layer;
-    const nodesLayer = this.nodesLayerRef.current as Konva.Layer;
-    const topLayer = this.topLayerRef.current as Konva.Layer;
+    const stage = this.stageRef.current as G.Canvas;
     const { zoom = true, multiSelect = false } = this.props;
 
     initClearState(model, stage);
     initLink(model, stage);
-    initDrag(model, stage, {
-      linesLayer,
-      nodesLayer,
-      topLayer,
-    });
+    initDrag(model, stage);
     initSelect(model);
 
-    zoom &&
-      initScale(model, stage, {
-        linesLayer,
-        nodesLayer,
-      });
+    zoom && initScale(model, stage);
 
-    multiSelect &&
-      initMultiSelect(model, stage, {
-        linesLayer,
-        nodesLayer,
-        topLayer,
-      });
+    multiSelect && initMultiSelect(model, stage);
     initHotKeys(model, stage);
     initHotKeys(model, stage);
     initDataChangeListener(model);
@@ -259,6 +244,7 @@ class Flow extends React.Component<FlowProps, {}> {
         style={{
           position: "relative",
         }}
+        id={STAGE_CLASS_NAME}
       >
         <FlowContext.Provider value={model}>
           {getRightClickPanel(this.props.children)}
@@ -274,7 +260,6 @@ class Flow extends React.Component<FlowProps, {}> {
               x={model.x()}
               y={model.y()}
             >
-              {/* Provider需要在Stage内部，issue https://github.com/konvajs/react-konva/issues/188 */}
               <FlowContext.Provider value={model}>
                 {this.props.grid && <Grid />}
                 {/* 先注册节点，后注册线，线的一些计算属性需要节点的map */}

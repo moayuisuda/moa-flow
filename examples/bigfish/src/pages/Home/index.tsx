@@ -4,7 +4,7 @@ import { PageContainer } from '@alipay/tech-ui';
 import Guide from '@/components/Guide';
 import { trim } from '@/utils/format';
 import styles from './style.less';
-import { Flow, RightClickPanel } from '@ali/flow-infra';
+import { Flow, RightClickPanel } from '@ali/flow-infra-g';
 import { Button } from 'antd';
 
 export default () => {

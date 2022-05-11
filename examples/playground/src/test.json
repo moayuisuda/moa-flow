@@ -1,14 +1,14 @@
 {
   "scale": 1,
-  "x": 0,
-  "y": 0,
+  "x": 100,
+  "y": 100,
   "cells": [
     {
       "id": "2",
       "cellType": "node",
-      "component": "CommonNode",
-      "x": 0,
-      "y": 0,
+      "component": "BizNode",
+      "x": 1.2323232123,
+      "y": 0.12323232,
       "ports": [
         {
           "cellType": "port",
@@ -26,14 +26,14 @@
           "edges": ["EDGE"]
         }
       ],
-      "label": "NODE 3 Matrix"
+      "label": "NODE 2 Matrix"
     },
     {
       "id": "3",
       "cellType": "node",
-      "component": "CommonNode",
-      "x": 200,
-      "y": 100,
+      "component": "BizNode",
+      "x": 400.13222223,
+      "y": 200.3223232322,
       "ports": [
         {
           "cellType": "port",
@@ -48,9 +48,10 @@
     },
     {
       "cellType": "edge",
-      "component": "Edge",
+      "component": "BizEdge",
       "source": "2-1",
       "target": "3-0",
+      "label": "坐标x之和: ",
       "id": "EDGE"
     }
   ]

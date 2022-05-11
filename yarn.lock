@@ -4592,13 +4592,6 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react-reconciler@~0.26.2":
-  version "0.26.4"
-  resolved "https://registry.npmmirror.com/@types/react-reconciler/-/react-reconciler-0.26.4.tgz#651404be172cf29b65cddf246d8d964b4e448399"
-  integrity sha512-bdx4aIBkQRDAnzc23JBFeZmVpmfLJHfHikmQukEt9qs4bQtq9f+PDbNwhR9u74FkIUyIDz1I1qJ8OF6RwadKpw==
-  dependencies:
-    "@types/react" "*"
-
 "@types/react-redux@^7.1.0", "@types/react-redux@^7.1.2", "@types/react-redux@^7.1.20":
   version "7.1.24"
   resolved "https://registry.npm.alibaba-inc.com/@types/react-redux/download/@types/react-redux-7.1.24.tgz#6caaff1603aba17b27d20f8ad073e4c077e975c0"
@@ -14623,11 +14616,6 @@ ko-sleep@^1.0.3:
   dependencies:
     ms "*"
 
-konva@8.3.5:
-  version "8.3.5"
-  resolved "https://registry.npm.alibaba-inc.com/konva/download/konva-8.3.5.tgz#017799db93f70ef6437eaa8e7776a4b32648344b"
-  integrity sha512-RjaZN8PwZN3n/AlqLmtPNozLRXd6pPo11UawTJpvuOAKEkSQSXI1EHntDRIPnrrJ/j4gU0VmPzWs7/ZgLZnAPQ==
-
 language-subtag-registry@~0.3.2:
   version "0.3.21"
   resolved "https://registry.npmmirror.com/language-subtag-registry/-/language-subtag-registry-0.3.21.tgz#04ac218bea46f04cb039084602c6da9e788dd45a"
@@ -19959,31 +19947,6 @@ react-json-view@~1.20.0:
     react-lifecycles-compat "^3.0.4"
     react-textarea-autosize "^6.1.0"
 
-react-konva-utils@0.2.0:
-  version "0.2.0"
-  resolved "https://registry.npmmirror.com/react-konva-utils/-/react-konva-utils-0.2.0.tgz#e79ed7776edd50f40c152d8d49d2693ff12e910b"
-  integrity sha512-xjxhmuZnRJthInyb5wLwdgtO5gQnUvCpEutMoFwQtnwL4s4JFNLTq+fjlmCGhP+TxiJXiztzwinptL+wxP16pg==
-  dependencies:
-    react-konva "^17.0.2-4"
-    use-image "^1.0.7"
-
-react-konva@17.0.2-5:
-  version "17.0.2-5"
-  resolved "https://registry.npmmirror.com/react-konva/-/react-konva-17.0.2-5.tgz#e70b0acf323402de0a540f27b300fbe7ed151849"
-  integrity sha512-IyzdfqRDK8r1ulp/jbLPX18AuO+n5yNtL0+4T0QEUsgArRqIl/VRCG1imA5mYJBk0cBNC5+fWDHN+HWEW62ZEQ==
-  dependencies:
-    react-reconciler "~0.26.2"
-    scheduler "^0.20.2"
-
-react-konva@^17.0.2-4:
-  version "17.0.2-6"
-  resolved "https://registry.npmmirror.com/react-konva/-/react-konva-17.0.2-6.tgz#80b3fdebfd915878eafe554c191bec282cdda0de"
-  integrity sha512-cfRsBKxqAQ6gTBmyrKptKRWhHD+C068dvyqcZ4h8qzKbAacTXQtfLMSpOI+d+ptxSMvayIbbCdbsBmk3bWiClQ==
-  dependencies:
-    "@types/react-reconciler" "~0.26.2"
-    react-reconciler "~0.26.2"
-    scheduler "^0.20.2"
-
 react-lifecycles-compat@^3.0.4:
   version "3.0.4"
   resolved "https://registry.npm.alibaba-inc.com/react-lifecycles-compat/download/react-lifecycles-compat-3.0.4.tgz#4f1a273afdfc8f3488a8c516bfda78f872352362"
@@ -19998,7 +19961,7 @@ react-native-swipeout@^2.2.2:
     prop-types "^15.5.10"
     react-tween-state "^0.1.5"
 
-react-reconciler@^0.26.2, react-reconciler@~0.26.2:
+react-reconciler@^0.26.2:
   version "0.26.2"
   resolved "https://registry.npmmirror.com/react-reconciler/-/react-reconciler-0.26.2.tgz#bbad0e2d1309423f76cf3c3309ac6c96e05e9d91"
   integrity sha512-nK6kgY28HwrMNwDnMui3dvm3rCFjZrcGiuwLc5COUipBK5hWHLOxMJhSnSomirqWwjPBJKV1QcbkI0VJr7Gl1Q==
@@ -23386,11 +23349,6 @@ use-callback-ref@^1.2.5:
   integrity sha512-3FT9PRuRdbB9HfXhEq35u4oZkvpJ5kuYbpqhCfmiZyReuRgpnhDlbr2ZEnnuS0RrJAPn6l23xjFg9kpDM+Ms7w==
   dependencies:
     tslib "^2.0.0"
-
-use-image@^1.0.7:
-  version "1.0.12"
-  resolved "https://registry.npmmirror.com/use-image/-/use-image-1.0.12.tgz#fe288ca0d24f873dd52b240857839f6b4d4787ff"
-  integrity sha512-h6tCbHSvZOyrAKGkj4LTAyOUcMtL6NFyQdmP1M2spuClZrmyPe6nfB/NaFu135a2KKUt+7oGeUdvCiHcMdJerw==
 
 use-json-comparison@^1.0.3, use-json-comparison@^1.0.5:
   version "1.0.6"

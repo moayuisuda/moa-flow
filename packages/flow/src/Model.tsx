@@ -8,8 +8,8 @@ import { union, without, merge, isUndefined } from "lodash";
 import { EdgeDataType } from "./cells/Edge";
 import { PortDataType } from "./scaffold/Port";
 import { NodeDataType } from "./cells/Node";
-import Konva from "konva";
-import { CanvasDataType, AllCellDataType } from "./types/common";
+import G from "@antv/g";
+import { CanvasDataType, AllCellDataType, Vector2d } from "./types/common";
 import Cell from "./cells/Cell";
 import { InteractivePointerEvent } from "@antv/g";
 
@@ -77,9 +77,9 @@ export class FlowModel {
   };
 
   refs = {
-    stageRef: undefined as React.RefObject<Konva.Stage> | undefined,
-    nodesLayerRef: undefined as React.RefObject<Konva.Layer> | undefined,
-    linesLayerRef: undefined as React.RefObject<Konva.Layer> | undefined,
+    stageRef: undefined as React.RefObject<G.Canvas> | undefined,
+    nodesLayerRef: undefined as React.RefObject<G.Group> | undefined,
+    linesLayerRef: undefined as React.RefObject<G.Group> | undefined,
   };
 
   @observable
@@ -152,8 +152,8 @@ export class FlowModel {
   @action setMultiSelect = (
     select: {
       isSelecting?: boolean;
-      start?: Konva.Vector2d;
-      end?: Konva.Vector2d;
+      start?: Vector2d;
+      end?: Vector2d;
     },
     onlySetPosition = false
   ) => {
@@ -173,8 +173,6 @@ export class FlowModel {
     const re: string[] = [];
     this.cellsMap.forEach((cell) => {
       if (cell.props.data?.cellType === "node") {
-        const instance = cell.wrapperRef.current;
-        const bounds = instance.getBBox();
         // 判断矩形是否相交
         if (
           isRectsInterSect(
@@ -184,7 +182,7 @@ export class FlowModel {
               width: right - x,
               height: bottom - y,
             },
-            bounds
+            this.getLocalBBox(cell.props.data.id)
           )
         ) {
           re.push(cell.props.data.id);
@@ -266,6 +264,19 @@ export class FlowModel {
     cellData.$state = {
       isSelect: false,
       isLinking: false,
+    };
+  };
+
+  getLocalBBox = (id: string) => {
+    const instanceBounds = this.cellsMap
+      .get(id)
+      .wrapperRef.current.getLocalBounds();
+
+    return {
+      x: instanceBounds.center[0] - instanceBounds.halfExtents[0],
+      y: instanceBounds.center[1] - instanceBounds.halfExtents[1],
+      width: instanceBounds.halfExtents[0] * 2,
+      height: instanceBounds.halfExtents[1] * 2,
     };
   };
 
@@ -359,7 +370,7 @@ export class FlowModel {
     return matchCell.id;
   };
 
-  snap = (vector: Konva.Vector2d) => {
+  snap = (vector: Vector2d) => {
     const grid = this.grid as number;
     return {
       x: Math.round(vector.x / grid) * grid,
@@ -442,7 +453,7 @@ export class FlowModel {
     } else targetCellData.edges = [edgeId];
 
     this.sendEvent({
-      type: "linked",
+      type: "link",
       data: {
         source,
         target,

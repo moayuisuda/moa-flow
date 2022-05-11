@@ -45,6 +45,14 @@ class Interactor extends React.Component<InteractorType> {
       <Group
         x={x}
         y={y}
+        onRightdown={() => {
+          const { selectCells } = this.context;
+
+          if (selectable) {
+            if (!selectCells.includes(this.props.id))
+              context.setSelectedCells([id]);
+          }
+        }}
         onMousedown={(e) => {
           const {
             selectCells,
@@ -56,18 +64,16 @@ class Interactor extends React.Component<InteractorType> {
               context.setSelectedCells([id]);
 
             // drag
-            if (e.button === EVT_LEFTCLICK) {
-              if (topOnFocus)
-                this.context.moveTo(
-                  this.props.id,
-                  this.context.canvasData.cells.length - 1
-                );
+            if (topOnFocus)
+              this.context.moveTo(
+                this.props.id,
+                this.context.canvasData.cells.length - 1
+              );
 
-              select.isSelecting = true;
+            select.isSelecting = true;
 
-              drag.start.x = e.canvas.x;
-              drag.start.y = e.canvas.y;
-            }
+            drag.start.x = e.canvas.x;
+            drag.start.y = e.canvas.y;
           }
         }}
         {...others}

@@ -22,6 +22,7 @@ class SelectBoundsRect extends React.Component<{}, {}> {
             width={Math.abs(select.start.x - select.end.x)}
             height={Math.abs(select.start.y - select.end.y)}
             stroke={color.primary}
+            lineWidth={2}
           />
         )}
       </>
