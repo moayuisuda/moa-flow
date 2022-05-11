@@ -5,14 +5,14 @@
 ## Usage
 
 ```
-import flow from '@ali/flow-infra-g';
+import { Flow } from '@ali/flow-infra-g';
 
 // 引用
 <Flow
   width={800}
   height={800}
   canvasData={{
-    scale: { x: 1, y: 1 },
+    scale: 1,
     x: 0,
     y: 0,
     cells: [
@@ -22,6 +22,7 @@ import flow from '@ali/flow-infra-g';
         cellType: 'node',
         x: 100,
         y: 100,
+        ports: []
       },
     ],
   }}
