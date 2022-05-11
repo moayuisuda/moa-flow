@@ -17,6 +17,7 @@ import { Flow } from '@ali/flow-infra-g';
     y: 0,
     cells: [
       {
+        label: 'hello',
         id: 'TEST_NODE',
         component: 'CommonNode',
         cellType: 'node',

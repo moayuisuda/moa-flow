@@ -16,6 +16,7 @@ var Cell = /** @class */ (function (_super) {
         _this.wrapperRef = React.createRef();
         return _this;
     }
+    Cell.prototype.onMount = function () { };
     Cell.regist = function (name, model) {
         model.componentsMap.set(name, this);
     };

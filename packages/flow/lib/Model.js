@@ -9,7 +9,6 @@ import v4 from './packages/flow/node_modules/uuid/dist/esm-browser/v4.js';
 var FlowModel = /** @class */ (function () {
     function FlowModel(eventSender) {
         var _this = this;
-        this.extraContext = {};
         this.setEventSender = function (eventSender) {
             _this.eventBus.sender = eventSender;
         };
@@ -18,6 +17,7 @@ var FlowModel = /** @class */ (function () {
                 _this.setCellDataMap(cellData);
             });
         };
+        this.extra = {};
         this._width = 1000;
         this._height = 600;
         this.width = function (width) {
@@ -60,6 +60,9 @@ var FlowModel = /** @class */ (function () {
         this.linkEdge = "Edge";
         this.setLinkEdge = function (name) {
             _this.linkEdge = name;
+        };
+        this.getLinkingPort = function () {
+            return _this.buffer.link.source;
         };
         this.clearPortEdge = function (edgeId) {
             var edgeData = _this.getCellData(edgeId);

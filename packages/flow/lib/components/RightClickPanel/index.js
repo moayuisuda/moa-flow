@@ -43,7 +43,6 @@ var RightClickPanel = /** @class */ (function (_super) {
     RightClickPanel.prototype.render = function () {
         if (!this.context.buffer.rightClickPanel.visible)
             return React.createElement(React.Fragment, null);
-        console.log(this.props.children);
         return (React.createElement("div", { style: {
                 top: this.state.pos.y,
                 left: this.state.pos.x,

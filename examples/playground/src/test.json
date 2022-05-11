@@ -1,14 +1,38 @@
 {
-  "scale": 1,
-  "x": 100,
+  "scale": 0.5,
+  "x": 200,
   "y": 100,
   "cells": [
+    {
+      "id": "1",
+      "cellType": "node",
+      "component": "BizNode",
+      "x": -300,
+      "y": 200,
+      "ports": [
+        {
+          "cellType": "port",
+          "label": "age",
+          "id": "1-0",
+          "portType": "in",
+          "host": "1"
+        },
+        {
+          "cellType": "port",
+          "label": "father",
+          "id": "1-1",
+          "portType": "out",
+          "host": "1"
+        }
+      ],
+      "label": "NODE 1 Matrix"
+    },
     {
       "id": "2",
       "cellType": "node",
       "component": "BizNode",
-      "x": 1.2323232123,
-      "y": 0.12323232,
+      "x": 0,
+      "y": 0,
       "ports": [
         {
           "cellType": "port",
@@ -32,8 +56,8 @@
       "id": "3",
       "cellType": "node",
       "component": "BizNode",
-      "x": 400.13222223,
-      "y": 200.3223232322,
+      "x": 400,
+      "y": 100,
       "ports": [
         {
           "cellType": "port",
@@ -47,11 +71,28 @@
       "label": "NODE 3 Matrix"
     },
     {
+      "id": "4",
+      "cellType": "node",
+      "component": "BizNode",
+      "x": 400,
+      "y": 300,
+      "ports": [
+        {
+          "cellType": "port",
+          "label": "age",
+          "id": "4-0",
+          "portType": "in",
+          "host": "4"
+        }
+      ],
+      "label": "NODE 3 Matrix"
+    },
+    {
       "cellType": "edge",
       "component": "BizEdge",
       "source": "2-1",
       "target": "3-0",
-      "label": "坐标x之和: ",
+      "label": "默认连线",
       "id": "EDGE"
     }
   ]

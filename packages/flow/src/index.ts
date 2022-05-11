@@ -8,6 +8,7 @@ import Interactor from './scaffold/Interacotr'
 import Port from "./scaffold/Port";
 import { PortDataType } from "./scaffold/Port";
 import Model from "./Model";
+// import { Portal } from "components/Portal";
 
 import RightClickPanel from './components/RightClickPanel/index';
 import Image from './components/Image';
@@ -38,10 +39,10 @@ export {
     Node,
     Edge,
     Interactor,
+    // Portal,
     Image,
     RightClickPanel,
     Graph,
-    // mountFlow,
     autorun,
 };
 

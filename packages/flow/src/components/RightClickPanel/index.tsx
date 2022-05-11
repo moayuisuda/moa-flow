@@ -56,7 +56,6 @@ class RightClickPanel extends React.Component<
 
   render() {
     if (!this.context.buffer.rightClickPanel.visible) return <></>;
-    console.log(this.props.children);
     return (
       <div
         style={{
@@ -65,19 +64,6 @@ class RightClickPanel extends React.Component<
         }}
         className={styles["toolbar"]}
       >
-        {/* <button
-          className={styles["toolbar__button"]}
-          onClick={() => this.dele()}
-        >
-          删除
-        </button>
-        <button
-          className={styles["toolbar__button"]}
-          onClick={() => this.dele()}
-        >
-          移到顶层
-        </button> */}
-        {/* @TODO */}
         {this.props.children(this.context)}
       </div>
     );

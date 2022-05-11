@@ -128,7 +128,7 @@ var Edge = /** @class */ (function (_super) {
         var lineLenthCenter = lineCenter(points);
         return {
             x: lineLenthCenter[0] || points[0][0],
-            y: lineLenthCenter[1] || points[0][0],
+            y: lineLenthCenter[1] || points[0][1],
         };
     };
     Edge.prototype.labelRender = function () {

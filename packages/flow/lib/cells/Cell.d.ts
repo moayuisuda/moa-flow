@@ -19,13 +19,13 @@ declare abstract class Cell<D, S = {}, P = {}> extends React.Component<{
         height: number;
     };
     abstract content(): JSX.Element;
+    onMount(): void;
     static metaData: any;
     wrapperRef: React.RefObject<any>;
     constructor(props: any, context: Model);
     static regist(name: string, model: Model): void;
     static getMetaData(): {};
     setData(data: any): void;
-    onMount: () => void;
     componentDidMount(): void;
     getData(): ({
         data: D & CellDataType;

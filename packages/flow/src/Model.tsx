@@ -15,8 +15,6 @@ import { InteractivePointerEvent } from "@antv/g";
 
 type EventSender = (data: any) => void;
 export class FlowModel {
-  extraContext = {};
-
   constructor(eventSender?: EventSender) {
     makeObservable(this);
     if (eventSender) this.eventBus.sender = eventSender;
@@ -46,6 +44,8 @@ export class FlowModel {
       }
     }
   }
+
+  extra: any = {};
 
   @observable _width: number = 1000;
   @observable _height: number = 600;
@@ -98,6 +98,10 @@ export class FlowModel {
   linkEdge = "Edge";
   @action setLinkEdge = (name: string) => {
     this.linkEdge = name;
+  };
+
+  getLinkingPort = () => {
+    return this.buffer.link.source;
   };
 
   @action clearPortEdge = (edgeId: string) => {

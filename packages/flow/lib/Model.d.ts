@@ -5,11 +5,11 @@ import { CanvasDataType, AllCellDataType, Vector2d } from "./types/common";
 import { InteractivePointerEvent } from "@antv/g";
 declare type EventSender = (data: any) => void;
 export declare class FlowModel {
-    extraContext: {};
     constructor(eventSender?: EventSender);
     setEventSender: (eventSender: EventSender) => void;
     setCellsDataMap: () => void;
     setCellDataMap(cellData: AllCellDataType): void;
+    extra: any;
     _width: number;
     _height: number;
     width: (width?: number | undefined) => number;
@@ -30,6 +30,7 @@ export declare class FlowModel {
     setHotKey: (key: "RightMouseDown" | "LeftMouseDown" | "Space", value: boolean) => void;
     linkEdge: string;
     setLinkEdge: (name: string) => void;
+    getLinkingPort: () => string | undefined;
     clearPortEdge: (edgeId: string) => void;
     buffer: {
         rightClickPanel: {

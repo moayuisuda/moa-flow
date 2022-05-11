@@ -14,11 +14,15 @@ function App() {
   const modelRef = useRef<ModelType>();
 
   useEffect(() => {
-    // 注册自定义节点;
     const model = modelRef.current as ModelType;
+
+    // 放一些额外的业务逻辑到实例里，在节点里可以在this.context中获取
+    model.extra = { alert: (e: string) => message.info(e) };
 
     model.regist("BizNode", BizNode);
     model.regist("BizEdge", BizEdge);
+    // 将默认连线设置为自定义连线
+    model.setLinkEdge("BizEdge");
 
     model.setCanvasData(testData);
   }, []);
@@ -40,14 +44,13 @@ function App() {
             return (
               <Button
                 onClick={() => {
+                  const { getCellData, selectCells } = context;
                   message.info(
-                    `当前选中的是 ${
-                      context.getCellData(context.selectCells[0])?.label
-                    }`
+                    `当前选中的节点是 ${getCellData(selectCells[0])?.label}`
                   );
                 }}
               >
-                获取当前节点
+                获取选中节点
               </Button>
             );
           }}

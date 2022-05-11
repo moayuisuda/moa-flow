@@ -1,13 +1,14 @@
 import React from "react";
 import {
-  PortDataType,
+  Node,
   Graph,
   Interactor,
-  Node,
+  ModelType,
+  PortDataType,
   NodeDataType,
 } from "@ali/flow-infra-g";
-import { message, Modal } from "antd";
-const { Rect, Text, Circle, Group } = Graph;
+import { message } from "antd";
+const { Rect, Text, Circle, HTML } = Graph;
 
 const { Port } = Interactor;
 
@@ -22,7 +23,7 @@ type BizNodeDataType = {
   y?: number;
   label?: string;
 } & NodeDataType;
-class BizNode extends Node<BizNodeDataType, {}> {
+class BizNode extends Node<BizNodeDataType, { modalVisible: boolean }> {
   static metaData = {
     label: "",
   };
@@ -33,6 +34,14 @@ class BizNode extends Node<BizNodeDataType, {}> {
       y: cellData.y,
       width: 200,
       height: 100,
+    };
+  }
+
+  constructor(props: { data: BizNodeDataType }, context: ModelType) {
+    super(props, context);
+
+    this.state = {
+      modalVisible: true,
     };
   }
 
@@ -50,6 +59,13 @@ class BizNode extends Node<BizNodeDataType, {}> {
         stroke: undefined,
         lineWidth: 0,
       };
+  };
+
+  inputDom = () => {
+    const input = document.createElement("input");
+    input.addEventListener("focus", () => this.context.extra.alert('hello'));
+
+    return input
   };
 
   content() {
@@ -74,9 +90,7 @@ class BizNode extends Node<BizNodeDataType, {}> {
           radius={10}
           {...this.getStroke()}
         />
-
         <Rect width={width} height={40} fill={color.deepGrey} radius={10} />
-
         <Text
           x={10}
           y={10}
@@ -85,6 +99,8 @@ class BizNode extends Node<BizNodeDataType, {}> {
           text={label || ""}
           fill="white"
         />
+
+        <HTML innerHTML={this.inputDom()} y={100} width={0} height={0} />
 
         {/* out的port */}
         {inPorts.map((portData) => (
@@ -105,7 +121,6 @@ class BizNode extends Node<BizNodeDataType, {}> {
             ></Circle>
           </Port>
         ))}
-
         {/* out的port */}
         {outPorts.map((portData) => (
           <Port

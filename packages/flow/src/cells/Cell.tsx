@@ -34,6 +34,9 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
 
   // 如果是content: () => xxx 对应的是instance property，这种写法是instance function
   abstract content(): JSX.Element;
+  
+  onMount(): void {}
+
   static metaData: any = { id: "" };
 
   wrapperRef: React.RefObject<any>;
@@ -66,8 +69,6 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
     this.context;
     this.context.setCellData(this.props.data.id, data);
   }
-
-  onMount: () => void;
 
   componentDidMount(): void {
     [
