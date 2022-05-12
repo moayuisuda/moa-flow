@@ -6,6 +6,15 @@ var Node = /** @class */ (function (_super) {
     function Node() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
+    Node.prototype.getLinkNodes = function () {
+        return this.context.getLinkNodes(this.props.data.id);
+    };
+    Node.prototype.getLinkPorts = function () {
+        return this.context.getLinkPorts(this.props.data.id);
+    };
+    Node.prototype.getNodeEdges = function () {
+        return this.context.getNodeEdges(this.props.data.id);
+    };
     Node.metaData = {
         x: 0,
         y: 0,

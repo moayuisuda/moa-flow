@@ -1,17 +1,19 @@
-import { Flow, RightClickPanel } from "@ali/flow-infra-g";
+import { Flow, RightClickPanel, Canvas } from "@ali/flow-infra-g";
 import type { ModelType } from "@ali/flow-infra-g";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Button, message } from "antd";
 import "antd/dist/antd.css";
 
 import BizEdge from "./BizEdge";
 import BizNode from "./BizNode";
+import BizContext from "./Context";
 
 import testData from "./test.json";
 
 function App() {
   const modelRef = useRef<ModelType>();
+  const [count, setCount] = useState(0);
 
   useEffect(() => {
     const model = modelRef.current as ModelType;
@@ -25,6 +27,10 @@ function App() {
     model.setLinkEdge("BizEdge");
 
     model.setCanvasData(testData);
+
+    setInterval(() => {
+      setCount((count) => count + 1);
+    }, 1000);
   }, []);
 
   return (
@@ -39,6 +45,13 @@ function App() {
           // message.info(`[${e.type}]}`);
         }}
       >
+        <BizContext.Provider
+          value={{
+            count,
+          }}
+        >
+          <Canvas />
+        </BizContext.Provider>
         <RightClickPanel>
           {(context: ModelType) => {
             return (

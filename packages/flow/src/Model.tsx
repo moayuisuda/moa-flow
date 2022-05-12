@@ -78,8 +78,6 @@ export class FlowModel {
 
   refs = {
     stageRef: undefined as React.RefObject<G.Canvas> | undefined,
-    nodesLayerRef: undefined as React.RefObject<G.Group> | undefined,
-    linesLayerRef: undefined as React.RefObject<G.Group> | undefined,
   };
 
   @observable
@@ -218,7 +216,7 @@ export class FlowModel {
 
   // 注册节点到model，方便动态引用
   componentsMap = new Map();
-  regist = (name: string, component: Cell) => {
+  regist = (name: string, component: any) => {
     this.componentsMap.set(name, component);
   };
 

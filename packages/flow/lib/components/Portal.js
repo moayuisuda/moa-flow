@@ -7,7 +7,7 @@ var Portal = function (_a) {
     var children = _a.children, others = __rest(_a, ["children"]);
     var div = React.useState(function () { return document.createElement("div"); })[0];
     React.useLayoutEffect(function () {
-        ReactDOM.render(children, div);
+        ReactDOM.render(React.createElement(React.Fragment, null, children), div);
     });
     return React.createElement(HTML, __assign({ innerHTML: div }, others, { width: 0, height: 0 }));
 };

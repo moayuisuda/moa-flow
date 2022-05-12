@@ -1,18 +1,19 @@
 import { __extends, __assign, __decorate } from './node_modules/tslib/tslib.es6.js';
-import { Group, Circle, Canvas } from '@antv/react-g';
+import { Group, Circle, Canvas as Canvas$1 } from '@antv/react-g';
 import LinkingEdge from './cells/LinkingEdge.js';
 import React, { useContext, useState, useEffect, createRef } from 'react';
 import { FlowModel } from './Model.js';
 import { Renderer } from '@antv/g-canvas';
 import { observer } from 'mobx-react';
-import { computed, autorun } from 'mobx';
+import { computed } from 'mobx';
 import { FlowContext } from './Context.js';
 import { registComponents } from './utils/registComponents.js';
 import SelectBoundsRect from './scaffold/SelectBoundsRect.js';
 import { initClearState, initLink, initDrag, initSelect, initScale, initMultiSelect, initHotKeys } from './events.js';
 import { STAGE_CLASS_NAME } from './constants.js';
-import { getRightClickPanel } from './components/RightClickPanel/index.js';
 import { color } from './theme/style.js';
+import { getCanvas } from './utils/getElement.js';
+import { getRightClickPanel } from './components/RightClickPanel/index.js';
 
 var renderer = new Renderer();
 var renderComponent = function (cellData, model) {
@@ -49,17 +50,6 @@ var Grid = /** @class */ (function (_super) {
         _this.gridRef = React.createRef();
         return _this;
     }
-    Grid.prototype.componentDidMount = function () {
-        autorun(function () {
-            // console.log(this.context.width(), this.context.height());
-            // requestAnimationFrame(() => {
-            //   if (this.gridRef.current) {
-            //     this.gridRef.current.isCached() && this.gridRef.current.clearCache();
-            //     this.gridRef.current.cache();
-            //   }
-            // });
-        });
-    };
     Grid.prototype.render = function () {
         var _this = this;
         var grid = this.context.grid;
@@ -78,30 +68,30 @@ var Grid = /** @class */ (function (_super) {
     ], Grid);
     return Grid;
 }(React.Component));
-var Edges = observer(function (props) {
-    var linesLayerRef = props.linesLayerRef, model = props.model;
+var Edges = observer(function () {
+    var context = useContext(FlowContext);
     var _a = useState(0); _a[0]; var setSecondRefresh = _a[1];
     useEffect(function () {
         setSecondRefresh(1);
     }, []);
-    var edgesData = model.canvasData.cells.filter(function (cellData) { return cellData.cellType === "edge"; });
-    return (React.createElement(Group, { ref: linesLayerRef, zIndex: 1 }, edgesData.map(function (cellData) {
-        return renderComponent(cellData, model);
+    var edgesData = context.canvasData.cells.filter(function (cellData) { return cellData.cellType === "edge"; });
+    return (React.createElement(Group, { zIndex: 1 }, edgesData.map(function (cellData) {
+        return renderComponent(cellData, context);
     })));
 });
-var Nodes = observer(function (props) {
-    var nodesLayerRef = props.nodesLayerRef, model = props.model;
-    var nodesData = model.canvasData.cells.filter(function (cellData) {
+var Nodes = observer(function () {
+    var context = useContext(FlowContext);
+    var nodesData = context.canvasData.cells.filter(function (cellData) {
         return cellData.cellType !== "edge";
     });
-    return (React.createElement(Group, { ref: nodesLayerRef, zIndex: 2 }, nodesData.slice(0, nodesData.length).map(function (cellData) {
-        return renderComponent(cellData, model);
+    return (React.createElement(Group, { zIndex: 2 }, nodesData.slice(0, nodesData.length).map(function (cellData) {
+        return renderComponent(cellData, context);
     })));
 });
-var InteractTop = observer(function (props) {
-    var model = props.model, topLayerRef = props.topLayerRef;
-    return (React.createElement(Group, { zIndex: 3, ref: topLayerRef },
-        React.createElement(LinkingEdge, { data: model.buffer.link }),
+var InteractTop = observer(function () {
+    var context = useContext(FlowContext);
+    return (React.createElement(Group, { zIndex: 3 },
+        React.createElement(LinkingEdge, { data: context.buffer.link }),
         React.createElement(SelectBoundsRect, null)));
 });
 var Flow = /** @class */ (function (_super) {
@@ -119,9 +109,6 @@ var Flow = /** @class */ (function (_super) {
         props.onLoad && props.onLoad(_this.flowModel);
         var refs = _this.flowModel.refs;
         _this.stageRef = refs.stageRef = createRef();
-        _this.nodesLayerRef = refs.nodesLayerRef = createRef();
-        _this.linesLayerRef = refs.linesLayerRef = createRef();
-        _this.topLayerRef = createRef();
         registComponents(_this.flowModel);
         return _this;
     }
@@ -145,18 +132,22 @@ var Flow = /** @class */ (function (_super) {
             }, id: STAGE_CLASS_NAME },
             React.createElement(FlowContext.Provider, { value: model },
                 getRightClickPanel(this.props.children),
-                React.createElement(Canvas, { renderer: renderer, className: STAGE_CLASS_NAME, ref: this.stageRef, width: model.width(), height: model.height() },
+                React.createElement(Canvas$1, { renderer: renderer, className: STAGE_CLASS_NAME, ref: this.stageRef, width: model.width(), height: model.height() },
                     React.createElement(Group, { transform: "scale(".concat(model.scale(), ", ").concat(model.scale(), ")"), x: model.x(), y: model.y() },
                         React.createElement(FlowContext.Provider, { value: model },
                             this.props.grid && React.createElement(Grid, null),
-                            React.createElement(Nodes, { nodesLayerRef: this.nodesLayerRef, model: model }),
-                            React.createElement(Edges, { linesLayerRef: this.linesLayerRef, model: model }),
-                            React.createElement(InteractTop, { topLayerRef: this.topLayerRef, model: model })))))));
+                            getCanvas(this.props.children)))))));
     };
     Flow = __decorate([
         observer
     ], Flow);
     return Flow;
 }(React.Component));
+var Canvas = function () {
+    return (React.createElement(React.Fragment, null,
+        React.createElement(Nodes, null),
+        React.createElement(Edges, null),
+        React.createElement(InteractTop, null)));
+};
 
-export { Flow as default };
+export { Canvas, Flow as default };

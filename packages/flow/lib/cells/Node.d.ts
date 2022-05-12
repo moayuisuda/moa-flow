@@ -8,5 +8,8 @@ export declare type NodeDataType = {
 } & CellDataType;
 declare abstract class Node<P = {}, S = {}> extends Cell<P & NodeDataType, S> {
     static metaData: any;
+    getLinkNodes(): string[];
+    getLinkPorts(): string[];
+    getNodeEdges(): string[];
 }
 export default Node;

@@ -19,8 +19,6 @@ export declare class FlowModel {
     setGrid: (grid: number) => void;
     refs: {
         stageRef: React.RefObject<G.Canvas> | undefined;
-        nodesLayerRef: React.RefObject<G.Group> | undefined;
-        linesLayerRef: React.RefObject<G.Group> | undefined;
     };
     hotKey: {
         RightMouseDown: boolean;
@@ -89,7 +87,7 @@ export declare class FlowModel {
     cellsMap: Map<string, any>;
     cellsDataMap: Map<string, CellDataType>;
     componentsMap: Map<any, any>;
-    regist: (name: string, component: Cell) => void;
+    regist: (name: string, component: any) => void;
     eventBus: {
         sender: EventSender | undefined;
         receiver: undefined;

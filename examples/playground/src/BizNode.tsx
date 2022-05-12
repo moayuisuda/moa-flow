@@ -7,21 +7,21 @@ import {
   PortDataType,
   NodeDataType,
   Portal,
+  ConsumerBridge
 } from "@ali/flow-infra-g";
-import { message, Input, Modal } from "antd";
-const { Rect, Text, Circle, HTML } = Graph;
+import { message, Input } from "antd";
+import BizContext from "./Context";
 
+const { Rect, Text, Circle } = Graph;
 const { Port } = Interactor;
 
-type CommonPortDataType = PortDataType & {
+type BizPortDataType = PortDataType & {
   label: string;
   portType: "in" | "out" | "control-out" | "control-in";
 };
 
 type BizNodeDataType = {
-  ports?: CommonPortDataType[];
-  x?: number;
-  y?: number;
+  ports?: BizPortDataType[];
   label?: string;
 } & NodeDataType;
 class BizNode extends Node<BizNodeDataType, { modalVisible: boolean }> {
@@ -62,13 +62,6 @@ class BizNode extends Node<BizNodeDataType, { modalVisible: boolean }> {
       };
   };
 
-  inputDom = () => {
-    const input = document.createElement("input");
-    input.addEventListener("focus", () => this.context.extra.alert("hello"));
-
-    return input;
-  };
-
   content() {
     const { color } = this.context;
     const { data } = this.props;
@@ -81,79 +74,81 @@ class BizNode extends Node<BizNodeDataType, { modalVisible: boolean }> {
       ports?.filter((portData) => portData.portType === "out") || [];
 
     return (
-      <Interactor {...this.props.data}>
-        <Rect
-          width={width}
-          height={height}
-          fill="white"
-          shadowColor="rgba(0,0,0,0.1)"
-          shadowBlur={10}
-          radius={10}
-          {...this.getStroke()}
-        />
-        <Rect width={width} height={40} fill={color.deepGrey} radius={10} />
-        <Text
-          x={10}
-          y={10}
-          fontWeight="bold"
-          textBaseline={"top"}
-          text={label || ""}
-          fill="white"
-        />
-
-        <Portal y={100}>
-          <Input
-            onInput={(e) => {
-              this.setData({ label: e.target.value });
-            }}
-            style={{ width: 200 }}
-          ></Input>
-        </Portal>
-
-        {/* in的port */}
-        {inPorts.map((portData: PortDataType) => (
-          <Port
-            y={70}
-            data={portData}
-            key={portData.label}
-            anchor={{
-              x: data.x - 20,
-              y: data.y + 70,
-            }}
-          >
-            <Circle
-              lineWidth={4}
-              stroke={color.primary}
+      <ConsumerBridge context={BizContext}>
+        {(bizContext) => (
+          <Interactor {...this.props.data}>
+            <Rect
+              width={width}
+              height={height}
               fill="white"
-              r={10}
-            ></Circle>
-          </Port>
-        ))}
-        {/* out的port */}
-        {outPorts.map((portData: PortDataType) => (
-          <Port
-            x={width}
-            y={70}
-            data={portData}
-            key={portData.label}
-            anchor={{
-              x: data.x + width + 20,
-              y: data.y + 70,
-            }}
-            link={(target: PortDataType, source: PortDataType) => {
-              message.info(JSON.stringify(target));
-              return true;
-            }}
-          >
-            <Circle
-              lineWidth={4}
-              stroke={color.primary}
+              shadowColor="rgba(0,0,0,0.1)"
+              shadowBlur={10}
+              radius={10}
+              {...this.getStroke()}
+            />
+            <Rect width={width} height={40} fill={color.deepGrey} radius={10} />
+            <Text
+              x={10}
+              y={10}
+              fontWeight="bold"
+              textBaseline={"top"}
+              text={(label || "") + bizContext.count}
               fill="white"
-              r={10}
-            ></Circle>
-          </Port>
-        ))}
-      </Interactor>
+            />
+
+            <Portal y={100}>
+              <Input
+                value={bizContext.count}
+                style={{ width: 200 }}
+              ></Input>
+            </Portal>
+
+            {/* in的port */}
+            {inPorts.map((portData: PortDataType) => (
+              <Port
+                y={70}
+                data={portData}
+                key={portData.label}
+                anchor={{
+                  x: data.x - 20,
+                  y: data.y + 70,
+                }}
+              >
+                <Circle
+                  lineWidth={4}
+                  stroke={color.primary}
+                  fill="white"
+                  r={10}
+                ></Circle>
+              </Port>
+            ))}
+            {/* out的port */}
+            {outPorts.map((portData: PortDataType) => (
+              <Port
+                x={width}
+                y={70}
+                data={portData}
+                key={portData.label}
+                anchor={{
+                  x: data.x + width + 20,
+                  y: data.y + 70,
+                }}
+                link={(target: PortDataType, source: PortDataType) => {
+                  message.info(JSON.stringify(target));
+                  return true;
+                }}
+              >
+                <Circle
+                  lineWidth={4}
+                  stroke={color.primary}
+                  fill="white"
+                  r={10}
+                ></Circle>
+              </Port>
+            ))}
+          </Interactor>
+        )}
+      </ConsumerBridge>
     );
   }
 }

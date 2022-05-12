@@ -1,4 +1,4 @@
-import { Canvas, Group, Circle, Rect } from "@antv/react-g";
+import { Canvas as RGCanvas, Group, Circle } from "@antv/react-g";
 import LinkingEdge from "./cells/LinkingEdge";
 import React, { createRef } from "react";
 import FlowModel from "./Model";
@@ -22,11 +22,13 @@ import {
 } from "./events";
 import { useEffect, useState, useContext } from "react";
 import { STAGE_CLASS_NAME } from "./constants";
-import { getRightClickPanel } from "./components/RightClickPanel/index";
 import { initMultiSelect, initSelect } from "./events";
 import { color } from "./theme/style";
-import { autorun } from "mobx";
 import { CellDataType } from "./cells/Cell";
+import { getCanvas } from "./utils/getElement";
+import RightClickPanel, {
+  getRightClickPanel,
+} from "./components/RightClickPanel";
 
 const renderer = new CanvasRenderer();
 
@@ -81,19 +83,6 @@ class Grid extends React.Component<{}> {
   static contextType = FlowContext;
   // vscode 无法推断 this.context 的类型，需要显式声明 this.context 的类型
   declare context: React.ContextType<typeof FlowContext>;
-
-  componentDidMount() {
-    autorun(() => {
-      // console.log(this.context.width(), this.context.height());
-      // requestAnimationFrame(() => {
-      //   if (this.gridRef.current) {
-      //     this.gridRef.current.isCached() && this.gridRef.current.clearCache();
-      //     this.gridRef.current.cache();
-      //   }
-      // });
-    });
-  }
-
   gridRef: any;
 
   constructor(props: any) {
@@ -126,49 +115,49 @@ class Grid extends React.Component<{}> {
   }
 }
 
-const Edges = observer((props: { linesLayerRef; model }) => {
-  const { linesLayerRef, model } = props;
+const Edges = observer(() => {
+  const context = useContext(FlowContext);
   const [_, setSecondRefresh] = useState(0);
 
   useEffect(() => {
     setSecondRefresh(1);
   }, []);
 
-  const edgesData = model.canvasData.cells.filter(
+  const edgesData = context.canvasData.cells.filter(
     (cellData: CellDataType) => cellData.cellType === "edge"
   );
 
   return (
-    <Group ref={linesLayerRef} zIndex={1}>
+    <Group zIndex={1}>
       {edgesData.map((cellData: CellDataType) => {
-        return renderComponent(cellData, model);
+        return renderComponent(cellData, context);
       })}
     </Group>
   );
 });
 
-const Nodes = observer((props: { nodesLayerRef; model }) => {
-  const { nodesLayerRef, model } = props;
+const Nodes = observer(() => {
+  const context = useContext(FlowContext);
 
-  const nodesData = model.canvasData.cells.filter((cellData) => {
+  const nodesData = context.canvasData.cells.filter((cellData) => {
     return cellData.cellType !== "edge";
   });
 
   return (
-    <Group ref={nodesLayerRef} zIndex={2}>
+    <Group zIndex={2}>
       {nodesData.slice(0, nodesData.length).map((cellData) => {
-        return renderComponent(cellData, model);
+        return renderComponent(cellData, context);
       })}
     </Group>
   );
 });
 
-const InteractTop = observer((props: { model; topLayerRef }) => {
-  const { model, topLayerRef } = props;
+const InteractTop = observer(() => {
+  const context = useContext(FlowContext);
 
   return (
-    <Group zIndex={3} ref={topLayerRef}>
-      <LinkingEdge data={model.buffer.link} />
+    <Group zIndex={3}>
+      <LinkingEdge data={context.buffer.link} />
       <SelectBoundsRect />
     </Group>
   );
@@ -189,9 +178,6 @@ type FlowProps = {
 class Flow extends React.Component<FlowProps, {}> {
   flowModel: FlowModel;
   stageRef;
-  nodesLayerRef;
-  linesLayerRef;
-  topLayerRef;
 
   constructor(props: FlowProps) {
     super(props);
@@ -210,9 +196,6 @@ class Flow extends React.Component<FlowProps, {}> {
 
     const { refs } = this.flowModel;
     this.stageRef = refs.stageRef = createRef<G.Canvas>();
-    this.nodesLayerRef = refs.nodesLayerRef = createRef<G.Group>();
-    this.linesLayerRef = refs.linesLayerRef = createRef<G.Group>();
-    this.topLayerRef = createRef<G.Group>();
 
     registComponents(this.flowModel);
   }
@@ -247,8 +230,8 @@ class Flow extends React.Component<FlowProps, {}> {
         id={STAGE_CLASS_NAME}
       >
         <FlowContext.Provider value={model}>
-          {getRightClickPanel(this.props.children)}
-          <Canvas
+          {getRightClickPanel(this.props.children, RightClickPanel)}
+          <RGCanvas
             renderer={renderer}
             className={STAGE_CLASS_NAME}
             ref={this.stageRef}
@@ -262,17 +245,24 @@ class Flow extends React.Component<FlowProps, {}> {
             >
               <FlowContext.Provider value={model}>
                 {this.props.grid && <Grid />}
-                {/* 先注册节点，后注册线，线的一些计算属性需要节点的map */}
-                <Nodes nodesLayerRef={this.nodesLayerRef} model={model} />
-                <Edges linesLayerRef={this.linesLayerRef} model={model} />
-                <InteractTop topLayerRef={this.topLayerRef} model={model} />
+                {getCanvas(this.props.children)}
               </FlowContext.Provider>
             </Group>
-          </Canvas>
+          </RGCanvas>
         </FlowContext.Provider>
       </div>
     );
   }
 }
+
+export const Canvas = () => {
+  return (
+    <>
+      <Nodes />
+      <Edges />
+      <InteractTop />
+    </>
+  );
+};
 
 export default Flow;

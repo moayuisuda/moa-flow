@@ -12,7 +12,7 @@ const Portal = ({
   const [div] = React.useState(() => document.createElement("div"));
 
   React.useLayoutEffect(() => {
-    ReactDOM.render(children, div);
+    ReactDOM.render(<>{children}</>, div);
   });
 
   return <RGHTML innerHTML={div} {...others} width={0} height={0} />;

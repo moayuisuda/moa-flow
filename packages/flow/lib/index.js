@@ -1,4 +1,4 @@
-export { default as Flow } from './Flow.js';
+export { Canvas, default as Flow } from './Flow.js';
 export { default as Cell } from './cells/Cell.js';
 export { default as Node } from './cells/Node.js';
 export { default as Edge } from './cells/Edge.js';
@@ -10,3 +10,4 @@ export { default as Image } from './components/Image.js';
 import * as reactG from '@antv/react-g';
 export { reactG as Graph };
 export { autorun } from 'mobx';
+export { default as ConsumerBridge } from './components/ConsumerBridge.js';

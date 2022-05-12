@@ -46,8 +46,6 @@ var FlowModel = /** @class */ (function () {
         };
         this.refs = {
             stageRef: undefined,
-            nodesLayerRef: undefined,
-            linesLayerRef: undefined,
         };
         this.hotKey = {
             RightMouseDown: false,

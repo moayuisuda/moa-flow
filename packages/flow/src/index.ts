@@ -21,6 +21,8 @@ import { Vector2d } from './types/common';
 import { CellDataType } from './cells/Cell';
 import { EdgeDataType } from './cells/Edge';
 import { NodeDataType } from './cells/Node';
+import { Canvas } from './Flow';
+import ConsumerBridge from './components/ConsumerBridge';
 
 
 type ModelType = Model
@@ -44,6 +46,8 @@ export {
     RightClickPanel,
     Graph,
     autorun,
+    Canvas,
+    ConsumerBridge
 };
 
 export type { ModelType, FlowInfraEventType, Vector2d, CellDataType, EdgeDataType, PortDataType, NodeDataType };
