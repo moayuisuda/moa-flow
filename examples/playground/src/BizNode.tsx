@@ -6,8 +6,9 @@ import {
   ModelType,
   PortDataType,
   NodeDataType,
+  Portal,
 } from "@ali/flow-infra-g";
-import { message } from "antd";
+import { message, Input, Modal } from "antd";
 const { Rect, Text, Circle, HTML } = Graph;
 
 const { Port } = Interactor;
@@ -63,9 +64,9 @@ class BizNode extends Node<BizNodeDataType, { modalVisible: boolean }> {
 
   inputDom = () => {
     const input = document.createElement("input");
-    input.addEventListener("focus", () => this.context.extra.alert('hello'));
+    input.addEventListener("focus", () => this.context.extra.alert("hello"));
 
-    return input
+    return input;
   };
 
   content() {
@@ -100,10 +101,17 @@ class BizNode extends Node<BizNodeDataType, { modalVisible: boolean }> {
           fill="white"
         />
 
-        <HTML innerHTML={this.inputDom()} y={100} width={0} height={0} />
+        <Portal y={100}>
+          <Input
+            onInput={(e) => {
+              this.setData({ label: e.target.value });
+            }}
+            style={{ width: 200 }}
+          ></Input>
+        </Portal>
 
-        {/* out的port */}
-        {inPorts.map((portData) => (
+        {/* in的port */}
+        {inPorts.map((portData: PortDataType) => (
           <Port
             y={70}
             data={portData}
@@ -122,7 +130,7 @@ class BizNode extends Node<BizNodeDataType, { modalVisible: boolean }> {
           </Port>
         ))}
         {/* out的port */}
-        {outPorts.map((portData) => (
+        {outPorts.map((portData: PortDataType) => (
           <Port
             x={width}
             y={70}
@@ -132,7 +140,7 @@ class BizNode extends Node<BizNodeDataType, { modalVisible: boolean }> {
               x: data.x + width + 20,
               y: data.y + 70,
             }}
-            link={(target, source) => {
+            link={(target: PortDataType, source: PortDataType) => {
               message.info(JSON.stringify(target));
               return true;
             }}

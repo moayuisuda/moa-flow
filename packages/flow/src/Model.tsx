@@ -324,7 +324,35 @@ export class FlowModel {
     return re;
   };
 
-  // 获取某一个结点连接的其他节点
+  getLinkPorts = (id: string) => {
+    const re: string[] = [];
+    const nodeData = this.getCellData(id) as NodeDataType;
+    if (nodeData.ports)
+      nodeData.ports.forEach((port: PortDataType) => {
+        if (port.edges) {
+          port.edges.forEach((edgeId) => {
+            const edgeData = this.getCellData(edgeId) as EdgeDataType;
+            const sourcePort = this.getCellData(
+              edgeData.source as string
+            ) as PortDataType;
+            const targetPort = this.getCellData(
+              edgeData.target as string
+            ) as PortDataType;
+
+            re.push(
+              ...without(
+                union([sourcePort.id as string], [targetPort.id as string]),
+                id
+              )
+            );
+          });
+        }
+      });
+
+    return re;
+  };
+
+  // 获取某一个node连接的其他node
   getLinkNodes = (id: string) => {
     const re: string[] = [];
     const nodeData = this.getCellData(id) as NodeDataType;

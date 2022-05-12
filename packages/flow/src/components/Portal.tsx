@@ -1,8 +1,9 @@
 import React from "react";
-import { HTML as RGHTML, HTMLStyleProps } from "@antv/react-g";
+import { HTML as RGHTML } from "@antv/react-g";
+import { HTMLStyleProps } from "@antv/g";
 import ReactDOM from "react-dom";
 
-export const HTML = ({
+const Portal = ({
   children,
   ...others
 }: Omit<HTMLStyleProps, "innerHTML"> & {
@@ -12,12 +13,9 @@ export const HTML = ({
 
   React.useLayoutEffect(() => {
     ReactDOM.render(children, div);
-    
-    return () => {
-      ReactDOM.unmountComponentAtNode(div);
-      div.parentNode?.removeChild(div);
-    };
-  }, []);
+  });
 
-  return <RGHTML innerHTML={div} {...others} />;
+  return <RGHTML innerHTML={div} {...others} width={0} height={0} />;
 };
+
+export default Portal;

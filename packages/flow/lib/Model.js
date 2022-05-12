@@ -242,7 +242,23 @@ var FlowModel = /** @class */ (function () {
                 });
             return re;
         };
-        // 获取某一个结点连接的其他节点
+        this.getLinkPorts = function (id) {
+            var re = [];
+            var nodeData = _this.getCellData(id);
+            if (nodeData.ports)
+                nodeData.ports.forEach(function (port) {
+                    if (port.edges) {
+                        port.edges.forEach(function (edgeId) {
+                            var edgeData = _this.getCellData(edgeId);
+                            var sourcePort = _this.getCellData(edgeData.source);
+                            var targetPort = _this.getCellData(edgeData.target);
+                            re.push.apply(re, lodash.exports.without(lodash.exports.union([sourcePort.id], [targetPort.id]), id));
+                        });
+                    }
+                });
+            return re;
+        };
+        // 获取某一个node连接的其他node
         this.getLinkNodes = function (id) {
             var re = [];
             var nodeData = _this.getCellData(id);

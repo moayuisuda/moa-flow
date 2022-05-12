@@ -112,6 +112,7 @@ export declare class FlowModel {
     setCellId: (data: CellDataType) => void;
     setCellData: (id: string, data: any) => void;
     getNodeEdges: (nodeId: string) => string[];
+    getLinkPorts: (id: string) => string[];
     getLinkNodes: (id: string) => string[];
     deleCell: (id: string) => string | undefined;
     snap: (vector: Vector2d) => {

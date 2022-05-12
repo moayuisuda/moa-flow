@@ -4,6 +4,7 @@ export { default as Node } from './cells/Node.js';
 export { default as Edge } from './cells/Edge.js';
 export { default as Interactor } from './scaffold/Interacotr.js';
 export { default as Port } from './scaffold/Port.js';
+export { default as Portal } from './components/Portal.js';
 export { default as RightClickPanel } from './components/RightClickPanel/index.js';
 export { default as Image } from './components/Image.js';
 import * as reactG from '@antv/react-g';

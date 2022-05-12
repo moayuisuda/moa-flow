@@ -30,8 +30,8 @@ declare abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & 
     };
     protected formatVerticied: (verticies: Vector2d[]) => Vector2d[];
     getLinkPortsData: () => {
-        source: Vector2d | PortDataType;
-        target: Vector2d | PortDataType;
+        source: PortDataType | Vector2d;
+        target: PortDataType | Vector2d;
     };
     getAnchors: () => {
         source: any;
