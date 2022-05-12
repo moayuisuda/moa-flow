@@ -62,13 +62,12 @@ class BizNode extends Node<BizNodeDataType, { modalVisible: boolean }> {
       };
   };
 
-  inputDom = () => {
-    const input = document.createElement("input");
-    input.addEventListener("focus", () => this.context.extra.alert("hello"));
-
-    return input;
-  };
-
+  getLinkData() {
+    const linkNodes = this.context.getLinkNodes(this.props.data.id)
+    if(linkNodes) return JSON.stringify((this.context.getCellData(linkNodes[0]) as any))
+    this.context
+  }
+  
   content() {
     const { color } = this.context;
     const { data } = this.props;
@@ -101,11 +100,14 @@ class BizNode extends Node<BizNodeDataType, { modalVisible: boolean }> {
           fill="white"
         />
 
+        <Text text={this.getLinkData()}></Text>
+
         <Portal y={100}>
           <Input
             onInput={(e) => {
               this.setData({ label: e.target.value });
             }}
+            onFocus={e => this.context.extra.alert('hello')}
             style={{ width: 200 }}
           ></Input>
         </Portal>
