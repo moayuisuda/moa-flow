@@ -13,6 +13,18 @@ abstract class Node<P = {}, S = {}> extends Cell<P & NodeDataType, S> {
     y: 0,
     cellType: "node",
   };
+
+  getLinkNodes() {
+    return this.context.getLinkNodes(this.props.data.id);
+  }
+
+  getLinkPorts() {
+    return this.context.getLinkPorts(this.props.data.id);
+  }
+
+  getNodeEdges() {
+    return this.context.getNodeEdges(this.props.data.id);
+  }
 }
 
 export default Node;
