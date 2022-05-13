@@ -8,10 +8,10 @@ import { union, without, merge, isUndefined } from "lodash";
 import { EdgeDataType } from "./cells/Edge";
 import { PortDataType } from "./scaffold/Port";
 import { NodeDataType } from "./cells/Node";
-import G from "@antv/g";
 import { CanvasDataType, AllCellDataType, Vector2d } from "./types/common";
 import Cell from "./cells/Cell";
 import { InteractivePointerEvent } from "@antv/g";
+import * as G from "@antv/g";
 
 type EventSender = (data: any) => void;
 export class FlowModel {
@@ -114,7 +114,7 @@ export class FlowModel {
     targetPort.edges && remove(targetPort.edges as string[], edgeId);
   };
 
-  // 一些中间状态，比如连线中的开始节点的暂存，不应该让外部
+  // 一些中间状态，比如连线中的开始节点的暂存，不应该让外部感知
   @observable
   buffer = {
     rightClickPanel: {
@@ -220,7 +220,6 @@ export class FlowModel {
     this.componentsMap.set(name, component);
   };
 
-  // 消息传递
   eventBus = {
     sender: undefined as EventSender | undefined,
     receiver: undefined,
@@ -229,7 +228,6 @@ export class FlowModel {
   // 选中的cell
   @observable selectCells: string[] = [];
   @action setSelectedCells = (ids: string[], ifReplace = true) => {
-    // @TODO select感觉只能放在私有属性，否则每次更新要diff全部的节点
     if (ifReplace) {
       this.selectCells = ids;
     } else {
@@ -237,7 +235,6 @@ export class FlowModel {
     }
   };
 
-  // 画布的渲染数据，之后的渲染大部分都为受控渲染，更改canvasData => 触发重新渲染
   @observable canvasData: CanvasDataType = {
     scale: 1,
     x: 0,
@@ -307,6 +304,9 @@ export class FlowModel {
     merge(cellData, data);
   };
 
+  /**
+   * @description 获取某个node连接的所有edge
+   */
   getNodeEdges = (nodeId: string) => {
     const re: string[] = [];
     const nodeData = this.getCellData(nodeId) as NodeDataType;
@@ -322,58 +322,83 @@ export class FlowModel {
     return re;
   };
 
-  getLinkPorts = (id: string) => {
+  /**
+   * @description 获取某个port连接的所有port
+   */
+  getPortLinkPorts = (portId: string) => {
     const re: string[] = [];
-    const nodeData = this.getCellData(id) as NodeDataType;
-    if (nodeData.ports)
-      nodeData.ports.forEach((port: PortDataType) => {
-        if (port.edges) {
-          port.edges.forEach((edgeId) => {
-            const edgeData = this.getCellData(edgeId) as EdgeDataType;
-            const sourcePort = this.getCellData(
-              edgeData.source as string
-            ) as PortDataType;
-            const targetPort = this.getCellData(
-              edgeData.target as string
-            ) as PortDataType;
 
-            re.push(
-              ...without(
-                union([sourcePort.id as string], [targetPort.id as string]),
-                id
-              )
-            );
-          });
-        }
+    const portData = this.getCellData(portId) as PortDataType;
+    portData.edges?.forEach((edgeId) => {
+      const edgeData = this.getCellData(edgeId) as EdgeDataType;
+      const sourcePort = this.getCellData(
+        edgeData.source as string
+      ) as PortDataType;
+      const targetPort = this.getCellData(
+        edgeData.target as string
+      ) as PortDataType;
+
+      re.push(
+        ...without(
+          union([sourcePort.id as string], [targetPort.id as string]),
+          portId
+        )
+      );
+    });
+
+    return re;
+  };
+
+  /**
+   * @description 获取某个port连接的所有node
+   */
+  getPortLinkNodes = (portId: string) => {
+    const re: string[] = [];
+
+    const portData = this.getCellData(portId) as PortDataType;
+    portData.edges?.forEach((edgeId) => {
+      const edgeData = this.getCellData(edgeId) as EdgeDataType;
+      const sourcePort = this.getCellData(
+        edgeData.source as string
+      ) as PortDataType;
+      const targetPort = this.getCellData(
+        edgeData.target as string
+      ) as PortDataType;
+
+      re.push(
+        ...without(
+          union([sourcePort.host as string], [targetPort.host as string]),
+          portData.host as string
+        )
+      );
+    });
+
+    return re;
+  };
+
+  /**
+   * @description 获取某个node连接的所有port
+   */
+  getLinkPorts = (nodeId: string) => {
+    const re: string[] = [];
+    const nodeData = this.getCellData(nodeId) as NodeDataType;
+    if (nodeData.ports)
+      nodeData.ports.forEach((portData: PortDataType) => {
+        re.push(...this.getPortLinkPorts(portData.id));
       });
 
     return re;
   };
 
-  // 获取某一个node连接的其他node
-  getLinkNodes = (id: string) => {
+  /**
+   * @description 获取某个node连接的所有node
+   */
+  getLinkNodes = (nodeId: string) => {
     const re: string[] = [];
-    const nodeData = this.getCellData(id) as NodeDataType;
+    const nodeData = this.getCellData(nodeId) as NodeDataType;
     if (nodeData.ports)
-      nodeData.ports.forEach((port: PortDataType) => {
-        if (port.edges) {
-          port.edges.forEach((edgeId) => {
-            const edgeData = this.getCellData(edgeId) as EdgeDataType;
-            const sourcePort = this.getCellData(
-              edgeData.source as string
-            ) as PortDataType;
-            const targetPort = this.getCellData(
-              edgeData.target as string
-            ) as PortDataType;
-
-            re.push(
-              ...without(
-                union([sourcePort.host as string], [targetPort.host as string]),
-                id
-              )
-            );
-          });
-        }
+      nodeData.ports.forEach((portData: PortDataType) => {
+        re.push(...this.getPortLinkNodes(portData.id));
       });
 
     return re;
@@ -411,8 +436,7 @@ export class FlowModel {
   // 自动布局，用自动布局的三方库对每一个节点的x，y进行计算
   // @action setAutoLayout = (layoutOption) => {};
 
-  // 创建新的节点数据
-  @action createCellData = (component: string, initOptions?: any) => {
+  createCellData = (component: string, initOptions?: any) => {
     const id = v4();
 
     const metaData = Object.assign(
@@ -543,6 +567,9 @@ export class FlowModel {
     return this.canvasData.cells;
   };
 
+  /**
+   * @description 获取当前鼠标的[画布坐标]
+   */
   getStageCursor = (e: InteractivePointerEvent) => {
     return {
       x: (e.canvas.x - this.x()) / this.scale(),

@@ -9,6 +9,11 @@ var Portal = function (_a) {
     React.useLayoutEffect(function () {
         ReactDOM.render(React.createElement(React.Fragment, null, children), div);
     });
+    React.useEffect(function () {
+        return function () {
+            ReactDOM.unmountComponentAtNode(div);
+        };
+    }, []);
     return React.createElement(HTML, __assign({ innerHTML: div }, others, { width: 0, height: 0 }));
 };
 

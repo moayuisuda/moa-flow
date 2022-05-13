@@ -69,7 +69,7 @@ var FlowModel = /** @class */ (function () {
             sourcePort.edges && remove(sourcePort.edges, edgeId);
             targetPort.edges && remove(targetPort.edges, edgeId);
         };
-        // 一些中间状态，比如连线中的开始节点的暂存，不应该让外部
+        // 一些中间状态，比如连线中的开始节点的暂存，不应该让外部感知
         this.buffer = {
             rightClickPanel: {
                 visible: false,
@@ -152,7 +152,6 @@ var FlowModel = /** @class */ (function () {
         this.regist = function (name, component) {
             _this.componentsMap.set(name, component);
         };
-        // 消息传递
         this.eventBus = {
             sender: undefined,
             receiver: undefined,
@@ -161,7 +160,6 @@ var FlowModel = /** @class */ (function () {
         this.selectCells = [];
         this.setSelectedCells = function (ids, ifReplace) {
             if (ifReplace === void 0) { ifReplace = true; }
-            // @TODO select感觉只能放在私有属性，否则每次更新要diff全部的节点
             if (ifReplace) {
                 _this.selectCells = ids;
             }
@@ -169,7 +167,6 @@ var FlowModel = /** @class */ (function () {
                 _this.selectCells = lodash.exports.union(_this.selectCells, ids);
             }
         };
-        // 画布的渲染数据，之后的渲染大部分都为受控渲染，更改canvasData => 触发重新渲染
         this.canvasData = {
             scale: 1,
             x: 0,
@@ -227,6 +224,9 @@ var FlowModel = /** @class */ (function () {
             });
             lodash.exports.merge(cellData, data);
         };
+        /**
+         * @description 获取某个node连接的所有edge
+         */
         this.getNodeEdges = function (nodeId) {
             var re = [];
             var nodeData = _this.getCellData(nodeId);
@@ -240,36 +240,57 @@ var FlowModel = /** @class */ (function () {
                 });
             return re;
         };
-        this.getLinkPorts = function (id) {
+        /**
+         * @description 获取某个port连接的所有port
+         */
+        this.getPortLinkPorts = function (portId) {
+            var _a;
             var re = [];
-            var nodeData = _this.getCellData(id);
+            var portData = _this.getCellData(portId);
+            (_a = portData.edges) === null || _a === void 0 ? void 0 : _a.forEach(function (edgeId) {
+                var edgeData = _this.getCellData(edgeId);
+                var sourcePort = _this.getCellData(edgeData.source);
+                var targetPort = _this.getCellData(edgeData.target);
+                re.push.apply(re, lodash.exports.without(lodash.exports.union([sourcePort.id], [targetPort.id]), portId));
+            });
+            return re;
+        };
+        /**
+         * @description 获取某个port连接的所有node
+         */
+        this.getPortLinkNodes = function (portId) {
+            var _a;
+            var re = [];
+            var portData = _this.getCellData(portId);
+            (_a = portData.edges) === null || _a === void 0 ? void 0 : _a.forEach(function (edgeId) {
+                var edgeData = _this.getCellData(edgeId);
+                var sourcePort = _this.getCellData(edgeData.source);
+                var targetPort = _this.getCellData(edgeData.target);
+                re.push.apply(re, lodash.exports.without(lodash.exports.union([sourcePort.host], [targetPort.host]), portData.host));
+            });
+            return re;
+        };
+        /**
+         * @description 获取某个node连接的所有port
+         */
+        this.getLinkPorts = function (nodeId) {
+            var re = [];
+            var nodeData = _this.getCellData(nodeId);
             if (nodeData.ports)
-                nodeData.ports.forEach(function (port) {
-                    if (port.edges) {
-                        port.edges.forEach(function (edgeId) {
-                            var edgeData = _this.getCellData(edgeId);
-                            var sourcePort = _this.getCellData(edgeData.source);
-                            var targetPort = _this.getCellData(edgeData.target);
-                            re.push.apply(re, lodash.exports.without(lodash.exports.union([sourcePort.id], [targetPort.id]), id));
-                        });
-                    }
+                nodeData.ports.forEach(function (portData) {
+                    re.push.apply(re, _this.getPortLinkPorts(portData.id));
                 });
             return re;
         };
-        // 获取某一个node连接的其他node
-        this.getLinkNodes = function (id) {
+        /**
+         * @description 获取某个node连接的所有node
+         */
+        this.getLinkNodes = function (nodeId) {
             var re = [];
-            var nodeData = _this.getCellData(id);
+            var nodeData = _this.getCellData(nodeId);
             if (nodeData.ports)
-                nodeData.ports.forEach(function (port) {
-                    if (port.edges) {
-                        port.edges.forEach(function (edgeId) {
-                            var edgeData = _this.getCellData(edgeId);
-                            var sourcePort = _this.getCellData(edgeData.source);
-                            var targetPort = _this.getCellData(edgeData.target);
-                            re.push.apply(re, lodash.exports.without(lodash.exports.union([sourcePort.host], [targetPort.host]), id));
-                        });
-                    }
+                nodeData.ports.forEach(function (portData) {
+                    re.push.apply(re, _this.getPortLinkNodes(portData.id));
                 });
             return re;
         };
@@ -299,7 +320,6 @@ var FlowModel = /** @class */ (function () {
         };
         // 自动布局，用自动布局的三方库对每一个节点的x，y进行计算
         // @action setAutoLayout = (layoutOption) => {};
-        // 创建新的节点数据
         this.createCellData = function (component, initOptions) {
             var id = v4();
             var metaData = Object.assign(_this.componentsMap.get(component).getMetaData(), {
@@ -380,6 +400,9 @@ var FlowModel = /** @class */ (function () {
         this.getCellsData = function () {
             return _this.canvasData.cells;
         };
+        /**
+         * @description 获取当前鼠标的[画布坐标]
+         */
         this.getStageCursor = function (e) {
             return {
                 x: (e.canvas.x - _this.x()) / _this.scale(),
@@ -495,9 +518,6 @@ var FlowModel = /** @class */ (function () {
     __decorate([
         action
     ], FlowModel.prototype, "deleCell", void 0);
-    __decorate([
-        action
-    ], FlowModel.prototype, "createCellData", void 0);
     __decorate([
         action
     ], FlowModel.prototype, "addCell", void 0);

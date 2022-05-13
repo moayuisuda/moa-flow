@@ -8,7 +8,7 @@ class LinkingEdge extends React.Component<{ data: any }> {
   static contextType = FlowContext;
   declare context: React.ContextType<typeof FlowContext>;
 
-  constructor(props) {
+  constructor(props: any) {
     super(props);
   }
 

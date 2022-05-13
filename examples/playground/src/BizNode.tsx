@@ -7,9 +7,9 @@ import {
   PortDataType,
   NodeDataType,
   Portal,
-  ConsumerBridge
+  ConsumerBridge,
 } from "@ali/flow-infra-g";
-import { message, Input } from "antd";
+import { message, Input, Modal } from "antd";
 import BizContext from "./Context";
 
 const { Rect, Text, Circle } = Graph;
@@ -62,6 +62,7 @@ class BizNode extends Node<BizNodeDataType, { modalVisible: boolean }> {
       };
   };
 
+  // 只有这个方法是必须的
   content() {
     const { color } = this.context;
     const { data } = this.props;
@@ -96,11 +97,23 @@ class BizNode extends Node<BizNodeDataType, { modalVisible: boolean }> {
               fill="white"
             />
 
+            <Text
+              x={20}
+              y={60}
+              text={"连接nodes: " + JSON.stringify(this.getLinkNodes())}
+            />
+            <Text
+              x={20}
+              y={90}
+              text={"连接ports: " + JSON.stringify(this.getLinkPorts())}
+            />
+
             <Portal y={100}>
-              <Input
-                value={bizContext.count}
-                style={{ width: 200 }}
-              ></Input>
+              <Input value={bizContext.count} style={{ width: 200 }}></Input>
+              {/* <Modal
+                visible={this.state.modalVisible}
+                onCancel={() => this.setState({ modalVisible: false })}
+              ></Modal> */}
             </Portal>
 
             {/* in的port */}

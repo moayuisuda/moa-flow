@@ -15,6 +15,12 @@ const Portal = ({
     ReactDOM.render(<>{children}</>, div);
   });
 
+  React.useEffect(() => {
+    return () => {
+      ReactDOM.unmountComponentAtNode(div);
+    };
+  }, []);
+
   return <RGHTML innerHTML={div} {...others} width={0} height={0} />;
 };
 

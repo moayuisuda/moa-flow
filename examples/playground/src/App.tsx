@@ -28,9 +28,9 @@ function App() {
 
     model.setCanvasData(testData);
 
-    setInterval(() => {
-      setCount((count) => count + 1);
-    }, 1000);
+    // setInterval(() => {
+    //   setCount((count) => count + 1);
+    // }, 1000);
   }, []);
 
   return (
@@ -45,6 +45,7 @@ function App() {
           // message.info(`[${e.type}]}`);
         }}
       >
+        {/* Provider包裹画布组件 */}
         <BizContext.Provider
           value={{
             count,
@@ -52,6 +53,8 @@ function App() {
         >
           <Canvas />
         </BizContext.Provider>
+
+        {/* 右键菜单组件，可以拿到context */}
         <RightClickPanel>
           {(context: ModelType) => {
             return (
@@ -69,6 +72,11 @@ function App() {
           }}
         </RightClickPanel>
       </Flow>
+      <h1>111</h1>
+      <h1>111</h1>
+      <h1>111</h1>
+      <h1>111</h1>
+      <h1>111</h1>
     </div>
   );
 }

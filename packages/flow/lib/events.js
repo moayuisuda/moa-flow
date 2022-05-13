@@ -1,7 +1,7 @@
 import { __spreadArray } from './node_modules/tslib/tslib.es6.js';
 import { autorun } from 'mobx';
 import './node_modules/lodash/lodash.js';
-import { EVT_LEFTCLICK, EVT_RIGHTCLICK } from './constants.js';
+import { EVT_LEFTCLICK, STAGE_ID, EVT_RIGHTCLICK } from './constants.js';
 import { l as lodash } from './_virtual/lodash.js';
 
 var initClearState = function (model, stage) {
@@ -87,10 +87,13 @@ var initDrag = function (model, stage) {
     });
 };
 var initScale = function (model, stage) {
+    var _a;
     var scaleBy = 1.02;
+    (_a = document.querySelector("#".concat(STAGE_ID))) === null || _a === void 0 ? void 0 : _a.addEventListener('wheel', function (e) {
+        e.preventDefault();
+    });
     stage.on('wheel', function (e) {
         // stop default scrolling
-        e.preventDefault();
         e.stopPropagation();
         var oldScale = model.canvasData.scale;
         var pointer = e.canvas;
@@ -188,6 +191,7 @@ var initHotKeys = function (model, stage) {
         }
     });
     window.addEventListener('keyup', function (e) {
+        console.log(e.code);
         switch (e.code) {
             case 'Space':
                 e.preventDefault();

@@ -10,7 +10,7 @@ import { FlowContext } from './Context.js';
 import { registComponents } from './utils/registComponents.js';
 import SelectBoundsRect from './scaffold/SelectBoundsRect.js';
 import { initClearState, initLink, initDrag, initSelect, initScale, initMultiSelect, initHotKeys } from './events.js';
-import { STAGE_CLASS_NAME } from './constants.js';
+import { STAGE_ID } from './constants.js';
 import { color } from './theme/style.js';
 import { getCanvas } from './utils/getElement.js';
 import { getRightClickPanel } from './components/RightClickPanel/index.js';
@@ -129,10 +129,11 @@ var Flow = /** @class */ (function (_super) {
         var model = this.flowModel;
         return (React.createElement("div", { style: {
                 position: "relative",
-            }, id: STAGE_CLASS_NAME },
+                display: "inline-block",
+            }, id: STAGE_ID },
             React.createElement(FlowContext.Provider, { value: model },
                 getRightClickPanel(this.props.children),
-                React.createElement(Canvas$1, { renderer: renderer, className: STAGE_CLASS_NAME, ref: this.stageRef, width: model.width(), height: model.height() },
+                React.createElement(Canvas$1, { renderer: renderer, ref: this.stageRef, width: model.width(), height: model.height() },
                     React.createElement(Group, { transform: "scale(".concat(model.scale(), ", ").concat(model.scale(), ")"), x: model.x(), y: model.y() },
                         React.createElement(FlowContext.Provider, { value: model },
                             this.props.grid && React.createElement(Grid, null),

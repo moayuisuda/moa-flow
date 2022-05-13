@@ -4,7 +4,7 @@ import * as G from "@antv/g";
 import React from "react";
 import { FlowContext } from "../../Context";
 import Model from "../../Model";
-import { EVT_RIGHTCLICK, STAGE_CLASS_NAME } from "../../constants";
+import { EVT_RIGHTCLICK, STAGE_ID } from "../../constants";
 
 @observer
 class RightClickPanel extends React.Component<
@@ -18,7 +18,7 @@ class RightClickPanel extends React.Component<
 
   initStageEvent = () => {
     document
-      .querySelector("#" + STAGE_CLASS_NAME)
+      .querySelector("#" + STAGE_ID)
       ?.addEventListener("contextmenu", (e) => {
         e.preventDefault();
         this.context.buffer.rightClickPanel.visible = true;

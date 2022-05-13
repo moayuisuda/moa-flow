@@ -3,7 +3,7 @@ import { observer } from 'mobx-react';
 import styles from './style.less.js';
 import React from 'react';
 import { FlowContext } from '../../Context.js';
-import { STAGE_CLASS_NAME } from '../../constants.js';
+import { STAGE_ID } from '../../constants.js';
 
 var RightClickPanel = /** @class */ (function (_super) {
     __extends(RightClickPanel, _super);
@@ -12,7 +12,7 @@ var RightClickPanel = /** @class */ (function (_super) {
         _this.initStageEvent = function () {
             var _a;
             (_a = document
-                .querySelector("#" + STAGE_CLASS_NAME)) === null || _a === void 0 ? void 0 : _a.addEventListener("contextmenu", function (e) {
+                .querySelector("#" + STAGE_ID)) === null || _a === void 0 ? void 0 : _a.addEventListener("contextmenu", function (e) {
                 e.preventDefault();
                 _this.context.buffer.rightClickPanel.visible = true;
                 _this.setState({

@@ -21,7 +21,7 @@ import {
   initDataChangeListener,
 } from "./events";
 import { useEffect, useState, useContext } from "react";
-import { STAGE_CLASS_NAME } from "./constants";
+import { STAGE_ID } from "./constants";
 import { initMultiSelect, initSelect } from "./events";
 import { color } from "./theme/style";
 import { CellDataType } from "./cells/Cell";
@@ -226,14 +226,14 @@ class Flow extends React.Component<FlowProps, {}> {
       <div
         style={{
           position: "relative",
+          display: "inline-block",
         }}
-        id={STAGE_CLASS_NAME}
+        id={STAGE_ID}
       >
         <FlowContext.Provider value={model}>
-          {getRightClickPanel(this.props.children, RightClickPanel)}
+          {getRightClickPanel(this.props.children)}
           <RGCanvas
             renderer={renderer}
-            className={STAGE_CLASS_NAME}
             ref={this.stageRef}
             width={model.width()}
             height={model.height()}

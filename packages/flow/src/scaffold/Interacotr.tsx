@@ -5,7 +5,6 @@ import { observer } from "mobx-react";
 
 import { FlowContext } from "../Context";
 import Port from "./Port";
-import { EVT_LEFTCLICK } from "../constants";
 
 type InteractorType = {
   x?: number;
@@ -15,7 +14,6 @@ type InteractorType = {
   selectable?: boolean;
   topOnFocus?: boolean;
 };
-
 @observer
 class Interactor extends React.Component<InteractorType> {
   static contextType = FlowContext;

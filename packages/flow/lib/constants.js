@@ -1,5 +1,5 @@
-var STAGE_CLASS_NAME = 'flow-stage';
+var STAGE_ID = 'flow-stage';
 var EVT_LEFTCLICK = 0;
 var EVT_RIGHTCLICK = 2;
 
-export { EVT_LEFTCLICK, EVT_RIGHTCLICK, STAGE_CLASS_NAME };
+export { EVT_LEFTCLICK, EVT_RIGHTCLICK, STAGE_ID };

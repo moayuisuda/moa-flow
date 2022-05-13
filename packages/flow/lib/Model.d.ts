@@ -1,8 +1,8 @@
 import React from "react";
 import { CellDataType } from "./cells/Cell";
-import G from "@antv/g";
 import { CanvasDataType, AllCellDataType, Vector2d } from "./types/common";
 import { InteractivePointerEvent } from "@antv/g";
+import * as G from "@antv/g";
 declare type EventSender = (data: any) => void;
 export declare class FlowModel {
     constructor(eventSender?: EventSender);
@@ -109,9 +109,26 @@ export declare class FlowModel {
     setCanvasData: (canvasData: CanvasDataType) => void;
     setCellId: (data: CellDataType) => void;
     setCellData: (id: string, data: any) => void;
+    /**
+     * @description 获取某个node连接的所有edge
+     */
     getNodeEdges: (nodeId: string) => string[];
-    getLinkPorts: (id: string) => string[];
-    getLinkNodes: (id: string) => string[];
+    /**
+     * @description 获取某个port连接的所有port
+     */
+    getPortLinkPorts: (portId: string) => string[];
+    /**
+     * @description 获取某个port连接的所有node
+     */
+    getPortLinkNodes: (portId: string) => string[];
+    /**
+     * @description 获取某个node连接的所有port
+     */
+    getLinkPorts: (nodeId: string) => string[];
+    /**
+     * @description 获取某个node连接的所有node
+     */
+    getLinkNodes: (nodeId: string) => string[];
     deleCell: (id: string) => string | undefined;
     snap: (vector: Vector2d) => {
         x: number;
@@ -129,6 +146,9 @@ export declare class FlowModel {
     getCellData: (id: string) => CellDataType | undefined;
     getCellInstance: (id: string) => any;
     getCellsData: () => any[];
+    /**
+     * @description 获取当前鼠标的[画布坐标]
+     */
     getStageCursor: (e: InteractivePointerEvent) => {
         x: number;
         y: number;

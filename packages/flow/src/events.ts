@@ -3,7 +3,7 @@ import { autorun } from "mobx"
 import { without } from 'lodash';
 import { NodeDataType } from "./cells/Node";
 import { CellDataType } from './cells/Cell';
-import { EVT_LEFTCLICK, EVT_RIGHTCLICK } from './constants';
+import { EVT_LEFTCLICK, EVT_RIGHTCLICK, STAGE_ID } from './constants';
 import { Vector2d } from "./types/common";
 import { InteractivePointerEvent, Canvas } from '@antv/g';
 
@@ -18,7 +18,7 @@ export const initClearState = (model: ModelType, stage: Canvas) => {
 }
 
 export const initLink = (model: ModelType, stage: Canvas) => {
-    stage.on('mouseup', (e) => {
+    stage.on('mouseup', (e: InteractivePointerEvent) => {
         model.clearLinkBuffer();
     })
 
@@ -119,10 +119,13 @@ export const initDrag = (model: ModelType, stage: Canvas) => {
 export const initScale = (model: ModelType, stage: Canvas) => {
     let scaleBy = 1.02;
 
+    document.querySelector(`#${STAGE_ID}`)?.addEventListener('wheel', e => {
+        e.preventDefault()
+    })
+
     stage.on('wheel', (e: InteractivePointerEvent) => {
 
         // stop default scrolling
-        e.preventDefault();
         e.stopPropagation()
 
         const oldScale = model.canvasData.scale;
@@ -233,6 +236,7 @@ export const initHotKeys = (model: ModelType, stage: Canvas) => {
     })
 
     window.addEventListener('keyup', e => {
+        console.log(e.code)
         switch (e.code) {
             case 'Space':
                 e.preventDefault()
