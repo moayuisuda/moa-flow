@@ -12,7 +12,7 @@ import {
 import { message, Input, Modal } from "antd";
 import BizContext from "./Context";
 
-const { Rect, Text, Circle, Arrow } = Graph;
+const { Rect, Text, Circle } = Graph;
 const { Port } = Interactor;
 
 type BizPortDataType = PortDataType & {

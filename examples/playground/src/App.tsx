@@ -28,9 +28,9 @@ function App() {
 
     model.setCanvasData(testData);
 
-    // setInterval(() => {
-    //   setCount((count) => count + 1);
-    // }, 1000);
+    setInterval(() => {
+      setCount((count) => count + 1);
+    }, 1000);
   }, []);
 
   return (

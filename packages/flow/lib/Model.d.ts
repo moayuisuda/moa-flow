@@ -1,6 +1,6 @@
 import React from "react";
 import { CellDataType } from "./cells/Cell";
-import { CanvasDataType, AllCellDataType, Vector2d } from "./types/common";
+import { CanvasDataType, AllCellDataType, Vector2d } from "./typings/common";
 import { InteractivePointerEvent } from "@antv/g";
 import * as G from "@antv/g";
 declare type EventSender = (data: any) => void;
@@ -138,14 +138,14 @@ export declare class FlowModel {
     addCell: (componentName: string, initOptions: any) => any;
     setLinkingPosition: (e: InteractivePointerEvent) => void;
     link: (source: string, target: string) => void;
-    scale: (scale?: number | undefined) => any;
-    x(x?: number): any;
-    y(y?: number): any;
+    scale: (scale?: number | undefined) => number;
+    x(x?: number): number;
+    y(y?: number): number;
     moveTo(id: string, index: number): void;
     getCell: (id: string) => any;
     getCellData: (id: string) => CellDataType | undefined;
     getCellInstance: (id: string) => any;
-    getCellsData: () => any;
+    getCellsData: () => any[];
     /**
      * @description 获取当前鼠标的[画布坐标]
      */

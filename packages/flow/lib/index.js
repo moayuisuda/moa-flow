@@ -5,7 +5,6 @@ export { default as Node } from './cells/Node.js';
 export { default as Edge } from './cells/Edge.js';
 import { Arrow } from './components/Arrow.js';
 export { ConsumerBridge } from './components/ConsumerBridge.js';
-import 'react';
 export { Interactor } from './components/Interacotr.js';
 export { Port } from './components/Port.js';
 export { Portal } from './components/Portal.js';

@@ -13,12 +13,13 @@ import { NodeDataType } from "./cells/Node";
 import {
   Portal,
   RightClickPanel,
-  ConsumerBridge,
   Interactor,
   Port,
   PortDataType,
   Arrow,
-} from "components";
+  ConsumerBridge
+} from "./components";
+// import { ConsumerBridge } from './components/ConsumerBridge'
 
 import * as G from "@antv/react-g";
 import { autorun } from "mobx";

@@ -38,8 +38,6 @@ var RightClickPanel = /** @class */ (function (_super) {
             _this.initStageEvent();
         });
     };
-    RightClickPanel.prototype.dele = function () { };
-    RightClickPanel.prototype.moveToTop = function () { };
     RightClickPanel.prototype.render = function () {
         if (!this.context.buffer.rightClickPanel.visible)
             return React.createElement(React.Fragment, null);

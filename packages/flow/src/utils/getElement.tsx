@@ -1,6 +1,5 @@
 import React from "react";
 import { Canvas } from "../Flow";
-import RightClickPanel from "../components/RightClickPanel";
 
 export const getElement = (
   children: React.ReactNode[] | React.ReactNode,

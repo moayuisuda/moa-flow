@@ -1,4 +1,4 @@
-import { Bounds } from '../types/common';
+import { Bounds } from '../typings/common';
 import { isUndefined } from 'lodash';
 export const arrayMove = <T>(arr: T[], oldIndex: number, newIndex: number) => {
     arr.splice(newIndex, 0, arr.splice(oldIndex, 1)[0]);

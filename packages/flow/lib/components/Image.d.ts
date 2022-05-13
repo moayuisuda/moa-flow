@@ -1,1 +1,2 @@
-export declare const Image: () => void;
+export declare class Image {
+}

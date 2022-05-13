@@ -6,7 +6,7 @@ import ReactDOM from "react-dom";
 export const Portal = ({
   children,
   ...others
-}: Omit<HTMLStyleProps, "innerHTML"> & {
+}: Omit<HTMLStyleProps, "innerHTML" | "width" | "height"> & {
   children: React.ReactElement;
 }) => {
   const [div] = React.useState(() => document.createElement("div"));

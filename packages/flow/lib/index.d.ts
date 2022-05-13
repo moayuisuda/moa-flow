@@ -7,7 +7,7 @@ import Edge from "./cells/Edge";
 import { CellDataType } from "./cells/Cell";
 import { EdgeDataType } from "./cells/Edge";
 import { NodeDataType } from "./cells/Node";
-import { Portal, RightClickPanel, ConsumerBridge, Interactor, Port, PortDataType, Arrow } from "components";
+import { Portal, RightClickPanel, Interactor, Port, PortDataType, Arrow, ConsumerBridge } from "./components";
 import * as G from "@antv/react-g";
 import { autorun } from "mobx";
 import { Vector2d, FlowInfraEventType } from "./typings/common";
