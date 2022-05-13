@@ -78,4 +78,4 @@ export const getRightClickPanel = (
   });
 };
 
-export default RightClickPanel;
+export { RightClickPanel };

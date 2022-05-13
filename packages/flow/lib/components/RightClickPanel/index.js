@@ -60,4 +60,4 @@ var getRightClickPanel = function (children) {
     });
 };
 
-export { RightClickPanel as default, getRightClickPanel };
+export { RightClickPanel, getRightClickPanel };

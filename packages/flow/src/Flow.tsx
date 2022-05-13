@@ -9,7 +9,7 @@ import { computed } from "mobx";
 import { FlowContext } from "./Context";
 
 import { registComponents } from "./utils/registComponents";
-import SelectBoundsRect from "./scaffold/SelectBoundsRect";
+import { SelectBoundsRect, getRightClickPanel } from "./components";
 import * as G from "@antv/g";
 
 import {
@@ -26,9 +26,6 @@ import { initMultiSelect, initSelect } from "./events";
 import { color } from "./theme/style";
 import { CellDataType } from "./cells/Cell";
 import { getCanvas } from "./utils/getElement";
-import RightClickPanel, {
-  getRightClickPanel,
-} from "./components/RightClickPanel";
 
 const renderer = new CanvasRenderer();
 

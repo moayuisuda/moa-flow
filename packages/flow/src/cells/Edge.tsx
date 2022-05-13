@@ -1,18 +1,13 @@
-import Cell from "./Cell";
-import { Polyline, Group, Text, Rect, Path } from "@antv/react-g";
-import * as G from "@antv/g";
-import Interactor from "../scaffold/Interacotr";
-import { CellDataType } from "./Cell";
-import { PortDataType } from "../scaffold/Port";
-import React from "react";
+import Cell, { CellDataType } from "./Cell";
 import { NodeDataType } from "./Node";
-import { isVector2d } from "../utils/util";
 import FlowModel from "../Model";
-import { titleCase } from "utils/string";
-import { lineCenter } from "utils/vector";
-import { Vector2d } from "../types/common";
-import Arrow from "../components/Arrow";
-import { InteractivePointerEvent } from '@antv/g';
+import { Group, Text, Rect } from "@antv/react-g";
+import { Vector2d } from "../typings/common";
+import { Interactor, Arrow, PortDataType } from "../components";
+import React from "react";
+import { isVector2d, lineCenter, titleCase } from "../utils";
+import { InteractivePointerEvent } from "@antv/g";
+import * as G from "@antv/g";
 
 export type EdgeDataType = {
   source: string | Vector2d;

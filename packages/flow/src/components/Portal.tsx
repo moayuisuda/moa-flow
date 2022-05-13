@@ -3,7 +3,7 @@ import { HTML as RGHTML } from "@antv/react-g";
 import { HTMLStyleProps } from "@antv/g";
 import ReactDOM from "react-dom";
 
-const Portal = ({
+export const Portal = ({
   children,
   ...others
 }: Omit<HTMLStyleProps, "innerHTML"> & {
@@ -23,5 +23,3 @@ const Portal = ({
 
   return <RGHTML innerHTML={div} {...others} width={0} height={0} />;
 };
-
-export default Portal;

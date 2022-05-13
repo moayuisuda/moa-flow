@@ -107,6 +107,7 @@ class BizNode extends Node<BizNodeDataType, { modalVisible: boolean }> {
               y={90}
               text={"连接ports: " + JSON.stringify(this.getLinkPorts())}
             />
+            {/* 也可以用this.context.getPortLinkPorts/this.context.getPortLinkNodes，根据port来定义节点 */}
 
             <Portal y={100}>
               <Input value={bizContext.count} style={{ width: 200 }}></Input>

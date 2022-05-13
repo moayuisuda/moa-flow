@@ -17,4 +17,4 @@ var Portal = function (_a) {
     return React.createElement(HTML, __assign({ innerHTML: div }, others, { width: 0, height: 0 }));
 };
 
-export { Portal as default };
+export { Portal };

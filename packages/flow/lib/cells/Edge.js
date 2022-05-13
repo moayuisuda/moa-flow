@@ -1,13 +1,20 @@
 import { __extends, __spreadArray, __assign } from '../node_modules/tslib/tslib.es6.js';
 import Cell from './Cell.js';
 import { Group, Rect, Text } from '@antv/react-g';
-import * as G from '@antv/g';
-import Interactor from '../scaffold/Interacotr.js';
+import { Arrow } from '../components/Arrow.js';
 import React from 'react';
-import { isVector2d } from '../utils/util.js';
+import 'mobx-react';
+import { Interactor } from '../components/Interacotr.js';
+import '../components/Port.js';
+import '../node_modules/react-dom/index.js';
+import '../components/RightClickPanel/index.js';
+import '../components/SelectBoundsRect.js';
+import '../Flow.js';
+import './CommonNode/index.js';
 import { titleCase } from '../utils/string.js';
+import { isVector2d } from '../utils/util.js';
 import { lineCenter } from '../utils/vector.js';
-import Arrow from '../components/Arrow.js';
+import * as G from '@antv/g';
 
 var TEXT_HEIGHT = 16;
 var LABEL_PADDING = 4;

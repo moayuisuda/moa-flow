@@ -22,7 +22,7 @@ export interface ArrowStyleProps extends BaseStyleProps {
  * 1. default(Path)
  * 2. custom
  */
-export default class Arrow extends Component<ArrowStyleProps, {}> {
+export declare class Arrow extends Component<ArrowStyleProps, {}> {
     startRef: React.MutableRefObject<DisplayObject | null>;
     endRef: React.MutableRefObject<DisplayObject | null>;
     bodyRef: React.MutableRefObject<DisplayObject | null>;

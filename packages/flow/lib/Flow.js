@@ -8,12 +8,16 @@ import { observer } from 'mobx-react';
 import { computed } from 'mobx';
 import { FlowContext } from './Context.js';
 import { registComponents } from './utils/registComponents.js';
-import SelectBoundsRect from './scaffold/SelectBoundsRect.js';
+import './components/Arrow.js';
+import './components/Interacotr.js';
+import './components/Port.js';
+import './node_modules/react-dom/index.js';
+import { getRightClickPanel } from './components/RightClickPanel/index.js';
+import { SelectBoundsRect } from './components/SelectBoundsRect.js';
 import { initClearState, initLink, initDrag, initSelect, initScale, initMultiSelect, initHotKeys } from './events.js';
 import { STAGE_ID } from './constants.js';
 import { color } from './theme/style.js';
 import { getCanvas } from './utils/getElement.js';
-import { getRightClickPanel } from './components/RightClickPanel/index.js';
 
 var renderer = new Renderer();
 var renderComponent = function (cellData, model) {

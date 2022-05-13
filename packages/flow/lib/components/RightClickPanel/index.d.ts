@@ -19,4 +19,4 @@ declare class RightClickPanel extends React.Component<{
     render(): JSX.Element;
 }
 export declare const getRightClickPanel: (children: React.ReactNode[] | React.ReactNode) => React.ReactChild | React.ReactFragment | React.ReactPortal | undefined;
-export default RightClickPanel;
+export { RightClickPanel };

@@ -4,7 +4,6 @@ import { FlowContext } from "../Context";
 import { cloneDeep } from "lodash";
 import { observer } from "mobx-react";
 import Model from "../Model";
-import { AllCellDataType } from "../types/common";
 import { titleCase } from "utils/string";
 import { InteractivePointerEvent } from "@antv/g";
 
@@ -34,7 +33,7 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
 
   // 如果是content: () => xxx 对应的是instance property，这种写法是instance function
   abstract content(): JSX.Element;
-  
+
   onMount(): void {}
 
   static metaData: any = { id: "" };

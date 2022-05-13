@@ -108,4 +108,4 @@ var Arrow = /** @class */ (function (_super) {
     return Arrow;
 }(Component));
 
-export { Arrow as default };
+export { Arrow };

@@ -1,5 +1,4 @@
-import Cell from "./Cell";
-import { CellDataType } from "./Cell";
+import Cell, { CellDataType } from "./Cell";
 export type NodeDataType = {
   x: number;
   y: number;

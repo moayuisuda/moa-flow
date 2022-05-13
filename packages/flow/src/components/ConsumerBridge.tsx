@@ -1,7 +1,7 @@
 import React from "react";
 import { Observer } from "mobx-react";
 
-const ConsumerBridge: <T>(props: {
+export const ConsumerBridge: <T>(props: {
   context: React.Context<T>;
   children: (value: T) => React.ReactElement;
 }) => React.ReactElement = (props) => {
@@ -11,5 +11,3 @@ const ConsumerBridge: <T>(props: {
     </props.context.Consumer>
   );
 };
-
-export default ConsumerBridge;

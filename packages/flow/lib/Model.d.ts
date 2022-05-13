@@ -138,14 +138,14 @@ export declare class FlowModel {
     addCell: (componentName: string, initOptions: any) => any;
     setLinkingPosition: (e: InteractivePointerEvent) => void;
     link: (source: string, target: string) => void;
-    scale: (scale?: number | undefined) => number;
-    x(x?: number): number;
-    y(y?: number): number;
+    scale: (scale?: number | undefined) => any;
+    x(x?: number): any;
+    y(y?: number): any;
     moveTo(id: string, index: number): void;
     getCell: (id: string) => any;
     getCellData: (id: string) => CellDataType | undefined;
     getCellInstance: (id: string) => any;
-    getCellsData: () => any[];
+    getCellsData: () => any;
     /**
      * @description 获取当前鼠标的[画布坐标]
      */

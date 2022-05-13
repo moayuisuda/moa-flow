@@ -1,11 +1,10 @@
-import Cell from "./Cell";
-import * as G from "@antv/g";
-import { CellDataType } from "./Cell";
-import { PortDataType } from "../scaffold/Port";
-import React from "react";
+import Cell, { CellDataType } from "./Cell";
 import { NodeDataType } from "./Node";
 import FlowModel from "../Model";
-import { Vector2d } from "../types/common";
+import { Vector2d } from "../typings/common";
+import { PortDataType } from "../components";
+import React from "react";
+import * as G from "@antv/g";
 export declare type EdgeDataType = {
     source: string | Vector2d;
     target: string | Vector2d;
