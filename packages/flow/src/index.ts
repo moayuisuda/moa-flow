@@ -17,14 +17,19 @@ import {
   Interactor,
   Port,
   PortDataType,
+  Arrow,
 } from "components";
 
-import * as Graph from "@antv/react-g";
+import * as G from "@antv/react-g";
 import { autorun } from "mobx";
 import { Vector2d, FlowInfraEventType } from "./typings/common";
 import { Canvas } from "./Flow";
 
 type ModelType = Model;
+const Graph = {
+  ...G,
+  Arrow
+}
 
 export {
   Flow,
