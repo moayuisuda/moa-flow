@@ -7,7 +7,7 @@ export const Portal = ({
   children,
   ...others
 }: Omit<HTMLStyleProps, "innerHTML" | "width" | "height"> & {
-  children: React.ReactElement;
+  children: React.ReactNode;
 }) => {
   const [div] = React.useState(() => document.createElement("div"));
 

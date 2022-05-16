@@ -41,7 +41,7 @@ class BizNode extends Node<BizNodeDataType, { modalVisible: boolean }> {
     super(props, context);
 
     this.state = {
-      modalVisible: true,
+      modalVisible: false,
     };
   }
 
@@ -109,10 +109,10 @@ class BizNode extends Node<BizNodeDataType, { modalVisible: boolean }> {
 
             <Portal y={100}>
               <Input value={bizContext.count} style={{ width: 200 }}></Input>
-              {/* <Modal
+              <Modal
                 visible={this.state.modalVisible}
                 onCancel={() => this.setState({ modalVisible: false })}
-              ></Modal> */}
+              ></Modal>
             </Portal>
             {/* in的port */}
             {inPorts.map((portData: PortDataType) => (
@@ -186,6 +186,7 @@ class BizNode extends Node<BizNodeDataType, { modalVisible: boolean }> {
               width={20}
               height={20}
               img={require("./img.png")}
+              onClick={() => this.setState({ modalVisible: true })}
             ></Image>
           </Interactor>
         )}

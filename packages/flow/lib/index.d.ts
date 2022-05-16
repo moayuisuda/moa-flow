@@ -1,3 +1,4 @@
+/// <reference types="react" />
 import Flow from "./Flow";
 import Model from "./Model";
 import Cell from "./cells/Cell";
