@@ -9,6 +9,7 @@
       "component": "BizNode",
       "x": -300,
       "y": 200,
+      "visible": true,
       "ports": [
         {
           "cellType": "port",
@@ -22,6 +23,7 @@
           "label": "father",
           "id": "1-1",
           "portType": "out",
+          "fold": false,
           "host": "1"
         }
       ],
@@ -31,6 +33,7 @@
       "id": "2",
       "cellType": "node",
       "component": "BizNode",
+      "visible": true,
       "x": 0,
       "y": 0,
       "ports": [
@@ -46,6 +49,7 @@
           "label": "father",
           "id": "2-1",
           "portType": "out",
+          "fold": false,
           "host": "2",
           "edges": ["EDGE"]
         }
@@ -56,6 +60,7 @@
       "id": "3",
       "cellType": "node",
       "component": "BizNode",
+      "visible": true,
       "x": 400,
       "y": 100,
       "ports": [
@@ -74,6 +79,7 @@
       "id": "4",
       "cellType": "node",
       "component": "BizNode",
+      "visible": true,
       "x": 400,
       "y": 300,
       "ports": [
@@ -90,6 +96,7 @@
     {
       "cellType": "edge",
       "component": "BizEdge",
+      "visible": true,
       "source": "2-1",
       "target": "3-0",
       "label": "默认连线",

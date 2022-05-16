@@ -3,21 +3,20 @@ import {
   Node,
   Graph,
   Interactor,
-  ModelType,
-  PortDataType,
-  NodeDataType,
   Portal,
   ConsumerBridge,
 } from "@ali/flow-infra-g";
+import type { ModelType, PortDataType, NodeDataType } from "@ali/flow-infra-g";
 import { message, Input, Modal } from "antd";
 import BizContext from "./Context";
 
-const { Rect, Text, Circle } = Graph;
+const { Rect, Text, Circle, Image, Group } = Graph;
 const { Port } = Interactor;
 
-type BizPortDataType = PortDataType & {
+export type BizPortDataType = PortDataType & {
   label: string;
   portType: "in" | "out" | "control-out" | "control-in";
+  fold?: boolean;
 };
 
 type BizNodeDataType = {
@@ -96,7 +95,6 @@ class BizNode extends Node<BizNodeDataType, { modalVisible: boolean }> {
               text={(label || "") + bizContext.count}
               fill="white"
             />
-
             <Text
               x={20}
               y={60}
@@ -116,7 +114,6 @@ class BizNode extends Node<BizNodeDataType, { modalVisible: boolean }> {
                 onCancel={() => this.setState({ modalVisible: false })}
               ></Modal> */}
             </Portal>
-
             {/* in的port */}
             {inPorts.map((portData: PortDataType) => (
               <Port
@@ -138,28 +135,58 @@ class BizNode extends Node<BizNodeDataType, { modalVisible: boolean }> {
             ))}
             {/* out的port */}
             {outPorts.map((portData: PortDataType) => (
-              <Port
-                x={width}
-                y={70}
-                data={portData}
-                key={portData.label}
-                anchor={{
-                  x: data.x + width + 20,
-                  y: data.y + 70,
-                }}
-                link={(target: PortDataType, source: PortDataType) => {
-                  message.info(JSON.stringify(target));
-                  return true;
-                }}
-              >
-                <Circle
-                  lineWidth={4}
-                  stroke={color.primary}
-                  fill="white"
-                  r={10}
-                ></Circle>
-              </Port>
+              <Group x={width} y={70} key={portData.id}>
+                <Text
+                  cursor="pointer"
+                  fill={this.context.color.active}
+                  textBaseline="middle"
+                  x={-50}
+                  text={portData.fold ? "展开" : "收起"}
+                  // 防止冒泡触发默认的选中事件
+                  onMousedown={(e) => e.stopPropagation()}
+                  onClick={() => {
+                    const linkedNodes = this.getLinkNodes();
+                    const edges = this.getNodeEdges();
+
+                    linkedNodes.concat(edges).forEach((cellId) => {
+                      this.context.setCellData(cellId, {
+                        visible: portData.fold,
+                      });
+                    });
+
+                    this.context.setCellData(portData.id, {
+                      fold: !portData.fold,
+                    });
+                  }}
+                />
+
+                <Port
+                  data={portData}
+                  anchor={{
+                    x: data.x + width + 20,
+                    y: data.y + 70,
+                  }}
+                  link={(target: PortDataType, source: PortDataType) => {
+                    message.info(JSON.stringify(target));
+                    return true;
+                  }}
+                >
+                  <Circle
+                    lineWidth={4}
+                    stroke={color.primary}
+                    fill="white"
+                    r={10}
+                  ></Circle>
+                </Port>
+              </Group>
             ))}
+
+            <Image
+              x={width}
+              width={20}
+              height={20}
+              img={require("./img.png")}
+            ></Image>
           </Interactor>
         )}
       </ConsumerBridge>
