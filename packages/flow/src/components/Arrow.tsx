@@ -91,6 +91,11 @@ export class Arrow extends Component<ArrowStyleProps, {}> {
     );
   }
 
+  getCenter() {
+    const points = (this.bodyRef.current as G.Polyline).getPoint(0.5);
+    return points;
+  }
+
   /**
    * transform arrow head according to arrow line
    */

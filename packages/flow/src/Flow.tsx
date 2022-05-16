@@ -114,11 +114,6 @@ class Grid extends React.Component<{}> {
 
 const Edges = observer(() => {
   const context = useContext(FlowContext);
-  const [_, setSecondRefresh] = useState(0);
-
-  useEffect(() => {
-    setSecondRefresh(1);
-  }, []);
 
   const edgesData = context.canvasData.cells.filter(
     (cellData: CellDataType) => cellData.cellType === "edge"

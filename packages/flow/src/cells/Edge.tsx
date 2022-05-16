@@ -22,9 +22,13 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
     cellType: "edge",
   };
   labelRef: React.RefObject<G.Group>;
+  arrowRef: React.RefObject<Arrow>;
 
   protected bazier = false;
-  protected arrow = false;
+  protected startHead = false;
+  protected endhead = true;
+
+  pathInstance = new G.Path();
 
   isMountEvents = false;
 
@@ -36,6 +40,7 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
   ) {
     super(props, context);
     this.labelRef = React.createRef();
+    this.arrowRef = React.createRef();
   }
 
   protected lineStyle({ isSelect }: { isSelect: boolean }) {
@@ -187,16 +192,22 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
   }
 
   labelPosition() {
-    const points = this.getVectors().map((vector) => [vector.x, vector.y]) as [
-      number,
-      number
-    ][];
-    const lineLenthCenter = lineCenter(points);
+    if (this.bazier) {
+      this.pathInstance.style.setProperty("path", this.getBazierPath());
 
-    return {
-      x: lineLenthCenter[0] || points[0][0],
-      y: lineLenthCenter[1] || points[0][1],
-    };
+      return this.pathInstance.getPoint(0.5);
+    } else {
+      const points = this.getVectors().map((vector) => [
+        vector.x,
+        vector.y,
+      ]) as [number, number][];
+      const lineLenthCenter = lineCenter(points);
+
+      return {
+        x: lineLenthCenter[0] || points[0][0],
+        y: lineLenthCenter[1] || points[0][1],
+      };
+    }
   }
 
   protected labelRender() {
@@ -272,7 +283,6 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
 
   protected edgeRender({
     points,
-    isLinking,
   }: {
     points: [number, number][];
     isLinking: boolean;
@@ -300,10 +310,11 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
     return (
       <Group>
         <Arrow
-          {...(this.bazier ? bazierProps : polyLineProps)}
-          points={points}
+          ref={this.arrowRef}
           {...lineProps}
-          endHead={true}
+          {...(this.bazier ? bazierProps : polyLineProps)}
+          startHead={this.startHead}
+          endHead={this.endhead}
         />
       </Group>
     );

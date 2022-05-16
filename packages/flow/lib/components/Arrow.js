@@ -57,6 +57,10 @@ var Arrow = /** @class */ (function (_super) {
             startHead && (React.createElement(Group, { ref: this.startRef }, this.getArrowHead(startHead, true))),
             endHead && (React.createElement(Group, { ref: this.endRef }, this.getArrowHead(endHead, false)))));
     };
+    Arrow.prototype.getCenter = function () {
+        var points = this.bodyRef.current.getPoint(0.5);
+        return points;
+    };
     /**
      * transform arrow head according to arrow line
      */

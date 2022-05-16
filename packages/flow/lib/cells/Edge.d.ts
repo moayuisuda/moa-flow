@@ -2,7 +2,7 @@ import Cell, { CellDataType } from "./Cell";
 import { NodeDataType } from "./Node";
 import FlowModel from "../Model";
 import { Dir, Vector2d } from "../typings/common";
-import { PortDataType } from "../components";
+import { Arrow, PortDataType } from "../components";
 import React from "react";
 import * as G from "@antv/g";
 export declare type EdgeDataType = {
@@ -14,8 +14,11 @@ export declare type EdgeDataType = {
 declare abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
     static metaData: any;
     labelRef: React.RefObject<G.Group>;
+    arrowRef: React.RefObject<Arrow>;
     protected bazier: boolean;
-    protected arrow: boolean;
+    protected startHead: boolean;
+    protected endhead: boolean;
+    pathInstance: G.Path;
     isMountEvents: boolean;
     constructor(props: {
         data: EdgeDataType;
@@ -29,8 +32,8 @@ declare abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & 
     };
     protected formatVerticied: (verticies: Vector2d[]) => Vector2d[];
     getLinkPortsData: () => {
-        source: PortDataType | Vector2d;
-        target: PortDataType | Vector2d;
+        source: Vector2d | PortDataType;
+        target: Vector2d | PortDataType;
     };
     getAnchors: () => {
         source: any;
@@ -46,10 +49,10 @@ declare abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & 
     private vectorsToPoints;
     labelContent(): JSX.Element;
     labelStyle(): {};
-    labelPosition(): {
+    labelPosition(): G.Point | {
         x: number;
         y: number;
-    };
+    } | null;
     protected labelRender(): JSX.Element;
     labelFormatter(label: string): string;
     isLinking(): any;
@@ -59,7 +62,7 @@ declare abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & 
     };
     getBazierPath(): string;
     lineExtra: () => JSX.Element;
-    protected edgeRender({ points, isLinking, }: {
+    protected edgeRender({ points, }: {
         points: [number, number][];
         isLinking: boolean;
     }): JSX.Element;

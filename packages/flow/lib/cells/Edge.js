@@ -23,7 +23,9 @@ var Edge = /** @class */ (function (_super) {
     function Edge(props, context) {
         var _this = _super.call(this, props, context) || this;
         _this.bazier = false;
-        _this.arrow = false;
+        _this.startHead = false;
+        _this.endhead = true;
+        _this.pathInstance = new G.Path();
         _this.isMountEvents = false;
         _this.formatVerticied = function (verticies) {
             return verticies;
@@ -60,6 +62,7 @@ var Edge = /** @class */ (function (_super) {
             };
         };
         _this.labelRef = React.createRef();
+        _this.arrowRef = React.createRef();
         return _this;
     }
     Edge.prototype.lineStyle = function (_a) {
@@ -131,12 +134,21 @@ var Edge = /** @class */ (function (_super) {
         return {};
     };
     Edge.prototype.labelPosition = function () {
-        var points = this.getVectors().map(function (vector) { return [vector.x, vector.y]; });
-        var lineLenthCenter = lineCenter(points);
-        return {
-            x: lineLenthCenter[0] || points[0][0],
-            y: lineLenthCenter[1] || points[0][1],
-        };
+        if (this.bazier) {
+            this.pathInstance.style.setProperty("path", this.getBazierPath());
+            return this.pathInstance.getPoint(0.5);
+        }
+        else {
+            var points = this.getVectors().map(function (vector) { return [
+                vector.x,
+                vector.y,
+            ]; });
+            var lineLenthCenter = lineCenter(points);
+            return {
+                x: lineLenthCenter[0] || points[0][0],
+                y: lineLenthCenter[1] || points[0][1],
+            };
+        }
     };
     Edge.prototype.labelRender = function () {
         var _this = this;
@@ -188,7 +200,7 @@ var Edge = /** @class */ (function (_super) {
         return "M".concat(source.x, ",").concat(source.y, " \n    C").concat(source.x + dir.source[0], ",").concat(source.y + dir.source[1], " ").concat(target.x + dir.target[0], ",").concat(target.y + dir.target[1], " \n    ").concat(target.x, ",").concat(target.y);
     };
     Edge.prototype.edgeRender = function (_a) {
-        var points = _a.points; _a.isLinking;
+        var points = _a.points;
         var color = this.context.color;
         var lineProps = __assign({ lineCap: "round", lineJoin: "round", lineWidth: 3, stroke: color.deepGrey }, this.lineStyle({ isSelect: this.isSelect() }));
         var bazierProps = {
@@ -200,7 +212,7 @@ var Edge = /** @class */ (function (_super) {
             points: points,
         };
         return (React.createElement(Group, null,
-            React.createElement(Arrow, __assign({}, (this.bazier ? bazierProps : polyLineProps), { points: points }, lineProps, { endHead: true }))));
+            React.createElement(Arrow, __assign({ ref: this.arrowRef }, lineProps, (this.bazier ? bazierProps : polyLineProps), { startHead: this.startHead, endHead: this.endhead }))));
     };
     Edge.prototype.content = function () {
         return (React.createElement(Interactor, { id: this.props.data.id, draggable: false },

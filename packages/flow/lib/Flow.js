@@ -1,7 +1,7 @@
 import { __extends, __assign, __decorate } from './node_modules/tslib/tslib.es6.js';
 import { Group, Circle, Canvas as Canvas$1 } from '@antv/react-g';
 import LinkingEdge from './cells/LinkingEdge.js';
-import React, { useContext, useState, useEffect, createRef } from 'react';
+import React, { useContext, createRef } from 'react';
 import { FlowModel } from './Model.js';
 import { Renderer } from '@antv/g-canvas';
 import { observer } from 'mobx-react';
@@ -74,10 +74,6 @@ var Grid = /** @class */ (function (_super) {
 }(React.Component));
 var Edges = observer(function () {
     var context = useContext(FlowContext);
-    var _a = useState(0); _a[0]; var setSecondRefresh = _a[1];
-    useEffect(function () {
-        setSecondRefresh(1);
-    }, []);
     var edgesData = context.canvasData.cells.filter(function (cellData) { return cellData.cellType === "edge"; });
     return (React.createElement(Group, { zIndex: 1 }, edgesData.map(function (cellData) {
         return renderComponent(cellData, context);

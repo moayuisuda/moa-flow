@@ -105,7 +105,6 @@ class BizNode extends Node<BizNodeDataType, { modalVisible: boolean }> {
               y={90}
               text={"连接ports: " + JSON.stringify(this.getLinkPorts())}
             />
-            {/* 也可以用this.context.getPortLinkPorts/this.context.getPortLinkNodes，根据port来定义节点 */}
 
             <Portal y={100}>
               <Input value={bizContext.count} style={{ width: 200 }}></Input>
@@ -145,8 +144,10 @@ class BizNode extends Node<BizNodeDataType, { modalVisible: boolean }> {
                   // 防止冒泡触发默认的选中事件
                   onMousedown={(e) => e.stopPropagation()}
                   onClick={() => {
-                    const linkedNodes = this.getLinkNodes();
-                    const edges = this.getNodeEdges();
+                    const linkedNodes = this.context.getPortLinkNodes(
+                      portData.id
+                    );
+                    const edges = portData.edges as string[];
 
                     linkedNodes.concat(edges).forEach((cellId) => {
                       this.context.setCellData(cellId, {

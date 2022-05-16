@@ -28,9 +28,9 @@ function App() {
 
     model.setCanvasData(testData);
 
-    setInterval(() => {
-      setCount((count) => count + 1);
-    }, 1000);
+    // setInterval(() => {
+    //   setCount((count) => count + 1);
+    // }, 1000);
   }, []);
 
   return (
@@ -39,7 +39,6 @@ function App() {
       <Flow
         multiSelect
         modelRef={modelRef}
-        canvasData={testData}
         onEvent={(e) => {
           // if (e.type === "data:change") return;
           // message.info(`[${e.type}]}`);
@@ -72,11 +71,6 @@ function App() {
           }}
         </RightClickPanel>
       </Flow>
-      <h1>111</h1>
-      <h1>111</h1>
-      <h1>111</h1>
-      <h1>111</h1>
-      <h1>111</h1>
     </div>
   );
 }
