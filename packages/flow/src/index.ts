@@ -19,10 +19,10 @@ import {
   Arrow,
   ConsumerBridge
 } from "./components";
-// import { ConsumerBridge } from './components/ConsumerBridge'
 
 import * as G from "@antv/react-g";
 import { autorun } from "mobx";
+import { Observer, observer } from "mobx-react";
 import { Vector2d, FlowInfraEventType } from "./typings/common";
 import { Canvas } from "./Flow";
 
@@ -40,12 +40,15 @@ export {
   Port,
   Interactor,
   Portal,
-  // Image,
+
   Graph,
   autorun,
   ConsumerBridge,
   RightClickPanel,
   Canvas,
+
+  Observer,
+  observer
 };
 
 export type {

@@ -101,6 +101,7 @@ export class Port extends Cell<PortDataType, {}, PortPropsType> {
   content() {
     return (
       <Group
+        cursor="crosshair"
         onMousedown={(e: InteractivePointerEvent) => this.onLinkStart(e)}
         onMouseup={(e: InteractivePointerEvent) => this.onLinkEnd(e)}
         x={this.props.x || 0}

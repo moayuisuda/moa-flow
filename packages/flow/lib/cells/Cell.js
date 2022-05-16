@@ -69,7 +69,7 @@ var Cell = /** @class */ (function (_super) {
         var _this = this;
         return (React.createElement(Group, { ref: function (ref) {
                 _this.wrapperRef.current = ref;
-            } }, this.content()));
+            } }, lodash.exports.isUndefined(this.props.data.visible) || this.props.data.visible ? (React.createElement(Group, null, this.content())) : (React.createElement(React.Fragment, null))));
     };
     Cell.contextType = FlowContext;
     Cell.metaData = { id: "" };

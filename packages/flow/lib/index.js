@@ -12,6 +12,7 @@ export { RightClickPanel } from './components/RightClickPanel/index.js';
 import './components/SelectBoundsRect.js';
 import * as G from '@antv/react-g';
 export { autorun } from 'mobx';
+export { Observer, observer } from 'mobx-react';
 
 var Graph = __assign(__assign({}, G), { Arrow: Arrow });
 

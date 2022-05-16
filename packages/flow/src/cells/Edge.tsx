@@ -2,7 +2,7 @@ import Cell, { CellDataType } from "./Cell";
 import { NodeDataType } from "./Node";
 import FlowModel from "../Model";
 import { Group, Text, Rect } from "@antv/react-g";
-import { Vector2d } from "../typings/common";
+import { Dir, Vector2d } from "../typings/common";
 import { Interactor, Arrow, PortDataType } from "../components";
 import React from "react";
 import { isVector2d, lineCenter, titleCase } from "../utils";
@@ -247,12 +247,24 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
     return this.props.data.$state.isLinking;
   }
 
+  getBazierDir(): { source: Dir; target: Dir } {
+    const { source, target } = this.getAnchors();
+    const LENGTH = (target.x - source.x) * 0.5;
+
+    return {
+      source: [LENGTH, 0],
+      target: [-LENGTH, 0],
+    };
+  }
+
   getBazierPath() {
     const { source, target } = this.getAnchors();
-    const LENGTH = (source.x - target.x) * 0.5;
+    const dir = this.getBazierDir();
 
     return `M${source.x},${source.y} 
-    C${source.x - LENGTH},${source.y} ${target.x + LENGTH},${target.y} 
+    C${source.x + dir.source[0]},${source.y + dir.source[1]} ${
+      target.x + dir.target[0]
+    },${target.y + dir.target[1]} 
     ${target.x},${target.y}`;
   }
 

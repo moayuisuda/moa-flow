@@ -24,3 +24,4 @@ export declare type Vector2d = {
     x: number;
     y: number;
 };
+export declare type Dir = [number, number];

@@ -1,7 +1,7 @@
 import React from "react";
 import { Group } from "@antv/react-g";
 import { FlowContext } from "../Context";
-import { cloneDeep } from "lodash";
+import { cloneDeep, isUndefined } from "lodash";
 import { observer } from "mobx-react";
 import Model from "../Model";
 import { titleCase } from "utils/string";
@@ -9,6 +9,7 @@ import { InteractivePointerEvent } from "@antv/g";
 
 export type CellDataType = {
   id: string;
+  visible?: boolean;
   cellType: string;
   component: string;
   [key: string]: any;
@@ -111,7 +112,11 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
           this.wrapperRef.current = ref;
         }}
       >
-        {this.content()}
+        {isUndefined(this.props.data.visible) || this.props.data.visible ? (
+          <Group>{this.content()}</Group>
+        ) : (
+          <></>
+        )}
       </Group>
     );
   }

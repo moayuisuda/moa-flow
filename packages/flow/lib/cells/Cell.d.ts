@@ -3,6 +3,7 @@ import { FlowContext } from "../Context";
 import Model from "../Model";
 export declare type CellDataType = {
     id: string;
+    visible?: boolean;
     cellType: string;
     component: string;
     [key: string]: any;

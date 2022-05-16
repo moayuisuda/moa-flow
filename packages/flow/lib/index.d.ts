@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import Flow from "./Flow";
 import Model from "./Model";
 import Cell from "./cells/Cell";
@@ -10,6 +9,7 @@ import { NodeDataType } from "./cells/Node";
 import { Portal, RightClickPanel, Interactor, Port, PortDataType, Arrow, ConsumerBridge } from "./components";
 import * as G from "@antv/react-g";
 import { autorun } from "mobx";
+import { Observer, observer } from "mobx-react";
 import { Vector2d, FlowInfraEventType } from "./typings/common";
 import { Canvas } from "./Flow";
 declare type ModelType = Model;
@@ -379,5 +379,5 @@ declare const Graph: {
     reconcilor: ReactReconciler.Reconciler<import("@antv/g").Element<any, any>, import("@antv/g").Element<any, any>, import("@antv/g").Element<any, any>, any, any>;
     render: (component: import("react").ReactNode, target: import("@antv/g").Element<any, any> | import("@antv/g").Canvas, callback?: (() => void) | null | undefined) => void;
 };
-export { Flow, Cell, Node, Edge, Port, Interactor, Portal, Graph, autorun, ConsumerBridge, RightClickPanel, Canvas, };
+export { Flow, Cell, Node, Edge, Port, Interactor, Portal, Graph, autorun, ConsumerBridge, RightClickPanel, Canvas, Observer, observer };
 export type { ModelType, FlowInfraEventType, Vector2d, CellDataType, EdgeDataType, PortDataType, NodeDataType, };

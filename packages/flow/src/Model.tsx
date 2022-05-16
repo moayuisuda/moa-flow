@@ -450,6 +450,7 @@ export class FlowModel {
 
     return Object.assign(metaData, {
       id,
+      visible: true,
       ...initOptions,
     });
   };

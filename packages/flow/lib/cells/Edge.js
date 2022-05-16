@@ -174,10 +174,18 @@ var Edge = /** @class */ (function (_super) {
     Edge.prototype.isLinking = function () {
         return this.props.data.$state.isLinking;
     };
+    Edge.prototype.getBazierDir = function () {
+        var _a = this.getAnchors(), source = _a.source, target = _a.target;
+        var LENGTH = (target.x - source.x) * 0.5;
+        return {
+            source: [LENGTH, 0],
+            target: [-LENGTH, 0],
+        };
+    };
     Edge.prototype.getBazierPath = function () {
         var _a = this.getAnchors(), source = _a.source, target = _a.target;
-        var LENGTH = (source.x - target.x) * 0.5;
-        return "M".concat(source.x, ",").concat(source.y, " \n    C").concat(source.x - LENGTH, ",").concat(source.y, " ").concat(target.x + LENGTH, ",").concat(target.y, " \n    ").concat(target.x, ",").concat(target.y);
+        var dir = this.getBazierDir();
+        return "M".concat(source.x, ",").concat(source.y, " \n    C").concat(source.x + dir.source[0], ",").concat(source.y + dir.source[1], " ").concat(target.x + dir.target[0], ",").concat(target.y + dir.target[1], " \n    ").concat(target.x, ",").concat(target.y);
     };
     Edge.prototype.edgeRender = function (_a) {
         var points = _a.points; _a.isLinking;

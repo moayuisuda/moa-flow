@@ -1,7 +1,7 @@
 import Cell, { CellDataType } from "./Cell";
 import { NodeDataType } from "./Node";
 import FlowModel from "../Model";
-import { Vector2d } from "../typings/common";
+import { Dir, Vector2d } from "../typings/common";
 import { PortDataType } from "../components";
 import React from "react";
 import * as G from "@antv/g";
@@ -29,8 +29,8 @@ declare abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & 
     };
     protected formatVerticied: (verticies: Vector2d[]) => Vector2d[];
     getLinkPortsData: () => {
-        source: PortDataType | Vector2d;
-        target: PortDataType | Vector2d;
+        source: Vector2d | PortDataType;
+        target: Vector2d | PortDataType;
     };
     getAnchors: () => {
         source: any;
@@ -53,6 +53,10 @@ declare abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & 
     protected labelRender(): JSX.Element;
     labelFormatter(label: string): string;
     isLinking(): any;
+    getBazierDir(): {
+        source: Dir;
+        target: Dir;
+    };
     getBazierPath(): string;
     lineExtra: () => JSX.Element;
     protected edgeRender({ points, isLinking, }: {

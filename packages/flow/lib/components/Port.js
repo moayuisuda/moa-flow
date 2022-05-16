@@ -61,7 +61,7 @@ var Port = /** @class */ (function (_super) {
     };
     Port.prototype.content = function () {
         var _this = this;
-        return (React.createElement(Group, { onMousedown: function (e) { return _this.onLinkStart(e); }, onMouseup: function (e) { return _this.onLinkEnd(e); }, x: this.props.x || 0, y: this.props.y || 0 }, this.props.children));
+        return (React.createElement(Group, { cursor: "crosshair", onMousedown: function (e) { return _this.onLinkStart(e); }, onMouseup: function (e) { return _this.onLinkEnd(e); }, x: this.props.x || 0, y: this.props.y || 0 }, this.props.children));
     };
     Port.metaData = {
         cellType: "port",
