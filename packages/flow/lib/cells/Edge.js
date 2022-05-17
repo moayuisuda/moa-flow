@@ -15,6 +15,7 @@ import { titleCase } from '../utils/string.js';
 import { callIfFn, isVector2d } from '../utils/util.js';
 import { lineCenter } from '../utils/vector.js';
 import * as G from '@antv/g';
+import { autorun } from 'mobx';
 
 var TEXT_HEIGHT = 16;
 var LABEL_PADDING = 4;
@@ -78,13 +79,17 @@ var Edge = /** @class */ (function (_super) {
             });
         }
     };
-    Edge.prototype.componentDidUpdate = function (prevProps) {
-        if (prevProps.data.visible === false && this.props.data.visible === true)
-            this.initAnimate();
-    };
     Edge.prototype.componentDidMount = function () {
+        var _this = this;
         _super.prototype.componentDidMount.call(this);
-        this.initAnimate();
+        autorun(function () {
+            if (_this.props.data.visible === true) {
+                requestAnimationFrame(function () {
+                    // 确保didUpdate之后再设置动画
+                    _this.initAnimate();
+                });
+            }
+        });
     };
     Edge.prototype.lineStyle = function (_a) {
         var isSelect = _a.isSelect;

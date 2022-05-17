@@ -10,6 +10,7 @@ import { InteractivePointerEvent } from "@antv/g";
 import * as G from "@antv/g";
 import type { DisplayObject } from "@antv/g";
 import { callIfFn } from "../utils/util";
+import { autorun } from "mobx";
 
 export type EdgeDataType = {
   source: string | Vector2d;
@@ -63,15 +64,17 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
     }
   }
 
-  componentDidUpdate(prevProps: { data: EdgeDataType }) {
-    if (prevProps.data.visible === false && this.props.data.visible === true)
-      this.initAnimate();
-  }
-
   componentDidMount(): void {
     super.componentDidMount();
 
-    this.initAnimate();
+    autorun(() => {
+      if (this.props.data.visible === true) {
+        requestAnimationFrame(() => {
+          // 确保didUpdate之后再设置动画
+          this.initAnimate();
+        });
+      }
+    });
   }
 
   protected lineStyle({ isSelect }: { isSelect: boolean }) {
