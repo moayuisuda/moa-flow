@@ -67,17 +67,23 @@ var Edge = /** @class */ (function (_super) {
         _this.arrowRef = React.createRef();
         return _this;
     }
-    Edge.prototype.componentDidMount = function () {
-        var _a;
-        _super.prototype.componentDidMount.call(this);
+    Edge.prototype.initAnimate = function () {
+        var _a, _b, _c;
         if (callIfFn(this.animate)) {
             var lineDash = callIfFn(this.lineDash);
             var LENGTH = lineDash[0] + lineDash[1];
-            ((_a = this.arrowRef.current) === null || _a === void 0 ? void 0 : _a.bodyRef.current).animate([{ lineDashOffset: LENGTH }, { lineDashOffset: 0 }], {
+            (_c = (_b = (_a = this.arrowRef.current) === null || _a === void 0 ? void 0 : _a.bodyRef.current) === null || _b === void 0 ? void 0 : _b.animate) === null || _c === void 0 ? void 0 : _c.call(_b, [{ lineDashOffset: LENGTH }, { lineDashOffset: 0 }], {
                 duration: 500,
                 iterations: Infinity,
             });
         }
+    };
+    Edge.prototype.componentDidUpdate = function () {
+        this.initAnimate();
+    };
+    Edge.prototype.componentDidMount = function () {
+        _super.prototype.componentDidMount.call(this);
+        this.initAnimate();
     };
     Edge.prototype.lineStyle = function (_a) {
         var isSelect = _a.isSelect;

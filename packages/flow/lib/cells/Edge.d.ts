@@ -26,6 +26,8 @@ declare abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & 
     constructor(props: {
         data: EdgeDataType;
     }, context: FlowModel);
+    initAnimate(): void;
+    componentDidUpdate(): void;
     componentDidMount(): void;
     protected lineStyle({ isSelect }: {
         isSelect: boolean;
@@ -36,8 +38,8 @@ declare abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & 
     };
     protected formatVerticied: (verticies: Vector2d[]) => Vector2d[];
     getLinkPortsData: () => {
-        source: PortDataType | Vector2d;
-        target: PortDataType | Vector2d;
+        source: Vector2d | PortDataType;
+        target: Vector2d | PortDataType;
     };
     getAnchors: () => {
         source: any;

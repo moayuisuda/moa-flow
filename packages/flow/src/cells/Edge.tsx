@@ -9,7 +9,6 @@ import { isVector2d, lineCenter, titleCase } from "../utils";
 import { InteractivePointerEvent } from "@antv/g";
 import * as G from "@antv/g";
 import type { DisplayObject } from "@antv/g";
-import { isFunction } from "lodash";
 import { callIfFn } from "../utils/util";
 
 export type EdgeDataType = {
@@ -50,13 +49,11 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
     this.arrowRef = React.createRef();
   }
 
-  componentDidMount(): void {
-    super.componentDidMount();
-
+  initAnimate() {
     if (callIfFn(this.animate)) {
       const lineDash = callIfFn(this.lineDash);
       const LENGTH = lineDash[0] + lineDash[1];
-      (this.arrowRef.current?.bodyRef.current as DisplayObject).animate(
+      (this.arrowRef.current?.bodyRef.current as DisplayObject)?.animate?.(
         [{ lineDashOffset: LENGTH }, { lineDashOffset: 0 }],
         {
           duration: 500,
@@ -64,6 +61,16 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
         }
       );
     }
+  }
+
+  componentDidUpdate() {
+    this.initAnimate();
+  }
+
+  componentDidMount(): void {
+    super.componentDidMount();
+
+    this.initAnimate();
   }
 
   protected lineStyle({ isSelect }: { isSelect: boolean }) {
