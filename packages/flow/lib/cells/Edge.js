@@ -78,8 +78,9 @@ var Edge = /** @class */ (function (_super) {
             });
         }
     };
-    Edge.prototype.componentDidUpdate = function () {
-        this.initAnimate();
+    Edge.prototype.componentDidUpdate = function (prevProps) {
+        if (prevProps.data.visible === false && this.props.data.visible === true)
+            this.initAnimate();
     };
     Edge.prototype.componentDidMount = function () {
         _super.prototype.componentDidMount.call(this);

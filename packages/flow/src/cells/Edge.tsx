@@ -63,8 +63,9 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
     }
   }
 
-  componentDidUpdate() {
-    this.initAnimate();
+  componentDidUpdate(prevProps: { data: EdgeDataType }) {
+    if (prevProps.data.visible === false && this.props.data.visible === true)
+      this.initAnimate();
   }
 
   componentDidMount(): void {
