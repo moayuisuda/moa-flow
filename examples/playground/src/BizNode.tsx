@@ -7,7 +7,7 @@ import {
   ConsumerBridge,
 } from "@ali/flow-infra-g";
 import type { ModelType, PortDataType, NodeDataType } from "@ali/flow-infra-g";
-import { message, Input, Modal } from "antd";
+import { message, Input, Modal, Slider } from "antd";
 import BizContext from "./Context";
 
 const { Rect, Text, Circle, Image, Group } = Graph;
@@ -107,11 +107,27 @@ class BizNode extends Node<BizNodeDataType, { modalVisible: boolean }> {
             />
 
             <Portal y={100}>
-              <Input value={bizContext.count} style={{ width: 200 }}></Input>
-              <Modal
+              {/* <Input value={bizContext.count} style={{ width: 200 }}></Input> */}
+              {/* <Modal
                 visible={this.state.modalVisible}
                 onCancel={() => this.setState({ modalVisible: false })}
-              ></Modal>
+              ></Modal> */}
+              <Slider
+                style={{
+                  width: 100,
+                  boxShadow: "0 0 2px 2px rgba(0,0,0,.2)",
+                }}
+                min={0}
+                max={1}
+                onChange={(value) => {
+                  this.getLinkNodes().forEach((nodeId) => {
+                    this.context.setCellData(nodeId, {
+                      label: String(value),
+                    });
+                  });
+                }}
+                step={0.01}
+              />
             </Portal>
             {/* in的port */}
             {inPorts.map((portData: PortDataType) => (
@@ -144,6 +160,7 @@ class BizNode extends Node<BizNodeDataType, { modalVisible: boolean }> {
                   // 防止冒泡触发默认的选中事件
                   onMousedown={(e) => e.stopPropagation()}
                   onClick={() => {
+                    // 获取某个port连接的node
                     const linkedNodes = this.context.getPortLinkNodes(
                       portData.id
                     );
