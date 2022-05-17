@@ -3,13 +3,24 @@ import type { NodeDataType } from "@ali/flow-infra-g";
 import { BizPortDataType } from "./BizNode";
 
 export default class BizEdge extends Edge {
-  protected bazier: boolean = true;
-
-  onMount() {
+  componentDidMount() {
+    super.componentDidMount();
     this.setData({
       label: "自定义",
     });
   }
+
+  bazier = true;
+  lineDash = [10, 10] as [number, number];
+  animate = () => {
+    return (
+      (
+        this.context.getCellData(
+          this.props.data.target as string
+        ) as BizPortDataType
+      )?.portType === "in"
+    );
+  };
 
   labelFormatter(label: string): string {
     const { source, target } = this.getLinkNodesData() as {

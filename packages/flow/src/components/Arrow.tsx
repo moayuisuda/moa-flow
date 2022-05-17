@@ -23,6 +23,8 @@ const typeMap = {
   Polyline: Polyline,
 };
 
+const ARROW_SIZE = 16;
+
 /**
  * support 3 types of arrow line:
  * 1. Line
@@ -155,9 +157,10 @@ export class Arrow extends Component<ArrowStyleProps, {}> {
       <Path
         {...others}
         fill={this.props.stroke}
-        path={`M${10 * cos(PI / 6)},${10 * sin(PI / 6)} L0,0 L${
-          10 * cos(PI / 6)
-        },-${10 * sin(PI / 6)} Z`}
+        path={`M${ARROW_SIZE * cos(PI / 6)},${ARROW_SIZE * sin(PI / 6)} L0,0 L${
+          ARROW_SIZE * cos(PI / 6)
+        },-${ARROW_SIZE * sin(PI / 6)} Z`}
+        lineDash={[0, 0]}
       />
     );
   }

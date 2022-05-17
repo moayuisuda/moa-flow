@@ -8,6 +8,9 @@ import React from "react";
 import { isVector2d, lineCenter, titleCase } from "../utils";
 import { InteractivePointerEvent } from "@antv/g";
 import * as G from "@antv/g";
+import type { DisplayObject } from "@antv/g";
+import { isFunction } from "lodash";
+import { callIfFn } from "../utils/util";
 
 export type EdgeDataType = {
   source: string | Vector2d;
@@ -17,6 +20,8 @@ export type EdgeDataType = {
 } & CellDataType;
 const TEXT_HEIGHT = 16;
 const LABEL_PADDING = 4;
+
+type Head = React.ReactNode | boolean;
 abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
   static metaData: any = {
     cellType: "edge",
@@ -24,9 +29,11 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
   labelRef: React.RefObject<G.Group>;
   arrowRef: React.RefObject<Arrow>;
 
-  protected bazier = false;
-  protected startHead = false;
-  protected endhead = true;
+  protected bazier: boolean | (() => boolean) = false;
+  protected startHead: Head | (() => Head) = false;
+  protected endhead: Head | (() => Head) = true;
+  protected lineDash: [number, number] | (() => [number, number]) = [0, 0];
+  protected animate: boolean | (() => boolean) = false;
 
   pathInstance = new G.Path();
 
@@ -41,6 +48,22 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
     super(props, context);
     this.labelRef = React.createRef();
     this.arrowRef = React.createRef();
+  }
+
+  componentDidMount(): void {
+    super.componentDidMount();
+
+    if (callIfFn(this.animate)) {
+      const lineDash = callIfFn(this.lineDash);
+      const LENGTH = lineDash[0] + lineDash[1];
+      (this.arrowRef.current?.bodyRef.current as DisplayObject).animate(
+        [{ lineDashOffset: LENGTH }, { lineDashOffset: 0 }],
+        {
+          duration: 500,
+          iterations: Infinity,
+        }
+      );
+    }
   }
 
   protected lineStyle({ isSelect }: { isSelect: boolean }) {
@@ -192,7 +215,7 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
   }
 
   labelPosition() {
-    if (this.bazier) {
+    if (callIfFn(this.bazier)) {
       this.pathInstance.style.setProperty("path", this.getBazierPath());
 
       return this.pathInstance.getPoint(0.5);
@@ -312,9 +335,10 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
         <Arrow
           ref={this.arrowRef}
           {...lineProps}
-          {...(this.bazier ? bazierProps : polyLineProps)}
-          startHead={this.startHead}
-          endHead={this.endhead}
+          {...(callIfFn(this.bazier) ? bazierProps : polyLineProps)}
+          startHead={callIfFn(this.startHead)}
+          endHead={callIfFn(this.endhead)}
+          lineDash={callIfFn(this.lineDash)}
         />
       </Group>
     );

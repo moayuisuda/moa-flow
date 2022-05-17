@@ -11,18 +11,22 @@ export declare type EdgeDataType = {
     label: string;
     verticies?: Vector2d[];
 } & CellDataType;
+declare type Head = React.ReactNode | boolean;
 declare abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
     static metaData: any;
     labelRef: React.RefObject<G.Group>;
     arrowRef: React.RefObject<Arrow>;
-    protected bazier: boolean;
-    protected startHead: boolean;
-    protected endhead: boolean;
+    protected bazier: boolean | (() => boolean);
+    protected startHead: Head | (() => Head);
+    protected endhead: Head | (() => Head);
+    protected lineDash: [number, number] | (() => [number, number]);
+    protected animate: boolean | (() => boolean);
     pathInstance: G.Path;
     isMountEvents: boolean;
     constructor(props: {
         data: EdgeDataType;
     }, context: FlowModel);
+    componentDidMount(): void;
     protected lineStyle({ isSelect }: {
         isSelect: boolean;
     }): {
@@ -32,8 +36,8 @@ declare abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & 
     };
     protected formatVerticied: (verticies: Vector2d[]) => Vector2d[];
     getLinkPortsData: () => {
-        source: Vector2d | PortDataType;
-        target: Vector2d | PortDataType;
+        source: PortDataType | Vector2d;
+        target: PortDataType | Vector2d;
     };
     getAnchors: () => {
         source: any;

@@ -10,6 +10,7 @@ var typeMap = {
     Line: Line,
     Polyline: Polyline,
 };
+var ARROW_SIZE = 16;
 /**
  * support 3 types of arrow line:
  * 1. Line
@@ -107,7 +108,7 @@ var Arrow = /** @class */ (function (_super) {
     Arrow.prototype.getDefaultArrowHead = function () {
         var _a = this.props; _a.startHead; _a.endHead; _a.body; var others = __rest(_a, ["startHead", "endHead", "body"]);
         var sin = Math.sin, cos = Math.cos, PI = Math.PI;
-        return (React.createElement(Path, __assign({}, others, { fill: this.props.stroke, path: "M".concat(10 * cos(PI / 6), ",").concat(10 * sin(PI / 6), " L0,0 L").concat(10 * cos(PI / 6), ",-").concat(10 * sin(PI / 6), " Z") })));
+        return (React.createElement(Path, __assign({}, others, { fill: this.props.stroke, path: "M".concat(ARROW_SIZE * cos(PI / 6), ",").concat(ARROW_SIZE * sin(PI / 6), " L0,0 L").concat(ARROW_SIZE * cos(PI / 6), ",-").concat(ARROW_SIZE * sin(PI / 6), " Z"), lineDash: [0, 0] })));
     };
     return Arrow;
 }(Component));

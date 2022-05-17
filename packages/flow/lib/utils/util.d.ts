@@ -4,3 +4,4 @@ export declare const findIndex: (arr: any[], target: any) => number | undefined;
 export declare const remove: (arr: any[], target: any) => void;
 export declare const isRectsInterSect: (boundsA: Bounds, boundsB: Bounds) => boolean;
 export declare const isVector2d: (source: any) => boolean;
+export declare const callIfFn: (exp: any) => any;

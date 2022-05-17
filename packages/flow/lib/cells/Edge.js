@@ -12,7 +12,7 @@ import '../components/SelectBoundsRect.js';
 import '../Flow.js';
 import './CommonNode/index.js';
 import { titleCase } from '../utils/string.js';
-import { isVector2d } from '../utils/util.js';
+import { callIfFn, isVector2d } from '../utils/util.js';
 import { lineCenter } from '../utils/vector.js';
 import * as G from '@antv/g';
 
@@ -25,6 +25,8 @@ var Edge = /** @class */ (function (_super) {
         _this.bazier = false;
         _this.startHead = false;
         _this.endhead = true;
+        _this.lineDash = [0, 0];
+        _this.animate = false;
         _this.pathInstance = new G.Path();
         _this.isMountEvents = false;
         _this.formatVerticied = function (verticies) {
@@ -65,6 +67,18 @@ var Edge = /** @class */ (function (_super) {
         _this.arrowRef = React.createRef();
         return _this;
     }
+    Edge.prototype.componentDidMount = function () {
+        var _a;
+        _super.prototype.componentDidMount.call(this);
+        if (callIfFn(this.animate)) {
+            var lineDash = callIfFn(this.lineDash);
+            var LENGTH = lineDash[0] + lineDash[1];
+            ((_a = this.arrowRef.current) === null || _a === void 0 ? void 0 : _a.bodyRef.current).animate([{ lineDashOffset: LENGTH }, { lineDashOffset: 0 }], {
+                duration: 500,
+                iterations: Infinity,
+            });
+        }
+    };
     Edge.prototype.lineStyle = function (_a) {
         var isSelect = _a.isSelect;
         var color = this.context.color;
@@ -134,7 +148,7 @@ var Edge = /** @class */ (function (_super) {
         return {};
     };
     Edge.prototype.labelPosition = function () {
-        if (this.bazier) {
+        if (callIfFn(this.bazier)) {
             this.pathInstance.style.setProperty("path", this.getBazierPath());
             return this.pathInstance.getPoint(0.5);
         }
@@ -212,7 +226,7 @@ var Edge = /** @class */ (function (_super) {
             points: points,
         };
         return (React.createElement(Group, null,
-            React.createElement(Arrow, __assign({ ref: this.arrowRef }, lineProps, (this.bazier ? bazierProps : polyLineProps), { startHead: this.startHead, endHead: this.endhead }))));
+            React.createElement(Arrow, __assign({ ref: this.arrowRef }, lineProps, (callIfFn(this.bazier) ? bazierProps : polyLineProps), { startHead: callIfFn(this.startHead), endHead: callIfFn(this.endhead), lineDash: callIfFn(this.lineDash) }))));
     };
     Edge.prototype.content = function () {
         return (React.createElement(Interactor, { id: this.props.data.id, draggable: false },
