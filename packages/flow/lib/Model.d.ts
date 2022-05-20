@@ -12,8 +12,8 @@ export declare class FlowModel {
     extra: any;
     _width: number;
     _height: number;
-    width: (width?: number | undefined) => number;
-    height: (height?: number | undefined) => number;
+    width: (width?: number | undefined) => number | undefined;
+    height: (height?: number | undefined) => number | undefined;
     setSize: (width: number, height: number) => void;
     grid: number | undefined;
     setGrid: (grid: number) => void;
@@ -138,9 +138,9 @@ export declare class FlowModel {
     addCell: (componentName: string, initOptions: any) => any;
     setLinkingPosition: (e: InteractivePointerEvent) => void;
     link: (source: string, target: string) => void;
-    scale: (scale?: number | undefined) => number;
-    x(x?: number): number;
-    y(y?: number): number;
+    scale: (scale?: number | undefined) => number | undefined;
+    x(x?: number): number | undefined;
+    y(y?: number): number | undefined;
     moveTo(id: string, index: number): void;
     getCell: (id: string) => any;
     getCellData: (id: string) => CellDataType | undefined;

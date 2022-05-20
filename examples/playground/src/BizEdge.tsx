@@ -12,15 +12,15 @@ export default class BizEdge extends Edge {
 
   bazier = true;
   lineDash = [10, 10] as [number, number];
-  animate = () => {
-    return (
-      (
-        this.context.getCellData(
-          this.props.data.target as string
-        ) as BizPortDataType
-      )?.portType === "in"
-    );
-  };
+  // animate = () => {
+  //   return (
+  //     (
+  //       this.context.getCellData(
+  //         this.props.data.target as string
+  //       ) as BizPortDataType
+  //     )?.portType === "in"
+  //   );
+  // };
 
   labelFormatter(label: string): string {
     const { source, target } = this.getLinkNodesData() as {

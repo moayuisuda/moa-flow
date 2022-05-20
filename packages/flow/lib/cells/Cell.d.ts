@@ -25,7 +25,7 @@ declare abstract class Cell<D, S = {}, P = {}> extends React.Component<{
     wrapperRef: React.RefObject<any>;
     constructor(props: any, context: Model);
     static regist(name: string, model: Model): void;
-    static getMetaData(): {};
+    static getMetaData(): any;
     setData(data: any): void;
     componentDidMount(): void;
     getData(): ({

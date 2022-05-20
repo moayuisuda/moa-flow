@@ -128,6 +128,7 @@ var Flow = /** @class */ (function (_super) {
     Flow.prototype.render = function () {
         var model = this.flowModel;
         return (React.createElement("div", { style: {
+                overflow: 'hidden',
                 position: "relative",
                 display: "inline-block",
             }, id: STAGE_ID },

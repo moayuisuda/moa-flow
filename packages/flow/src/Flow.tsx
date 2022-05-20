@@ -217,6 +217,7 @@ class Flow extends React.Component<FlowProps, {}> {
     return (
       <div
         style={{
+          overflow: 'hidden',
           position: "relative",
           display: "inline-block",
         }}

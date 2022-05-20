@@ -31,6 +31,14 @@ function App() {
     // setInterval(() => {
     //   setCount((count) => count + 1);
     // }, 1000);
+    // for (let i = 0; i < 200; i++) {
+    //   model.addCell("BizNode", {
+    //     x: Math.random() * 2000,
+    //     y: Math.random() * 1000,
+    //     label: "asd",
+    //     ports: [],
+    //   });
+    // }
   }, []);
 
   return (

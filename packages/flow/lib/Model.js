@@ -1,6 +1,6 @@
 import { __decorate, __assign } from './node_modules/tslib/tslib.es6.js';
 import { observable, action, makeObservable } from 'mobx';
-import { remove, isRectsInterSect, findIndex, arrayMove } from './utils/util.js';
+import { findIndex, arrayMove, remove, isRectsInterSect } from './utils/util.js';
 import { color } from './theme/style.js';
 import './node_modules/lodash/lodash.js';
 import { l as lodash } from './_virtual/lodash.js';
