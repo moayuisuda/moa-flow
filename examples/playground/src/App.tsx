@@ -8,6 +8,7 @@ import "antd/dist/antd.css";
 import BizEdge from "./BizEdge";
 import BizNode from "./BizNode";
 import BizContext from "./Context";
+import FuncNode from "./FuncNode";
 
 import testData from "./test.json";
 
@@ -18,27 +19,26 @@ function App() {
   useEffect(() => {
     const model = modelRef.current as ModelType;
 
-    // 放一些额外的业务逻辑到实例里，在节点里可以在this.context中获取
-    model.extra = { alert: (e: string) => message.info(e) };
-
+    // 注册节点
     model.regist("BizNode", BizNode);
     model.regist("BizEdge", BizEdge);
-    // 将默认连线设置为自定义连线
+    model.regist("FuncNode", FuncNode);
+
+    // 将默认连线设置为BizEdge
     model.setLinkEdge("BizEdge");
 
+    // 设置画布数据
     model.setCanvasData(testData);
 
-    // setInterval(() => {
-    //   setCount((count) => count + 1);
-    // }, 1000);
-    // for (let i = 0; i < 200; i++) {
-    //   model.addCell("BizNode", {
-    //     x: Math.random() * 2000,
-    //     y: Math.random() * 1000,
-    //     label: "asd",
-    //     ports: [],
-    //   });
-    // }
+    setInterval(() => {
+      // 向节点传递事件
+      // model.sendEvent("func-1", {
+      //   type: "top",
+      //   data: {
+      //     age: 10,
+      //   },
+      // });
+    }, 1000);
   }, []);
 
   return (
@@ -52,7 +52,7 @@ function App() {
           // message.info(`[${e.type}]}`);
         }}
       >
-        {/* Provider包裹画布组件 */}
+        {/* Provider包裹画布组件，这个provider可以用 */}
         <BizContext.Provider
           value={{
             count,

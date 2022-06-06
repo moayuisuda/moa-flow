@@ -73,6 +73,8 @@ class BizNode extends Node<BizNodeDataType, { modalVisible: boolean }> {
     const outPorts =
       ports?.filter((portData) => portData.portType === "out") || [];
 
+    const position = this.getPosition();
+
     return (
       <ConsumerBridge context={BizContext}>
         {(bizContext) => (
@@ -106,29 +108,9 @@ class BizNode extends Node<BizNodeDataType, { modalVisible: boolean }> {
               text={"连接ports: " + JSON.stringify(this.getLinkPorts())}
             />
 
-            <Portal y={100}>
-              {/* <Input value={bizContext.count} style={{ width: 200 }}></Input> */}
-              {/* <Modal
-                visible={this.state.modalVisible}
-                onCancel={() => this.setState({ modalVisible: false })}
-              ></Modal> */}
-              <Slider
-                style={{
-                  width: 100,
-                  boxShadow: "0 0 2px 2px rgba(0,0,0,.2)",
-                }}
-                min={0}
-                max={1}
-                onChange={(value) => {
-                  this.getLinkNodes().forEach((nodeId) => {
-                    this.context.setCellData(nodeId, {
-                      label: String(value),
-                    });
-                  });
-                }}
-                step={0.01}
-              />
-            </Portal>
+
+            {/* <Graph.HTML width={0} height={0} innerHTML={"<input />"} /> */}
+
             {/* in的port */}
             {inPorts.map((portData: PortDataType) => (
               <Port
@@ -136,8 +118,8 @@ class BizNode extends Node<BizNodeDataType, { modalVisible: boolean }> {
                 data={portData}
                 key={portData.label}
                 anchor={{
-                  x: data.x - 20,
-                  y: data.y + 70,
+                  x: position.x - 20,
+                  y: position.y + 70,
                 }}
               >
                 <Circle
@@ -181,8 +163,8 @@ class BizNode extends Node<BizNodeDataType, { modalVisible: boolean }> {
                 <Port
                   data={portData}
                   anchor={{
-                    x: data.x + width + 20,
-                    y: data.y + 70,
+                    x: position.x + width + 20,
+                    y: position.y + 70,
                   }}
                   link={(target: PortDataType, source: PortDataType) => {
                     message.info(JSON.stringify(target));
