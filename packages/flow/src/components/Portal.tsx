@@ -2,6 +2,7 @@ import React from "react";
 import { HTML as RGHTML } from "@antv/react-g";
 import { HTMLStyleProps } from "@antv/g";
 import ReactDOM from "react-dom";
+import { observer, Observer } from "mobx-react";
 
 export const Portal = ({
   children,
@@ -10,9 +11,18 @@ export const Portal = ({
   children: React.ReactNode;
 }) => {
   const [div] = React.useState(() => document.createElement("div"));
+  console.log({ div });
 
   React.useLayoutEffect(() => {
-    ReactDOM.render(<>{children}</>, div);
+    ReactDOM.render(
+      <Observer>
+        {() => {
+          console.log("change");
+          return children as React.ReactElement;
+        }}
+      </Observer>,
+      div
+    );
   });
 
   React.useEffect(() => {

@@ -49,7 +49,7 @@ export class Port extends Cell<PortDataType, {}, PortPropsType> {
       },
     } = this;
 
-    this.context.sendEvent({
+    this.context.emitEvent({
       type: "beforeLink",
       data: {
         source: this.props.data.id,

@@ -9,6 +9,7 @@ import v4 from './packages/flow/node_modules/uuid/dist/esm-browser/v4.js';
 var FlowModel = /** @class */ (function () {
     function FlowModel(eventSender) {
         var _this = this;
+        this.eventMap = new Map();
         this.setEventSender = function (eventSender) {
             _this.eventBus.sender = eventSender;
         };
@@ -118,6 +119,7 @@ var FlowModel = /** @class */ (function () {
             _this.cellsMap.forEach(function (cell) {
                 var _a;
                 if (((_a = cell.props.data) === null || _a === void 0 ? void 0 : _a.cellType) === "node") {
+                    console.log(_this.getLocalBBox(cell.props.data.id));
                     // 判断矩形是否相交
                     if (isRectsInterSect({
                         x: x,
@@ -176,7 +178,7 @@ var FlowModel = /** @class */ (function () {
         this.clearSelect = function () {
             _this.selectCells = [];
         };
-        this.sendEvent = function (data) {
+        this.emitEvent = function (data) {
             var _a, _b;
             (_b = (_a = _this.eventBus).sender) === null || _b === void 0 ? void 0 : _b.call(_a, data);
         };
@@ -197,9 +199,10 @@ var FlowModel = /** @class */ (function () {
             var instanceBounds = _this.cellsMap
                 .get(id)
                 .wrapperRef.current.getLocalBounds();
+            var _a = _this.getNodePosition(id), x = _a.x, y = _a.y;
             return {
-                x: instanceBounds.center[0] - instanceBounds.halfExtents[0],
-                y: instanceBounds.center[1] - instanceBounds.halfExtents[1],
+                x: instanceBounds.center[0] - instanceBounds.halfExtents[0] + x,
+                y: instanceBounds.center[1] - instanceBounds.halfExtents[1] + y,
                 width: instanceBounds.halfExtents[0] * 2,
                 height: instanceBounds.halfExtents[1] * 2,
             };
@@ -219,7 +222,7 @@ var FlowModel = /** @class */ (function () {
         };
         this.setCellData = function (id, data) {
             var cellData = _this.getCellData(id);
-            _this.sendEvent({
+            _this.emitEvent({
                 type: "data:change",
             });
             lodash.exports.merge(cellData, data);
@@ -306,7 +309,7 @@ var FlowModel = /** @class */ (function () {
             remove(_this.canvasData.cells, matchCell);
             _this.cellsMap.delete(id);
             _this.cellsDataMap.delete(id);
-            _this.sendEvent({
+            _this.emitEvent({
                 type: "data:change",
             });
             return matchCell.id;
@@ -344,7 +347,7 @@ var FlowModel = /** @class */ (function () {
             //   newCellData,
             //   this.canvasData.cells[this.canvasData.cells.length - 1]
             // ); // 两者不是一个对象，后者是proxy
-            _this.sendEvent({
+            _this.emitEvent({
                 type: "data:change",
             });
             return newCellData.id;
@@ -371,7 +374,7 @@ var FlowModel = /** @class */ (function () {
             }
             else
                 targetCellData.edges = [edgeId];
-            _this.sendEvent({
+            _this.emitEvent({
                 type: "link",
                 data: {
                     source: source,
@@ -399,6 +402,26 @@ var FlowModel = /** @class */ (function () {
         };
         this.getCellsData = function () {
             return _this.canvasData.cells;
+        };
+        this.getNodePosition = function (id) {
+            var re = { x: 0, y: 0 };
+            var curr = _this.getCellData(id);
+            while (curr) {
+                re.x += curr.x;
+                re.y += curr.y;
+                curr = curr.parent
+                    ? _this.getCellData(curr.parent)
+                    : undefined;
+            }
+            return re;
+        };
+        this.sendEvent = function (cellId, params) {
+            var events = _this.eventMap.get(cellId);
+            console.log(events);
+            events &&
+                events.forEach(function (event) {
+                    event(params);
+                });
         };
         /**
          * @description 获取当前鼠标的[画布坐标]

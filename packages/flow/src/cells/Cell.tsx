@@ -6,6 +6,7 @@ import { observer } from "mobx-react";
 import Model from "../Model";
 import { titleCase } from "utils/string";
 import { InteractivePointerEvent } from "@antv/g";
+import Node from "./Node";
 
 export type CellDataType = {
   id: string;
@@ -66,7 +67,6 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
   }
 
   setData(data: any) {
-    this.context;
     this.context.setCellData(this.props.data.id, data);
   }
 
@@ -83,7 +83,7 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
         const instanceEventFn = this[`on${titleCase(eventName)}`];
         instanceEventFn && instanceEventFn.call(this, e);
 
-        this.context.sendEvent({
+        this.context.emitEvent({
           type: `cell:${eventName}`,
           data: {
             e,

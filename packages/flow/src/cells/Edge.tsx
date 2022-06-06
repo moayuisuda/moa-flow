@@ -264,7 +264,7 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
               const instanceEventFn = this[`onLabel${titleCase(eventName)}`];
               instanceEventFn && instanceEventFn.call(this, e);
 
-              this.context.sendEvent({
+              this.context.emitEvent({
                 type: `label:${eventName}`,
                 data: {
                   e,
@@ -313,14 +313,26 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
     ${target.x},${target.y}`;
   }
 
+  getPolylinePath() {
+    const points = this.getPoints();
+
+    let str = `M${points[0][0]},${points[0][1]}`;
+    for (let i = 1; i < points.length; i++) {
+      str += `L${points[i][0]},${points[i][1]}`;
+    }
+
+    return str;
+  }
+
+  getPath() {
+    return callIfFn(this.bazier)
+      ? this.getBazierPath()
+      : this.getPolylinePath();
+  }
+
   lineExtra: () => JSX.Element;
 
-  protected edgeRender({
-    points,
-  }: {
-    points: [number, number][];
-    isLinking: boolean;
-  }) {
+  protected edgeRender() {
     const { color } = this.context;
 
     const lineProps = {
@@ -331,22 +343,12 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
       ...this.lineStyle({ isSelect: this.isSelect() }),
     } as any;
 
-    const bazierProps = {
-      type: "Path",
-      path: this.getBazierPath(),
-    };
-
-    const polyLineProps = {
-      type: "Polyline",
-      points,
-    };
-
     return (
       <Group>
         <Arrow
           ref={this.arrowRef}
           {...lineProps}
-          {...(callIfFn(this.bazier) ? bazierProps : polyLineProps)}
+          path={this.getPath()}
           startHead={callIfFn(this.startHead)}
           endHead={callIfFn(this.endhead)}
           lineDash={callIfFn(this.lineDash)}
@@ -358,10 +360,7 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
   content() {
     return (
       <Interactor id={this.props.data.id} draggable={false}>
-        {this.edgeRender({
-          points: this.getPoints(),
-          isLinking: this.isLinking(),
-        })}
+        {this.edgeRender()}
         {this.labelRender()}
         {this.lineExtra && this.lineExtra()}
       </Interactor>

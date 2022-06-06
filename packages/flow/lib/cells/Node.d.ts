@@ -10,5 +10,10 @@ declare abstract class Node<P = {}, S = {}> extends Cell<P & NodeDataType, S> {
     getLinkNodes(): string[];
     getLinkPorts(): string[];
     getNodeEdges(): string[];
+    getPosition(): {
+        x: number;
+        y: number;
+    };
+    getChildren(): any[];
 }
 export default Node;

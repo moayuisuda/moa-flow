@@ -12,14 +12,15 @@ var Interactor = /** @class */ (function (_super) {
     }
     Interactor.prototype.render = function () {
         var _this = this;
-        var _a = this, context = _a.context, _b = _a.props, _c = _b.x, x = _c === void 0 ? 0 : _c, _d = _b.y, y = _d === void 0 ? 0 : _d; _b.draggable; var id = _b.id, _f = _b.topOnFocus, topOnFocus = _f === void 0 ? true : _f, _g = _b.selectable, selectable = _g === void 0 ? true : _g, others = __rest(_b, ["x", "y", "draggable", "id", "topOnFocus", "selectable"]);
-        return (React.createElement(Group, __assign({ x: x, y: y, onRightdown: function () {
+        var _a = this, context = _a.context, _b = _a.props; _b.draggable; var id = _b.id, _d = _b.topOnFocus, topOnFocus = _d === void 0 ? true : _d, _e = _b.selectable, selectable = _e === void 0 ? true : _e, others = __rest(_b, ["draggable", "id", "topOnFocus", "selectable"]);
+        return (React.createElement(Group, __assign({ onRightdown: function () {
                 var selectCells = _this.context.selectCells;
                 if (selectable) {
                     if (!selectCells.includes(_this.props.id))
                         context.setSelectedCells([id]);
                 }
             }, onMousedown: function (e) {
+                e.stopPropagation();
                 var _a = _this.context, selectCells = _a.selectCells, _b = _a.buffer, select = _b.select, drag = _b.drag;
                 if (selectable) {
                     if (!selectCells.includes(_this.props.id))
@@ -31,7 +32,7 @@ var Interactor = /** @class */ (function (_super) {
                     drag.start.x = e.canvas.x;
                     drag.start.y = e.canvas.y;
                 }
-            } }, others), this.props.children));
+            } }, others, { x: 0, y: 0 }), this.props.children));
     };
     Interactor.contextType = FlowContext;
     Interactor = __decorate([

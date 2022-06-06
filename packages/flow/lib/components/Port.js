@@ -18,7 +18,7 @@ var Port = /** @class */ (function (_super) {
     Port.prototype.onLinkStart = function (e) {
         e.stopPropagation();
         var link = this.context.buffer.link;
-        this.context.sendEvent({
+        this.context.emitEvent({
             type: "beforeLink",
             data: {
                 source: this.props.data.id,

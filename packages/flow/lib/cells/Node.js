@@ -15,6 +15,15 @@ var Node = /** @class */ (function (_super) {
     Node.prototype.getNodeEdges = function () {
         return this.context.getNodeEdges(this.props.data.id);
     };
+    Node.prototype.getPosition = function () {
+        return this.context.getNodePosition(this.getData().id);
+    };
+    Node.prototype.getChildren = function () {
+        var _this = this;
+        return this.context.canvasData.cells.filter(function (cellData) {
+            cellData.parent === _this.getData().id;
+        });
+    };
     Node.metaData = {
         x: 0,
         y: 0,

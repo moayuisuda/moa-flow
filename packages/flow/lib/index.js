@@ -13,6 +13,9 @@ import './components/SelectBoundsRect.js';
 import * as G from '@antv/react-g';
 export { autorun } from 'mobx';
 export { Observer, observer } from 'mobx-react';
+export { FlowContext } from './Context.js';
+export { useEvent } from './hooks/useEvent.js';
+export { useModel } from './hooks/useModel.js';
 
 var Graph = __assign(__assign({}, G), { Arrow: Arrow });
 

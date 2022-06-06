@@ -25,6 +25,7 @@ import { autorun } from "mobx";
 import { Observer, observer } from "mobx-react";
 import { Vector2d, FlowInfraEventType } from "./typings/common";
 import { Canvas } from "./Flow";
+import { FlowContext } from './Context';
 
 type ModelType = Model;
 const Graph = {
@@ -32,6 +33,7 @@ const Graph = {
   Arrow
 }
 
+export * from './hooks'
 export {
   Flow,
   Cell,
@@ -46,6 +48,8 @@ export {
   ConsumerBridge,
   RightClickPanel,
   Canvas,
+
+  FlowContext,
 
   Observer,
   observer

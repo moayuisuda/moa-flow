@@ -31,7 +31,6 @@ var Cell = /** @class */ (function (_super) {
         return lodash.exports.cloneDeep(re);
     };
     Cell.prototype.setData = function (data) {
-        this.context;
         this.context.setCellData(this.props.data.id, data);
     };
     Cell.prototype.componentDidMount = function () {
@@ -47,7 +46,7 @@ var Cell = /** @class */ (function (_super) {
             _this.wrapperRef.current.on(eventName, function (e) {
                 var instanceEventFn = _this["on".concat(titleCase(eventName))];
                 instanceEventFn && instanceEventFn.call(_this, e);
-                _this.context.sendEvent({
+                _this.context.emitEvent({
                     type: "cell:".concat(eventName),
                     data: {
                         e: e,

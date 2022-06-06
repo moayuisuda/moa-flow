@@ -193,7 +193,7 @@ var Edge = /** @class */ (function (_super) {
                     label.on(eventName, function (e) {
                         var instanceEventFn = _this["onLabel".concat(titleCase(eventName))];
                         instanceEventFn && instanceEventFn.call(_this, e);
-                        _this.context.sendEvent({
+                        _this.context.emitEvent({
                             type: "label:".concat(eventName),
                             data: {
                                 e: e,
@@ -225,27 +225,28 @@ var Edge = /** @class */ (function (_super) {
         var dir = this.getBazierDir();
         return "M".concat(source.x, ",").concat(source.y, " \n    C").concat(source.x + dir.source[0], ",").concat(source.y + dir.source[1], " ").concat(target.x + dir.target[0], ",").concat(target.y + dir.target[1], " \n    ").concat(target.x, ",").concat(target.y);
     };
-    Edge.prototype.edgeRender = function (_a) {
-        var points = _a.points;
+    Edge.prototype.getPolylinePath = function () {
+        var points = this.getPoints();
+        var str = "M".concat(points[0][0], ",").concat(points[0][1]);
+        for (var i = 1; i < points.length; i++) {
+            str += "L".concat(points[i][0], ",").concat(points[i][1]);
+        }
+        return str;
+    };
+    Edge.prototype.getPath = function () {
+        return callIfFn(this.bazier)
+            ? this.getBazierPath()
+            : this.getPolylinePath();
+    };
+    Edge.prototype.edgeRender = function () {
         var color = this.context.color;
         var lineProps = __assign({ lineCap: "round", lineJoin: "round", lineWidth: 3, stroke: color.deepGrey }, this.lineStyle({ isSelect: this.isSelect() }));
-        var bazierProps = {
-            type: "Path",
-            path: this.getBazierPath(),
-        };
-        var polyLineProps = {
-            type: "Polyline",
-            points: points,
-        };
         return (React.createElement(Group, null,
-            React.createElement(Arrow, __assign({ ref: this.arrowRef }, lineProps, (callIfFn(this.bazier) ? bazierProps : polyLineProps), { startHead: callIfFn(this.startHead), endHead: callIfFn(this.endhead), lineDash: callIfFn(this.lineDash) }))));
+            React.createElement(Arrow, __assign({ ref: this.arrowRef }, lineProps, { path: this.getPath(), startHead: callIfFn(this.startHead), endHead: callIfFn(this.endhead), lineDash: callIfFn(this.lineDash) }))));
     };
     Edge.prototype.content = function () {
         return (React.createElement(Interactor, { id: this.props.data.id, draggable: false },
-            this.edgeRender({
-                points: this.getPoints(),
-                isLinking: this.isLinking(),
-            }),
+            this.edgeRender(),
             this.labelRender(),
             this.lineExtra && this.lineExtra()));
     };

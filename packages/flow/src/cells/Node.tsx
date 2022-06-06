@@ -24,6 +24,16 @@ abstract class Node<P = {}, S = {}> extends Cell<P & NodeDataType, S> {
   getNodeEdges() {
     return this.context.getNodeEdges(this.props.data.id);
   }
+
+  getPosition() {
+    return this.context.getNodePosition(this.getData().id);
+  }
+
+  getChildren() {
+    return this.context.canvasData.cells.filter((cellData) => {
+      cellData.parent === this.getData().id;
+    });
+  }
 }
 
 export default Node;

@@ -28,8 +28,6 @@ export class Interactor extends React.Component<InteractorType> {
     const {
       context,
       props: {
-        x = 0,
-        y = 0,
         draggable = true,
         id,
         topOnFocus = true,
@@ -40,8 +38,6 @@ export class Interactor extends React.Component<InteractorType> {
 
     return (
       <Group
-        x={x}
-        y={y}
         onRightdown={() => {
           const { selectCells } = this.context;
 
@@ -51,6 +47,8 @@ export class Interactor extends React.Component<InteractorType> {
           }
         }}
         onMousedown={(e) => {
+          e.stopPropagation();
+
           const {
             selectCells,
             buffer: { select, drag },
@@ -74,6 +72,8 @@ export class Interactor extends React.Component<InteractorType> {
           }
         }}
         {...others}
+        x={0}
+        y={0}
       >
         {this.props.children}
       </Group>

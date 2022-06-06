@@ -5,6 +5,7 @@ import { InteractivePointerEvent } from "@antv/g";
 import * as G from "@antv/g";
 declare type EventSender = (data: any) => void;
 export declare class FlowModel {
+    eventMap: Map<string, Map<string, Function>>;
     constructor(eventSender?: EventSender);
     setEventSender: (eventSender: EventSender) => void;
     setCellsDataMap: () => void;
@@ -12,8 +13,8 @@ export declare class FlowModel {
     extra: any;
     _width: number;
     _height: number;
-    width: (width?: number | undefined) => number | undefined;
-    height: (height?: number | undefined) => number | undefined;
+    width: (width?: number) => number | undefined;
+    height: (height?: number) => number | undefined;
     setSize: (width: number, height: number) => void;
     grid: number | undefined;
     setGrid: (grid: number) => void;
@@ -96,7 +97,7 @@ export declare class FlowModel {
     setSelectedCells: (ids: string[], ifReplace?: boolean) => void;
     canvasData: CanvasDataType;
     clearSelect: () => void;
-    sendEvent: (data: any) => void;
+    emitEvent: (data: any) => void;
     setStageScale: (scale: number) => void;
     setStagePosition: (x: number, y: number) => void;
     insertRuntimeState: (cellData: CellDataType) => void;
@@ -138,7 +139,7 @@ export declare class FlowModel {
     addCell: (componentName: string, initOptions: any) => any;
     setLinkingPosition: (e: InteractivePointerEvent) => void;
     link: (source: string, target: string) => void;
-    scale: (scale?: number | undefined) => number | undefined;
+    scale: (scale?: number) => number | undefined;
     x(x?: number): number | undefined;
     y(y?: number): number | undefined;
     moveTo(id: string, index: number): void;
@@ -146,6 +147,11 @@ export declare class FlowModel {
     getCellData: (id: string) => CellDataType | undefined;
     getCellInstance: (id: string) => any;
     getCellsData: () => any[];
+    getNodePosition: (id: string) => {
+        x: number;
+        y: number;
+    };
+    sendEvent: (cellId: string, params?: any) => void;
     /**
      * @description 获取当前鼠标的[画布坐标]
      */

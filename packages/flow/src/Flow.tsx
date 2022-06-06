@@ -1,10 +1,10 @@
-import { Canvas as RGCanvas, Group, Circle } from "@antv/react-g";
+import { Canvas as RGCanvas, Group, Circle, Rect, Text } from "@antv/react-g";
 import LinkingEdge from "./cells/LinkingEdge";
 import React, { createRef } from "react";
 import FlowModel from "./Model";
 import { Renderer as CanvasRenderer } from "@antv/g-canvas";
 
-import { observer } from "mobx-react";
+import { observer, Observer } from "mobx-react";
 import { computed } from "mobx";
 import { FlowContext } from "./Context";
 
@@ -20,7 +20,7 @@ import {
   initHotKeys,
   initDataChangeListener,
 } from "./events";
-import { useEffect, useState, useContext } from "react";
+import { useContext } from "react";
 import { STAGE_ID } from "./constants";
 import { initMultiSelect, initSelect } from "./events";
 import { color } from "./theme/style";
@@ -29,15 +29,25 @@ import { getCanvas } from "./utils/getElement";
 
 const renderer = new CanvasRenderer();
 
-const renderComponent = (cellData, model) => {
-  return React.createElement(
-    model.componentsMap.get(cellData.component) || Group,
-    {
-      data: cellData,
-      key: cellData.id,
-    }
+const CellComponent = observer(({ cellData }: { cellData: CellDataType }) => {
+  const model = useContext(FlowContext);
+  const absolutePosition =
+    cellData.cellType === "node"
+      ? model.getNodePosition(cellData.id)
+      : { x: 0, y: 0 };
+
+  return (
+    <Group {...absolutePosition}>
+      {React.createElement(
+        model.componentsMap.get(cellData.component) || Group,
+        {
+          data: cellData,
+          key: cellData.id,
+        }
+      )}
+    </Group>
   );
-};
+});
 
 const Dots = observer(() => {
   const model = useContext(FlowContext);
@@ -70,16 +80,18 @@ const Dots = observer(() => {
   return (
     <Group>
       {_dots.map((dot) => {
-        return <Circle x={dot.x} y={dot.y} r={1} fill={color.deepGrey} />;
+        return <Circle cx={dot.x} cy={dot.y} r={10} fill={color.deepGrey} />;
       })}
     </Group>
   );
 });
+
 @observer
 class Grid extends React.Component<{}> {
   static contextType = FlowContext;
   // vscode 无法推断 this.context 的类型，需要显式声明 this.context 的类型
   declare context: React.ContextType<typeof FlowContext>;
+
   gridRef: any;
 
   constructor(props: any) {
@@ -121,9 +133,9 @@ const Edges = observer(() => {
 
   return (
     <Group zIndex={1}>
-      {edgesData.map((cellData: CellDataType) => {
-        return renderComponent(cellData, context);
-      })}
+      {edgesData.map((cellData: CellDataType) => (
+        <CellComponent cellData={cellData} key={cellData.id} />
+      ))}
     </Group>
   );
 });
@@ -137,9 +149,9 @@ const Nodes = observer(() => {
 
   return (
     <Group zIndex={2}>
-      {nodesData.slice(0, nodesData.length).map((cellData) => {
-        return renderComponent(cellData, context);
-      })}
+      {nodesData.slice(0, nodesData.length).map((cellData) => (
+        <CellComponent cellData={cellData} key={cellData.id} />
+      ))}
     </Group>
   );
 });
@@ -217,7 +229,7 @@ class Flow extends React.Component<FlowProps, {}> {
     return (
       <div
         style={{
-          overflow: 'hidden',
+          overflow: "hidden",
           position: "relative",
           display: "inline-block",
         }}

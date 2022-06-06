@@ -1,4 +1,4 @@
-import { __extends, __assign, __decorate } from './node_modules/tslib/tslib.es6.js';
+import { __assign, __extends, __decorate } from './node_modules/tslib/tslib.es6.js';
 import { Group, Circle, Canvas as Canvas$1 } from '@antv/react-g';
 import LinkingEdge from './cells/LinkingEdge.js';
 import React, { useContext, createRef } from 'react';
@@ -20,12 +20,17 @@ import { color } from './theme/style.js';
 import { getCanvas } from './utils/getElement.js';
 
 var renderer = new Renderer();
-var renderComponent = function (cellData, model) {
-    return React.createElement(model.componentsMap.get(cellData.component) || Group, {
+var CellComponent = observer(function (_a) {
+    var cellData = _a.cellData;
+    var model = useContext(FlowContext);
+    var absolutePosition = cellData.cellType === "node"
+        ? model.getNodePosition(cellData.id)
+        : { x: 0, y: 0 };
+    return (React.createElement(Group, __assign({}, absolutePosition), React.createElement(model.componentsMap.get(cellData.component) || Group, {
         data: cellData,
         key: cellData.id,
-    });
-};
+    })));
+});
 var Dots = observer(function () {
     var model = useContext(FlowContext);
     // const EXTRA = model.grid as number;
@@ -44,7 +49,7 @@ var Dots = observer(function () {
         return re;
     }).get();
     return (React.createElement(Group, null, _dots.map(function (dot) {
-        return React.createElement(Circle, { x: dot.x, y: dot.y, r: 1, fill: color.deepGrey });
+        return React.createElement(Circle, { cx: dot.x, cy: dot.y, r: 10, fill: color.deepGrey });
     })));
 });
 var Grid = /** @class */ (function (_super) {
@@ -75,18 +80,14 @@ var Grid = /** @class */ (function (_super) {
 var Edges = observer(function () {
     var context = useContext(FlowContext);
     var edgesData = context.canvasData.cells.filter(function (cellData) { return cellData.cellType === "edge"; });
-    return (React.createElement(Group, { zIndex: 1 }, edgesData.map(function (cellData) {
-        return renderComponent(cellData, context);
-    })));
+    return (React.createElement(Group, { zIndex: 1 }, edgesData.map(function (cellData) { return (React.createElement(CellComponent, { cellData: cellData, key: cellData.id })); })));
 });
 var Nodes = observer(function () {
     var context = useContext(FlowContext);
     var nodesData = context.canvasData.cells.filter(function (cellData) {
         return cellData.cellType !== "edge";
     });
-    return (React.createElement(Group, { zIndex: 2 }, nodesData.slice(0, nodesData.length).map(function (cellData) {
-        return renderComponent(cellData, context);
-    })));
+    return (React.createElement(Group, { zIndex: 2 }, nodesData.slice(0, nodesData.length).map(function (cellData) { return (React.createElement(CellComponent, { cellData: cellData, key: cellData.id })); })));
 });
 var InteractTop = observer(function () {
     var context = useContext(FlowContext);
@@ -128,7 +129,7 @@ var Flow = /** @class */ (function (_super) {
     Flow.prototype.render = function () {
         var model = this.flowModel;
         return (React.createElement("div", { style: {
-                overflow: 'hidden',
+                overflow: "hidden",
                 position: "relative",
                 display: "inline-block",
             }, id: STAGE_ID },

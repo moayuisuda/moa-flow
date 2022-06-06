@@ -66,11 +66,10 @@ declare abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & 
         target: Dir;
     };
     getBazierPath(): string;
+    getPolylinePath(): string;
+    getPath(): string;
     lineExtra: () => JSX.Element;
-    protected edgeRender({ points, }: {
-        points: [number, number][];
-        isLinking: boolean;
-    }): JSX.Element;
+    protected edgeRender(): JSX.Element;
     content(): JSX.Element;
 }
 export default Edge;

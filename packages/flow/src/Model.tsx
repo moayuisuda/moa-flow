@@ -15,6 +15,8 @@ import * as G from "@antv/g";
 
 type EventSender = (data: any) => void;
 export class FlowModel {
+  eventMap = new Map<string, Map<string, Function>>();
+
   constructor(eventSender?: EventSender) {
     makeObservable(this);
     if (eventSender) this.eventBus.sender = eventSender;
@@ -52,14 +54,14 @@ export class FlowModel {
   width = (width?: number) => {
     if (isUndefined(width)) return this._width;
     else {
-      this._width = width;
+      this._width = width as number;
       return width;
     }
   };
   height = (height?: number) => {
     if (isUndefined(height)) return this._height;
     else {
-      this._height = height;
+      this._height = height as number;
       return height;
     }
   };
@@ -175,6 +177,8 @@ export class FlowModel {
     const re: string[] = [];
     this.cellsMap.forEach((cell) => {
       if (cell.props.data?.cellType === "node") {
+        console.log(this.getLocalBBox(cell.props.data.id));
+
         // 判断矩形是否相交
         if (
           isRectsInterSect(
@@ -246,7 +250,7 @@ export class FlowModel {
     this.selectCells = [];
   };
 
-  sendEvent = (data: any) => {
+  emitEvent = (data: any) => {
     this.eventBus.sender?.(data);
   };
 
@@ -271,9 +275,10 @@ export class FlowModel {
       .get(id)
       .wrapperRef.current.getLocalBounds();
 
+    const { x, y } = this.getNodePosition(id);
     return {
-      x: instanceBounds.center[0] - instanceBounds.halfExtents[0],
-      y: instanceBounds.center[1] - instanceBounds.halfExtents[1],
+      x: instanceBounds.center[0] - instanceBounds.halfExtents[0] + x,
+      y: instanceBounds.center[1] - instanceBounds.halfExtents[1] + y,
       width: instanceBounds.halfExtents[0] * 2,
       height: instanceBounds.halfExtents[1] * 2,
     };
@@ -297,7 +302,7 @@ export class FlowModel {
 
   @action setCellData = (id: string, data: any) => {
     const cellData = this.getCellData(id);
-    this.sendEvent({
+    this.emitEvent({
       type: "data:change",
     });
 
@@ -418,7 +423,7 @@ export class FlowModel {
     this.cellsMap.delete(id);
     this.cellsDataMap.delete(id);
 
-    this.sendEvent({
+    this.emitEvent({
       type: "data:change",
     });
 
@@ -476,7 +481,7 @@ export class FlowModel {
     //   this.canvasData.cells[this.canvasData.cells.length - 1]
     // ); // 两者不是一个对象，后者是proxy
 
-    this.sendEvent({
+    this.emitEvent({
       type: "data:change",
     });
 
@@ -507,7 +512,7 @@ export class FlowModel {
       targetCellData.edges.push(edgeId);
     } else targetCellData.edges = [edgeId];
 
-    this.sendEvent({
+    this.emitEvent({
       type: "link",
       data: {
         source,
@@ -566,6 +571,31 @@ export class FlowModel {
 
   getCellsData = () => {
     return this.canvasData.cells;
+  };
+
+  getNodePosition = (id: string) => {
+    const re = { x: 0, y: 0 };
+
+    let curr: CellDataType | undefined = this.getCellData(id);
+
+    while (curr) {
+      re.x += curr.x;
+      re.y += curr.y;
+      curr = curr.parent
+        ? (this.getCellData(curr.parent) as CellDataType)
+        : undefined;
+    }
+
+    return re;
+  };
+
+  sendEvent = (cellId: string, params?: any) => {
+    const events = this.eventMap.get(cellId);
+    console.log(events);
+    events &&
+      events.forEach((event) => {
+        event(params);
+      });
   };
 
   /**
