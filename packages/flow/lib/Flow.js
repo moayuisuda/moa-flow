@@ -29,6 +29,7 @@ var CellComponent = observer(function (_a) {
     return (React.createElement(Group, __assign({}, absolutePosition), React.createElement(model.componentsMap.get(cellData.component) || Group, {
         data: cellData,
         key: cellData.id,
+        wrapperRef: model.getWrapperRef(cellData.id),
     })));
 });
 var Dots = observer(function () {

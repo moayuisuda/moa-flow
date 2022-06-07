@@ -116,18 +116,17 @@ var FlowModel = /** @class */ (function () {
             if (onlySetPosition)
                 return;
             var re = [];
-            _this.cellsMap.forEach(function (cell) {
-                var _a;
-                if (((_a = cell.props.data) === null || _a === void 0 ? void 0 : _a.cellType) === "node") {
-                    console.log(_this.getLocalBBox(cell.props.data.id));
+            _this.canvasData.cells.forEach(function (cellData) {
+                if (cellData.cellType === "node") {
+                    console.log(_this.getLocalBBox(cellData.id));
                     // 判断矩形是否相交
                     if (isRectsInterSect({
                         x: x,
                         y: y,
                         width: right - x,
                         height: bottom - y,
-                    }, _this.getLocalBBox(cell.props.data.id))) {
-                        re.push(cell.props.data.id);
+                    }, _this.getLocalBBox(cellData.id))) {
+                        re.push(cellData.id);
                     }
                 }
             });
@@ -145,6 +144,17 @@ var FlowModel = /** @class */ (function () {
         };
         // 全局颜色，可以由用户自定义
         this.color = color;
+        this.getWrapperRef = function (id) {
+            var ref = _this.wrapperRefsMap.get(id);
+            if (ref)
+                return ref;
+            // @TODO 放在外層並用useCallback緩存設置map
+            else
+                _this.wrapperRefsMap.set(id, { current: null });
+            return _this.wrapperRefsMap.get(id);
+        };
+        // function component的外层group ref的map
+        this.wrapperRefsMap = new Map();
         // cell的<id, 实例>map，方便用id获取到组件实例
         this.cellsMap = new Map();
         // cellData的<id, cellData>map，用来修改受控数据
@@ -196,10 +206,10 @@ var FlowModel = /** @class */ (function () {
             };
         };
         this.getLocalBBox = function (id) {
-            var instanceBounds = _this.cellsMap
-                .get(id)
-                .wrapperRef.current.getLocalBounds();
-            var _a = _this.getNodePosition(id), x = _a.x, y = _a.y;
+            var _a, _b, _c;
+            var instanceBounds = ((_a = _this.cellsMap.get(id)) === null || _a === void 0 ? void 0 : _a.wrapperRef.current.getLocalBounds()) ||
+                ((_c = (_b = _this.wrapperRefsMap.get(id)) === null || _b === void 0 ? void 0 : _b.current) === null || _c === void 0 ? void 0 : _c.getLocalBounds());
+            var _d = _this.getNodePosition(id), x = _d.x, y = _d.y;
             return {
                 x: instanceBounds.center[0] - instanceBounds.halfExtents[0] + x,
                 y: instanceBounds.center[1] - instanceBounds.halfExtents[1] + y,

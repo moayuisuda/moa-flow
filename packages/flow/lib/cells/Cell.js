@@ -4,7 +4,6 @@ import { Group } from '@antv/react-g';
 import { FlowContext } from '../Context.js';
 import '../node_modules/lodash/lodash.js';
 import { observer } from 'mobx-react';
-import { titleCase } from '../utils/string.js';
 import { l as lodash } from '../_virtual/lodash.js';
 
 // D: data, S: state, P: props
@@ -34,28 +33,6 @@ var Cell = /** @class */ (function (_super) {
         this.context.setCellData(this.props.data.id, data);
     };
     Cell.prototype.componentDidMount = function () {
-        var _this = this;
-        [
-            "mouseenter",
-            "mouseleave",
-            "mousedown",
-            "mouseup",
-            "dblclick",
-            "click",
-        ].forEach(function (eventName) {
-            _this.wrapperRef.current.on(eventName, function (e) {
-                var instanceEventFn = _this["on".concat(titleCase(eventName))];
-                instanceEventFn && instanceEventFn.call(_this, e);
-                _this.context.emitEvent({
-                    type: "cell:".concat(eventName),
-                    data: {
-                        e: e,
-                        cellData: _this.props.data,
-                        cell: _this,
-                    },
-                });
-            });
-        });
         this.onMount && this.onMount();
     };
     Cell.prototype.getData = function () {

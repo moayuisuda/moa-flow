@@ -16,6 +16,7 @@ export { Observer, observer } from 'mobx-react';
 export { FlowContext } from './Context.js';
 export { useEvent } from './hooks/useEvent.js';
 export { useModel } from './hooks/useModel.js';
+export { Content } from './hooks/useContent.js';
 
 var Graph = __assign(__assign({}, G), { Arrow: Arrow });
 

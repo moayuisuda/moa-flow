@@ -26,7 +26,7 @@ export declare class Arrow extends Component<ArrowStyleProps, {}> {
     endRef: React.MutableRefObject<DisplayObject | null>;
     bodyRef: React.MutableRefObject<DisplayObject | null>;
     constructor(props: ArrowStyleProps);
-    getArrowHead(head: ArrowHead, isStart: boolean): ArrowHead | JSX.Element | undefined;
+    getArrowHead(head: ArrowHead, isStart: boolean): JSX.Element | ArrowHead | undefined;
     setHeadTransform(): void;
     componentDidMount(): void;
     componentDidUpdate(): void;

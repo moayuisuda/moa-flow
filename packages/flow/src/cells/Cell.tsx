@@ -4,9 +4,7 @@ import { FlowContext } from "../Context";
 import { cloneDeep, isUndefined } from "lodash";
 import { observer } from "mobx-react";
 import Model from "../Model";
-import { titleCase } from "utils/string";
-import { InteractivePointerEvent } from "@antv/g";
-import Node from "./Node";
+import G from "@antv/g";
 
 export type CellDataType = {
   id: string;
@@ -18,7 +16,9 @@ export type CellDataType = {
 
 // D: data, S: state, P: props
 abstract class Cell<D, S = {}, P = {}> extends React.Component<
-  { data: D & CellDataType } & P,
+  {
+    data: D & CellDataType;
+  } & P,
   S
 > {
   static contextType = FlowContext;
@@ -71,29 +71,6 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
   }
 
   componentDidMount(): void {
-    [
-      "mouseenter",
-      "mouseleave",
-      "mousedown",
-      "mouseup",
-      "dblclick",
-      "click",
-    ].forEach((eventName) => {
-      this.wrapperRef.current.on(eventName, (e: InteractivePointerEvent) => {
-        const instanceEventFn = this[`on${titleCase(eventName)}`];
-        instanceEventFn && instanceEventFn.call(this, e);
-
-        this.context.emitEvent({
-          type: `cell:${eventName}`,
-          data: {
-            e,
-            cellData: this.props.data,
-            cell: this,
-          },
-        });
-      });
-    });
-
     this.onMount && this.onMount();
   }
 

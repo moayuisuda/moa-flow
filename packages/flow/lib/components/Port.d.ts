@@ -29,7 +29,10 @@ export declare class Port extends Cell<PortDataType, {}, PortPropsType> {
     constructor(props: PortPropsType & {
         data: PortDataType;
     }, context: FlowModel);
-    anchor(): any;
+    anchor(): {
+        x: number;
+        y: number;
+    };
     onLinkStart(e: InteractivePointerEvent): void;
     onLinkEnd(e: InteractivePointerEvent): void;
     content(): JSX.Element;

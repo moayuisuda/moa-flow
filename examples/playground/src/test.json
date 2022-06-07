@@ -4,6 +4,23 @@
   "y": 0,
   "cells": [
     {
+      "id": "func-1",
+      "cellType": "node",
+      "component": "FuncNode",
+      "ports": [
+        {
+          "cellType": "port",
+          "label": "func-edge",
+          "id": "func-1-0",
+          "host": "func-1"
+        }
+      ],
+      "x": 100,
+      "y": 200,
+      "visible": true,
+      "label": "FUNC 1 Matrix"
+    },
+    {
       "id": "1",
       "cellType": "node",
       "component": "BizNode",

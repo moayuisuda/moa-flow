@@ -10,8 +10,7 @@ import { PortDataType } from "./components";
 import { NodeDataType } from "./cells/Node";
 import { CanvasDataType, AllCellDataType, Vector2d } from "./typings/common";
 import Cell from "./cells/Cell";
-import { InteractivePointerEvent } from "@antv/g";
-import * as G from "@antv/g";
+import G, { InteractivePointerEvent } from "@antv/g";
 
 type EventSender = (data: any) => void;
 export class FlowModel {
@@ -175,9 +174,9 @@ export class FlowModel {
     if (onlySetPosition) return;
 
     const re: string[] = [];
-    this.cellsMap.forEach((cell) => {
-      if (cell.props.data?.cellType === "node") {
-        console.log(this.getLocalBBox(cell.props.data.id));
+    this.canvasData.cells.forEach((cellData) => {
+      if (cellData.cellType === "node") {
+        console.log(this.getLocalBBox(cellData.id));
 
         // 判断矩形是否相交
         if (
@@ -188,10 +187,10 @@ export class FlowModel {
               width: right - x,
               height: bottom - y,
             },
-            this.getLocalBBox(cell.props.data.id)
+            this.getLocalBBox(cellData.id)
           )
         ) {
-          re.push(cell.props.data.id);
+          re.push(cellData.id);
         }
       }
     });
@@ -213,6 +212,17 @@ export class FlowModel {
   // 全局颜色，可以由用户自定义
   @observable color = color;
 
+  getWrapperRef = (id: string) => {
+    const ref = this.wrapperRefsMap.get(id);
+
+    if (ref) return ref;
+    // @TODO 放在外層並用useCallback緩存設置map
+    else this.wrapperRefsMap.set(id, { current: null });
+
+    return this.wrapperRefsMap.get(id);
+  };
+  // function component的外层group ref的map
+  wrapperRefsMap = new Map<string, { current: G.Group | null }>();
   // cell的<id, 实例>map，方便用id获取到组件实例
   cellsMap = new Map<string, React.Component<any, any> & any>();
   // cellData的<id, cellData>map，用来修改受控数据
@@ -271,9 +281,9 @@ export class FlowModel {
   };
 
   getLocalBBox = (id: string) => {
-    const instanceBounds = this.cellsMap
-      .get(id)
-      .wrapperRef.current.getLocalBounds();
+    const instanceBounds =
+      this.cellsMap.get(id)?.wrapperRef.current.getLocalBounds() ||
+      this.wrapperRefsMap.get(id)?.current?.getLocalBounds();
 
     const { x, y } = this.getNodePosition(id);
     return {

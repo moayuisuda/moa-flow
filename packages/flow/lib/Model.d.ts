@@ -1,8 +1,7 @@
 import React from "react";
 import { CellDataType } from "./cells/Cell";
 import { CanvasDataType, AllCellDataType, Vector2d } from "./typings/common";
-import { InteractivePointerEvent } from "@antv/g";
-import * as G from "@antv/g";
+import G, { InteractivePointerEvent } from "@antv/g";
 declare type EventSender = (data: any) => void;
 export declare class FlowModel {
     eventMap: Map<string, Map<string, Function>>;
@@ -13,8 +12,8 @@ export declare class FlowModel {
     extra: any;
     _width: number;
     _height: number;
-    width: (width?: number) => number | undefined;
-    height: (height?: number) => number | undefined;
+    width: (width?: number) => number;
+    height: (height?: number) => number;
     setSize: (width: number, height: number) => void;
     grid: number | undefined;
     setGrid: (grid: number) => void;
@@ -85,6 +84,12 @@ export declare class FlowModel {
         deepGrey: string;
         background: string;
     };
+    getWrapperRef: (id: string) => {
+        current: G.Group | null;
+    } | undefined;
+    wrapperRefsMap: Map<string, {
+        current: G.Group | null;
+    }>;
     cellsMap: Map<string, any>;
     cellsDataMap: Map<string, CellDataType>;
     componentsMap: Map<any, any>;
@@ -139,9 +144,9 @@ export declare class FlowModel {
     addCell: (componentName: string, initOptions: any) => any;
     setLinkingPosition: (e: InteractivePointerEvent) => void;
     link: (source: string, target: string) => void;
-    scale: (scale?: number) => number | undefined;
-    x(x?: number): number | undefined;
-    y(y?: number): number | undefined;
+    scale: (scale?: number) => number;
+    x(x?: number): number;
+    y(y?: number): number;
     moveTo(id: string, index: number): void;
     getCell: (id: string) => any;
     getCellData: (id: string) => CellDataType | undefined;

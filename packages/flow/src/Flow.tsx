@@ -43,6 +43,7 @@ const CellComponent = observer(({ cellData }: { cellData: CellDataType }) => {
         {
           data: cellData,
           key: cellData.id,
+          wrapperRef: model.getWrapperRef(cellData.id),
         }
       )}
     </Group>

@@ -8,7 +8,7 @@ import Node from "./cells/Node";
 import Edge from "./cells/Edge";
 import { CellDataType } from "./cells/Cell";
 import { EdgeDataType } from "./cells/Edge";
-import { NodeDataType } from "./cells/Node";
+import { NodeDataType, NodePropsType } from './cells/Node';
 
 import {
   Portal,
@@ -63,4 +63,5 @@ export type {
   EdgeDataType,
   PortDataType,
   NodeDataType,
+  NodePropsType
 };
