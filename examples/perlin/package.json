@@ -1,0 +1,48 @@
+{
+  "name": "perlin",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "react-scripts build",
+    "dev": "DISABLE_ESLINT_PLUGIN=true react-scripts start",
+    "eject": "react-scripts eject",
+    "start": "DISABLE_ESLINT_PLUGIN=true react-scripts start",
+    "test": "react-scripts test"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "dependencies": {
+    "@ali/flow-infra-g": "^1.0.0",
+    "@alipay/bigfish": "^4.0.25",
+    "@alipay/connect-util": "^0.0.0-S29001104120.0",
+    "@alipay/tech-ui": "^2.26.1",
+    "@testing-library/jest-dom": "^5.16.4",
+    "@testing-library/react": "^13.3.0",
+    "@testing-library/user-event": "^13.5.0",
+    "@types/jest": "^27.5.2",
+    "@types/node": "^16.11.39",
+    "@types/react": "^17.0.39",
+    "@types/react-dom": "^17.0.12",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-scripts": ".0.1",
+    "typescript": "^4.7.3",
+    "web-vitals": "^2.1.4"
+  }
+}

@@ -6,6 +6,7 @@ import { Interactor } from '../../components/Interacotr.js';
 import '../../components/Port.js';
 import { Rect, Text, Circle } from '@antv/react-g';
 import '../../node_modules/react-dom/index.js';
+import '../../Context.js';
 import '../../components/RightClickPanel/index.js';
 import '../../components/SelectBoundsRect.js';
 import Node from '../Node.js';

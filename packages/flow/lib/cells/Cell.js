@@ -1,9 +1,9 @@
 import { __extends } from '../node_modules/tslib/tslib.es6.js';
-import React from 'react';
 import { Group } from '@antv/react-g';
-import { FlowContext } from '../Context.js';
 import '../node_modules/lodash/lodash.js';
 import { observer } from 'mobx-react';
+import React from 'react';
+import { FlowContext } from '../Context.js';
 import { l as lodash } from '../_virtual/lodash.js';
 
 // D: data, S: state, P: props
@@ -45,7 +45,8 @@ var Cell = /** @class */ (function (_super) {
         var _this = this;
         return (React.createElement(Group, { ref: function (ref) {
                 _this.wrapperRef.current = ref;
-            } }, lodash.exports.isUndefined(this.props.data.visible) || this.props.data.visible ? (React.createElement(Group, null, this.content())) : (React.createElement(React.Fragment, null))));
+            } }, !this.context.pendingRender &&
+            (lodash.exports.isUndefined(this.props.data.visible) || this.props.data.visible) ? (React.createElement(Group, null, this.content())) : (React.createElement(React.Fragment, null))));
     };
     Cell.contextType = FlowContext;
     Cell.metaData = { id: "" };

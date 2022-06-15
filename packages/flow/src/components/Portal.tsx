@@ -3,6 +3,8 @@ import { HTML as RGHTML } from "@antv/react-g";
 import { HTMLStyleProps } from "@antv/g";
 import ReactDOM from "react-dom";
 import { observer, Observer } from "mobx-react";
+import { useModel } from "../hooks/useModel";
+import { FlowContext } from "../Context";
 
 export const Portal = ({
   children,
@@ -10,17 +12,20 @@ export const Portal = ({
 }: Omit<HTMLStyleProps, "innerHTML" | "width" | "height"> & {
   children: React.ReactNode;
 }) => {
+  const context = useModel();
+
   const [div] = React.useState(() => document.createElement("div"));
-  console.log({ div });
 
   React.useLayoutEffect(() => {
     ReactDOM.render(
-      <Observer>
-        {() => {
-          console.log("change");
-          return children as React.ReactElement;
-        }}
-      </Observer>,
+      <FlowContext.Provider value={context}>
+        <Observer>
+          {() => {
+            console.log("change");
+            return children as React.ReactElement;
+          }}
+        </Observer>
+      </FlowContext.Provider>,
       div
     );
   });

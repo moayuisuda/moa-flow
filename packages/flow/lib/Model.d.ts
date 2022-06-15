@@ -1,7 +1,7 @@
+import G, { InteractivePointerEvent } from "@antv/g";
 import React from "react";
 import { CellDataType } from "./cells/Cell";
-import { CanvasDataType, AllCellDataType, Vector2d } from "./typings/common";
-import G, { InteractivePointerEvent } from "@antv/g";
+import { AllCellDataType, CanvasDataType, Vector2d } from "./typings/common";
 declare type EventSender = (data: any) => void;
 export declare class FlowModel {
     eventMap: Map<string, Map<string, Function>>;
@@ -10,6 +10,9 @@ export declare class FlowModel {
     setCellsDataMap: () => void;
     setCellDataMap(cellData: AllCellDataType): void;
     extra: any;
+    pendingRender: boolean;
+    trigRender(): void;
+    pendRender(): void;
     _width: number;
     _height: number;
     width: (width?: number) => number;
@@ -80,9 +83,10 @@ export declare class FlowModel {
         active: string;
         grey: string;
         blue: string;
-        green: string;
         deepGrey: string;
         background: string;
+        success: string;
+        error: string;
     };
     getWrapperRef: (id: string) => {
         current: G.Group | null;
@@ -141,7 +145,7 @@ export declare class FlowModel {
         y: number;
     };
     createCellData: (component: string, initOptions?: any) => any;
-    addCell: (componentName: string, initOptions: any) => any;
+    addCell: (componentName: string, initOptions?: any) => any;
     setLinkingPosition: (e: InteractivePointerEvent) => void;
     link: (source: string, target: string) => void;
     scale: (scale?: number) => number;

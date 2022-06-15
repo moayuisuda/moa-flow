@@ -5,7 +5,7 @@
 ## Usage
 
 ```
-// G的api文档：https://g-next.antv.vision/en/docs/api/basic/display-object
+// G的api文档：https://g-next.antv.vision/en/docs/api/basic/display-object，G的整体api是和svg一样的
 
 import { Flow } from '@ali/flow-infra-g';
 

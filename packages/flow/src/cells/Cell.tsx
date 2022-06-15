@@ -1,10 +1,9 @@
-import React from "react";
 import { Group } from "@antv/react-g";
-import { FlowContext } from "../Context";
 import { cloneDeep, isUndefined } from "lodash";
 import { observer } from "mobx-react";
+import React from "react";
+import { FlowContext } from "../Context";
 import Model from "../Model";
-import G from "@antv/g";
 
 export type CellDataType = {
   id: string;
@@ -89,7 +88,8 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
           this.wrapperRef.current = ref;
         }}
       >
-        {isUndefined(this.props.data.visible) || this.props.data.visible ? (
+        {!this.context.pendingRender &&
+        (isUndefined(this.props.data.visible) || this.props.data.visible) ? (
           <Group>{this.content()}</Group>
         ) : (
           <></>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <textarea></textarea>>
+  </body>
+  <script>
+    const funcStr = "return value";
+
+    const a = async () => {
+      const value = 2;
+
+      runCodeWidthVariables = (str) => {
+        const func = new Function(
+          "value",
+          `
+            ${funcStr}
+        `
+        );
+        return func(value);
+      };
+
+      return runCodeWidthVariables();
+    };
+
+    const b = async () => {
+      const value = await a();
+      console.log("resove!", value);
+    };
+
+    b();
+  </script>
+</html>

@@ -19,7 +19,7 @@ declare class Flow extends React.Component<FlowProps, {}> {
     flowModel: FlowModel;
     stageRef: React.RefObject<G.Canvas>;
     constructor(props: FlowProps);
-    componentDidMount(): void;
+    componentDidMount: () => Promise<void>;
     render(): JSX.Element;
 }
 export declare const Canvas: () => JSX.Element;

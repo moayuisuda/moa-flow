@@ -1,10 +1,10 @@
 import { __decorate, __assign } from './node_modules/tslib/tslib.es6.js';
-import { observable, action, makeObservable } from 'mobx';
-import { findIndex, arrayMove, remove, isRectsInterSect } from './utils/util.js';
-import { color } from './theme/style.js';
 import './node_modules/lodash/lodash.js';
+import { action, observable, makeObservable } from 'mobx';
+import { color } from './theme/style.js';
+import { findIndex, arrayMove, remove, isRectsInterSect } from './utils/util.js';
 import { l as lodash } from './_virtual/lodash.js';
-import v4 from './packages/flow/node_modules/uuid/dist/esm-browser/v4.js';
+import v4 from './node_modules/uuid/dist/esm-browser/v4.js';
 
 var FlowModel = /** @class */ (function () {
     function FlowModel(eventSender) {
@@ -19,6 +19,7 @@ var FlowModel = /** @class */ (function () {
             });
         };
         this.extra = {};
+        this.pendingRender = true;
         this._width = 1000;
         this._height = 600;
         this.width = function (width) {
@@ -218,6 +219,7 @@ var FlowModel = /** @class */ (function () {
             };
         };
         this.setCanvasData = function (canvasData) {
+            _this.pendRender();
             canvasData.cells.forEach(function (cellData) {
                 _this.insertRuntimeState(cellData);
             });
@@ -226,6 +228,7 @@ var FlowModel = /** @class */ (function () {
             // this.cellsDataMap.clear();
             // this.cellsMap.clear();
             _this.setCellsDataMap();
+            _this.trigRender();
         };
         this.setCellId = function (data) {
             data.id = v4();
@@ -460,6 +463,12 @@ var FlowModel = /** @class */ (function () {
             }
         }
     };
+    FlowModel.prototype.trigRender = function () {
+        this.pendingRender = false;
+    };
+    FlowModel.prototype.pendRender = function () {
+        this.pendingRender = true;
+    };
     // @action
     FlowModel.prototype.x = function (x) {
         if (lodash.exports.isUndefined(x))
@@ -482,6 +491,12 @@ var FlowModel = /** @class */ (function () {
         var oldIndex = findIndex(this.canvasData.cells, this.getCellData(id));
         arrayMove(this.canvasData.cells, oldIndex, index);
     };
+    __decorate([
+        action
+    ], FlowModel.prototype, "trigRender", null);
+    __decorate([
+        action
+    ], FlowModel.prototype, "pendRender", null);
     __decorate([
         observable
     ], FlowModel.prototype, "_width", void 0);

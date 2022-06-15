@@ -1,30 +1,31 @@
-import { Canvas as RGCanvas, Group, Circle, Rect, Text } from "@antv/react-g";
-import LinkingEdge from "./cells/LinkingEdge";
-import React, { createRef } from "react";
-import FlowModel from "./Model";
 import { Renderer as CanvasRenderer } from "@antv/g-canvas";
+import { Canvas as RGCanvas, Circle, Group } from "@antv/react-g";
+import React, { createRef } from "react";
+import LinkingEdge from "./cells/LinkingEdge";
+import FlowModel from "./Model";
 
-import { observer, Observer } from "mobx-react";
 import { computed } from "mobx";
+import { observer } from "mobx-react";
 import { FlowContext } from "./Context";
 
-import { registComponents } from "./utils/registComponents";
-import { SelectBoundsRect, getRightClickPanel } from "./components";
 import * as G from "@antv/g";
+import { getRightClickPanel, SelectBoundsRect } from "./components";
+import { registComponents } from "./utils/registComponents";
 
-import {
-  initDrag,
-  initClearState,
-  initLink,
-  initScale,
-  initHotKeys,
-  initDataChangeListener,
-} from "./events";
 import { useContext } from "react";
-import { STAGE_ID } from "./constants";
-import { initMultiSelect, initSelect } from "./events";
-import { color } from "./theme/style";
 import { CellDataType } from "./cells/Cell";
+import { STAGE_ID } from "./constants";
+import {
+  initClearState,
+  initDataChangeListener,
+  initDrag,
+  initHotKeys,
+  initLink,
+  initMultiSelect,
+  initScale,
+  initSelect,
+} from "./events";
+import { color } from "./theme/style";
 import { getCanvas } from "./utils/getElement";
 
 const renderer = new CanvasRenderer();
@@ -81,7 +82,7 @@ const Dots = observer(() => {
   return (
     <Group>
       {_dots.map((dot) => {
-        return <Circle cx={dot.x} cy={dot.y} r={10} fill={color.deepGrey} />;
+        return <Circle cx={dot.x} cy={dot.y} r={2} fill={color.deepGrey} />;
       })}
     </Group>
   );
@@ -188,24 +189,21 @@ class Flow extends React.Component<FlowProps, {}> {
     super(props);
 
     this.flowModel = new FlowModel(props.onEvent);
-    this.props.canvasData &&
-      this.flowModel.setCanvasData(this.props.canvasData);
     this.props.grid && this.flowModel.setGrid(this.props.grid);
 
     if (this.props.width && this.props.height) {
       this.flowModel.setSize(this.props.width, this.props.height);
     }
+    this.props.onLoad && this.props.onLoad(this.flowModel);
 
     props.modelRef && (props.modelRef.current = this.flowModel);
-    props.onLoad && props.onLoad(this.flowModel);
-
     const { refs } = this.flowModel;
     this.stageRef = refs.stageRef = createRef<G.Canvas>();
 
     registComponents(this.flowModel);
   }
 
-  componentDidMount(): void {
+  componentDidMount = async () => {
     const { flowModel: model } = this;
 
     const stage = this.stageRef.current as G.Canvas;
@@ -222,7 +220,12 @@ class Flow extends React.Component<FlowProps, {}> {
     initHotKeys(model, stage);
     initHotKeys(model, stage);
     initDataChangeListener(model);
-  }
+
+    //@TODO 看下为啥这个appendChild就要await，jsx中的就不需要
+    await this.stageRef.current?.ready;
+    this.props.canvasData &&
+      this.flowModel.setCanvasData(this.props.canvasData);
+  };
 
   render() {
     const { flowModel: model } = this;
@@ -246,11 +249,12 @@ class Flow extends React.Component<FlowProps, {}> {
           >
             <Group
               transform={`scale(${model.scale()}, ${model.scale()})`}
+              // @ts-ignore
               x={model.x()}
               y={model.y()}
             >
               <FlowContext.Provider value={model}>
-                {this.props.grid && <Grid />}
+                {model.grid && <Grid />}
                 {getCanvas(this.props.children)}
               </FlowContext.Provider>
             </Group>

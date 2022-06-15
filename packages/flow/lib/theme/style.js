@@ -3,9 +3,10 @@ var color = {
     active: 'rgb(255, 108, 55)',
     grey: 'rgb(242, 242, 242)',
     blue: '#0053b8',
-    green: '#0cbb52',
     deepGrey: 'rgb(162, 177, 195)',
-    background: 'rgba(255,255,255,255)'
+    background: 'rgba(255,255,255,255)',
+    success: '#d9f7be',
+    error: 'rgba(246,99,107,1)'
 };
 
 export { color };

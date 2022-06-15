@@ -168,6 +168,7 @@ var initMultiSelect = function (model, stage) {
         }
     });
 };
+var INPUT_NODELIST = ['TEXTAREA', 'INPUT'];
 var initHotKeys = function (model, stage) {
     stage.on('mousedown', function (e) {
         e.preventDefault();
@@ -186,14 +187,17 @@ var initHotKeys = function (model, stage) {
     window.addEventListener('keydown', function (e) {
         switch (e.code) {
             case 'Space':
+                if (INPUT_NODELIST.includes(e.target.nodeName))
+                    return;
                 e.preventDefault();
                 model.setHotKey(e.code, true);
         }
     });
     window.addEventListener('keyup', function (e) {
-        console.log(e.code);
         switch (e.code) {
             case 'Space':
+                if (INPUT_NODELIST.includes(e.target.nodeName))
+                    return;
                 e.preventDefault();
                 model.setHotKey(e.code, false);
         }

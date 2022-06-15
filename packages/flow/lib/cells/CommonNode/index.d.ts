@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { PortDataType } from "../../components";
 import Node, { NodeDataType } from "../Node";
 declare type CommonPortDataType = PortDataType & {

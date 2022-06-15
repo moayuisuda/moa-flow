@@ -211,6 +211,7 @@ export const initMultiSelect = (model: Model, stage: Canvas) => {
     })
 }
 
+const INPUT_NODELIST = ['TEXTAREA', 'INPUT']
 export const initHotKeys = (model: Model, stage: Canvas) => {
     stage.on('mousedown', (e: InteractivePointerEvent) => {
         e.preventDefault()
@@ -230,15 +231,16 @@ export const initHotKeys = (model: Model, stage: Canvas) => {
     window.addEventListener('keydown', e => {
         switch (e.code) {
             case 'Space':
+                if (INPUT_NODELIST.includes(e.target.nodeName)) return
                 e.preventDefault()
                 model.setHotKey(e.code, true)
         }
     })
 
     window.addEventListener('keyup', e => {
-        console.log(e.code)
         switch (e.code) {
             case 'Space':
+                if (INPUT_NODELIST.includes(e.target.nodeName)) return
                 e.preventDefault()
                 model.setHotKey(e.code, false)
         }

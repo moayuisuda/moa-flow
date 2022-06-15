@@ -1,16 +1,15 @@
-import { action, observable, makeObservable } from "mobx";
-import React from "react";
-import { arrayMove, findIndex, isRectsInterSect, remove } from "./utils/util";
-import { CellDataType } from "./cells/Cell";
-import { color } from "./theme/style";
-import { v4 } from "uuid";
-import { union, without, merge, isUndefined } from "lodash";
-import { EdgeDataType } from "./cells/Edge";
-import { PortDataType } from "./components";
-import { NodeDataType } from "./cells/Node";
-import { CanvasDataType, AllCellDataType, Vector2d } from "./typings/common";
-import Cell from "./cells/Cell";
 import G, { InteractivePointerEvent } from "@antv/g";
+import { isUndefined, merge, union, without } from "lodash";
+import { action, makeObservable, observable } from "mobx";
+import React from "react";
+import { v4 } from "uuid";
+import { CellDataType } from "./cells/Cell";
+import { EdgeDataType } from "./cells/Edge";
+import { NodeDataType } from "./cells/Node";
+import { PortDataType } from "./components";
+import { color } from "./theme/style";
+import { AllCellDataType, CanvasDataType, Vector2d } from "./typings/common";
+import { arrayMove, findIndex, isRectsInterSect, remove } from "./utils/util";
 
 type EventSender = (data: any) => void;
 export class FlowModel {
@@ -47,6 +46,16 @@ export class FlowModel {
   }
 
   extra: any = {};
+
+  pendingRender: boolean = true;
+  @action
+  trigRender() {
+    this.pendingRender = false;
+  }
+  @action
+  pendRender() {
+    this.pendingRender = true;
+  }
 
   @observable _width: number = 1000;
   @observable _height: number = 600;
@@ -295,6 +304,8 @@ export class FlowModel {
   };
 
   @action setCanvasData = (canvasData: CanvasDataType) => {
+    this.pendRender();
+
     canvasData.cells.forEach((cellData) => {
       this.insertRuntimeState(cellData);
     });
@@ -304,6 +315,8 @@ export class FlowModel {
     // this.cellsDataMap.clear();
     // this.cellsMap.clear();
     this.setCellsDataMap();
+
+    this.trigRender();
   };
 
   @action setCellId = (data: CellDataType) => {
@@ -470,7 +483,7 @@ export class FlowModel {
     });
   };
 
-  @action addCell = (componentName: string, initOptions: any) => {
+  @action addCell = (componentName: string, initOptions?: any) => {
     const newCellData = this.createCellData(componentName, initOptions);
 
     if (newCellData.ports) {
