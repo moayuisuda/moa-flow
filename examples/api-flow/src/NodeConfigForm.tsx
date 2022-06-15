@@ -1,3 +1,4 @@
+import { useModel } from "@ali/flow-infra-g";
 import {
   ProFormCascader,
   ProFormGroup,
@@ -5,13 +6,12 @@ import {
   ProFormText,
 } from "@alipay/tech-ui";
 import { useState } from "react";
-import { useModel } from "@ali/flow-infra-g";
 // @ts-ignore
 import type { IApi, IMeta, ISchema } from "@alipay/connect-util";
 import { Button, Form } from "antd";
 import lodash from "lodash";
 import { useEffect } from "react";
-import { InterfaceNodeDataType } from "./InterfaceNode";
+import { InterfaceNodeDataType } from "./nodes/InterfaceNode";
 import ParamEditableTable from "./ParamsConfigTable";
 import { FlowNodeConfig, IParamFront } from "./types";
 

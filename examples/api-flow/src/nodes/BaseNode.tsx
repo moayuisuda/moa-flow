@@ -1,5 +1,6 @@
 import type { ModelType, NodeDataType, PortDataType } from "@ali/flow-infra-g";
 import { ConsumerBridge, Graph, Interactor, Node } from "@ali/flow-infra-g";
+import { message } from "antd";
 import { Context } from "../Context";
 
 const { Rect, Text, Circle, Group } = Graph;
@@ -23,12 +24,12 @@ export type BaseNodeDataType = {
   status: STATUS_ENUM;
 } & NodeDataType;
 
-class BaseNode<D, S = {}> extends Node<BaseNodeDataType & D, S> {
+class BaseNode<D = {}, S = {}> extends Node<BaseNodeDataType & D, S> {
   static metaData: any = {
     title: "",
     type: "",
     cacheData: undefined,
-    status: "wait",
+    status: STATUS_ENUM.WAIT,
     ports: [
       {
         portType: "in",
@@ -39,14 +40,8 @@ class BaseNode<D, S = {}> extends Node<BaseNodeDataType & D, S> {
     ],
   };
 
-  static getBounds(cellData: BaseNodeDataType) {
-    return {
-      x: cellData.x,
-      y: cellData.y,
-      width: 200,
-      height: 100,
-    };
-  }
+  width: number = 220;
+  height: number = 100;
 
   constructor(props: { data: BaseNodeDataType }, context: ModelType) {
     super(props, context);
@@ -77,7 +72,8 @@ class BaseNode<D, S = {}> extends Node<BaseNodeDataType & D, S> {
   };
 
   onTaksError(e: any) {
-    // message.error(`[${this.props.data.title}] ${e}`);
+    message.error(`[${this.props.data.title}] ${e}`);
+    console.error(e);
   }
 
   // 单个节点的task
@@ -90,7 +86,7 @@ class BaseNode<D, S = {}> extends Node<BaseNodeDataType & D, S> {
         status: STATUS_ENUM.PROCESS,
       });
       const resData = await this.excute();
-      this.setData({ cacheData: resData });
+      this.setData({ cacheData: resData }, false);
       this.setData({
         status: STATUS_ENUM.SUCCESS,
       });
@@ -172,7 +168,7 @@ class BaseNode<D, S = {}> extends Node<BaseNodeDataType & D, S> {
     const { color } = this.context;
     const { data } = this.props;
     const { title, ports } = data;
-    const { width, height } = BaseNode.getBounds(data);
+    const { width, height } = this;
 
     const inPorts =
       ports?.filter((portData) => portData.portType === "in") || [];
@@ -183,7 +179,7 @@ class BaseNode<D, S = {}> extends Node<BaseNodeDataType & D, S> {
 
     return (
       <ConsumerBridge context={Context}>
-        {(BaseContext) => (
+        {(bizContext) => (
           <Interactor {...this.props.data}>
             <Rect
               width={width}
@@ -194,13 +190,13 @@ class BaseNode<D, S = {}> extends Node<BaseNodeDataType & D, S> {
               {...this.getFill()}
               {...this.getStroke()}
             />
-            <Rect width={width} height={40} fill={color.deepGrey} radius={10} />
+            <Rect width={width} height={40} fill={color.deepGrey} radius={4} />
             <Text
               x={10}
-              y={10}
+              y={20}
               fontWeight="bold"
-              textBaseline={"top"}
-              text={`${title} [${this.props.data.status}]`}
+              textBaseline="middle"
+              text={`${title} [${STATUS_ENUM[data.status]}]`}
               fill="white"
             />
 

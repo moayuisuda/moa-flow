@@ -4,11 +4,16 @@ import { Modal } from "antd";
 import { Context } from "../Context";
 import NodeInfoSettingDrawer from "../NodeConfigForm";
 import { FlowNodeConfig } from "../types";
-import BaseNode, { BaseNodeDataType } from "./BaseNode";
+import BaseNode, {
+  BaseNodeDataType,
+  BasePortDataType,
+  STATUS_ENUM,
+} from "./BaseNode";
 
-const { Rect, Text, Circle, Image, Group } = Graph;
+const { Rect, Text, Group } = Graph;
 
 export type InterfaceNodeDataType = BaseNodeDataType & FlowNodeConfig;
+export type InterfacePortDataType = BasePortDataType;
 
 class InterfaceNode extends BaseNode<
   InterfaceNodeDataType,
@@ -20,15 +25,6 @@ class InterfaceNode extends BaseNode<
     type: "",
   };
 
-  static getBounds(cellData: InterfaceNodeDataType) {
-    return {
-      x: cellData.x,
-      y: cellData.y,
-      width: 200,
-      height: 100,
-    };
-  }
-
   constructor(props: { data: InterfaceNodeDataType }, context: ModelType) {
     super(props, context);
 
@@ -37,7 +33,7 @@ class InterfaceNode extends BaseNode<
     };
   }
 
-  // 执行实际的接口请求
+  // @TODO 执行实际的接口请求
   excute = () => {
     const data = this.props.data;
 
@@ -48,7 +44,7 @@ class InterfaceNode extends BaseNode<
         "Content-Type": "application/json",
       },
       body: JSON.stringify(this.getParams()),
-    });
+    }).then((res) => res.json());
   };
 
   // @TODO 把inputParams转化为接口的参数
@@ -77,7 +73,7 @@ class InterfaceNode extends BaseNode<
 
   view() {
     const { data } = this.props;
-    const { width } = InterfaceNode.getBounds(data);
+    const { width } = this;
 
     const position = this.getPosition();
 
@@ -89,11 +85,12 @@ class InterfaceNode extends BaseNode<
               x={20}
               y={70}
               textBaseline="middle"
-              text={"status: " + this.state.status}
+              text={"status: " + STATUS_ENUM[data.status]}
             />
 
             <Portal>
               <Modal
+                title={data.id}
                 destroyOnClose
                 visible={this.state.modalVisible}
                 width={800}
@@ -124,7 +121,7 @@ class InterfaceNode extends BaseNode<
               ></Rect>
               <Text
                 y={20}
-                x={6}
+                x={8}
                 textBaseline="middle"
                 fill="white"
                 text={"Edit"}

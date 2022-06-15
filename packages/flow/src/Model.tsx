@@ -323,13 +323,14 @@ export class FlowModel {
     data.id = v4();
   };
 
-  @action setCellData = (id: string, data: any) => {
+  @action setCellData = (id: string, data: any, rec: boolean = true) => {
     const cellData = this.getCellData(id);
     this.emitEvent({
       type: "data:change",
     });
 
-    merge(cellData, data);
+    if (!rec) Object.assign(cellData, data);
+    else merge(cellData, data);
   };
 
   /**

@@ -118,7 +118,7 @@ export declare class FlowModel {
     };
     setCanvasData: (canvasData: CanvasDataType) => void;
     setCellId: (data: CellDataType) => void;
-    setCellData: (id: string, data: any) => void;
+    setCellData: (id: string, data: any, rec?: boolean) => void;
     /**
      * @description 获取某个node连接的所有edge
      */

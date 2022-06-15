@@ -65,8 +65,8 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
     return cloneDeep(re);
   }
 
-  setData(data: any) {
-    this.context.setCellData(this.props.data.id, data);
+  setData(data: any, rec: boolean = true) {
+    this.context.setCellData(this.props.data.id, data, rec);
   }
 
   componentDidMount(): void {

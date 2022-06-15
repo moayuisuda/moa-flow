@@ -29,6 +29,7 @@
       ],
       "interface": "",
       "inputParams": [],
+      "status": 0,
       "title": "Init Node",
       "type": ""
     }

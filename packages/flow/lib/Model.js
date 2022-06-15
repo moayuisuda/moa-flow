@@ -4,7 +4,7 @@ import { action, observable, makeObservable } from 'mobx';
 import { color } from './theme/style.js';
 import { findIndex, arrayMove, remove, isRectsInterSect } from './utils/util.js';
 import { l as lodash } from './_virtual/lodash.js';
-import v4 from './node_modules/uuid/dist/esm-browser/v4.js';
+import v4 from './packages/flow/node_modules/uuid/dist/esm-browser/v4.js';
 
 var FlowModel = /** @class */ (function () {
     function FlowModel(eventSender) {
@@ -233,12 +233,16 @@ var FlowModel = /** @class */ (function () {
         this.setCellId = function (data) {
             data.id = v4();
         };
-        this.setCellData = function (id, data) {
+        this.setCellData = function (id, data, rec) {
+            if (rec === void 0) { rec = true; }
             var cellData = _this.getCellData(id);
             _this.emitEvent({
                 type: "data:change",
             });
-            lodash.exports.merge(cellData, data);
+            if (!rec)
+                Object.assign(cellData, data);
+            else
+                lodash.exports.merge(cellData, data);
         };
         /**
          * @description 获取某个node连接的所有edge

@@ -1,4 +1,4 @@
-import { Button, message, Space } from "antd";
+import { Button, Divider, message, Space } from "antd";
 import "antd/dist/antd.css";
 import { useEffect, useRef, useState } from "react";
 
@@ -11,13 +11,14 @@ import GlobalSetting from "./GlobalSetting";
 import InterfaceNode, {
   InterfaceNodeDataType,
   InterfacePortDataType,
-} from "./InterfaceNode";
+} from "./nodes/InterfaceNode";
 
 // @ts-ignore
 import { getSchemaByTag } from "@alipay/connect-util";
 
 import { flatten } from "lodash";
 import { mockSchema } from "./mockData";
+import ProcessNode from "./nodes/ProcessNode";
 import testData from "./test.json";
 import type { ISchema } from "./types";
 
@@ -26,12 +27,14 @@ function App() {
   const [interfaceSchema, setInterfaceSchema] = useState<ISchema>(mockSchema);
   const [globalSettingVisible, setGlobalSettingVisible] =
     useState<boolean>(false);
+  const [nodeList, setNodeList] = useState<[string, Function][]>([]);
 
   useEffect(() => {
     const model = modelRef.current as ModelType;
 
     // 注册节点
     model.regist("InterfaceNode", InterfaceNode);
+    model.regist("ProcessNode", ProcessNode);
     model.regist("FlowEdge", FlowEdge);
 
     model.extra = {
@@ -40,6 +43,14 @@ function App() {
 
     // 将默认连线设置为FlowEdge
     model.setLinkEdge("FlowEdge");
+
+    setNodeList(
+      Array.from(modelRef.current?.componentsMap as Map<string, any>).filter(
+        ([_, Component]) => {
+          return Component.getMetaData().cellType === "node";
+        }
+      )
+    );
   }, []);
 
   const handleSave = () => {
@@ -128,11 +139,18 @@ function App() {
                       const { getCellData, selectCells } = context;
                       const cellData = getCellData(selectCells[0]);
 
-                      if (!(cellData && cellData.component === "InterfaceNode"))
+                      if (
+                        !(
+                          cellData &&
+                          nodeList
+                            .map(([nodeName]) => nodeName)
+                            .includes(cellData.component)
+                        )
+                      )
                         message.info("请选择接口节点");
                       else {
-                        process(cellData.id);
                         message.info(`${cellData.title}开始执行`);
+                        process(cellData.id);
                       }
                     }}
                   >
@@ -140,11 +158,42 @@ function App() {
                   </Button>
                   <Button
                     onClick={() => {
-                      context.addCell("InterfaceNode");
+                      const { getCell, selectCells } = context;
+                      const cellInstance = getCell(selectCells[0]);
+
+                      if (
+                        !(
+                          cellInstance &&
+                          nodeList
+                            .map(([nodeName]) => nodeName)
+                            .includes(cellInstance.getData().component)
+                        )
+                      )
+                        message.info("请选择接口节点");
+                      else {
+                        cellInstance.process();
+                        message.info(
+                          `开始执行到${cellInstance.getData().title}`
+                        );
+                      }
                     }}
                   >
-                    增添接口节点
+                    以此节点为终点执行
                   </Button>
+                  <Divider />
+                  {nodeList.map(([name]) => {
+                    return (
+                      <Button
+                        onClick={() => {
+                          context.addCell(name, {
+                            title: name,
+                          });
+                        }}
+                      >
+                        {`增添${name}节点`}
+                      </Button>
+                    );
+                  })}
                 </Space>
               );
             }}

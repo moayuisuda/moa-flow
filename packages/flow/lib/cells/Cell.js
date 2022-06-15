@@ -29,8 +29,9 @@ var Cell = /** @class */ (function (_super) {
         }
         return lodash.exports.cloneDeep(re);
     };
-    Cell.prototype.setData = function (data) {
-        this.context.setCellData(this.props.data.id, data);
+    Cell.prototype.setData = function (data, rec) {
+        if (rec === void 0) { rec = true; }
+        this.context.setCellData(this.props.data.id, data, rec);
     };
     Cell.prototype.componentDidMount = function () {
         this.onMount && this.onMount();

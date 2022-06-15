@@ -5,7 +5,7 @@ import { Table, TableColumnProps } from "antd";
 import type { IParamFront } from "./types";
 import { Select, Input, Tooltip } from "antd";
 import { useModel } from "@ali/flow-infra-g";
-import { InterfaceNodeDataType, InterfacePortDataType } from "./InterfaceNode";
+import { InterfaceNodeDataType, InterfacePortDataType } from "./nodes/InterfaceNode";
 
 const ParamsConfigTable = ({
   onChange,
