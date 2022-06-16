@@ -24,6 +24,7 @@ import testData from "./test.json";
 function App() {
   const modelRef = useRef<ModelType>();
   const [interfaceSchema, setInterfaceSchema] = useState<ISchema>(mockSchema);
+  const interfaceSchemaRef = useRef();
   const [globalSettingVisible, setGlobalSettingVisible] =
     useState<boolean>(false);
   const [nodeList, setNodeList] = useState<[string, Function][]>([]);
@@ -38,6 +39,7 @@ function App() {
 
     model.extra = {
       taskPool: {},
+      interfaceSchemaRef,
     };
 
     // 将默认连线设置为FlowEdge
@@ -51,6 +53,10 @@ function App() {
       )
     );
   }, []);
+
+  useEffect(() => {
+    interfaceSchemaRef.current = interfaceSchema;
+  }, [interfaceSchema]);
 
   const handleSave = () => {
     const data = JSON.stringify(modelRef.current?.canvasData);
@@ -70,7 +76,9 @@ function App() {
     tagName: string;
   }) => {
     const schema = await getSchemaByTag({ appId, tagName });
-    if (schema) setInterfaceSchema(schema);
+    if (schema) {
+      setInterfaceSchema(schema);
+    }
   };
 
   const getLeaveNodes = (id: string): string[] => {

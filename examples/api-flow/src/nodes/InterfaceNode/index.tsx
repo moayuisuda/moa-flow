@@ -2,9 +2,10 @@ import type { ModelType } from "@ali/flow-infra-g";
 import { ConsumerBridge, Graph, Portal } from "@ali/flow-infra-g";
 import { Modal } from "antd";
 import { Context } from "../../Context";
-import NodeInfoSettingDrawer from "./NodeConfigForm";
+import NodeConfigForm from "./NodeConfigForm";
 import BaseNode, { STATUS_ENUM } from "../BaseNode";
 import { InterfaceNodeDataType } from "./types";
+import { createRef } from "react";
 
 const { Rect, Text, Group } = Graph;
 
@@ -18,12 +19,18 @@ class InterfaceNode extends BaseNode<
     type: "",
   };
 
+  formRef: React.RefObject<{
+    submit: Function;
+  }>;
+
   constructor(props: { data: InterfaceNodeDataType }, context: ModelType) {
     super(props, context);
 
     this.state = {
       modalVisible: false,
     };
+
+    this.formRef = createRef();
   }
 
   // @TODO 执行实际的接口请求
@@ -61,6 +68,9 @@ class InterfaceNode extends BaseNode<
 
   // @TODO 转化为真实url
   getUrl(interfaceArr: string[]) {
+    const interfaceSchema = this.context.extra.interfaceSchemaRef.current;
+    console.log("interface", interfaceArr, interfaceSchema.apis);
+    debugger;
     return "https://c7201052-b5c3-4023-a628-ad23c75a7819.mock.pstmn.io/test1";
   }
 
@@ -87,13 +97,20 @@ class InterfaceNode extends BaseNode<
                 destroyOnClose
                 visible={this.state.modalVisible}
                 width={800}
+                onOk={async () => {
+                  await this.formRef.current?.submit();
+                  this.setState({
+                    modalVisible: false,
+                  });
+                }}
                 onCancel={() => {
                   this.setState({
                     modalVisible: false,
                   });
                 }}
               >
-                <NodeInfoSettingDrawer
+                <NodeConfigForm
+                  ref={this.formRef}
                   id={data.id}
                   interfaceSchema={InterfaceContext.interfaceSchema}
                 />
