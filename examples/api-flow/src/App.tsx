@@ -1,26 +1,25 @@
 import { Button, Divider, message, Space } from "antd";
 import "antd/dist/antd.css";
 import { useEffect, useRef, useState } from "react";
-
 import type { ModelType } from "@ali/flow-infra-g";
 import { Canvas, Flow, RightClickPanel } from "@ali/flow-infra-g";
 
-import { Context } from "./Context";
+import ProcessNode from "./nodes/ProcessNode";
+import InterfaceNode from "./nodes/InterfaceNode";
 import FlowEdge from "./FlowEdge";
+import { Context } from "./Context";
 import GlobalSetting from "./GlobalSetting";
-import InterfaceNode, {
+import type {
   InterfaceNodeDataType,
   InterfacePortDataType,
-} from "./nodes/InterfaceNode";
-
+} from "./nodes/InterfaceNode/types";
 // @ts-ignore
 import { getSchemaByTag } from "@alipay/connect-util";
-
-import { flatten } from "lodash";
-import { mockSchema } from "./mockData";
-import ProcessNode from "./nodes/ProcessNode";
-import testData from "./test.json";
 import type { ISchema } from "./types";
+import { flatten } from "lodash";
+
+import { mockSchema } from "./mockData";
+import testData from "./test.json";
 
 function App() {
   const modelRef = useRef<ModelType>();

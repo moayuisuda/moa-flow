@@ -11,9 +11,9 @@ import type { IApi, IMeta, ISchema } from "@alipay/connect-util";
 import { Button, Form } from "antd";
 import lodash from "lodash";
 import { useEffect } from "react";
-import { InterfaceNodeDataType } from "./nodes/InterfaceNode";
 import ParamEditableTable from "./ParamsConfigTable";
-import { FlowNodeConfig, IParamFront } from "./types";
+import { InterfaceNodeDataType } from "./types";
+import { FlowNodeConfig, IParamFront } from "../../types";
 
 const NodeConfigForm = ({
   interfaceSchema,
@@ -214,6 +214,7 @@ const NodeConfigForm = ({
             setDataSource(params);
           };
 
+          // @TODO setDataSource
           // const dataSource: IParamFront[] = parametersList?.map((item) => {
           //   const requestSchema = apiSchema.meta.request.find(({ id }) => id === item.id);
           //   const valueLine: IParamFront = inputParams?.find(({ id }) => id === item.id);

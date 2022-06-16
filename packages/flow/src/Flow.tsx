@@ -58,7 +58,6 @@ const Dots = observer(() => {
 
   const _dots = computed(() => {
     const re = [];
-    // @TODO
     for (
       let i = -EXTRA;
       i <= model.height() + EXTRA;

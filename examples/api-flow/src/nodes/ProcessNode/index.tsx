@@ -1,8 +1,8 @@
-import { Graph, Portal } from "@ali/flow-infra-g";
-import { Input } from "antd";
-import BaseNode from "./BaseNode";
+import { Portal, Graph } from "@ali/flow-infra-g";
+import { Input, Form } from "antd";
+import BaseNode from "../BaseNode";
 
-const { Rect, Text, Circle, Image, Group } = Graph;
+const { Group, Text, Rect } = Graph;
 
 class ProcessNode extends BaseNode<{
   processSource: string;
@@ -58,21 +58,23 @@ class ProcessNode extends BaseNode<{
     const { width, height } = this;
 
     return (
-      <Portal x={20} y={50}>
-        <Input.TextArea
-          style={{
-            width: 320,
-            minHeight: 100,
-            maxWidth: "none",
-          }}
-          defaultValue={data.processSource}
-          onInput={(e) => {
-            this.setData({
-              processSource: e.currentTarget.value,
-            });
-          }}
-        />
-      </Portal>
+      <Group>
+        <Portal x={20} y={50}>
+          <Input.TextArea
+            style={{
+              width: 320,
+              minHeight: 100,
+              maxWidth: "none",
+            }}
+            defaultValue={data.processSource}
+            onInput={(e) => {
+              this.setData({
+                processSource: e.currentTarget.value,
+              });
+            }}
+          />
+        </Portal>
+      </Group>
     );
   }
 }

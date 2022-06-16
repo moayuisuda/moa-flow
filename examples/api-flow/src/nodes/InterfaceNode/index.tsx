@@ -1,19 +1,12 @@
 import type { ModelType } from "@ali/flow-infra-g";
 import { ConsumerBridge, Graph, Portal } from "@ali/flow-infra-g";
 import { Modal } from "antd";
-import { Context } from "../Context";
-import NodeInfoSettingDrawer from "../NodeConfigForm";
-import { FlowNodeConfig } from "../types";
-import BaseNode, {
-  BaseNodeDataType,
-  BasePortDataType,
-  STATUS_ENUM,
-} from "./BaseNode";
+import { Context } from "../../Context";
+import NodeInfoSettingDrawer from "./NodeConfigForm";
+import BaseNode, { STATUS_ENUM } from "../BaseNode";
+import { InterfaceNodeDataType } from "./types";
 
 const { Rect, Text, Group } = Graph;
-
-export type InterfaceNodeDataType = BaseNodeDataType & FlowNodeConfig;
-export type InterfacePortDataType = BasePortDataType;
 
 class InterfaceNode extends BaseNode<
   InterfaceNodeDataType,
@@ -59,8 +52,8 @@ class InterfaceNode extends BaseNode<
         const nodeData = this.context.getCellData(
           param.value
         ) as InterfaceNodeDataType;
-        re[param.id] = nodeData.cacheData;
-      } else re[param.id] = param.value;
+        re[param.name] = nodeData.cacheData;
+      } else re[param.name] = param.value;
     });
 
     return re;

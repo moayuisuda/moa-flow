@@ -24,7 +24,10 @@ export type BaseNodeDataType = {
   status: STATUS_ENUM;
 } & NodeDataType;
 
-class BaseNode<D = {}, S = {}> extends Node<BaseNodeDataType & D, S> {
+class BaseNode<Data = {}, State = {}> extends Node<
+  BaseNodeDataType & Data,
+  State
+> {
   static metaData: any = {
     title: "",
     type: "",

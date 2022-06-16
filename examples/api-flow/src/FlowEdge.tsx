@@ -1,5 +1,5 @@
 import { Edge, Vector2d } from "@ali/flow-infra-g";
-import { InterfacePortDataType } from "./nodes/InterfaceNode";
+import { InterfacePortDataType } from "./nodes/InterfaceNode/types";
 
 export default class FlowEdge extends Edge {
   bazier = true;

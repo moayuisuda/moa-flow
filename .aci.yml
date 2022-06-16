@@ -1,0 +1,22 @@
+# 不要修改该文件，会自动生成，详见 https://gitlab.alibaba-inc.com/node/ci
+version: "2.0"
+
+parameters:
+  NODE_ENV: "test"
+
+stages:
+  - run-node-14
+
+jobs:
+  ci-node-14:
+    stage: run-node-14
+    component: node-test
+    id: ci-node-14
+    inputs:
+      resourceClass: M
+      nodeVersion: node=14
+      script: tnpm run ci
+
+workflow:
+  stages:
+    run-node-14:

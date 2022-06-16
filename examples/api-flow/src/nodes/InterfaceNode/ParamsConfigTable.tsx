@@ -2,10 +2,10 @@ import React from "react";
 import lodash from "lodash";
 import { QuestionCircleOutlined } from "@ant-design/icons";
 import { Table, TableColumnProps } from "antd";
-import type { IParamFront } from "./types";
+import type { IParamFront } from "../../types";
 import { Select, Input, Tooltip } from "antd";
 import { useModel } from "@ali/flow-infra-g";
-import { InterfaceNodeDataType, InterfacePortDataType } from "./nodes/InterfaceNode";
+import { InterfaceNodeDataType, InterfacePortDataType } from "./types";
 
 const ParamsConfigTable = ({
   onChange,
