@@ -22,7 +22,7 @@ class BlockNode extends BaseNode<{}> {
     return (
       // @ts-ignore
       <Group y={60} x={30}>
-        <Text text={String(inValue)} />
+        <Text text={String(Math.abs(inValue))} />
         <Rect
           y={10}
           width={80}

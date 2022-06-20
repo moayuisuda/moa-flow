@@ -220,7 +220,6 @@ class Flow extends React.Component<FlowProps, {}> {
     initHotKeys(model, stage);
     initDataChangeListener(model);
 
-    //@TODO 看下为啥这个appendChild就要await，jsx中的就不需要
     await this.stageRef.current?.ready;
     this.props.canvasData &&
       this.flowModel.setCanvasData(this.props.canvasData);

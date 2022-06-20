@@ -18,36 +18,34 @@
   <script src="./perlin.js"></script>
   <script>
     let time = Date.now().valueOf();
-    const distance = 40;
-    const scale = 2000;
+    const distance = 40; // 水面方块的间距
+    const scale = 1000; // canvas坐标缩小到噪声坐标
 
     const canvas = document.querySelector("canvas");
     const context = canvas.getContext("2d");
 
-    class Point {
+    class WaterRect {
       constructor({ x, y }) {
         this.x = x;
         this.y = y;
       }
 
       draw() {
+        // const noiseValue = noise.simplex2(this.x / scale, this.y / scale);
+        const noiseValue = noise.simplex3(this.x / scale, this.y / scale, time);
         context.beginPath();
-        const seed = noise.simplex2(this.x / scale, this.y / scale);
-        // const seed = noise.simplex3(this.x / scale, this.y / scale, time);
-        context.arc(this.x, this.y, 10, 0, 2 * Math.PI);
-        // context.arc(this.x, this.y, Math.abs(seed) * 10, 0, 2 * Math.PI);
-        context.strokeStyle = `rgba(0,0,0,1)`;
-        // context.strokeStyle = `rgba(0,0,0,${seed})`;
-        context.stroke();
+        context.rect(this.x, this.y, 30, 30);
+        context.fillStyle = `rgba(0,0,0,${0.5 * (1 - noiseValue)})`;
+        context.fill();
       }
     }
 
     let points = [];
-    function genPoints() {
+    function genRects() {
       for (let y = 0; y < canvas.height; y += distance) {
         for (let x = 0; x < canvas.width; x += distance) {
           points.push(
-            new Point({
+            new WaterRect({
               x: x,
               y: y,
             })
@@ -56,7 +54,7 @@
       }
     }
 
-    function draw() {
+    function drawAll() {
       context.clearRect(0, 0, canvas.width, canvas.height);
 
       for (let i of points) {
@@ -65,13 +63,12 @@
     }
 
     function animate() {
-      draw();
-      time = new Date().valueOf() / scale;
+      drawAll();
+      time = new Date().valueOf() / 2000;
       requestAnimationFrame(animate);
     }
 
-    genPoints();
-    draw();
-    // animate();
+    genRects();
+    animate();
   </script>
 </html>

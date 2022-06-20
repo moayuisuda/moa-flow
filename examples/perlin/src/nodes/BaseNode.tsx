@@ -1,8 +1,9 @@
 import type { ModelType, NodeDataType, PortDataType } from "@ali/flow-infra-g";
 import { ConsumerBridge, Graph, Interactor, Node } from "@ali/flow-infra-g";
+import { message } from "antd";
 import { Context } from "../Context";
 
-const { Rect, Text, Circle, Image, Group } = Graph;
+const { Rect, Text, Circle, Group } = Graph;
 const { Port } = Interactor;
 
 export type BasePortDataType = PortDataType & {
@@ -10,19 +11,28 @@ export type BasePortDataType = PortDataType & {
   portType: "in" | "out";
 };
 
+export enum STATUS_ENUM {
+  WAIT,
+  PROCESS,
+  SUCCESS,
+  ERROR,
+}
+
 export type BaseNodeDataType = {
   ports: BasePortDataType[];
   cacheData: any;
+  status: STATUS_ENUM;
 } & NodeDataType;
 
-class BaseNode<D> extends Node<
-  BaseNodeDataType & D,
-  { modalVisible: boolean; status: "success" | "process" | "error" | "wait" }
+class BaseNode<Data = {}, State = {}> extends Node<
+  BaseNodeDataType & Data,
+  State
 > {
   static metaData: any = {
     title: "",
     type: "",
     cacheData: undefined,
+    status: STATUS_ENUM.WAIT,
     ports: [
       {
         portType: "in",
@@ -33,27 +43,16 @@ class BaseNode<D> extends Node<
     ],
   };
 
-  static getBounds(cellData: BaseNodeDataType) {
-    return {
-      x: cellData.x,
-      y: cellData.y,
-      width: 200,
-      height: 100,
-    };
-  }
+  width: number = 220;
+  height: number = 100;
 
   constructor(props: { data: BaseNodeDataType }, context: ModelType) {
     super(props, context);
-
-    this.state = {
-      modalVisible: false,
-      status: "wait",
-    };
   }
 
   // 怎样处理数据，并作用在自己的cacheData，返回的都是promise
   excute = async () => {
-    return;
+    return this.props.data.cacheData;
   };
 
   // 执行前置依赖节点
@@ -76,7 +75,8 @@ class BaseNode<D> extends Node<
   };
 
   onTaksError(e: any) {
-    // message.error(`[${this.props.data.title}] ${e}`);
+    message.error(`[${this.props.data.title}] ${e}`);
+    console.error(e);
   }
 
   // 单个节点的task
@@ -85,17 +85,17 @@ class BaseNode<D> extends Node<
 
     try {
       if (start !== this.props.data.id) await this.processPreNode(start);
-      this.setState({
-        status: "process",
+      this.setData({
+        status: STATUS_ENUM.PROCESS,
       });
       const resData = await this.excute();
-      this.setData({ cacheData: resData });
-      this.setState({
-        status: "success",
+      this.setData({ cacheData: resData }, false);
+      this.setData({
+        status: STATUS_ENUM.SUCCESS,
       });
     } catch (e) {
-      this.setState({
-        status: "error",
+      this.setData({
+        status: STATUS_ENUM.ERROR,
       });
       this.onTaksError(e);
 
@@ -123,7 +123,7 @@ class BaseNode<D> extends Node<
 
   // task的上层包装，用来注册task和返回已有的task
   process = async (start?: string) => {
-    // 如果task池子已经有在执行的相同task，就直接返回有的
+    // 如果task池已经有在执行的相同task，就直接返回有的
     const { taskPool } = this.context.extra;
     if (taskPool[this.getData().id]) return taskPool[this.getData().id];
 
@@ -153,13 +153,13 @@ class BaseNode<D> extends Node<
     const color = this.context.color;
 
     const fillMap = {
-      wait: "white",
-      process: color.grey,
-      error: color.error,
-      success: color.success,
+      [STATUS_ENUM.WAIT]: "white",
+      [STATUS_ENUM.PROCESS]: color.grey,
+      [STATUS_ENUM.ERROR]: color.error,
+      [STATUS_ENUM.SUCCESS]: color.success,
     };
 
-    return { fill: fillMap[this.state.status] };
+    return { fill: fillMap[this.props.data.status] };
   }
 
   view() {
@@ -171,7 +171,7 @@ class BaseNode<D> extends Node<
     const { color } = this.context;
     const { data } = this.props;
     const { title, ports } = data;
-    const { width, height } = BaseNode.getBounds(data);
+    const { width, height } = this;
 
     const inPorts =
       ports?.filter((portData) => portData.portType === "in") || [];
@@ -182,7 +182,7 @@ class BaseNode<D> extends Node<
 
     return (
       <ConsumerBridge context={Context}>
-        {(BaseContext) => (
+        {(bizContext) => (
           <Interactor {...this.props.data}>
             <Rect
               width={width}
@@ -193,13 +193,13 @@ class BaseNode<D> extends Node<
               {...this.getFill()}
               {...this.getStroke()}
             />
-            <Rect width={width} height={40} fill={color.deepGrey} radius={10} />
+            <Rect width={width} height={40} fill={color.deepGrey} radius={4} />
             <Text
               x={10}
-              y={10}
+              y={20}
               fontWeight="bold"
-              textBaseline={"top"}
-              text={`${title} [${this.state.status}]`}
+              textBaseline="middle"
+              text={`${title} [${STATUS_ENUM[data.status]}]`}
               fill="white"
             />
 

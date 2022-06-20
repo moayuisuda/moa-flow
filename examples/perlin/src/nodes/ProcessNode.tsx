@@ -10,6 +10,7 @@ class ProcessNode extends BaseNode<{
   static metaData = {
     processSource: "return source",
   };
+  width = 240;
   // 执行实际的接口请求
   excute = async () => {
     const data = this.props.data;
@@ -24,7 +25,11 @@ class ProcessNode extends BaseNode<{
       `
       );
 
-      return func(source, noise);
+      const noiseFn = (x: number) => {
+        return noise.simplex2(x, 0);
+      };
+
+      return func(source, noiseFn);
     };
 
     return runCodeWidthVariables(data.processSource);
@@ -33,13 +38,13 @@ class ProcessNode extends BaseNode<{
   view() {
     const { color } = this.context;
     const { data } = this.props;
-    const { width, height } = BaseNode.getBounds(data);
+    const { width, height } = this;
 
     return (
       <Portal x={20} y={40}>
         <Input.TextArea
           style={{
-            width: 160,
+            width: 200,
             maxWidth: "none",
           }}
           defaultValue={data.processSource}

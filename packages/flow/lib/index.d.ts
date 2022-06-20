@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import Flow from "./Flow";
 import Model from "./Model";
 import Cell from "./cells/Cell";
@@ -379,7 +378,7 @@ declare const Graph: {
     }>) => import("react").ReactElement<import("@antv/g").TextStyleProps, import("@antv/g").Shape.TEXT>;
     Canvas: import("react").ForwardRefExoticComponent<Pick<G.CanvasProps, keyof G.CanvasProps> & import("react").RefAttributes<import("@antv/g").Canvas>>;
     reconcilor: ReactReconciler.Reconciler<import("@antv/g").Element<any, any>, import("@antv/g").Element<any, any>, import("@antv/g").Element<any, any>, any, any>;
-    render: (component: import("react").ReactNode, target: import("@antv/g").Element<any, any> | import("@antv/g").Canvas, callback?: (() => void) | null | undefined) => void;
+    render: (component: import("react").ReactNode, target: import("@antv/g").Canvas | import("@antv/g").Element<any, any>, callback?: (() => void) | null | undefined) => void;
 };
 export * from './hooks';
 export { Flow, Cell, Node, Edge, Port, Interactor, Portal, Graph, autorun, ConsumerBridge, RightClickPanel, Canvas, FlowContext, Observer, observer };

@@ -32,6 +32,9 @@ class InputNode extends BaseNode<{}> {
       <Group>
         <Portal x={30} y={55}>
           <Slider
+            min={0}
+            max={1}
+            step={0.01}
             style={{ width: 120 }}
             value={data.value}
             onChange={(e) =>

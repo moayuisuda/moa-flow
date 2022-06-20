@@ -38,7 +38,6 @@ var Dots = observer(function () {
     var EXTRA = 0;
     var _dots = computed(function () {
         var re = [];
-        // @TODO
         for (var i = -EXTRA; i <= model.height() + EXTRA; i += model.grid) {
             for (var j = -EXTRA; j <= model.width() + EXTRA; j += model.grid) {
                 re.push({
@@ -117,10 +116,8 @@ var Flow = /** @class */ (function (_super) {
                         multiSelect && initMultiSelect(model, stage);
                         initHotKeys(model, stage);
                         initHotKeys(model, stage);
-                        //@TODO 看下为啥这个appendChild就要await，jsx中的就不需要
                         return [4 /*yield*/, ((_d = this.stageRef.current) === null || _d === void 0 ? void 0 : _d.ready)];
                     case 1:
-                        //@TODO 看下为啥这个appendChild就要await，jsx中的就不需要
                         _e.sent();
                         this.props.canvasData &&
                             this.flowModel.setCanvasData(this.props.canvasData);
