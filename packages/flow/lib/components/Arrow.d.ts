@@ -1,10 +1,9 @@
-import type { DisplayObject, BaseStyleProps } from "@antv/g";
+import type { DisplayObject } from "@antv/g";
+import * as G from "@antv/g";
 import React, { Component } from "react";
 declare type ArrowHead = boolean | DisplayObject;
-declare type ArrowBody = React.ReactElement;
-export interface ArrowStyleProps extends BaseStyleProps {
-    type: "Path" | "Line" | "Polyline";
-    body?: ArrowBody;
+export interface ArrowStyleProps extends React.ReactElement {
+    path: string;
     startHead?: ArrowHead;
     endHead?: ArrowHead;
     stroke?: string;
@@ -22,7 +21,7 @@ export interface ArrowStyleProps extends BaseStyleProps {
  * 1. default(Path)
  * 2. custom
  */
-export default class Arrow extends Component<ArrowStyleProps, {}> {
+export declare class Arrow extends Component<ArrowStyleProps, {}> {
     startRef: React.MutableRefObject<DisplayObject | null>;
     endRef: React.MutableRefObject<DisplayObject | null>;
     bodyRef: React.MutableRefObject<DisplayObject | null>;
@@ -32,6 +31,7 @@ export default class Arrow extends Component<ArrowStyleProps, {}> {
     componentDidMount(): void;
     componentDidUpdate(): void;
     render(): JSX.Element;
+    getCenter(): G.Point;
     /**
      * transform arrow head according to arrow line
      */

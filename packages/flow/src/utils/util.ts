@@ -1,5 +1,5 @@
-import { Bounds } from '../types/common';
-import { isUndefined } from 'lodash';
+import { Bounds } from '../typings/common';
+import { isUndefined, isFunction } from 'lodash';
 export const arrayMove = <T>(arr: T[], oldIndex: number, newIndex: number) => {
     arr.splice(newIndex, 0, arr.splice(oldIndex, 1)[0]);
     return arr;
@@ -31,4 +31,9 @@ export const isRectsInterSect = (boundsA: Bounds, boundsB: Bounds) => {
 
 export const isVector2d = (source: any) => {
     return typeof source !== 'string'
+}
+
+export const callIfFn = (exp: any) => {
+    if (isFunction(exp)) return exp();
+    else return exp;
 }

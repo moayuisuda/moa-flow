@@ -1,20 +1,20 @@
-import { action, observable, makeObservable } from "mobx";
+import G, { InteractivePointerEvent } from "@antv/g";
+import { isUndefined, merge, union, without } from "lodash";
+import { action, makeObservable, observable } from "mobx";
 import React from "react";
-import { arrayMove, findIndex, isRectsInterSect, remove } from "./utils/util";
-import { CellDataType } from "./cells/Cell";
-import { color } from "./theme/style";
 import { v4 } from "uuid";
-import { union, without, merge, isUndefined } from "lodash";
+import { CellDataType } from "./cells/Cell";
 import { EdgeDataType } from "./cells/Edge";
-import { PortDataType } from "./scaffold/Port";
 import { NodeDataType } from "./cells/Node";
-import G from "@antv/g";
-import { CanvasDataType, AllCellDataType, Vector2d } from "./types/common";
-import Cell from "./cells/Cell";
-import { InteractivePointerEvent } from "@antv/g";
+import { PortDataType } from "./components";
+import { color } from "./theme/style";
+import { AllCellDataType, CanvasDataType, Vector2d } from "./typings/common";
+import { arrayMove, findIndex, isRectsInterSect, remove } from "./utils/util";
 
 type EventSender = (data: any) => void;
 export class FlowModel {
+  eventMap = new Map<string, Map<string, Function>>();
+
   constructor(eventSender?: EventSender) {
     makeObservable(this);
     if (eventSender) this.eventBus.sender = eventSender;
@@ -47,19 +47,29 @@ export class FlowModel {
 
   extra: any = {};
 
+  pendingRender: boolean = true;
+  @action
+  trigRender() {
+    this.pendingRender = false;
+  }
+  @action
+  pendRender() {
+    this.pendingRender = true;
+  }
+
   @observable _width: number = 1000;
   @observable _height: number = 600;
   width = (width?: number) => {
     if (isUndefined(width)) return this._width;
     else {
-      this._width = width;
+      this._width = width as number;
       return width;
     }
   };
   height = (height?: number) => {
     if (isUndefined(height)) return this._height;
     else {
-      this._height = height;
+      this._height = height as number;
       return height;
     }
   };
@@ -78,8 +88,6 @@ export class FlowModel {
 
   refs = {
     stageRef: undefined as React.RefObject<G.Canvas> | undefined,
-    nodesLayerRef: undefined as React.RefObject<G.Group> | undefined,
-    linesLayerRef: undefined as React.RefObject<G.Group> | undefined,
   };
 
   @observable
@@ -116,7 +124,7 @@ export class FlowModel {
     targetPort.edges && remove(targetPort.edges as string[], edgeId);
   };
 
-  // 一些中间状态，比如连线中的开始节点的暂存，不应该让外部
+  // 一些中间状态，比如连线中的开始节点的暂存，不应该让外部感知
   @observable
   buffer = {
     rightClickPanel: {
@@ -175,8 +183,10 @@ export class FlowModel {
     if (onlySetPosition) return;
 
     const re: string[] = [];
-    this.cellsMap.forEach((cell) => {
-      if (cell.props.data?.cellType === "node") {
+    this.canvasData.cells.forEach((cellData) => {
+      if (cellData.cellType === "node") {
+        console.log(this.getLocalBBox(cellData.id));
+
         // 判断矩形是否相交
         if (
           isRectsInterSect(
@@ -186,10 +196,10 @@ export class FlowModel {
               width: right - x,
               height: bottom - y,
             },
-            this.getLocalBBox(cell.props.data.id)
+            this.getLocalBBox(cellData.id)
           )
         ) {
-          re.push(cell.props.data.id);
+          re.push(cellData.id);
         }
       }
     });
@@ -211,6 +221,16 @@ export class FlowModel {
   // 全局颜色，可以由用户自定义
   @observable color = color;
 
+  getWrapperRef = (id: string) => {
+    const ref = this.wrapperRefsMap.get(id);
+
+    if (ref) return ref;
+    else this.wrapperRefsMap.set(id, { current: null });
+
+    return this.wrapperRefsMap.get(id);
+  };
+  // function component的外层group ref的map
+  wrapperRefsMap = new Map<string, { current: G.Group | null }>();
   // cell的<id, 实例>map，方便用id获取到组件实例
   cellsMap = new Map<string, React.Component<any, any> & any>();
   // cellData的<id, cellData>map，用来修改受控数据
@@ -218,11 +238,10 @@ export class FlowModel {
 
   // 注册节点到model，方便动态引用
   componentsMap = new Map();
-  regist = (name: string, component: Cell) => {
+  regist = (name: string, component: any) => {
     this.componentsMap.set(name, component);
   };
 
-  // 消息传递
   eventBus = {
     sender: undefined as EventSender | undefined,
     receiver: undefined,
@@ -231,7 +250,6 @@ export class FlowModel {
   // 选中的cell
   @observable selectCells: string[] = [];
   @action setSelectedCells = (ids: string[], ifReplace = true) => {
-    // @TODO select感觉只能放在私有属性，否则每次更新要diff全部的节点
     if (ifReplace) {
       this.selectCells = ids;
     } else {
@@ -239,7 +257,6 @@ export class FlowModel {
     }
   };
 
-  // 画布的渲染数据，之后的渲染大部分都为受控渲染，更改canvasData => 触发重新渲染
   @observable canvasData: CanvasDataType = {
     scale: 1,
     x: 0,
@@ -251,7 +268,7 @@ export class FlowModel {
     this.selectCells = [];
   };
 
-  sendEvent = (data: any) => {
+  emitEvent = (data: any) => {
     this.eventBus.sender?.(data);
   };
 
@@ -272,19 +289,22 @@ export class FlowModel {
   };
 
   getLocalBBox = (id: string) => {
-    const instanceBounds = this.cellsMap
-      .get(id)
-      .wrapperRef.current.getLocalBounds();
+    const instanceBounds =
+      this.cellsMap.get(id)?.wrapperRef.current.getLocalBounds() ||
+      this.wrapperRefsMap.get(id)?.current?.getLocalBounds();
 
+    const { x, y } = this.getNodePosition(id);
     return {
-      x: instanceBounds.center[0] - instanceBounds.halfExtents[0],
-      y: instanceBounds.center[1] - instanceBounds.halfExtents[1],
+      x: instanceBounds.center[0] - instanceBounds.halfExtents[0] + x,
+      y: instanceBounds.center[1] - instanceBounds.halfExtents[1] + y,
       width: instanceBounds.halfExtents[0] * 2,
       height: instanceBounds.halfExtents[1] * 2,
     };
   };
 
   @action setCanvasData = (canvasData: CanvasDataType) => {
+    this.pendRender();
+
     canvasData.cells.forEach((cellData) => {
       this.insertRuntimeState(cellData);
     });
@@ -294,21 +314,27 @@ export class FlowModel {
     // this.cellsDataMap.clear();
     // this.cellsMap.clear();
     this.setCellsDataMap();
+
+    this.trigRender();
   };
 
   @action setCellId = (data: CellDataType) => {
     data.id = v4();
   };
 
-  @action setCellData = (id: string, data: any) => {
+  @action setCellData = (id: string, data: any, rec: boolean = true) => {
     const cellData = this.getCellData(id);
-    this.sendEvent({
+    this.emitEvent({
       type: "data:change",
     });
 
-    merge(cellData, data);
+    if (!rec) Object.assign(cellData, data);
+    else merge(cellData, data);
   };
 
+  /**
+   * @description 获取某个node连接的所有edge
+   */
   getNodeEdges = (nodeId: string) => {
     const re: string[] = [];
     const nodeData = this.getCellData(nodeId) as NodeDataType;
@@ -324,58 +350,83 @@ export class FlowModel {
     return re;
   };
 
-  getLinkPorts = (id: string) => {
+  /**
+   * @description 获取某个port连接的所有port
+   */
+  getPortLinkPorts = (portId: string) => {
     const re: string[] = [];
-    const nodeData = this.getCellData(id) as NodeDataType;
-    if (nodeData.ports)
-      nodeData.ports.forEach((port: PortDataType) => {
-        if (port.edges) {
-          port.edges.forEach((edgeId) => {
-            const edgeData = this.getCellData(edgeId) as EdgeDataType;
-            const sourcePort = this.getCellData(
-              edgeData.source as string
-            ) as PortDataType;
-            const targetPort = this.getCellData(
-              edgeData.target as string
-            ) as PortDataType;
 
-            re.push(
-              ...without(
-                union([sourcePort.id as string], [targetPort.id as string]),
-                id
-              )
-            );
-          });
-        }
+    const portData = this.getCellData(portId) as PortDataType;
+    portData.edges?.forEach((edgeId) => {
+      const edgeData = this.getCellData(edgeId) as EdgeDataType;
+      const sourcePort = this.getCellData(
+        edgeData.source as string
+      ) as PortDataType;
+      const targetPort = this.getCellData(
+        edgeData.target as string
+      ) as PortDataType;
+
+      re.push(
+        ...without(
+          union([sourcePort.id as string], [targetPort.id as string]),
+          portId
+        )
+      );
+    });
+
+    return re;
+  };
+
+  /**
+   * @description 获取某个port连接的所有node
+   */
+  getPortLinkNodes = (portId: string) => {
+    const re: string[] = [];
+
+    const portData = this.getCellData(portId) as PortDataType;
+    portData.edges?.forEach((edgeId) => {
+      const edgeData = this.getCellData(edgeId) as EdgeDataType;
+      const sourcePort = this.getCellData(
+        edgeData.source as string
+      ) as PortDataType;
+      const targetPort = this.getCellData(
+        edgeData.target as string
+      ) as PortDataType;
+
+      re.push(
+        ...without(
+          union([sourcePort.host as string], [targetPort.host as string]),
+          portData.host as string
+        )
+      );
+    });
+
+    return re;
+  };
+
+  /**
+   * @description 获取某个node连接的所有port
+   */
+  getLinkPorts = (nodeId: string) => {
+    const re: string[] = [];
+    const nodeData = this.getCellData(nodeId) as NodeDataType;
+    if (nodeData.ports)
+      nodeData.ports.forEach((portData: PortDataType) => {
+        re.push(...this.getPortLinkPorts(portData.id));
       });
 
     return re;
   };
 
-  // 获取某一个node连接的其他node
-  getLinkNodes = (id: string) => {
+  /**
+   * @description 获取某个node连接的所有node
+   */
+  getLinkNodes = (nodeId: string) => {
     const re: string[] = [];
-    const nodeData = this.getCellData(id) as NodeDataType;
+    const nodeData = this.getCellData(nodeId) as NodeDataType;
     if (nodeData.ports)
-      nodeData.ports.forEach((port: PortDataType) => {
-        if (port.edges) {
-          port.edges.forEach((edgeId) => {
-            const edgeData = this.getCellData(edgeId) as EdgeDataType;
-            const sourcePort = this.getCellData(
-              edgeData.source as string
-            ) as PortDataType;
-            const targetPort = this.getCellData(
-              edgeData.target as string
-            ) as PortDataType;
-
-            re.push(
-              ...without(
-                union([sourcePort.host as string], [targetPort.host as string]),
-                id
-              )
-            );
-          });
-        }
+      nodeData.ports.forEach((portData: PortDataType) => {
+        re.push(...this.getPortLinkNodes(portData.id));
       });
 
     return re;
@@ -395,7 +446,7 @@ export class FlowModel {
     this.cellsMap.delete(id);
     this.cellsDataMap.delete(id);
 
-    this.sendEvent({
+    this.emitEvent({
       type: "data:change",
     });
 
@@ -413,8 +464,7 @@ export class FlowModel {
   // 自动布局，用自动布局的三方库对每一个节点的x，y进行计算
   // @action setAutoLayout = (layoutOption) => {};
 
-  // 创建新的节点数据
-  @action createCellData = (component: string, initOptions?: any) => {
+  createCellData = (component: string, initOptions?: any) => {
     const id = v4();
 
     const metaData = Object.assign(
@@ -428,11 +478,12 @@ export class FlowModel {
 
     return Object.assign(metaData, {
       id,
+      visible: true,
       ...initOptions,
     });
   };
 
-  @action addCell = (componentName: string, initOptions: any) => {
+  @action addCell = (componentName: string, initOptions?: any) => {
     const newCellData = this.createCellData(componentName, initOptions);
 
     if (newCellData.ports) {
@@ -453,7 +504,7 @@ export class FlowModel {
     //   this.canvasData.cells[this.canvasData.cells.length - 1]
     // ); // 两者不是一个对象，后者是proxy
 
-    this.sendEvent({
+    this.emitEvent({
       type: "data:change",
     });
 
@@ -484,7 +535,7 @@ export class FlowModel {
       targetCellData.edges.push(edgeId);
     } else targetCellData.edges = [edgeId];
 
-    this.sendEvent({
+    this.emitEvent({
       type: "link",
       data: {
         source,
@@ -545,6 +596,34 @@ export class FlowModel {
     return this.canvasData.cells;
   };
 
+  getNodePosition = (id: string) => {
+    const re = { x: 0, y: 0 };
+
+    let curr: CellDataType | undefined = this.getCellData(id);
+
+    while (curr) {
+      re.x += curr.x;
+      re.y += curr.y;
+      curr = curr.parent
+        ? (this.getCellData(curr.parent) as CellDataType)
+        : undefined;
+    }
+
+    return re;
+  };
+
+  sendEvent = (cellId: string, params?: any) => {
+    const events = this.eventMap.get(cellId);
+    console.log(events);
+    events &&
+      events.forEach((event) => {
+        event(params);
+      });
+  };
+
+  /**
+   * @description 获取当前鼠标的[画布坐标]
+   */
   getStageCursor = (e: InteractivePointerEvent) => {
     return {
       x: (e.canvas.x - this.x()) / this.scale(),

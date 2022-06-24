@@ -1,14 +1,15 @@
 import { __decorate, __assign } from './node_modules/tslib/tslib.es6.js';
-import { observable, action, makeObservable } from 'mobx';
-import { remove, isRectsInterSect, findIndex, arrayMove } from './utils/util.js';
-import { color } from './theme/style.js';
 import './node_modules/lodash/lodash.js';
+import { action, observable, makeObservable } from 'mobx';
+import { color } from './theme/style.js';
+import { findIndex, arrayMove, remove, isRectsInterSect } from './utils/util.js';
 import { l as lodash } from './_virtual/lodash.js';
 import v4 from './packages/flow/node_modules/uuid/dist/esm-browser/v4.js';
 
 var FlowModel = /** @class */ (function () {
     function FlowModel(eventSender) {
         var _this = this;
+        this.eventMap = new Map();
         this.setEventSender = function (eventSender) {
             _this.eventBus.sender = eventSender;
         };
@@ -18,6 +19,7 @@ var FlowModel = /** @class */ (function () {
             });
         };
         this.extra = {};
+        this.pendingRender = true;
         this._width = 1000;
         this._height = 600;
         this.width = function (width) {
@@ -46,8 +48,6 @@ var FlowModel = /** @class */ (function () {
         };
         this.refs = {
             stageRef: undefined,
-            nodesLayerRef: undefined,
-            linesLayerRef: undefined,
         };
         this.hotKey = {
             RightMouseDown: false,
@@ -71,7 +71,7 @@ var FlowModel = /** @class */ (function () {
             sourcePort.edges && remove(sourcePort.edges, edgeId);
             targetPort.edges && remove(targetPort.edges, edgeId);
         };
-        // 一些中间状态，比如连线中的开始节点的暂存，不应该让外部
+        // 一些中间状态，比如连线中的开始节点的暂存，不应该让外部感知
         this.buffer = {
             rightClickPanel: {
                 visible: false,
@@ -117,17 +117,17 @@ var FlowModel = /** @class */ (function () {
             if (onlySetPosition)
                 return;
             var re = [];
-            _this.cellsMap.forEach(function (cell) {
-                var _a;
-                if (((_a = cell.props.data) === null || _a === void 0 ? void 0 : _a.cellType) === "node") {
+            _this.canvasData.cells.forEach(function (cellData) {
+                if (cellData.cellType === "node") {
+                    console.log(_this.getLocalBBox(cellData.id));
                     // 判断矩形是否相交
                     if (isRectsInterSect({
                         x: x,
                         y: y,
                         width: right - x,
                         height: bottom - y,
-                    }, _this.getLocalBBox(cell.props.data.id))) {
-                        re.push(cell.props.data.id);
+                    }, _this.getLocalBBox(cellData.id))) {
+                        re.push(cellData.id);
                     }
                 }
             });
@@ -145,6 +145,16 @@ var FlowModel = /** @class */ (function () {
         };
         // 全局颜色，可以由用户自定义
         this.color = color;
+        this.getWrapperRef = function (id) {
+            var ref = _this.wrapperRefsMap.get(id);
+            if (ref)
+                return ref;
+            else
+                _this.wrapperRefsMap.set(id, { current: null });
+            return _this.wrapperRefsMap.get(id);
+        };
+        // function component的外层group ref的map
+        this.wrapperRefsMap = new Map();
         // cell的<id, 实例>map，方便用id获取到组件实例
         this.cellsMap = new Map();
         // cellData的<id, cellData>map，用来修改受控数据
@@ -154,7 +164,6 @@ var FlowModel = /** @class */ (function () {
         this.regist = function (name, component) {
             _this.componentsMap.set(name, component);
         };
-        // 消息传递
         this.eventBus = {
             sender: undefined,
             receiver: undefined,
@@ -163,7 +172,6 @@ var FlowModel = /** @class */ (function () {
         this.selectCells = [];
         this.setSelectedCells = function (ids, ifReplace) {
             if (ifReplace === void 0) { ifReplace = true; }
-            // @TODO select感觉只能放在私有属性，否则每次更新要diff全部的节点
             if (ifReplace) {
                 _this.selectCells = ids;
             }
@@ -171,7 +179,6 @@ var FlowModel = /** @class */ (function () {
                 _this.selectCells = lodash.exports.union(_this.selectCells, ids);
             }
         };
-        // 画布的渲染数据，之后的渲染大部分都为受控渲染，更改canvasData => 触发重新渲染
         this.canvasData = {
             scale: 1,
             x: 0,
@@ -181,7 +188,7 @@ var FlowModel = /** @class */ (function () {
         this.clearSelect = function () {
             _this.selectCells = [];
         };
-        this.sendEvent = function (data) {
+        this.emitEvent = function (data) {
             var _a, _b;
             (_b = (_a = _this.eventBus).sender) === null || _b === void 0 ? void 0 : _b.call(_a, data);
         };
@@ -199,17 +206,19 @@ var FlowModel = /** @class */ (function () {
             };
         };
         this.getLocalBBox = function (id) {
-            var instanceBounds = _this.cellsMap
-                .get(id)
-                .wrapperRef.current.getLocalBounds();
+            var _a, _b, _c;
+            var instanceBounds = ((_a = _this.cellsMap.get(id)) === null || _a === void 0 ? void 0 : _a.wrapperRef.current.getLocalBounds()) ||
+                ((_c = (_b = _this.wrapperRefsMap.get(id)) === null || _b === void 0 ? void 0 : _b.current) === null || _c === void 0 ? void 0 : _c.getLocalBounds());
+            var _d = _this.getNodePosition(id), x = _d.x, y = _d.y;
             return {
-                x: instanceBounds.center[0] - instanceBounds.halfExtents[0],
-                y: instanceBounds.center[1] - instanceBounds.halfExtents[1],
+                x: instanceBounds.center[0] - instanceBounds.halfExtents[0] + x,
+                y: instanceBounds.center[1] - instanceBounds.halfExtents[1] + y,
                 width: instanceBounds.halfExtents[0] * 2,
                 height: instanceBounds.halfExtents[1] * 2,
             };
         };
         this.setCanvasData = function (canvasData) {
+            _this.pendRender();
             canvasData.cells.forEach(function (cellData) {
                 _this.insertRuntimeState(cellData);
             });
@@ -218,17 +227,25 @@ var FlowModel = /** @class */ (function () {
             // this.cellsDataMap.clear();
             // this.cellsMap.clear();
             _this.setCellsDataMap();
+            _this.trigRender();
         };
         this.setCellId = function (data) {
             data.id = v4();
         };
-        this.setCellData = function (id, data) {
+        this.setCellData = function (id, data, rec) {
+            if (rec === void 0) { rec = true; }
             var cellData = _this.getCellData(id);
-            _this.sendEvent({
+            _this.emitEvent({
                 type: "data:change",
             });
-            lodash.exports.merge(cellData, data);
+            if (!rec)
+                Object.assign(cellData, data);
+            else
+                lodash.exports.merge(cellData, data);
         };
+        /**
+         * @description 获取某个node连接的所有edge
+         */
         this.getNodeEdges = function (nodeId) {
             var re = [];
             var nodeData = _this.getCellData(nodeId);
@@ -242,36 +259,57 @@ var FlowModel = /** @class */ (function () {
                 });
             return re;
         };
-        this.getLinkPorts = function (id) {
+        /**
+         * @description 获取某个port连接的所有port
+         */
+        this.getPortLinkPorts = function (portId) {
+            var _a;
             var re = [];
-            var nodeData = _this.getCellData(id);
+            var portData = _this.getCellData(portId);
+            (_a = portData.edges) === null || _a === void 0 ? void 0 : _a.forEach(function (edgeId) {
+                var edgeData = _this.getCellData(edgeId);
+                var sourcePort = _this.getCellData(edgeData.source);
+                var targetPort = _this.getCellData(edgeData.target);
+                re.push.apply(re, lodash.exports.without(lodash.exports.union([sourcePort.id], [targetPort.id]), portId));
+            });
+            return re;
+        };
+        /**
+         * @description 获取某个port连接的所有node
+         */
+        this.getPortLinkNodes = function (portId) {
+            var _a;
+            var re = [];
+            var portData = _this.getCellData(portId);
+            (_a = portData.edges) === null || _a === void 0 ? void 0 : _a.forEach(function (edgeId) {
+                var edgeData = _this.getCellData(edgeId);
+                var sourcePort = _this.getCellData(edgeData.source);
+                var targetPort = _this.getCellData(edgeData.target);
+                re.push.apply(re, lodash.exports.without(lodash.exports.union([sourcePort.host], [targetPort.host]), portData.host));
+            });
+            return re;
+        };
+        /**
+         * @description 获取某个node连接的所有port
+         */
+        this.getLinkPorts = function (nodeId) {
+            var re = [];
+            var nodeData = _this.getCellData(nodeId);
             if (nodeData.ports)
-                nodeData.ports.forEach(function (port) {
-                    if (port.edges) {
-                        port.edges.forEach(function (edgeId) {
-                            var edgeData = _this.getCellData(edgeId);
-                            var sourcePort = _this.getCellData(edgeData.source);
-                            var targetPort = _this.getCellData(edgeData.target);
-                            re.push.apply(re, lodash.exports.without(lodash.exports.union([sourcePort.id], [targetPort.id]), id));
-                        });
-                    }
+                nodeData.ports.forEach(function (portData) {
+                    re.push.apply(re, _this.getPortLinkPorts(portData.id));
                 });
             return re;
         };
-        // 获取某一个node连接的其他node
-        this.getLinkNodes = function (id) {
+        /**
+         * @description 获取某个node连接的所有node
+         */
+        this.getLinkNodes = function (nodeId) {
             var re = [];
-            var nodeData = _this.getCellData(id);
+            var nodeData = _this.getCellData(nodeId);
             if (nodeData.ports)
-                nodeData.ports.forEach(function (port) {
-                    if (port.edges) {
-                        port.edges.forEach(function (edgeId) {
-                            var edgeData = _this.getCellData(edgeId);
-                            var sourcePort = _this.getCellData(edgeData.source);
-                            var targetPort = _this.getCellData(edgeData.target);
-                            re.push.apply(re, lodash.exports.without(lodash.exports.union([sourcePort.host], [targetPort.host]), id));
-                        });
-                    }
+                nodeData.ports.forEach(function (portData) {
+                    re.push.apply(re, _this.getPortLinkNodes(portData.id));
                 });
             return re;
         };
@@ -287,7 +325,7 @@ var FlowModel = /** @class */ (function () {
             remove(_this.canvasData.cells, matchCell);
             _this.cellsMap.delete(id);
             _this.cellsDataMap.delete(id);
-            _this.sendEvent({
+            _this.emitEvent({
                 type: "data:change",
             });
             return matchCell.id;
@@ -301,14 +339,13 @@ var FlowModel = /** @class */ (function () {
         };
         // 自动布局，用自动布局的三方库对每一个节点的x，y进行计算
         // @action setAutoLayout = (layoutOption) => {};
-        // 创建新的节点数据
         this.createCellData = function (component, initOptions) {
             var id = v4();
             var metaData = Object.assign(_this.componentsMap.get(component).getMetaData(), {
                 component: component,
             });
             _this.insertRuntimeState(metaData);
-            return Object.assign(metaData, __assign({ id: id }, initOptions));
+            return Object.assign(metaData, __assign({ id: id, visible: true }, initOptions));
         };
         this.addCell = function (componentName, initOptions) {
             var newCellData = _this.createCellData(componentName, initOptions);
@@ -326,7 +363,7 @@ var FlowModel = /** @class */ (function () {
             //   newCellData,
             //   this.canvasData.cells[this.canvasData.cells.length - 1]
             // ); // 两者不是一个对象，后者是proxy
-            _this.sendEvent({
+            _this.emitEvent({
                 type: "data:change",
             });
             return newCellData.id;
@@ -353,7 +390,7 @@ var FlowModel = /** @class */ (function () {
             }
             else
                 targetCellData.edges = [edgeId];
-            _this.sendEvent({
+            _this.emitEvent({
                 type: "link",
                 data: {
                     source: source,
@@ -382,6 +419,29 @@ var FlowModel = /** @class */ (function () {
         this.getCellsData = function () {
             return _this.canvasData.cells;
         };
+        this.getNodePosition = function (id) {
+            var re = { x: 0, y: 0 };
+            var curr = _this.getCellData(id);
+            while (curr) {
+                re.x += curr.x;
+                re.y += curr.y;
+                curr = curr.parent
+                    ? _this.getCellData(curr.parent)
+                    : undefined;
+            }
+            return re;
+        };
+        this.sendEvent = function (cellId, params) {
+            var events = _this.eventMap.get(cellId);
+            console.log(events);
+            events &&
+                events.forEach(function (event) {
+                    event(params);
+                });
+        };
+        /**
+         * @description 获取当前鼠标的[画布坐标]
+         */
         this.getStageCursor = function (e) {
             return {
                 x: (e.canvas.x - _this.x()) / _this.scale(),
@@ -406,6 +466,12 @@ var FlowModel = /** @class */ (function () {
             }
         }
     };
+    FlowModel.prototype.trigRender = function () {
+        this.pendingRender = false;
+    };
+    FlowModel.prototype.pendRender = function () {
+        this.pendingRender = true;
+    };
     // @action
     FlowModel.prototype.x = function (x) {
         if (lodash.exports.isUndefined(x))
@@ -428,6 +494,12 @@ var FlowModel = /** @class */ (function () {
         var oldIndex = findIndex(this.canvasData.cells, this.getCellData(id));
         arrayMove(this.canvasData.cells, oldIndex, index);
     };
+    __decorate([
+        action
+    ], FlowModel.prototype, "trigRender", null);
+    __decorate([
+        action
+    ], FlowModel.prototype, "pendRender", null);
     __decorate([
         observable
     ], FlowModel.prototype, "_width", void 0);
@@ -497,9 +569,6 @@ var FlowModel = /** @class */ (function () {
     __decorate([
         action
     ], FlowModel.prototype, "deleCell", void 0);
-    __decorate([
-        action
-    ], FlowModel.prototype, "createCellData", void 0);
     __decorate([
         action
     ], FlowModel.prototype, "addCell", void 0);

@@ -1,9 +1,8 @@
-import typescript from "@rollup/plugin-typescript";
+import alias from "@rollup/plugin-alias";
 import commonjs from "@rollup/plugin-commonjs";
 import resolve from "@rollup/plugin-node-resolve";
-import alias from "@rollup/plugin-alias";
+import typescript from "@rollup/plugin-typescript";
 import postcss from "rollup-plugin-postcss";
-import { uglify } from "rollup-plugin-uglify";
 
 import tsconfig from "./tsconfig.json";
 

@@ -1,0 +1,37 @@
+{
+  "scale": 1,
+  "x": 100,
+  "y": 100,
+  "cells": [
+    {
+      "id": "1",
+      "cellType": "node",
+      "component": "InterfaceNode",
+      "x": 0,
+      "y": 0,
+      "visible": true,
+      "ports": [
+        {
+          "cellType": "port",
+          "label": "age",
+          "id": "1-0",
+          "portType": "in",
+          "host": "1"
+        },
+        {
+          "cellType": "port",
+          "label": "father",
+          "id": "1-1",
+          "portType": "out",
+          "fold": false,
+          "host": "1"
+        }
+      ],
+      "interface": "",
+      "inputParams": [],
+      "status": 0,
+      "title": "Init Node",
+      "type": ""
+    }
+  ]
+}

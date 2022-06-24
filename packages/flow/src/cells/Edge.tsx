@@ -1,18 +1,16 @@
-import Cell from "./Cell";
-import { Polyline, Group, Text, Rect, Path } from "@antv/react-g";
-import * as G from "@antv/g";
-import Interactor from "../scaffold/Interacotr";
-import { CellDataType } from "./Cell";
-import { PortDataType } from "../scaffold/Port";
-import React from "react";
+import Cell, { CellDataType } from "./Cell";
 import { NodeDataType } from "./Node";
-import { isVector2d } from "../utils/util";
 import FlowModel from "../Model";
-import { titleCase } from "utils/string";
-import { lineCenter } from "utils/vector";
-import { Vector2d } from "../types/common";
-import Arrow from "../components/Arrow";
-import { InteractivePointerEvent } from '@antv/g';
+import { Group, Text, Rect } from "@antv/react-g";
+import { Dir, Vector2d } from "../typings/common";
+import { Interactor, Arrow, PortDataType } from "../components";
+import React from "react";
+import { isVector2d, lineCenter, titleCase } from "../utils";
+import { InteractivePointerEvent } from "@antv/g";
+import * as G from "@antv/g";
+import type { DisplayObject } from "@antv/g";
+import { callIfFn } from "../utils/util";
+import { autorun } from "mobx";
 
 export type EdgeDataType = {
   source: string | Vector2d;
@@ -22,14 +20,22 @@ export type EdgeDataType = {
 } & CellDataType;
 const TEXT_HEIGHT = 16;
 const LABEL_PADDING = 4;
+
+type Head = React.ReactNode | boolean;
 abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
   static metaData: any = {
     cellType: "edge",
   };
   labelRef: React.RefObject<G.Group>;
+  arrowRef: React.RefObject<Arrow>;
 
-  protected bazier = false;
-  protected arrow = false;
+  protected bazier: boolean | (() => boolean) = false;
+  protected startHead: Head | (() => Head) = false;
+  protected endhead: Head | (() => Head) = true;
+  protected lineDash: [number, number] | (() => [number, number]) = [0, 0];
+  protected animate: boolean | (() => boolean) = false;
+
+  pathInstance = new G.Path();
 
   isMountEvents = false;
 
@@ -41,6 +47,34 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
   ) {
     super(props, context);
     this.labelRef = React.createRef();
+    this.arrowRef = React.createRef();
+  }
+
+  initAnimate() {
+    if (callIfFn(this.animate)) {
+      const lineDash = callIfFn(this.lineDash);
+      const LENGTH = lineDash[0] + lineDash[1];
+      (this.arrowRef.current?.bodyRef.current as DisplayObject)?.animate?.(
+        [{ lineDashOffset: LENGTH }, { lineDashOffset: 0 }],
+        {
+          duration: 500,
+          iterations: Infinity,
+        }
+      );
+    }
+  }
+
+  componentDidMount(): void {
+    super.componentDidMount();
+
+    autorun(() => {
+      if (this.props.data.visible === true) {
+        requestAnimationFrame(() => {
+          // 确保didUpdate之后再设置动画
+          this.initAnimate();
+        });
+      }
+    });
   }
 
   protected lineStyle({ isSelect }: { isSelect: boolean }) {
@@ -192,16 +226,22 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
   }
 
   labelPosition() {
-    const points = this.getVectors().map((vector) => [vector.x, vector.y]) as [
-      number,
-      number
-    ][];
-    const lineLenthCenter = lineCenter(points);
+    if (callIfFn(this.bazier)) {
+      this.pathInstance.style.setProperty("path", this.getBazierPath());
 
-    return {
-      x: lineLenthCenter[0] || points[0][0],
-      y: lineLenthCenter[1] || points[0][1],
-    };
+      return this.pathInstance.getPoint(0.5);
+    } else {
+      const points = this.getVectors().map((vector) => [
+        vector.x,
+        vector.y,
+      ]) as [number, number][];
+      const lineLenthCenter = lineCenter(points);
+
+      return {
+        x: lineLenthCenter[0] || points[0][0],
+        y: lineLenthCenter[1] || points[0][1],
+      };
+    }
   }
 
   protected labelRender() {
@@ -224,7 +264,7 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
               const instanceEventFn = this[`onLabel${titleCase(eventName)}`];
               instanceEventFn && instanceEventFn.call(this, e);
 
-              this.context.sendEvent({
+              this.context.emitEvent({
                 type: `label:${eventName}`,
                 data: {
                   e,
@@ -252,24 +292,47 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
     return this.props.data.$state.isLinking;
   }
 
+  getBazierDir(): { source: Dir; target: Dir } {
+    const { source, target } = this.getAnchors();
+    const LENGTH = (target.x - source.x) * 0.5;
+
+    return {
+      source: [LENGTH, 0],
+      target: [-LENGTH, 0],
+    };
+  }
+
   getBazierPath() {
     const { source, target } = this.getAnchors();
-    const LENGTH = (source.x - target.x) * 0.5;
+    const dir = this.getBazierDir();
 
     return `M${source.x},${source.y} 
-    C${source.x - LENGTH},${source.y} ${target.x + LENGTH},${target.y} 
+    C${source.x + dir.source[0]},${source.y + dir.source[1]} ${
+      target.x + dir.target[0]
+    },${target.y + dir.target[1]} 
     ${target.x},${target.y}`;
+  }
+
+  getPolylinePath() {
+    const points = this.getPoints();
+
+    let str = `M${points[0][0]},${points[0][1]}`;
+    for (let i = 1; i < points.length; i++) {
+      str += `L${points[i][0]},${points[i][1]}`;
+    }
+
+    return str;
+  }
+
+  getPath() {
+    return callIfFn(this.bazier)
+      ? this.getBazierPath()
+      : this.getPolylinePath();
   }
 
   lineExtra: () => JSX.Element;
 
-  protected edgeRender({
-    points,
-    isLinking,
-  }: {
-    points: [number, number][];
-    isLinking: boolean;
-  }) {
+  protected edgeRender() {
     const { color } = this.context;
 
     const lineProps = {
@@ -280,23 +343,15 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
       ...this.lineStyle({ isSelect: this.isSelect() }),
     } as any;
 
-    const bazierProps = {
-      type: "Path",
-      path: this.getBazierPath(),
-    };
-
-    const polyLineProps = {
-      type: "Polyline",
-      points,
-    };
-
     return (
       <Group>
         <Arrow
-          {...(this.bazier ? bazierProps : polyLineProps)}
-          points={points}
+          ref={this.arrowRef}
           {...lineProps}
-          endHead={true}
+          path={this.getPath()}
+          startHead={callIfFn(this.startHead)}
+          endHead={callIfFn(this.endhead)}
+          lineDash={callIfFn(this.lineDash)}
         />
       </Group>
     );
@@ -305,10 +360,7 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
   content() {
     return (
       <Interactor id={this.props.data.id} draggable={false}>
-        {this.edgeRender({
-          points: this.getPoints(),
-          isLinking: this.isLinking(),
-        })}
+        {this.edgeRender()}
         {this.labelRender()}
         {this.lineExtra && this.lineExtra()}
       </Interactor>

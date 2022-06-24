@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      body {
+        margin: 0;
+      }
+
+      .content {
+        background: #000;
+      }
+    </style>
+  </head>
+
+  <body>
+    <canvas width="1000" height="1000" class="canvas"></canvas>
+  </body>
+  <script src="./perlin.js"></script>
+  <script>
+    let time = Date.now().valueOf();
+    const distance = 40; // 水面方块的间距
+    const scale = 1000; // canvas坐标缩小到噪声坐标
+
+    const canvas = document.querySelector("canvas");
+    const context = canvas.getContext("2d");
+
+    class WaterRect {
+      constructor({ x, y }) {
+        this.x = x;
+        this.y = y;
+      }
+
+      draw() {
+        // const noiseValue = noise.simplex2(this.x / scale, this.y / scale);
+        const noiseValue = noise.simplex3(this.x / scale, this.y / scale, time);
+        context.beginPath();
+        context.rect(this.x, this.y, 30, 30);
+        context.fillStyle = `rgba(0,0,0,${0.5 * (1 - noiseValue)})`;
+        context.fill();
+      }
+    }
+
+    let points = [];
+    function genRects() {
+      for (let y = 0; y < canvas.height; y += distance) {
+        for (let x = 0; x < canvas.width; x += distance) {
+          points.push(
+            new WaterRect({
+              x: x,
+              y: y,
+            })
+          );
+        }
+      }
+    }
+
+    function drawAll() {
+      context.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (let i of points) {
+        i.draw();
+      }
+    }
+
+    function animate() {
+      drawAll();
+      time = new Date().valueOf() / 2000;
+      requestAnimationFrame(animate);
+    }
+
+    genRects();
+    animate();
+  </script>
+</html>

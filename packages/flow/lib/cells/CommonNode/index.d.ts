@@ -1,14 +1,12 @@
-import type { FieldType } from "../../types/common";
-import { PortDataType } from "../../scaffold/Port";
-import Node from "../Node";
-import { NodeDataType } from "../Node";
+/// <reference types="react" />
+import { PortDataType } from "../../components";
+import Node, { NodeDataType } from "../Node";
 declare type CommonPortDataType = PortDataType & {
     label: string;
     portType: "in" | "out" | "control-out" | "control-in";
 };
 declare type CommonNodeDataType = {
     ports?: CommonPortDataType[];
-    fields?: FieldType[];
     x?: number;
     y?: number;
     label?: string;

@@ -1,5 +1,19 @@
-var STAGE_CLASS_NAME = 'flow-stage';
+import { __spreadArray } from './node_modules/tslib/tslib.es6.js';
+
+var STAGE_ID = 'flow-stage';
 var EVT_LEFTCLICK = 0;
 var EVT_RIGHTCLICK = 2;
+var COMMON_RESERVED_WORDS = [
+    'id', 'cellType'
+];
+__spreadArray(__spreadArray([], COMMON_RESERVED_WORDS, true), [
+    'component', 'parent', 'x', 'y', 'visible', 'ports'
+], false);
+__spreadArray(__spreadArray([], COMMON_RESERVED_WORDS, true), [
+    'host'
+], false);
+__spreadArray(__spreadArray([], COMMON_RESERVED_WORDS, true), [
+    'component', "source", "target", 'visible',
+], false);
 
-export { EVT_LEFTCLICK, EVT_RIGHTCLICK, STAGE_CLASS_NAME };
+export { COMMON_RESERVED_WORDS, EVT_LEFTCLICK, EVT_RIGHTCLICK, STAGE_ID };

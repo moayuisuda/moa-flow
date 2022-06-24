@@ -6,10 +6,8 @@ import { Path, Line, Polyline, Group } from "@antv/react-g";
 import React, { Component } from "react";
 
 type ArrowHead = boolean | DisplayObject;
-type ArrowBody = React.ReactElement;
-export interface ArrowStyleProps extends BaseStyleProps {
-  type: "Path" | "Line" | "Polyline";
-  body?: ArrowBody;
+export interface ArrowStyleProps extends React.ReactElement {
+  path: string;
   startHead?: ArrowHead;
   endHead?: ArrowHead;
   stroke?: string;
@@ -17,11 +15,8 @@ export interface ArrowStyleProps extends BaseStyleProps {
   opacity?: number;
   strokeOpacity?: number;
 }
-const typeMap = {
-  Path: Path,
-  Line: Line,
-  Polyline: Polyline,
-};
+
+const ARROW_SIZE = 16;
 
 /**
  * support 3 types of arrow line:
@@ -33,7 +28,7 @@ const typeMap = {
  * 1. default(Path)
  * 2. custom
  */
-export default class Arrow extends Component<ArrowStyleProps, {}> {
+export class Arrow extends Component<ArrowStyleProps, {}> {
   startRef: React.MutableRefObject<DisplayObject | null>;
   endRef: React.MutableRefObject<DisplayObject | null>;
   bodyRef: React.MutableRefObject<DisplayObject | null>;
@@ -55,10 +50,12 @@ export default class Arrow extends Component<ArrowStyleProps, {}> {
   }
 
   setHeadTransform() {
+    console.log("get");
     const { startHead, endHead } = this.props;
 
     startHead &&
       this.transformArrowHead(this.startRef.current as DisplayObject, true);
+
     endHead &&
       this.transformArrowHead(this.endRef.current as DisplayObject, false);
   }
@@ -74,11 +71,8 @@ export default class Arrow extends Component<ArrowStyleProps, {}> {
     const { startHead, endHead, ...others } = this.props;
 
     return (
-      <>
-        {React.createElement(typeMap[this.props.type] as any, {
-          ...others,
-          ref: this.bodyRef,
-        })}
+      <Group>
+        <Path {...others} ref={this.bodyRef} />
         {startHead && (
           <Group ref={this.startRef}>
             {this.getArrowHead(startHead, true)}
@@ -87,8 +81,13 @@ export default class Arrow extends Component<ArrowStyleProps, {}> {
         {endHead && (
           <Group ref={this.endRef}>{this.getArrowHead(endHead, false)}</Group>
         )}
-      </>
+      </Group>
     );
+  }
+
+  getCenter() {
+    const points = (this.bodyRef.current as G.Polyline).getPoint(0.5);
+    return points;
   }
 
   /**
@@ -102,32 +101,13 @@ export default class Arrow extends Component<ArrowStyleProps, {}> {
     let y1 = 0;
     let y2 = 0;
 
-    const bodyType = this.props.type;
-
-    if (bodyType === "Line") {
-      const {
-        x1: _x1,
-        x2: _x2,
-        y1: _y1,
-        y2: _y2,
-      } = (this.bodyRef.current as G.Line).attributes;
-      x1 = isStart ? _x1 : _x2;
-      x2 = isStart ? _x2 : _x1;
-      y1 = isStart ? _y1 : _y2;
-      y2 = isStart ? _y2 : _y1;
-    } else if (bodyType === "Polyline") {
-      const points = (this.bodyRef.current as G.Polyline).attributes.points;
-      const { length } = points;
-      x1 = isStart ? points[1][0] : points[length - 2][0];
-      y1 = isStart ? points[1][1] : points[length - 2][1];
-      x2 = isStart ? points[0][0] : points[length - 1][0];
-      y2 = isStart ? points[0][1] : points[length - 1][1];
-    } else if (bodyType === "Path") {
+    {
       const [p1, p2] = this.getTangent(this.bodyRef.current as G.Path, isStart);
       x1 = p1[0];
       y1 = p1[1];
       x2 = p2[0];
       y2 = p2[1];
+      console.log("p1p2", p1, p2);
     }
 
     const x = x1 - x2;
@@ -136,7 +116,7 @@ export default class Arrow extends Component<ArrowStyleProps, {}> {
     position = vec3.fromValues(x2, y2, 0);
 
     head.setLocalPosition(position);
-    head.style.transform = `rotate(${(rad * 180) / Math.PI}deg)`;
+    head.setLocalEulerAngles((rad * 180) / Math.PI);
   }
 
   private getTangent(path: G.Path, isStart: boolean): number[][] {
@@ -144,15 +124,16 @@ export default class Arrow extends Component<ArrowStyleProps, {}> {
   }
 
   private getDefaultArrowHead() {
-    const { startHead, endHead, body, ...others } = this.props;
+    const { startHead, endHead, ...others } = this.props;
     const { sin, cos, PI } = Math;
     return (
       <Path
         {...others}
+        lineDash={undefined}
         fill={this.props.stroke}
-        path={`M${10 * cos(PI / 6)},${10 * sin(PI / 6)} L0,0 L${
-          10 * cos(PI / 6)
-        },-${10 * sin(PI / 6)} Z`}
+        path={`M${ARROW_SIZE * cos(PI / 6)},${ARROW_SIZE * sin(PI / 6)} L0,0 L${
+          ARROW_SIZE * cos(PI / 6)
+        },-${ARROW_SIZE * sin(PI / 6)} Z`}
       />
     );
   }

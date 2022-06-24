@@ -1,15 +1,13 @@
-import React from "react";
 import { Group } from "@antv/react-g";
-import { FlowContext } from "../Context";
-import { cloneDeep } from "lodash";
+import { cloneDeep, isUndefined } from "lodash";
 import { observer } from "mobx-react";
+import React from "react";
+import { FlowContext } from "../Context";
 import Model from "../Model";
-import { AllCellDataType } from "../types/common";
-import { titleCase } from "utils/string";
-import { InteractivePointerEvent } from "@antv/g";
 
 export type CellDataType = {
   id: string;
+  visible?: boolean;
   cellType: string;
   component: string;
   [key: string]: any;
@@ -17,7 +15,9 @@ export type CellDataType = {
 
 // D: data, S: state, P: props
 abstract class Cell<D, S = {}, P = {}> extends React.Component<
-  { data: D & CellDataType } & P,
+  {
+    data: D & CellDataType;
+  } & P,
   S
 > {
   static contextType = FlowContext;
@@ -34,7 +34,7 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
 
   // 如果是content: () => xxx 对应的是instance property，这种写法是instance function
   abstract content(): JSX.Element;
-  
+
   onMount(): void {}
 
   static metaData: any = { id: "" };
@@ -65,35 +65,11 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
     return cloneDeep(re);
   }
 
-  setData(data: any) {
-    this.context;
-    this.context.setCellData(this.props.data.id, data);
+  setData(data: any, rec: boolean = true) {
+    this.context.setCellData(this.props.data.id, data, rec);
   }
 
   componentDidMount(): void {
-    [
-      "mouseenter",
-      "mouseleave",
-      "mousedown",
-      "mouseup",
-      "dblclick",
-      "click",
-    ].forEach((eventName) => {
-      this.wrapperRef.current.on(eventName, (e: InteractivePointerEvent) => {
-        const instanceEventFn = this[`on${titleCase(eventName)}`];
-        instanceEventFn && instanceEventFn.call(this, e);
-
-        this.context.sendEvent({
-          type: `cell:${eventName}`,
-          data: {
-            e,
-            cellData: this.props.data,
-            cell: this,
-          },
-        });
-      });
-    });
-
     this.onMount && this.onMount();
   }
 
@@ -112,7 +88,12 @@ abstract class Cell<D, S = {}, P = {}> extends React.Component<
           this.wrapperRef.current = ref;
         }}
       >
-        {this.content()}
+        {!this.context.pendingRender &&
+        (isUndefined(this.props.data.visible) || this.props.data.visible) ? (
+          <Group>{this.content()}</Group>
+        ) : (
+          <></>
+        )}
       </Group>
     );
   }

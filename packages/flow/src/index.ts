@@ -1,49 +1,67 @@
 "use strict";
 
 import Flow from "./Flow";
-import Cell from "./cells/Cell";
-import Node from './cells/Node'
-import Edge from './cells/Edge'
-import Interactor from './scaffold/Interacotr'
-import Port from "./scaffold/Port";
-import { PortDataType } from "./scaffold/Port";
 import Model from "./Model";
-import Portal from "components/Portal";
 
-import RightClickPanel from './components/RightClickPanel/index';
-import Image from './components/Image';
+import Cell from "./cells/Cell";
+import Node from "./cells/Node";
+import Edge from "./cells/Edge";
+import { CellDataType } from "./cells/Cell";
+import { EdgeDataType } from "./cells/Edge";
+import { NodeDataType, NodePropsType } from './cells/Node';
 
-import { FlowInfraEventType } from './types/common';
+import {
+  Portal,
+  RightClickPanel,
+  Interactor,
+  Port,
+  PortDataType,
+  Arrow,
+  ConsumerBridge
+} from "./components";
 
-import * as Graph from '@antv/react-g'
-import { autorun } from 'mobx';
-import { Vector2d } from './types/common';
-import { CellDataType } from './cells/Cell';
-import { EdgeDataType } from './cells/Edge';
-import { NodeDataType } from './cells/Node';
+import * as G from "@antv/react-g";
+import { autorun } from "mobx";
+import { Observer, observer } from "mobx-react";
+import { Vector2d, FlowInfraEventType } from "./typings/common";
+import { Canvas } from "./Flow";
+import { FlowContext } from './Context';
 
+type ModelType = Model;
+const Graph = {
+  ...G,
+  Arrow
+}
 
-type ModelType = Model
-
-// const mountFlow = (container: Element, props) => {
-//     const modelRef = React.createRef<ModelType>()
-//     ReactDOM.render(React.createElement(Flow, { ...props, modelRef }), container)
-
-//     return { modelRef }
-// }
-
+export * from './hooks'
 export {
-    Flow,
-    Cell,
-    Port,
-    Node,
-    Edge,
-    Interactor,
-    Portal,
-    Image,
-    RightClickPanel,
-    Graph,
-    autorun,
+  Flow,
+  Cell,
+  Node,
+  Edge,
+  Port,
+  Interactor,
+  Portal,
+
+  Graph,
+  autorun,
+  ConsumerBridge,
+  RightClickPanel,
+  Canvas,
+
+  FlowContext,
+
+  Observer,
+  observer
 };
 
-export type { ModelType, FlowInfraEventType, Vector2d, CellDataType, EdgeDataType, PortDataType, NodeDataType };
+export type {
+  ModelType,
+  FlowInfraEventType,
+  Vector2d,
+  CellDataType,
+  EdgeDataType,
+  PortDataType,
+  NodeDataType,
+  NodePropsType
+};

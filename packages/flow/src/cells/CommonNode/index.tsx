@@ -1,9 +1,6 @@
-import type { FieldType } from "../../types/common";
-import { PortDataType } from "../../scaffold/Port";
-import { Rect, Text, Circle, Group } from "@antv/react-g";
-import Interactor from "../../scaffold/Interacotr";
-import Node from "../Node";
-import { NodeDataType } from "../Node";
+import { Interactor, PortDataType } from "../../components";
+import { Rect, Text, Circle } from "@antv/react-g";
+import Node, { NodeDataType } from "../Node";
 import React from "react";
 
 const { Port } = Interactor;
@@ -15,7 +12,6 @@ type CommonPortDataType = PortDataType & {
 
 type CommonNodeDataType = {
   ports?: CommonPortDataType[];
-  fields?: FieldType[];
   x?: number;
   y?: number;
   label?: string;

@@ -3,7 +3,8 @@ export declare const color: {
     active: string;
     grey: string;
     blue: string;
-    green: string;
     deepGrey: string;
     background: string;
+    success: string;
+    error: string;
 };

@@ -1,13 +1,13 @@
-import { ModelType } from ".";
+import Model from "./Model";
 import { autorun } from "mobx"
 import { without } from 'lodash';
 import { NodeDataType } from "./cells/Node";
 import { CellDataType } from './cells/Cell';
-import { EVT_LEFTCLICK, EVT_RIGHTCLICK } from './constants';
-import { Vector2d } from "./types/common";
+import { EVT_LEFTCLICK, EVT_RIGHTCLICK, STAGE_ID } from './constants';
+import { Vector2d } from "./typings/common";
 import { InteractivePointerEvent, Canvas } from '@antv/g';
 
-export const initClearState = (model: ModelType, stage: Canvas) => {
+export const initClearState = (model: Model, stage: Canvas) => {
     stage.on('mousedown', (e: InteractivePointerEvent) => {
         if (e.button === EVT_LEFTCLICK) {
             model.buffer.rightClickPanel.visible = false
@@ -17,8 +17,8 @@ export const initClearState = (model: ModelType, stage: Canvas) => {
     })
 }
 
-export const initLink = (model: ModelType, stage: Canvas) => {
-    stage.on('mouseup', (e) => {
+export const initLink = (model: Model, stage: Canvas) => {
+    stage.on('mouseup', (e: InteractivePointerEvent) => {
         model.clearLinkBuffer();
     })
 
@@ -32,7 +32,7 @@ export const initLink = (model: ModelType, stage: Canvas) => {
     })
 }
 
-export const initSelect = (model: ModelType) => {
+export const initSelect = (model: Model) => {
     // 非受控设置select的节点
     let prevSelectCells: string[] = []
     autorun(() => {
@@ -55,7 +55,7 @@ export const initSelect = (model: ModelType) => {
     })
 }
 
-export const initDrag = (model: ModelType, stage: Canvas) => {
+export const initDrag = (model: Model, stage: Canvas) => {
     // 移动选择的节点
     // 暂存节点原本的zIndex，方便还原到原本的layer
     let zIndexCache: {
@@ -116,13 +116,16 @@ export const initDrag = (model: ModelType, stage: Canvas) => {
     })
 }
 
-export const initScale = (model: ModelType, stage: Canvas) => {
+export const initScale = (model: Model, stage: Canvas) => {
     let scaleBy = 1.02;
+
+    document.querySelector(`#${STAGE_ID}`)?.addEventListener('wheel', e => {
+        e.preventDefault()
+    })
 
     stage.on('wheel', (e: InteractivePointerEvent) => {
 
         // stop default scrolling
-        e.preventDefault();
         e.stopPropagation()
 
         const oldScale = model.canvasData.scale;
@@ -155,7 +158,7 @@ export const initScale = (model: ModelType, stage: Canvas) => {
     });
 }
 
-export const initMultiSelect = (model: ModelType, stage: Canvas) => {
+export const initMultiSelect = (model: Model, stage: Canvas) => {
 
     if (model.hotKey['Space']) return
 
@@ -208,8 +211,9 @@ export const initMultiSelect = (model: ModelType, stage: Canvas) => {
     })
 }
 
-export const initHotKeys = (model: ModelType, stage: Canvas) => {
-    stage.on('mousedown', e => {
+const INPUT_NODELIST = ['TEXTAREA', 'INPUT']
+export const initHotKeys = (model: Model, stage: Canvas) => {
+    stage.on('mousedown', (e: InteractivePointerEvent) => {
         e.preventDefault()
 
         switch (e.button) {
@@ -218,7 +222,7 @@ export const initHotKeys = (model: ModelType, stage: Canvas) => {
         }
     })
 
-    stage.on('mouseup', e => {
+    stage.on('mouseup', (e: InteractivePointerEvent) => {
         switch (e.button) {
             case EVT_LEFTCLICK: model.setHotKey('LeftMouseDown', false)
         }
@@ -227,6 +231,7 @@ export const initHotKeys = (model: ModelType, stage: Canvas) => {
     window.addEventListener('keydown', e => {
         switch (e.code) {
             case 'Space':
+                if (INPUT_NODELIST.includes(e.target.nodeName)) return
                 e.preventDefault()
                 model.setHotKey(e.code, true)
         }
@@ -235,10 +240,11 @@ export const initHotKeys = (model: ModelType, stage: Canvas) => {
     window.addEventListener('keyup', e => {
         switch (e.code) {
             case 'Space':
+                if (INPUT_NODELIST.includes(e.target.nodeName)) return
                 e.preventDefault()
                 model.setHotKey(e.code, false)
         }
     })
 }
 
-export const initDataChangeListener = (model: ModelType) => { }
+export const initDataChangeListener = (model: Model) => { }

@@ -1,24 +1,18 @@
 import { observer } from "mobx-react";
 import styles from "./style.less";
-import * as G from "@antv/g";
 import React from "react";
 import { FlowContext } from "../../Context";
-import Model from "../../Model";
-import { EVT_RIGHTCLICK, STAGE_CLASS_NAME } from "../../constants";
-
+import { STAGE_ID } from "../../constants";
 @observer
 class RightClickPanel extends React.Component<
-  {
-    stage?: G.Canvas;
-    extra?: (context: Model) => React.ReactNode;
-  },
+  {},
   { pos: { x: number; y: number } }
 > {
   static contextType = FlowContext;
 
   initStageEvent = () => {
     document
-      .querySelector("#" + STAGE_CLASS_NAME)
+      .querySelector("#" + STAGE_ID)
       ?.addEventListener("contextmenu", (e) => {
         e.preventDefault();
         this.context.buffer.rightClickPanel.visible = true;
@@ -39,7 +33,7 @@ class RightClickPanel extends React.Component<
     });
   }
 
-  constructor(props) {
+  constructor(props: any) {
     super(props);
 
     this.state = {
@@ -49,10 +43,6 @@ class RightClickPanel extends React.Component<
       },
     };
   }
-
-  dele() {}
-
-  moveToTop() {}
 
   render() {
     if (!this.context.buffer.rightClickPanel.visible) return <></>;
@@ -78,4 +68,4 @@ export const getRightClickPanel = (
   });
 };
 
-export default RightClickPanel;
+export { RightClickPanel };

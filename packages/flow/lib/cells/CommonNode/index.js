@@ -1,8 +1,15 @@
 import { __extends, __assign } from '../../node_modules/tslib/tslib.es6.js';
-import { Rect, Text, Circle } from '@antv/react-g';
-import Interactor from '../../scaffold/Interacotr.js';
-import Node from '../Node.js';
+import '../../components/Arrow.js';
 import React from 'react';
+import 'mobx-react';
+import { Interactor } from '../../components/Interacotr.js';
+import '../../components/Port.js';
+import { Rect, Text, Circle } from '@antv/react-g';
+import '../../node_modules/react-dom/index.js';
+import '../../Context.js';
+import '../../components/RightClickPanel/index.js';
+import '../../components/SelectBoundsRect.js';
+import Node from '../Node.js';
 
 var Port = Interactor.Port;
 var CommonNode = /** @class */ (function (_super) {

@@ -27,5 +27,11 @@ var isRectsInterSect = function (boundsA, boundsB) {
 var isVector2d = function (source) {
     return typeof source !== 'string';
 };
+var callIfFn = function (exp) {
+    if (lodash.exports.isFunction(exp))
+        return exp();
+    else
+        return exp;
+};
 
-export { arrayMove, findIndex, isRectsInterSect, isVector2d, remove };
+export { arrayMove, callIfFn, findIndex, isRectsInterSect, isVector2d, remove };

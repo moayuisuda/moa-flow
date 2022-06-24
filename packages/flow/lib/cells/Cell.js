@@ -1,10 +1,9 @@
 import { __extends } from '../node_modules/tslib/tslib.es6.js';
-import React from 'react';
 import { Group } from '@antv/react-g';
-import { FlowContext } from '../Context.js';
 import '../node_modules/lodash/lodash.js';
 import { observer } from 'mobx-react';
-import { titleCase } from '../utils/string.js';
+import React from 'react';
+import { FlowContext } from '../Context.js';
 import { l as lodash } from '../_virtual/lodash.js';
 
 // D: data, S: state, P: props
@@ -30,33 +29,11 @@ var Cell = /** @class */ (function (_super) {
         }
         return lodash.exports.cloneDeep(re);
     };
-    Cell.prototype.setData = function (data) {
-        this.context;
-        this.context.setCellData(this.props.data.id, data);
+    Cell.prototype.setData = function (data, rec) {
+        if (rec === void 0) { rec = true; }
+        this.context.setCellData(this.props.data.id, data, rec);
     };
     Cell.prototype.componentDidMount = function () {
-        var _this = this;
-        [
-            "mouseenter",
-            "mouseleave",
-            "mousedown",
-            "mouseup",
-            "dblclick",
-            "click",
-        ].forEach(function (eventName) {
-            _this.wrapperRef.current.on(eventName, function (e) {
-                var instanceEventFn = _this["on".concat(titleCase(eventName))];
-                instanceEventFn && instanceEventFn.call(_this, e);
-                _this.context.sendEvent({
-                    type: "cell:".concat(eventName),
-                    data: {
-                        e: e,
-                        cellData: _this.props.data,
-                        cell: _this,
-                    },
-                });
-            });
-        });
         this.onMount && this.onMount();
     };
     Cell.prototype.getData = function () {
@@ -69,7 +46,8 @@ var Cell = /** @class */ (function (_super) {
         var _this = this;
         return (React.createElement(Group, { ref: function (ref) {
                 _this.wrapperRef.current = ref;
-            } }, this.content()));
+            } }, !this.context.pendingRender &&
+            (lodash.exports.isUndefined(this.props.data.visible) || this.props.data.visible) ? (React.createElement(Group, null, this.content())) : (React.createElement(React.Fragment, null))));
     };
     Cell.contextType = FlowContext;
     Cell.metaData = { id: "" };

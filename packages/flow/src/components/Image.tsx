@@ -51,6 +51,4 @@ import React from "react";
 
 // export default Image;
 
-export default () => {
-  <></>;
-};
+export class Image {}

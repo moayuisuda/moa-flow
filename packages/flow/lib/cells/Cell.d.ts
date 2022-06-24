@@ -3,6 +3,7 @@ import { FlowContext } from "../Context";
 import Model from "../Model";
 export declare type CellDataType = {
     id: string;
+    visible?: boolean;
     cellType: string;
     component: string;
     [key: string]: any;
@@ -25,7 +26,7 @@ declare abstract class Cell<D, S = {}, P = {}> extends React.Component<{
     constructor(props: any, context: Model);
     static regist(name: string, model: Model): void;
     static getMetaData(): {};
-    setData(data: any): void;
+    setData(data: any, rec?: boolean): void;
     componentDidMount(): void;
     getData(): ({
         data: D & CellDataType;

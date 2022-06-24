@@ -1,26 +1,33 @@
-import Cell from "./Cell";
-import * as G from "@antv/g";
-import { CellDataType } from "./Cell";
-import { PortDataType } from "../scaffold/Port";
-import React from "react";
+import Cell, { CellDataType } from "./Cell";
 import { NodeDataType } from "./Node";
 import FlowModel from "../Model";
-import { Vector2d } from "../types/common";
+import { Dir, Vector2d } from "../typings/common";
+import { Arrow, PortDataType } from "../components";
+import React from "react";
+import * as G from "@antv/g";
 export declare type EdgeDataType = {
     source: string | Vector2d;
     target: string | Vector2d;
     label: string;
     verticies?: Vector2d[];
 } & CellDataType;
+declare type Head = React.ReactNode | boolean;
 declare abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
     static metaData: any;
     labelRef: React.RefObject<G.Group>;
-    protected bazier: boolean;
-    protected arrow: boolean;
+    arrowRef: React.RefObject<Arrow>;
+    protected bazier: boolean | (() => boolean);
+    protected startHead: Head | (() => Head);
+    protected endhead: Head | (() => Head);
+    protected lineDash: [number, number] | (() => [number, number]);
+    protected animate: boolean | (() => boolean);
+    pathInstance: G.Path;
     isMountEvents: boolean;
     constructor(props: {
         data: EdgeDataType;
     }, context: FlowModel);
+    initAnimate(): void;
+    componentDidMount(): void;
     protected lineStyle({ isSelect }: {
         isSelect: boolean;
     }): {
@@ -30,8 +37,8 @@ declare abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & 
     };
     protected formatVerticied: (verticies: Vector2d[]) => Vector2d[];
     getLinkPortsData: () => {
-        source: PortDataType | Vector2d;
-        target: PortDataType | Vector2d;
+        source: Vector2d | PortDataType;
+        target: Vector2d | PortDataType;
     };
     getAnchors: () => {
         source: any;
@@ -47,19 +54,22 @@ declare abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & 
     private vectorsToPoints;
     labelContent(): JSX.Element;
     labelStyle(): {};
-    labelPosition(): {
+    labelPosition(): G.Point | {
         x: number;
         y: number;
-    };
+    } | null;
     protected labelRender(): JSX.Element;
     labelFormatter(label: string): string;
     isLinking(): any;
+    getBazierDir(): {
+        source: Dir;
+        target: Dir;
+    };
     getBazierPath(): string;
+    getPolylinePath(): string;
+    getPath(): string;
     lineExtra: () => JSX.Element;
-    protected edgeRender({ points, isLinking, }: {
-        points: [number, number][];
-        isLinking: boolean;
-    }): JSX.Element;
+    protected edgeRender(): JSX.Element;
     content(): JSX.Element;
 }
 export default Edge;

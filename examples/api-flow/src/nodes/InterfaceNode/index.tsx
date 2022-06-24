@@ -1,0 +1,149 @@
+import type { ModelType } from "@ali/flow-infra-g";
+import { ConsumerBridge, Graph, Portal } from "@ali/flow-infra-g";
+import { Modal } from "antd";
+import { Context } from "../../Context";
+import NodeConfigForm from "./NodeConfigForm";
+import BaseNode, { STATUS_ENUM } from "../BaseNode";
+import { InterfaceNodeDataType } from "./types";
+import { createRef } from "react";
+
+const { Rect, Text, Group } = Graph;
+
+class InterfaceNode extends BaseNode<
+  InterfaceNodeDataType,
+  { modalVisible: boolean }
+> {
+  static metaData = {
+    interface: "",
+    inputParams: [],
+    type: "",
+  };
+
+  formRef: React.RefObject<{
+    submit: Function;
+  }>;
+
+  constructor(props: { data: InterfaceNodeDataType }, context: ModelType) {
+    super(props, context);
+
+    this.state = {
+      modalVisible: false,
+    };
+
+    this.formRef = createRef();
+  }
+
+  // @TODO 执行实际的接口请求
+  excute = () => {
+    const data = this.props.data;
+
+    return fetch(this.getUrl(data.interface), {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(this.getParams()),
+    }).then((res) => res.json());
+  };
+
+  // @TODO 把inputParams转化为接口的参数
+  getParams() {
+    const re = {} as {
+      [key: string]: any;
+    };
+
+    const inputParams = this.getData().inputParams;
+    inputParams.forEach((param) => {
+      if (param.assignmentType === "variable") {
+        const nodeData = this.context.getCellData(
+          param.value
+        ) as InterfaceNodeDataType;
+        re[param.name] = nodeData.cacheData;
+      } else re[param.name] = param.value;
+    });
+
+    return re;
+  }
+
+  // 转化为真实url
+  getUrl(interfaceArr: string[]) {
+    const interfaceSchema = this.context.extra.interfaceSchemaRef.current;
+    const { domain, apis } = interfaceSchema;
+    const protocols = apis?.[interfaceArr.join('.')]?.protocols;
+    const url = protocols.http?.path;
+    return `${domain}${url}`;
+  }
+
+  view() {
+    const { data } = this.props;
+    const { width } = this;
+
+    const position = this.getPosition();
+
+    return (
+      <ConsumerBridge context={Context}>
+        {(InterfaceContext) => (
+          <Group>
+            <Text
+              x={20}
+              y={70}
+              textBaseline="middle"
+              text={"status: " + STATUS_ENUM[data.status]}
+            />
+
+            <Portal>
+              <Modal
+                title={data.id}
+                destroyOnClose
+                visible={this.state.modalVisible}
+                width={800}
+                onOk={async () => {
+                  await this.formRef.current?.submit();
+                  this.setState({
+                    modalVisible: false,
+                  });
+                }}
+                onCancel={() => {
+                  this.setState({
+                    modalVisible: false,
+                  });
+                }}
+              >
+                <NodeConfigForm
+                  ref={this.formRef}
+                  id={data.id}
+                  interfaceSchema={InterfaceContext.interfaceSchema}
+                />
+              </Modal>
+            </Portal>
+
+            <Group
+              // @ts-ignore
+              x={width}
+              cursor="pointer"
+              onClick={() => this.setState({ modalVisible: true })}
+            >
+              <Rect
+                width={40}
+                height={40}
+                radius={[0, 4, 4, 0]}
+                fill={this.context.color.active}
+              ></Rect>
+              <Text
+                y={20}
+                x={8}
+                textBaseline="middle"
+                fill="white"
+                text={"Edit"}
+                fontSize={12}
+              />
+            </Group>
+          </Group>
+        )}
+      </ConsumerBridge>
+    );
+  }
+}
+
+export default InterfaceNode;

@@ -16,15 +16,23 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "lerna": "^4.0.0"
+    "buffer": "^6.0.3",
+    "crypto-browserify": "^3.12.0",
+    "lerna": "^4.0.0",
+    "path-browserify": "^1.0.1",
+    "process": "^0.11.10",
+    "react-app-rewire-alias": "^1.1.7",
+    "stream-browserify": "^3.0.0"
   },
   "private": true,
   "workspaces": [
     "packages/*",
     "examples/*"
   ],
-  "dependencies": {},
   "publishConfig": {
     "registry": "https://registry.npm.alibaba-inc.com"
+  },
+  "dependencies": {
+    "@alipay/connect-util": "^0.0.0-S29001104120.0"
   }
 }
