@@ -56,6 +56,7 @@ class InterfaceNode extends BaseNode<
     const inputParams = this.getData().inputParams;
     inputParams.forEach((param) => {
       if (param.assignmentType === "variable") {
+        console.log('moa-flow', param.value)
         const nodeData = this.context.getCellData(
           param.value
         ) as InterfaceNodeDataType;

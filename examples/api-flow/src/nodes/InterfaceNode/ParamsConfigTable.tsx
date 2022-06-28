@@ -113,27 +113,29 @@ const ParamsConfigTable = ({
         )
         else {
           const interfaceSchema = context.extra.interfaceSchemaRef.current;
-          type IDef = { definition: { title: string; type: string; properties: { [key: string]: IDef } } };
+          type IDef = { definition: { title: string; type: string; properties: { [key: string]: IDef } }; title: string; id: string; type: string;};
           // (def: IDef) => { value: string; label: string; children: any[] | undefined }[]
           const getOutputParam: any = (def: IDef) => {
+            console.log('moa-flow', 'def.definition', def, def.definition)
             return {
-              value: def.definition.title,
-              label: def.definition.title,
-              children: ['object', 'array'].includes(def.definition.type) ? Object.keys(def.definition?.properties || {}).map(childPropertyName => {
+              value: def.definition?.title || def.id,
+              label: def.definition?.title || def.title,
+              children: ['object', 'array'].includes(def.definition?.type || def.type) ? Object.keys(def.definition?.properties || {}).map(childPropertyName => {
                 const childProperty = def.definition?.properties?.[childPropertyName];
                 return getOutputParam(childProperty);
               }) : undefined
             }
           }
-          const options = linkNodes.filter(node => !!node.interfaceArr).map(nodeData => {
+          const options = linkNodes.filter(node => !!node.interface).map(nodeData => {
             const { interface: interfaceArr } = nodeData;
             const outputSchema = getInterfaceByName({ schema: interfaceSchema, name: interfaceArr.join('.') }).outputParam;
             return {
               ...getOutputParam(outputSchema),
               value: nodeData.id,
-              label: `${nodeData.title}(${interfaceArr.join('.')})`,
+              label: `${nodeData.title}`,
             }
           });
+          console.log('moa-flow', linkNodes, options);
           return <Cascader options={options} onChange={(e) => handleValueChange('value', path, e)} />
         }
       },
