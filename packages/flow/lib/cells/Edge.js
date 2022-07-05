@@ -25,7 +25,7 @@ var Edge = /** @class */ (function (_super) {
         var _this = _super.call(this, props, context) || this;
         _this.bazier = false;
         _this.startHead = false;
-        _this.endhead = true;
+        _this.endHead = true;
         _this.lineDash = [0, 0];
         _this.animate = false;
         _this.pathInstance = new G.Path();
@@ -242,7 +242,7 @@ var Edge = /** @class */ (function (_super) {
         var color = this.context.color;
         var lineProps = __assign({ lineCap: "round", lineJoin: "round", lineWidth: 3, stroke: color.deepGrey }, this.lineStyle({ isSelect: this.isSelect() }));
         return (React.createElement(Group, null,
-            React.createElement(Arrow, __assign({ ref: this.arrowRef }, lineProps, { path: this.getPath(), startHead: callIfFn(this.startHead), endHead: callIfFn(this.endhead), lineDash: callIfFn(this.lineDash) }))));
+            React.createElement(Arrow, __assign({ ref: this.arrowRef }, lineProps, { path: this.getPath(), startHead: callIfFn(this.startHead), endHead: callIfFn(this.endHead), lineDash: callIfFn(this.lineDash) }))));
     };
     Edge.prototype.content = function () {
         return (React.createElement(Interactor, { id: this.props.data.id, draggable: false },

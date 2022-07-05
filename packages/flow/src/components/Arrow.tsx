@@ -1,11 +1,12 @@
-import type { DisplayObject, BaseStyleProps } from "@antv/g";
-import * as G from "@antv/g";
-import { isBoolean } from "lodash";
+import type * as G from "@antv/g";
+import type { DisplayObject } from "@antv/g";
+import { isBoolean } from "@antv/g";
 import { vec3 } from "gl-matrix";
-import { Path, Line, Polyline, Group } from "@antv/react-g";
 import React, { Component } from "react";
+import { Group, Path } from "@antv/react-g";
 
-type ArrowHead = boolean | DisplayObject;
+type ArrowHead = boolean | React.ReactNode;
+
 export interface ArrowStyleProps extends React.ReactElement {
   path: string;
   startHead?: ArrowHead;
@@ -16,22 +17,12 @@ export interface ArrowStyleProps extends React.ReactElement {
   strokeOpacity?: number;
 }
 
-const ARROW_SIZE = 16;
+const DEFAULT_ARROW_SIZE = 16;
 
-/**
- * support 3 types of arrow line:
- * 1. Line
- * 2. Polyline
- * 3. Path
- *
- * support 2 types of arrow head:
- * 1. default(Path)
- * 2. custom
- */
 export class Arrow extends Component<ArrowStyleProps, {}> {
   startRef: React.MutableRefObject<DisplayObject | null>;
   endRef: React.MutableRefObject<DisplayObject | null>;
-  bodyRef: React.MutableRefObject<DisplayObject | null>;
+  bodyRef: React.MutableRefObject<G.Path | null>;
 
   constructor(props: ArrowStyleProps) {
     super(props);
@@ -50,19 +41,18 @@ export class Arrow extends Component<ArrowStyleProps, {}> {
   }
 
   setHeadTransform() {
-    console.log("get");
     const { startHead, endHead } = this.props;
 
-    startHead &&
+    if (startHead)
       this.transformArrowHead(this.startRef.current as DisplayObject, true);
-
-    endHead &&
+    if (endHead)
       this.transformArrowHead(this.endRef.current as DisplayObject, false);
   }
 
   componentDidMount() {
     this.setHeadTransform();
   }
+
   componentDidUpdate() {
     this.setHeadTransform();
   }
@@ -86,35 +76,29 @@ export class Arrow extends Component<ArrowStyleProps, {}> {
   }
 
   getCenter() {
-    const points = (this.bodyRef.current as G.Polyline).getPoint(0.5);
+    const points = (this.bodyRef.current as G.Path).getPoint(0.5);
     return points;
   }
 
-  /**
-   * transform arrow head according to arrow line
-   */
+  // transform arrow head to match line tangent
   private transformArrowHead(head: DisplayObject, isStart: boolean) {
-    let position = vec3.create();
     let rad = 0;
     let x1 = 0;
     let x2 = 0;
     let y1 = 0;
     let y2 = 0;
 
-    {
-      const [p1, p2] = this.getTangent(this.bodyRef.current as G.Path, isStart);
-      x1 = p1[0];
-      y1 = p1[1];
-      x2 = p2[0];
-      y2 = p2[1];
-      console.log("p1p2", p1, p2);
-    }
+    const [p1, p2] = this.getTangent(this.bodyRef.current as G.Path, isStart);
+    x1 = p1[0];
+    y1 = p1[1];
+    x2 = p2[0];
+    y2 = p2[1];
 
     const x = x1 - x2;
     const y = y1 - y2;
     rad = Math.atan2(y, x);
-    position = vec3.fromValues(x2, y2, 0);
 
+    const position = vec3.fromValues(x2, y2, 0);
     head.setLocalPosition(position);
     head.setLocalEulerAngles((rad * 180) / Math.PI);
   }
@@ -124,6 +108,7 @@ export class Arrow extends Component<ArrowStyleProps, {}> {
   }
 
   private getDefaultArrowHead() {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { startHead, endHead, ...others } = this.props;
     const { sin, cos, PI } = Math;
     return (
@@ -131,9 +116,11 @@ export class Arrow extends Component<ArrowStyleProps, {}> {
         {...others}
         lineDash={undefined}
         fill={this.props.stroke}
-        path={`M${ARROW_SIZE * cos(PI / 6)},${ARROW_SIZE * sin(PI / 6)} L0,0 L${
-          ARROW_SIZE * cos(PI / 6)
-        },-${ARROW_SIZE * sin(PI / 6)} Z`}
+        path={`M${DEFAULT_ARROW_SIZE * cos(PI / 6)},${
+          DEFAULT_ARROW_SIZE * sin(PI / 6)
+        } L0,0 L${DEFAULT_ARROW_SIZE * cos(PI / 6)},-${
+          DEFAULT_ARROW_SIZE * sin(PI / 6)
+        } Z`}
       />
     );
   }

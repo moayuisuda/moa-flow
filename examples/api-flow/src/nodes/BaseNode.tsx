@@ -189,11 +189,16 @@ class BaseNode<Data = {}, State = {}> extends Node<
               height={height}
               shadowColor="rgba(0,0,0,0.1)"
               shadowBlur={10}
-              radius={10}
+              radius={[10, 0, 10, 10]}
               {...this.getFill()}
               {...this.getStroke()}
             />
-            <Rect width={width} height={40} fill={color.deepGrey} radius={4} />
+            <Rect
+              width={width}
+              height={40}
+              fill={color.deepGrey}
+              radius={[10, 0, 0, 0]}
+            />
             <Text
               x={10}
               y={20}

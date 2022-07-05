@@ -2,9 +2,10 @@ import Cell, { CellDataType } from "./Cell";
 import { NodeDataType } from "./Node";
 import FlowModel from "../Model";
 import { Dir, Vector2d } from "../typings/common";
-import { Arrow, PortDataType } from "../components";
+import { PortDataType } from "../components";
 import React from "react";
 import * as G from "@antv/g";
+import { Arrow } from "../components";
 export declare type EdgeDataType = {
     source: string | Vector2d;
     target: string | Vector2d;
@@ -18,7 +19,7 @@ declare abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & 
     arrowRef: React.RefObject<Arrow>;
     protected bazier: boolean | (() => boolean);
     protected startHead: Head | (() => Head);
-    protected endhead: Head | (() => Head);
+    protected endHead: Head | (() => Head);
     protected lineDash: [number, number] | (() => [number, number]);
     protected animate: boolean | (() => boolean);
     pathInstance: G.Path;

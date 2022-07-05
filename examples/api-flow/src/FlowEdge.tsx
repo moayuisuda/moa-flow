@@ -1,4 +1,5 @@
-import { Edge, Vector2d } from "@ali/flow-infra-g";
+import { Edge, Vector2d, Graph } from "@ali/flow-infra-g";
+import { ReactNode } from "react";
 import { InterfacePortDataType } from "./nodes/InterfaceNode/types";
 
 export default class FlowEdge extends Edge {
@@ -8,6 +9,9 @@ export default class FlowEdge extends Edge {
     return true;
   };
 
+  protected startHead: ReactNode | (() => ReactNode) = (
+    <Graph.Rect width={100} height={100} stroke="black" />
+  );
   // 业务上层方法，根据port类型来确定贝塞尔曲线的弯曲方向
   getInterfaceDir(port: string | Vector2d): [number, number] | undefined {
     if (typeof port === "string") {

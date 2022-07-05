@@ -3,7 +3,7 @@ import { NodeDataType } from "./Node";
 import FlowModel from "../Model";
 import { Group, Text, Rect } from "@antv/react-g";
 import { Dir, Vector2d } from "../typings/common";
-import { Interactor, Arrow, PortDataType } from "../components";
+import { Interactor, PortDataType } from "../components";
 import React from "react";
 import { isVector2d, lineCenter, titleCase } from "../utils";
 import { InteractivePointerEvent } from "@antv/g";
@@ -11,6 +11,7 @@ import * as G from "@antv/g";
 import type { DisplayObject } from "@antv/g";
 import { callIfFn } from "../utils/util";
 import { autorun } from "mobx";
+import { Arrow } from "../components";
 
 export type EdgeDataType = {
   source: string | Vector2d;
@@ -31,7 +32,7 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
 
   protected bazier: boolean | (() => boolean) = false;
   protected startHead: Head | (() => Head) = false;
-  protected endhead: Head | (() => Head) = true;
+  protected endHead: Head | (() => Head) = true;
   protected lineDash: [number, number] | (() => [number, number]) = [0, 0];
   protected animate: boolean | (() => boolean) = false;
 
@@ -350,7 +351,7 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
           {...lineProps}
           path={this.getPath()}
           startHead={callIfFn(this.startHead)}
-          endHead={callIfFn(this.endhead)}
+          endHead={callIfFn(this.endHead)}
           lineDash={callIfFn(this.lineDash)}
         />
       </Group>

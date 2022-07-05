@@ -1,7 +1,7 @@
+import type * as G from "@antv/g";
 import type { DisplayObject } from "@antv/g";
-import * as G from "@antv/g";
 import React, { Component } from "react";
-declare type ArrowHead = boolean | DisplayObject;
+declare type ArrowHead = boolean | React.ReactNode;
 export interface ArrowStyleProps extends React.ReactElement {
     path: string;
     startHead?: ArrowHead;
@@ -11,30 +11,17 @@ export interface ArrowStyleProps extends React.ReactElement {
     opacity?: number;
     strokeOpacity?: number;
 }
-/**
- * support 3 types of arrow line:
- * 1. Line
- * 2. Polyline
- * 3. Path
- *
- * support 2 types of arrow head:
- * 1. default(Path)
- * 2. custom
- */
 export declare class Arrow extends Component<ArrowStyleProps, {}> {
     startRef: React.MutableRefObject<DisplayObject | null>;
     endRef: React.MutableRefObject<DisplayObject | null>;
-    bodyRef: React.MutableRefObject<DisplayObject | null>;
+    bodyRef: React.MutableRefObject<G.Path | null>;
     constructor(props: ArrowStyleProps);
-    getArrowHead(head: ArrowHead, isStart: boolean): JSX.Element | ArrowHead | undefined;
+    getArrowHead(head: ArrowHead, isStart: boolean): ArrowHead;
     setHeadTransform(): void;
     componentDidMount(): void;
     componentDidUpdate(): void;
     render(): JSX.Element;
-    getCenter(): G.Point;
-    /**
-     * transform arrow head according to arrow line
-     */
+    getCenter(): G.Point | null;
     private transformArrowHead;
     private getTangent;
     private getDefaultArrowHead;
