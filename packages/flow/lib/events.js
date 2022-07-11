@@ -7,7 +7,7 @@ import { l as lodash } from './_virtual/lodash.js';
 var initClearState = function (model, stage) {
     stage.on('mousedown', function (e) {
         if (e.button === EVT_LEFTCLICK) {
-            model.buffer.rightClickPanel.visible = false;
+            model.contextMenuVisible = false;
         }
         if (!model.buffer.select.isSelecting && e.button === EVT_LEFTCLICK)
             model.clearSelect();
@@ -53,7 +53,7 @@ var initDrag = function (model, stage) {
         };
         if (model.hotKey["Space"] && model.hotKey['LeftMouseDown']) {
             // stage并不受scale的影响，不用处理
-            model.setStagePosition(model.x() + movement.x, model.y() + movement.y);
+            model.setStagePosition(model.x + movement.x, model.y + movement.y);
         }
         if (select.isSelecting) {
             // if (stage.isListening()) stage.listening(false);
@@ -61,8 +61,8 @@ var initDrag = function (model, stage) {
                 var cellData = model.getCellData(id);
                 if (cellData.cellType === 'node') {
                     model.setCellData(cellData.id, {
-                        x: cellData.x + movement.x / model.scale(),
-                        y: cellData.y + movement.y / model.scale(),
+                        x: cellData.x + movement.x / model.scale,
+                        y: cellData.y + movement.y / model.scale,
                     });
                 }
             });
@@ -98,8 +98,8 @@ var initScale = function (model, stage) {
         var oldScale = model.canvasData.scale;
         var pointer = e.canvas;
         var mousePointTo = {
-            x: (pointer.x - model.x()) / oldScale,
-            y: (pointer.y - model.y()) / oldScale,
+            x: (pointer.x - model.x) / oldScale,
+            y: (pointer.y - model.y) / oldScale,
         };
         // how to scale? Zoom in? Or zoom out?
         var direction = e.deltaY > 0 ? 1 : -1;

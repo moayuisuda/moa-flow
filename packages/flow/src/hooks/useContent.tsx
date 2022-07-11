@@ -18,7 +18,6 @@ export const Content = (props: {
         <Group
           ref={(ref) => {
             //@TODO 看看為什麼會重複觸發
-            console.log("ref");
             props.wrapperRef.current = ref;
           }}
         >

@@ -2,6 +2,7 @@ import type { ModelType, NodeDataType, PortDataType } from "@ali/flow-infra-g";
 import { ConsumerBridge, Graph, Interactor, Node } from "@ali/flow-infra-g";
 import { message } from "antd";
 import { Context } from "../Context";
+import { HANG_FLAG } from "../constants";
 
 const { Rect, Text, Circle, Group } = Graph;
 const { Port } = Interactor;
@@ -14,8 +15,10 @@ export type BasePortDataType = PortDataType & {
 export enum STATUS_ENUM {
   WAIT,
   PROCESS,
+
   SUCCESS,
   ERROR,
+  HANG,
 }
 
 export type BaseNodeDataType = {
@@ -55,6 +58,20 @@ class BaseNode<Data = {}, State = {}> extends Node<
     return this.props.data.cacheData;
   };
 
+  checkHang = () => {
+    // 如果所有连接的结点都是hang的，那当前的结点也hang
+    let isAllPreHang = true;
+    const inNodes = this.getInNodes();
+    if (inNodes.length === 0) return false;
+
+    inNodes.forEach((id) => {
+      const output = (this.context.getCell(id) as BaseNode).output();
+      if (output !== HANG_FLAG) isAllPreHang = false;
+    });
+
+    return isAllPreHang;
+  };
+
   // 执行前置依赖节点
   processPreNode = (start?: string) => {
     const data = this.props.data;
@@ -88,8 +105,26 @@ class BaseNode<Data = {}, State = {}> extends Node<
       this.setData({
         status: STATUS_ENUM.PROCESS,
       });
+
+      // 如果这个结点本身已经从前置节点推导为hang结点，就不excute了
+      const isHang = this.checkHang();
+      if (isHang) {
+        this.setData({
+          status: STATUS_ENUM.HANG,
+        });
+        this.setData({ cacheData: HANG_FLAG });
+        return;
+      }
+
       const resData = await this.excute();
       this.setData({ cacheData: resData }, false);
+
+      if (resData === HANG_FLAG) {
+        this.setData({
+          status: STATUS_ENUM.HANG,
+        });
+        return;
+      }
       this.setData({
         status: STATUS_ENUM.SUCCESS,
       });
@@ -157,6 +192,7 @@ class BaseNode<Data = {}, State = {}> extends Node<
       [STATUS_ENUM.PROCESS]: color.grey,
       [STATUS_ENUM.ERROR]: color.error,
       [STATUS_ENUM.SUCCESS]: color.success,
+      [STATUS_ENUM.HANG]: color.deepGrey,
     };
 
     return { fill: fillMap[this.props.data.status] };

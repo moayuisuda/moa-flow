@@ -2,7 +2,7 @@ import { Button, Divider, message, Space } from "antd";
 import "antd/dist/antd.css";
 import { useEffect, useRef, useState } from "react";
 import type { ModelType } from "@ali/flow-infra-g";
-import { Canvas, Flow, RightClickPanel } from "@ali/flow-infra-g";
+import { Canvas, Flow, ContextMenu } from "@ali/flow-infra-g";
 
 import ProcessNode from "./nodes/ProcessNode";
 import InterfaceNode from "./nodes/InterfaceNode";
@@ -43,7 +43,7 @@ function App() {
     };
 
     // 将默认连线设置为FlowEdge
-    model.setLinkEdge("FlowEdge");
+    model.linkEdge = "FlowEdge";
 
     setNodeList(
       Array.from(modelRef.current?.componentsMap as Map<string, any>).filter(
@@ -84,8 +84,7 @@ function App() {
       setInterfaceSchema({
         ...schema,
         domain,
-      }
-      );
+      });
     }
   };
 
@@ -140,85 +139,94 @@ function App() {
           onSubmit={getInterfaceSchema}
         />
 
-        <Flow multiSelect modelRef={modelRef} grid={40} canvasData={testData}>
+        <Flow
+          width={window.innerWidth}
+          height={window.innerHeight}
+          multiSelect
+          modelRef={modelRef}
+          grid={40}
+          canvasData={testData}
+        >
           <Context.Provider value={{ interfaceSchema }}>
             <Canvas />
           </Context.Provider>
 
-          <RightClickPanel>
-            {(context: ModelType) => {
-              return (
-                <Space direction="vertical">
-                  <Button
-                    onClick={() => {
-                      const { deleCell, selectCells } = context;
-                      deleCell(selectCells[0])
-                    }}>
-                    删除
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      const { getCellData, selectCells } = context;
-                      const cellData = getCellData(selectCells[0]);
-                      if (
-                        !(
-                          cellData &&
-                          nodeList
-                            .map(([nodeName]) => nodeName)
-                            .includes(cellData.component)
-                        )
-                      )
-                        message.info("请选择接口节点");
-                      else {
-                        message.info(`${cellData.title}开始执行`);
-                        process(cellData.id);
-                      }
-                    }}
-                  >
-                    执行此节点
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      const { getCell, selectCells } = context;
-                      const cellInstance = getCell(selectCells[0]);
+          <ContextMenu>
+            <Space direction="vertical">
+              <Button
+                onClick={() => {
+                  const { deleCell, selectCells } =
+                    modelRef.current as ModelType;
+                  deleCell(selectCells[0]);
+                }}
+              >
+                删除
+              </Button>
+              <Button
+                onClick={() => {
+                  const { getCellData, selectCells } =
+                    modelRef.current as ModelType;
+                  const cellData = getCellData(selectCells[0]);
+                  if (
+                    !(
+                      cellData &&
+                      nodeList
+                        .map(([nodeName]) => nodeName)
+                        .includes(cellData.component)
+                    )
+                  )
+                    message.info("请选择接口节点");
+                  else {
+                    message.info(`${cellData.title}开始执行`);
+                    process(cellData.id);
+                  }
+                }}
+              >
+                执行此节点
+              </Button>
+              <Button
+                onClick={() => {
+                  const { getCell, selectCells } =
+                    modelRef.current as ModelType;
+                  const cellInstance = getCell(selectCells[0]);
 
-                      if (
-                        !(
-                          cellInstance &&
-                          nodeList
-                            .map(([nodeName]) => nodeName)
-                            .includes(cellInstance.getData().component)
-                        )
-                      )
-                        message.info("请选择接口节点");
-                      else {
-                        cellInstance.process();
-                        message.info(
-                          `开始执行到${cellInstance.getData().title}`
-                        );
-                      }
+                  if (
+                    !(
+                      cellInstance &&
+                      nodeList
+                        .map(([nodeName]) => nodeName)
+                        .includes(cellInstance.getData().component)
+                    )
+                  )
+                    message.info("请选择接口节点");
+                  else {
+                    cellInstance.process();
+                    message.info(`开始执行到${cellInstance.getData().title}`);
+                  }
+                }}
+              >
+                以此节点为终点执行
+              </Button>
+              <Divider />
+              {nodeList.map(([name]) => {
+                return (
+                  <Button
+                    onClick={() => {
+                      const model = modelRef.current as ModelType;
+                      (modelRef.current as ModelType).addCell(name, {
+                        title: name,
+                        x: -model.x + model.width / 2,
+                        y: -model.y + model.height / 2,
+                      });
+                      model.contextMenuVisible = false;
                     }}
                   >
-                    以此节点为终点执行
+                    {`增添${name}节点`}
                   </Button>
-                  <Divider />
-                  {nodeList.map(([name]) => {
-                    return (
-                      <Button
-                        onClick={() => {
-                          context.addCell(name, {
-                            title: name,
-                          });
-                        }}
-                      >
-                        {`增添${name}节点`}
-                      </Button>
-                    );
-                  })}
-                </Space>
-              );
-            }}
-          </RightClickPanel>
+                );
+              })}
+            </Space>
+          </ContextMenu>
         </Flow>
       </Context.Provider>
     </div>

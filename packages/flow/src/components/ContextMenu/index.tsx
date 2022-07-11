@@ -4,7 +4,7 @@ import React from "react";
 import { FlowContext } from "../../Context";
 import { STAGE_ID } from "../../constants";
 @observer
-class RightClickPanel extends React.Component<
+class ContextMenu extends React.Component<
   {},
   { pos: { x: number; y: number } }
 > {
@@ -15,7 +15,7 @@ class RightClickPanel extends React.Component<
       .querySelector("#" + STAGE_ID)
       ?.addEventListener("contextmenu", (e) => {
         e.preventDefault();
-        this.context.buffer.rightClickPanel.visible = true;
+        this.context.contextMenuVisible = true;
 
         this.setState({
           pos: {
@@ -45,7 +45,7 @@ class RightClickPanel extends React.Component<
   }
 
   render() {
-    if (!this.context.buffer.rightClickPanel.visible) return <></>;
+    if (!this.context.contextMenuVisible) return <></>;
     return (
       <div
         style={{
@@ -54,18 +54,18 @@ class RightClickPanel extends React.Component<
         }}
         className={styles["toolbar"]}
       >
-        {this.props.children(this.context)}
+        {this.props.children}
       </div>
     );
   }
 }
 
-export const getRightClickPanel = (
+export const getContextMenu = (
   children: React.ReactNode[] | React.ReactNode
 ) => {
   return React.Children.toArray(children).find((item: { type }) => {
-    return item.type === RightClickPanel;
+    return item.type === ContextMenu;
   });
 };
 
-export { RightClickPanel };
+export { ContextMenu };

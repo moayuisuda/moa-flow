@@ -1,0 +1,1 @@
+export const HANG_FLAG = Symbol('HANG_FLAG')

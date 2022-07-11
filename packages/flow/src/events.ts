@@ -10,7 +10,7 @@ import { InteractivePointerEvent, Canvas } from '@antv/g';
 export const initClearState = (model: Model, stage: Canvas) => {
     stage.on('mousedown', (e: InteractivePointerEvent) => {
         if (e.button === EVT_LEFTCLICK) {
-            model.buffer.rightClickPanel.visible = false
+            model.contextMenuVisible = false
         }
         if (!model.buffer.select.isSelecting && e.button === EVT_LEFTCLICK)
             model.clearSelect();
@@ -73,8 +73,8 @@ export const initDrag = (model: Model, stage: Canvas) => {
         if (model.hotKey["Space"] && model.hotKey['LeftMouseDown']) {
             // stage并不受scale的影响，不用处理
             model.setStagePosition(
-                model.x() + movement.x,
-                model.y() + movement.y
+                model.x + movement.x,
+                model.y + movement.y
             );
         }
 
@@ -86,8 +86,8 @@ export const initDrag = (model: Model, stage: Canvas) => {
 
                 if (cellData.cellType === 'node') {
                     model.setCellData(cellData.id, {
-                        x: cellData.x + movement.x / model.scale(),
-                        y: cellData.y + movement.y / model.scale(),
+                        x: cellData.x + movement.x / model.scale,
+                        y: cellData.y + movement.y / model.scale,
                     });
                 }
             })
@@ -132,8 +132,8 @@ export const initScale = (model: Model, stage: Canvas) => {
         const pointer = e.canvas as Vector2d;
 
         var mousePointTo = {
-            x: (pointer.x - model.x()) / oldScale,
-            y: (pointer.y - model.y()) / oldScale,
+            x: (pointer.x - model.x) / oldScale,
+            y: (pointer.y - model.y) / oldScale,
         };
 
         // how to scale? Zoom in? Or zoom out?

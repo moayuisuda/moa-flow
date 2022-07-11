@@ -7,7 +7,7 @@ import {
   CellDataType,
   Flow,
   ModelType,
-  RightClickPanel,
+  ContextMenu,
 } from "@ali/flow-infra-g";
 
 // @ts-ignore
@@ -33,7 +33,7 @@ function App() {
     model.regist("BlockNode", BlockNode);
     model.regist("FlowEdge", FlowEdge);
 
-    model.setLinkEdge("FlowEdge");
+    model.linkEdge = "FlowEdge";
 
     setNodeList(
       Array.from(modelRef.current?.componentsMap as Map<string, any>).filter(
@@ -103,7 +103,7 @@ function App() {
       <Flow multiSelect modelRef={modelRef} grid={40} canvasData={testData}>
         <Canvas />
 
-        <RightClickPanel>
+        <ContextMenu>
           {(context: ModelType) => {
             return (
               <Space direction="vertical">
@@ -169,7 +169,7 @@ function App() {
               </Space>
             );
           }}
-        </RightClickPanel>
+        </ContextMenu>
       </Flow>
     </div>
   );

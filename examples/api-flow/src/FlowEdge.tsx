@@ -8,10 +8,7 @@ export default class FlowEdge extends Edge {
   animate = () => {
     return true;
   };
-
-  protected startHead: ReactNode | (() => ReactNode) = (
-    <Graph.Rect width={100} height={100} stroke="black" />
-  );
+  
   // 业务上层方法，根据port类型来确定贝塞尔曲线的弯曲方向
   getInterfaceDir(port: string | Vector2d): [number, number] | undefined {
     if (typeof port === "string") {

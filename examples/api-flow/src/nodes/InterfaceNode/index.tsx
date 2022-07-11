@@ -69,18 +69,17 @@ class InterfaceNode extends BaseNode<
 
   // 转化为真实url
   getUrl(interfaceArr: string[]) {
-    const interfaceSchema = this.context.extra.interfaceSchemaRef.current;
-    const { domain, apis } = interfaceSchema;
-    const protocols = apis?.[interfaceArr.join('.')]?.protocols;
-    const url = protocols.http?.path;
-    return `${domain}${url}`;
+    // const interfaceSchema = this.context.extra.interfaceSchemaRef.current;
+    // const { domain, apis } = interfaceSchema;
+    // const protocols = apis?.[interfaceArr.join('.')]?.protocols;
+    // const url = protocols.http?.path;
+    // return `${domain}${url}`;
+    return 'https://c7201052-b5c3-4023-a628-ad23c75a7819.mock.pstmn.io/test1'
   }
 
   view() {
     const { data } = this.props;
     const { width } = this;
-
-    const position = this.getPosition();
 
     return (
       <ConsumerBridge context={Context}>

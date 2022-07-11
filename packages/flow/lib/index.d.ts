@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import Flow from "./Flow";
 import Model from "./Model";
 import Cell from "./cells/Cell";
@@ -7,7 +6,7 @@ import Edge from "./cells/Edge";
 import { CellDataType } from "./cells/Cell";
 import { EdgeDataType } from "./cells/Edge";
 import { NodeDataType, NodePropsType } from './cells/Node';
-import { Portal, RightClickPanel, Interactor, Port, PortDataType, Arrow, ConsumerBridge } from "./components";
+import { Portal, ContextMenu, Interactor, Port, PortDataType, Arrow, ConsumerBridge } from "./components";
 import * as G from "@antv/react-g";
 import { autorun } from "mobx";
 import { Observer, observer } from "mobx-react";
@@ -379,8 +378,8 @@ declare const Graph: {
     }>) => import("react").ReactElement<import("@antv/g").TextStyleProps, import("@antv/g").Shape.TEXT>;
     Canvas: import("react").ForwardRefExoticComponent<Pick<G.CanvasProps, keyof G.CanvasProps> & import("react").RefAttributes<import("@antv/g").Canvas>>;
     reconcilor: ReactReconciler.Reconciler<import("@antv/g").Element<any, any>, import("@antv/g").Element<any, any>, import("@antv/g").Element<any, any>, any, any>;
-    render: (component: import("react").ReactNode, target: import("@antv/g").Element<any, any> | import("@antv/g").Canvas, callback?: (() => void) | null | undefined) => void;
+    render: (component: import("react").ReactNode, target: import("@antv/g").Canvas | import("@antv/g").Element<any, any>, callback?: (() => void) | null | undefined) => void;
 };
 export * from './hooks';
-export { Flow, Cell, Node, Edge, Port, Interactor, Portal, Graph, autorun, ConsumerBridge, RightClickPanel, Canvas, FlowContext, Observer, observer };
+export { Flow, Cell, Node, Edge, Port, Interactor, Portal, Graph, autorun, ConsumerBridge, ContextMenu, Canvas, FlowContext, Observer, observer };
 export type { ModelType, FlowInfraEventType, Vector2d, CellDataType, EdgeDataType, PortDataType, NodeDataType, NodePropsType };

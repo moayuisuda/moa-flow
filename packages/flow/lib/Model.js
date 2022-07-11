@@ -1,6 +1,6 @@
 import { __decorate, __assign } from './node_modules/tslib/tslib.es6.js';
 import './node_modules/lodash/lodash.js';
-import { action, observable, makeObservable } from 'mobx';
+import { action, observable, computed, makeObservable } from 'mobx';
 import { color } from './theme/style.js';
 import { findIndex, arrayMove, remove, isRectsInterSect } from './utils/util.js';
 import { l as lodash } from './_virtual/lodash.js';
@@ -22,30 +22,8 @@ var FlowModel = /** @class */ (function () {
         this.pendingRender = true;
         this._width = 1000;
         this._height = 600;
-        this.width = function (width) {
-            if (lodash.exports.isUndefined(width))
-                return _this._width;
-            else {
-                _this._width = width;
-                return width;
-            }
-        };
-        this.height = function (height) {
-            if (lodash.exports.isUndefined(height))
-                return _this._height;
-            else {
-                _this._height = height;
-                return height;
-            }
-        };
-        this.setSize = function (width, height) {
-            _this._width = width;
-            _this._height = height;
-        };
-        this.grid = 1;
-        this.setGrid = function (grid) {
-            _this.grid = grid;
-        };
+        this._grid = 40;
+        this._linkEdge = "Edge";
         this.refs = {
             stageRef: undefined,
         };
@@ -56,10 +34,6 @@ var FlowModel = /** @class */ (function () {
         };
         this.setHotKey = function (key, value) {
             _this.hotKey[key] = value;
-        };
-        this.linkEdge = "Edge";
-        this.setLinkEdge = function (name) {
-            _this.linkEdge = name;
         };
         this.getLinkingPort = function () {
             return _this.buffer.link.source;
@@ -73,7 +47,7 @@ var FlowModel = /** @class */ (function () {
         };
         // 一些中间状态，比如连线中的开始节点的暂存，不应该让外部感知
         this.buffer = {
-            rightClickPanel: {
+            contextMenu: {
                 visible: false,
             },
             drag: {
@@ -119,8 +93,6 @@ var FlowModel = /** @class */ (function () {
             var re = [];
             _this.canvasData.cells.forEach(function (cellData) {
                 if (cellData.cellType === "node") {
-                    console.log(_this.getLocalBBox(cellData.id));
-                    // 判断矩形是否相交
                     if (isRectsInterSect({
                         x: x,
                         y: y,
@@ -179,14 +151,14 @@ var FlowModel = /** @class */ (function () {
                 _this.selectCells = lodash.exports.union(_this.selectCells, ids);
             }
         };
+        this.clearSelect = function () {
+            _this.selectCells = [];
+        };
         this.canvasData = {
             scale: 1,
             x: 0,
             y: 0,
             cells: [],
-        };
-        this.clearSelect = function () {
-            _this.selectCells = [];
         };
         this.emitEvent = function (data) {
             var _a, _b;
@@ -194,10 +166,6 @@ var FlowModel = /** @class */ (function () {
         };
         this.setStageScale = function (scale) {
             _this.canvasData.scale = scale;
-        };
-        this.setStagePosition = function (x, y) {
-            _this.canvasData.x = x;
-            _this.canvasData.y = y;
         };
         this.insertRuntimeState = function (cellData) {
             cellData.$state = {
@@ -399,13 +367,9 @@ var FlowModel = /** @class */ (function () {
             });
             _this.clearLinkBuffer();
         };
-        this.scale = function (scale) {
-            if (lodash.exports.isUndefined(scale))
-                return _this.canvasData.scale;
-            else {
-                _this.setStageScale(scale);
-                return scale;
-            }
+        this.setStagePosition = function (x, y) {
+            _this.canvasData.x = x;
+            _this.canvasData.y = y;
         };
         this.getCell = function (id) {
             return _this.cellsMap.get(id);
@@ -444,8 +408,8 @@ var FlowModel = /** @class */ (function () {
          */
         this.getStageCursor = function (e) {
             return {
-                x: (e.canvas.x - _this.x()) / _this.scale(),
-                y: (e.canvas.y - _this.y()) / _this.scale(),
+                x: (e.canvas.x - _this.x) / _this.scale,
+                y: (e.canvas.y - _this.y) / _this.scale,
             };
         };
         makeObservable(this);
@@ -472,24 +436,100 @@ var FlowModel = /** @class */ (function () {
     FlowModel.prototype.pendRender = function () {
         this.pendingRender = true;
     };
-    // @action
-    FlowModel.prototype.x = function (x) {
-        if (lodash.exports.isUndefined(x))
+    Object.defineProperty(FlowModel.prototype, "width", {
+        get: function () {
+            return this._width;
+        },
+        set: function (width) {
+            this._width = width;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(FlowModel.prototype, "height", {
+        get: function () {
+            return this._height;
+        },
+        set: function (height) {
+            this._height = height;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(FlowModel.prototype, "size", {
+        get: function () {
+            return {
+                width: this.width,
+                height: this.height,
+            };
+        },
+        set: function (size) {
+            this.height = size.height;
+            this.width = size.width;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(FlowModel.prototype, "grid", {
+        get: function () {
+            return this._grid;
+        },
+        set: function (grid) {
+            this._grid = grid;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(FlowModel.prototype, "linkEdge", {
+        get: function () {
+            return this._linkEdge;
+        },
+        set: function (linkEdge) {
+            this._linkEdge = linkEdge;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(FlowModel.prototype, "scale", {
+        get: function () {
+            return this.canvasData.scale;
+        },
+        set: function (scale) {
+            this.setStageScale(scale);
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(FlowModel.prototype, "x", {
+        get: function () {
             return this.canvasData.x;
-        else {
-            this.setStagePosition(x, this.canvasData.y);
-            return x;
-        }
-    };
-    // @action
-    FlowModel.prototype.y = function (y) {
-        if (lodash.exports.isUndefined(y))
+        },
+        set: function (x) {
+            this.canvasData.x = x;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(FlowModel.prototype, "y", {
+        get: function () {
             return this.canvasData.y;
-        else {
-            this.setStagePosition(this.canvasData.x, y);
-            return y;
-        }
-    };
+        },
+        set: function (y) {
+            this.canvasData.y = y;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(FlowModel.prototype, "contextMenuVisible", {
+        get: function () {
+            return this.buffer.contextMenu.visible;
+        },
+        set: function (visible) {
+            this.buffer.contextMenu.visible = visible;
+        },
+        enumerable: false,
+        configurable: true
+    });
     FlowModel.prototype.moveTo = function (id, index) {
         var oldIndex = findIndex(this.canvasData.cells, this.getCellData(id));
         arrayMove(this.canvasData.cells, oldIndex, index);
@@ -504,26 +544,44 @@ var FlowModel = /** @class */ (function () {
         observable
     ], FlowModel.prototype, "_width", void 0);
     __decorate([
+        computed
+    ], FlowModel.prototype, "width", null);
+    __decorate([
         observable
     ], FlowModel.prototype, "_height", void 0);
     __decorate([
-        action
-    ], FlowModel.prototype, "setSize", void 0);
+        computed
+    ], FlowModel.prototype, "height", null);
+    __decorate([
+        computed
+    ], FlowModel.prototype, "size", null);
     __decorate([
         observable
-    ], FlowModel.prototype, "grid", void 0);
+    ], FlowModel.prototype, "_grid", void 0);
     __decorate([
-        action
-    ], FlowModel.prototype, "setGrid", void 0);
+        computed
+    ], FlowModel.prototype, "grid", null);
+    __decorate([
+        computed
+    ], FlowModel.prototype, "linkEdge", null);
+    __decorate([
+        computed
+    ], FlowModel.prototype, "scale", null);
+    __decorate([
+        computed
+    ], FlowModel.prototype, "x", null);
+    __decorate([
+        computed
+    ], FlowModel.prototype, "y", null);
+    __decorate([
+        computed
+    ], FlowModel.prototype, "contextMenuVisible", null);
     __decorate([
         observable
     ], FlowModel.prototype, "hotKey", void 0);
     __decorate([
         action
     ], FlowModel.prototype, "setHotKey", void 0);
-    __decorate([
-        action
-    ], FlowModel.prototype, "setLinkEdge", void 0);
     __decorate([
         action
     ], FlowModel.prototype, "clearPortEdge", void 0);
@@ -546,17 +604,14 @@ var FlowModel = /** @class */ (function () {
         action
     ], FlowModel.prototype, "setSelectedCells", void 0);
     __decorate([
+        action
+    ], FlowModel.prototype, "clearSelect", void 0);
+    __decorate([
         observable
     ], FlowModel.prototype, "canvasData", void 0);
     __decorate([
         action
-    ], FlowModel.prototype, "clearSelect", void 0);
-    __decorate([
-        action
     ], FlowModel.prototype, "setStageScale", void 0);
-    __decorate([
-        action
-    ], FlowModel.prototype, "setStagePosition", void 0);
     __decorate([
         action
     ], FlowModel.prototype, "setCanvasData", void 0);
@@ -578,6 +633,9 @@ var FlowModel = /** @class */ (function () {
     __decorate([
         action
     ], FlowModel.prototype, "link", void 0);
+    __decorate([
+        action
+    ], FlowModel.prototype, "setStagePosition", void 0);
     __decorate([
         action
     ], FlowModel.prototype, "moveTo", null);

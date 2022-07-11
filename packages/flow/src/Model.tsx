@@ -1,6 +1,6 @@
 import G, { InteractivePointerEvent } from "@antv/g";
 import { isUndefined, merge, union, without } from "lodash";
-import { action, makeObservable, observable } from "mobx";
+import { action, makeObservable, observable, computed } from "mobx";
 import React from "react";
 import { v4 } from "uuid";
 import { CellDataType } from "./cells/Cell";
@@ -58,33 +58,84 @@ export class FlowModel {
   }
 
   @observable _width: number = 1000;
+  @computed
+  get width() {
+    return this._width;
+  }
+  set width(width: number) {
+    this._width = width as number;
+  }
+
   @observable _height: number = 600;
-  width = (width?: number) => {
-    if (isUndefined(width)) return this._width;
-    else {
-      this._width = width as number;
-      return width;
-    }
-  };
-  height = (height?: number) => {
-    if (isUndefined(height)) return this._height;
-    else {
-      this._height = height as number;
-      return height;
-    }
-  };
+  @computed
+  get height() {
+    return this._height;
+  }
+  set height(height: number) {
+    this._height = height as number;
+  }
 
-  @action
-  setSize = (width: number, height: number) => {
-    this._width = width;
-    this._height = height;
-  };
+  @computed
+  get size() {
+    return {
+      width: this.width,
+      height: this.height,
+    };
+  }
+  set size(size: { width: number; height: number }) {
+    this.height = size.height;
+    this.width = size.width;
+  }
 
-  @observable grid: number | undefined = 1;
-  @action
-  setGrid = (grid: number) => {
-    this.grid = grid;
-  };
+  @observable _grid: number = 40;
+  @computed
+  get grid() {
+    return this._grid;
+  }
+  set grid(grid: number) {
+    this._grid = grid;
+  }
+
+  _linkEdge = "Edge";
+  @computed
+  get linkEdge() {
+    return this._linkEdge;
+  }
+  set linkEdge(linkEdge: string) {
+    this._linkEdge = linkEdge;
+  }
+
+  @computed
+  get scale() {
+    return this.canvasData.scale;
+  }
+  set scale(scale: number) {
+    this.setStageScale(scale);
+  }
+
+  @computed
+  get x() {
+    return this.canvasData.x;
+  }
+  set x(x: number) {
+    this.canvasData.x = x;
+  }
+
+  @computed
+  get y() {
+    return this.canvasData.y;
+  }
+  set y(y: number) {
+    this.canvasData.y = y;
+  }
+
+  @computed
+  get contextMenuVisible() {
+    return this.buffer.contextMenu.visible;
+  }
+  set contextMenuVisible(visible: boolean) {
+    this.buffer.contextMenu.visible = visible;
+  }
 
   refs = {
     stageRef: undefined as React.RefObject<G.Canvas> | undefined,
@@ -101,11 +152,6 @@ export class FlowModel {
     value: boolean
   ) => {
     this.hotKey[key] = value;
-  };
-
-  linkEdge = "Edge";
-  @action setLinkEdge = (name: string) => {
-    this.linkEdge = name;
   };
 
   getLinkingPort = () => {
@@ -127,7 +173,7 @@ export class FlowModel {
   // 一些中间状态，比如连线中的开始节点的暂存，不应该让外部感知
   @observable
   buffer = {
-    rightClickPanel: {
+    contextMenu: {
       visible: false,
     },
     drag: {
@@ -185,9 +231,6 @@ export class FlowModel {
     const re: string[] = [];
     this.canvasData.cells.forEach((cellData) => {
       if (cellData.cellType === "node") {
-        console.log(this.getLocalBBox(cellData.id));
-
-        // 判断矩形是否相交
         if (
           isRectsInterSect(
             {
@@ -256,6 +299,9 @@ export class FlowModel {
       this.selectCells = union(this.selectCells, ids);
     }
   };
+  @action clearSelect = () => {
+    this.selectCells = [];
+  };
 
   @observable canvasData: CanvasDataType = {
     scale: 1,
@@ -264,21 +310,12 @@ export class FlowModel {
     cells: [],
   };
 
-  @action clearSelect = () => {
-    this.selectCells = [];
-  };
-
   emitEvent = (data: any) => {
     this.eventBus.sender?.(data);
   };
 
   @action setStageScale = (scale: number) => {
     this.canvasData.scale = scale;
-  };
-
-  @action setStagePosition = (x: number, y: number) => {
-    this.canvasData.x = x;
-    this.canvasData.y = y;
   };
 
   insertRuntimeState = (cellData: CellDataType) => {
@@ -545,31 +582,10 @@ export class FlowModel {
     this.clearLinkBuffer();
   };
 
-  scale = (scale?: number) => {
-    if (isUndefined(scale)) return this.canvasData.scale;
-    else {
-      this.setStageScale(scale);
-      return scale;
-    }
+  @action setStagePosition = (x: number, y: number) => {
+    this.canvasData.x = x;
+    this.canvasData.y = y;
   };
-
-  // @action
-  x(x?: number) {
-    if (isUndefined(x)) return this.canvasData.x;
-    else {
-      this.setStagePosition(x, this.canvasData.y);
-      return x;
-    }
-  }
-
-  // @action
-  y(y?: number) {
-    if (isUndefined(y)) return this.canvasData.y;
-    else {
-      this.setStagePosition(this.canvasData.x, y);
-      return y;
-    }
-  }
 
   @action
   moveTo(id: string, index: number) {
@@ -626,8 +642,8 @@ export class FlowModel {
    */
   getStageCursor = (e: InteractivePointerEvent) => {
     return {
-      x: (e.canvas.x - this.x()) / this.scale(),
-      y: (e.canvas.y - this.y()) / this.scale(),
+      x: (e.canvas.x - this.x) / this.scale,
+      y: (e.canvas.y - this.y) / this.scale,
     };
   };
 }

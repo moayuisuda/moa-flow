@@ -11,7 +11,7 @@ import './components/Arrow.js';
 import './components/Interacotr.js';
 import './components/Port.js';
 import './node_modules/react-dom/index.js';
-import { getRightClickPanel } from './components/RightClickPanel/index.js';
+import { getContextMenu } from './components/ContextMenu/index.js';
 import { SelectBoundsRect } from './components/SelectBoundsRect.js';
 import { registComponents } from './utils/registComponents.js';
 import { STAGE_ID } from './constants.js';
@@ -38,8 +38,8 @@ var Dots = observer(function () {
     var EXTRA = 0;
     var _dots = computed(function () {
         var re = [];
-        for (var i = -EXTRA; i <= model.height() + EXTRA; i += model.grid) {
-            for (var j = -EXTRA; j <= model.width() + EXTRA; j += model.grid) {
+        for (var i = -EXTRA; i <= model.height + EXTRA; i += model.grid) {
+            for (var j = -EXTRA; j <= model.width + EXTRA; j += model.grid) {
                 re.push({
                     x: j,
                     y: i,
@@ -64,11 +64,11 @@ var Grid = /** @class */ (function (_super) {
         var grid = this.context.grid;
         var _gridPos = computed(function () {
             return {
-                x: -Math.round(_this.context.x() / _this.context.scale() / grid) * grid,
-                y: -Math.round(_this.context.y() / _this.context.scale() / grid) * grid,
+                x: -Math.round(_this.context.x / _this.context.scale / grid) * grid,
+                y: -Math.round(_this.context.y / _this.context.scale / grid) * grid,
             };
         }).get();
-        return (React.createElement(Group, __assign({}, _gridPos, { zIndex: 0, ref: this.gridRef, visibility: this.context.grid && this.context.scale() >= 1 ? "visible" : "hidden" }),
+        return (React.createElement(Group, __assign({}, _gridPos, { zIndex: 0, ref: this.gridRef, visibility: grid && this.context.scale >= 1 ? "visible" : "hidden" }),
             React.createElement(Dots, null)));
     };
     Grid.contextType = FlowContext;
@@ -126,9 +126,12 @@ var Flow = /** @class */ (function (_super) {
             });
         }); };
         _this.flowModel = new FlowModel(props.onEvent);
-        _this.props.grid && _this.flowModel.setGrid(_this.props.grid);
+        _this.props.grid && (_this.flowModel.grid = _this.props.grid);
         if (_this.props.width && _this.props.height) {
-            _this.flowModel.setSize(_this.props.width, _this.props.height);
+            _this.flowModel.size = {
+                width: _this.props.width,
+                height: _this.props.height,
+            };
         }
         _this.props.onLoad && _this.props.onLoad(_this.flowModel);
         props.modelRef && (props.modelRef.current = _this.flowModel);
@@ -145,11 +148,11 @@ var Flow = /** @class */ (function (_super) {
                 display: "inline-block",
             }, id: STAGE_ID },
             React.createElement(FlowContext.Provider, { value: model },
-                getRightClickPanel(this.props.children),
-                React.createElement(Canvas$1, { renderer: renderer, ref: this.stageRef, width: model.width(), height: model.height() },
-                    React.createElement(Group, { transform: "scale(".concat(model.scale(), ", ").concat(model.scale(), ")"), 
+                getContextMenu(this.props.children),
+                React.createElement(Canvas$1, { renderer: renderer, ref: this.stageRef, width: model.width, height: model.height },
+                    React.createElement(Group, { transform: "scale(".concat(model.scale, ", ").concat(model.scale, ")"), 
                         // @ts-ignore
-                        x: model.x(), y: model.y() },
+                        x: model.x, y: model.y },
                         React.createElement(FlowContext.Provider, { value: model },
                             model.grid && React.createElement(Grid, null),
                             getCanvas(this.props.children)))))));

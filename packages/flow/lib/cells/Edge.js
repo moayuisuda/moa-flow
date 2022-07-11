@@ -8,7 +8,7 @@ import { Interactor } from '../components/Interacotr.js';
 import '../components/Port.js';
 import '../node_modules/react-dom/index.js';
 import '../Context.js';
-import '../components/RightClickPanel/index.js';
+import '../components/ContextMenu/index.js';
 import '../components/SelectBoundsRect.js';
 import '../Flow.js';
 import { titleCase } from '../utils/string.js';

@@ -5,16 +5,16 @@ import React from 'react';
 import { FlowContext } from '../../Context.js';
 import { STAGE_ID } from '../../constants.js';
 
-var RightClickPanel = /** @class */ (function (_super) {
-    __extends(RightClickPanel, _super);
-    function RightClickPanel(props) {
+var ContextMenu = /** @class */ (function (_super) {
+    __extends(ContextMenu, _super);
+    function ContextMenu(props) {
         var _this = _super.call(this, props) || this;
         _this.initStageEvent = function () {
             var _a;
             (_a = document
                 .querySelector("#" + STAGE_ID)) === null || _a === void 0 ? void 0 : _a.addEventListener("contextmenu", function (e) {
                 e.preventDefault();
-                _this.context.contextMenuVisible(true);
+                _this.context.contextMenuVisible = true;
                 _this.setState({
                     pos: {
                         x: e.clientX,
@@ -31,32 +31,31 @@ var RightClickPanel = /** @class */ (function (_super) {
         };
         return _this;
     }
-    RightClickPanel.prototype.componentDidMount = function () {
+    ContextMenu.prototype.componentDidMount = function () {
         var _this = this;
         // 子组件会在commit阶段先挂载触发didMount
         Promise.resolve().then(function () {
             _this.initStageEvent();
         });
     };
-    RightClickPanel.prototype.render = function () {
-        console.log("visible", this.context.contextMenuVisible());
-        if (!this.context.contextMenuVisible())
+    ContextMenu.prototype.render = function () {
+        if (!this.context.contextMenuVisible)
             return React.createElement(React.Fragment, null);
         return (React.createElement("div", { style: {
                 top: this.state.pos.y,
                 left: this.state.pos.x,
             }, className: styles["toolbar"] }, this.props.children));
     };
-    RightClickPanel.contextType = FlowContext;
-    RightClickPanel = __decorate([
+    ContextMenu.contextType = FlowContext;
+    ContextMenu = __decorate([
         observer
-    ], RightClickPanel);
-    return RightClickPanel;
+    ], ContextMenu);
+    return ContextMenu;
 }(React.Component));
-var getRightClickPanel = function (children) {
+var getContextMenu = function (children) {
     return React.Children.toArray(children).find(function (item) {
-        return item.type === RightClickPanel;
+        return item.type === ContextMenu;
     });
 };
 
-export { RightClickPanel, getRightClickPanel };
+export { ContextMenu, getContextMenu };

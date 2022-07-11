@@ -12,7 +12,7 @@ import { NodeDataType, NodePropsType } from './cells/Node';
 
 import {
   Portal,
-  RightClickPanel,
+  ContextMenu,
   Interactor,
   Port,
   PortDataType,
@@ -46,7 +46,7 @@ export {
   Graph,
   autorun,
   ConsumerBridge,
-  RightClickPanel,
+  ContextMenu,
   Canvas,
 
   FlowContext,

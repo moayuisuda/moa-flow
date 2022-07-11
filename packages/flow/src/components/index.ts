@@ -4,5 +4,5 @@ export * from "./Image";
 export * from "./Interacotr";
 export * from "./Port";
 export * from "./Portal";
-export * from "./RightClickPanel";
+export * from "./ContextMenu";
 export * from "./SelectBoundsRect";

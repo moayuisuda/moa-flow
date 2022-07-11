@@ -14,12 +14,33 @@ export declare class FlowModel {
     trigRender(): void;
     pendRender(): void;
     _width: number;
+    get width(): number;
+    set width(width: number);
     _height: number;
-    width: (width?: number) => number;
-    height: (height?: number) => number;
-    setSize: (width: number, height: number) => void;
-    grid: number | undefined;
-    setGrid: (grid: number) => void;
+    get height(): number;
+    set height(height: number);
+    get size(): {
+        width: number;
+        height: number;
+    };
+    set size(size: {
+        width: number;
+        height: number;
+    });
+    _grid: number;
+    get grid(): number;
+    set grid(grid: number);
+    _linkEdge: string;
+    get linkEdge(): string;
+    set linkEdge(linkEdge: string);
+    get scale(): number;
+    set scale(scale: number);
+    get x(): number;
+    set x(x: number);
+    get y(): number;
+    set y(y: number);
+    get contextMenuVisible(): boolean;
+    set contextMenuVisible(visible: boolean);
     refs: {
         stageRef: React.RefObject<G.Canvas> | undefined;
     };
@@ -29,12 +50,10 @@ export declare class FlowModel {
         Space: boolean;
     };
     setHotKey: (key: "RightMouseDown" | "LeftMouseDown" | "Space", value: boolean) => void;
-    linkEdge: string;
-    setLinkEdge: (name: string) => void;
     getLinkingPort: () => string | undefined;
     clearPortEdge: (edgeId: string) => void;
     buffer: {
-        rightClickPanel: {
+        contextMenu: {
             visible: boolean;
         };
         drag: {
@@ -104,11 +123,10 @@ export declare class FlowModel {
     };
     selectCells: string[];
     setSelectedCells: (ids: string[], ifReplace?: boolean) => void;
-    canvasData: CanvasDataType;
     clearSelect: () => void;
+    canvasData: CanvasDataType;
     emitEvent: (data: any) => void;
     setStageScale: (scale: number) => void;
-    setStagePosition: (x: number, y: number) => void;
     insertRuntimeState: (cellData: CellDataType) => void;
     getLocalBBox: (id: string) => {
         x: number;
@@ -148,9 +166,7 @@ export declare class FlowModel {
     addCell: (componentName: string, initOptions?: any) => any;
     setLinkingPosition: (e: InteractivePointerEvent) => void;
     link: (source: string, target: string) => void;
-    scale: (scale?: number) => number;
-    x(x?: number): number;
-    y(y?: number): number;
+    setStagePosition: (x: number, y: number) => void;
     moveTo(id: string, index: number): void;
     getCell: (id: string) => any;
     getCellData: (id: string) => CellDataType | undefined;

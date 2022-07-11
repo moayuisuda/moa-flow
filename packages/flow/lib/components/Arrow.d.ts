@@ -1,15 +1,11 @@
 import type * as G from "@antv/g";
-import type { DisplayObject } from "@antv/g";
+import type { DisplayObject, PathStyleProps } from "@antv/g";
 import React, { Component } from "react";
 declare type ArrowHead = boolean | React.ReactNode;
-export interface ArrowStyleProps extends React.ReactElement {
+export interface ArrowStyleProps extends PathStyleProps {
     path: string;
     startHead?: ArrowHead;
     endHead?: ArrowHead;
-    stroke?: string;
-    lineWidth?: number;
-    opacity?: number;
-    strokeOpacity?: number;
 }
 export declare class Arrow extends Component<ArrowStyleProps, {}> {
     startRef: React.MutableRefObject<DisplayObject | null>;

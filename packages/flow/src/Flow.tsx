@@ -9,7 +9,7 @@ import { observer } from "mobx-react";
 import { FlowContext } from "./Context";
 
 import * as G from "@antv/g";
-import { getRightClickPanel, SelectBoundsRect } from "./components";
+import { getContextMenu, SelectBoundsRect } from "./components";
 import { registComponents } from "./utils/registComponents";
 
 import { useContext } from "react";
@@ -58,14 +58,10 @@ const Dots = observer(() => {
 
   const _dots = computed(() => {
     const re = [];
-    for (
-      let i = -EXTRA;
-      i <= model.height() + EXTRA;
-      i += model.grid as number
-    ) {
+    for (let i = -EXTRA; i <= model.height + EXTRA; i += model.grid as number) {
       for (
         let j = -EXTRA;
-        j <= model.width() + EXTRA;
+        j <= model.width + EXTRA;
         j += model.grid as number
       ) {
         re.push({
@@ -105,8 +101,8 @@ class Grid extends React.Component<{}> {
 
     const _gridPos = computed(() => {
       return {
-        x: -Math.round(this.context.x() / this.context.scale() / grid) * grid,
-        y: -Math.round(this.context.y() / this.context.scale() / grid) * grid,
+        x: -Math.round(this.context.x / this.context.scale / grid) * grid,
+        y: -Math.round(this.context.y / this.context.scale / grid) * grid,
       };
     }).get();
 
@@ -115,9 +111,7 @@ class Grid extends React.Component<{}> {
         {..._gridPos}
         zIndex={0}
         ref={this.gridRef}
-        visibility={
-          this.context.grid && this.context.scale() >= 1 ? "visible" : "hidden"
-        }
+        visibility={grid && this.context.scale >= 1 ? "visible" : "hidden"}
       >
         <Dots />
       </Group>
@@ -188,10 +182,13 @@ class Flow extends React.Component<FlowProps, {}> {
     super(props);
 
     this.flowModel = new FlowModel(props.onEvent);
-    this.props.grid && this.flowModel.setGrid(this.props.grid);
+    this.props.grid && (this.flowModel.grid = this.props.grid);
 
     if (this.props.width && this.props.height) {
-      this.flowModel.setSize(this.props.width, this.props.height);
+      this.flowModel.size = {
+        width: this.props.width,
+        height: this.props.height,
+      };
     }
     this.props.onLoad && this.props.onLoad(this.flowModel);
 
@@ -238,18 +235,18 @@ class Flow extends React.Component<FlowProps, {}> {
         id={STAGE_ID}
       >
         <FlowContext.Provider value={model}>
-          {getRightClickPanel(this.props.children)}
+          {getContextMenu(this.props.children)}
           <RGCanvas
             renderer={renderer}
             ref={this.stageRef}
-            width={model.width()}
-            height={model.height()}
+            width={model.width}
+            height={model.height}
           >
             <Group
-              transform={`scale(${model.scale()}, ${model.scale()})`}
+              transform={`scale(${model.scale}, ${model.scale})`}
               // @ts-ignore
-              x={model.x()}
-              y={model.y()}
+              x={model.x}
+              y={model.y}
             >
               <FlowContext.Provider value={model}>
                 {model.grid && <Grid />}

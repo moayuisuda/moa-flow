@@ -8,7 +8,7 @@ export { ConsumerBridge } from './components/ConsumerBridge.js';
 export { Interactor } from './components/Interacotr.js';
 export { Port } from './components/Port.js';
 export { Portal } from './components/Portal.js';
-export { RightClickPanel } from './components/RightClickPanel/index.js';
+export { ContextMenu } from './components/ContextMenu/index.js';
 import './components/SelectBoundsRect.js';
 import * as G from '@antv/react-g';
 export { autorun } from 'mobx';
