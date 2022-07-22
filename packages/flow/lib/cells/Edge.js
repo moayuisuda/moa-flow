@@ -1,10 +1,10 @@
-import { __extends, __spreadArray, __assign } from '../node_modules/tslib/tslib.es6.js';
+import { __extends, __spreadArray, __assign, __decorate } from '../node_modules/tslib/tslib.es6.js';
 import React, { useContext } from 'react';
 import { isVector2d, callIfFn } from '../utils/util.js';
-import { lineCenter } from '../utils/vector.js';
 import { CellModel } from './Cell.js';
 import { FlowContext } from '../Context.js';
 import '../node_modules/mobx-react-lite/es/index.js';
+import { computed } from 'mobx';
 import { observer } from '../node_modules/mobx-react-lite/es/observer.js';
 
 var TEXT_HEIGHT = 16;
@@ -53,21 +53,8 @@ var EdgeModel = /** @class */ (function (_super) {
                 target: targetAnchor,
             };
         };
-        _this.labelRef = React.createRef();
-        _this.arrowRef = React.createRef();
         return _this;
     }
-    EdgeModel.prototype.lineStyle = function (_a) {
-        var isSelect = _a.isSelect;
-        var color = this.context.color;
-        if (isSelect) {
-            return {
-                stroke: color.active,
-            };
-        }
-        else
-            return {};
-    };
     EdgeModel.prototype.getPoints = function () {
         var routeResult = this.route(this.getVectors());
         return this.vectorsToPoints(routeResult);
@@ -105,23 +92,26 @@ var EdgeModel = /** @class */ (function (_super) {
         });
         return re;
     };
+    EdgeModel.prototype.getPointAt = function (ratio) {
+        this.pathInstance.setAttribute("d", this.getBazierPath());
+        return this.pathInstance.getPointAtLength(ratio * this.pathInstance.getTotalLength());
+    };
     EdgeModel.prototype.labelContent = function () {
         var _a = this.context; _a.color; var svgRef = _a.refs.svgRef;
         var text = this.labelFormatter(this.data.label);
         if (!text)
             return React.createElement(React.Fragment, null);
-        var props = __assign({ dominantBaseline: "hanging" }, this.labelStyle());
+        var props = {
+            dominantBaseline: "hanging",
+        };
         var textInstance = document.createElementNS("http://www.w3.org/2000/svg", "text");
         textInstance.innerHTML = text;
         svgRef.appendChild(textInstance);
         var textBounds = textInstance.getBBox();
         svgRef.removeChild(textInstance);
-        return (React.createElement("g", { x: -(textBounds.width + LABEL_PADDING) / 2, y: -(TEXT_HEIGHT + LABEL_PADDING) / 2 },
+        return (React.createElement("g", { transform: "translate(".concat(-(textBounds.width + LABEL_PADDING) / 2, ", ").concat(-(TEXT_HEIGHT + LABEL_PADDING) / 2, ")") },
             React.createElement("rect", { width: textBounds.width + LABEL_PADDING * 2, height: TEXT_HEIGHT + LABEL_PADDING * 2, fill: "white" }),
             React.createElement("text", __assign({ x: LABEL_PADDING, y: LABEL_PADDING }, props), text)));
-    };
-    EdgeModel.prototype.labelStyle = function () {
-        return {};
     };
     EdgeModel.prototype.labelFormatter = function (label) {
         return "label + asd";
@@ -142,24 +132,6 @@ var EdgeModel = /** @class */ (function (_super) {
         var dir = this.getBazierDir();
         return "M".concat(source.x, ",").concat(source.y, " \n    C").concat(source.x + dir.source[0], ",").concat(source.y + dir.source[1], " ").concat(target.x + dir.target[0], ",").concat(target.y + dir.target[1], " \n    ").concat(target.x, ",").concat(target.y);
     };
-    EdgeModel.prototype.labelPosition = function () {
-        if (callIfFn(this.bazier)) {
-            this.pathInstance.setAttribute("d", this.getBazierPath());
-            console.log(this.pathInstance);
-            return this.pathInstance.getPointAtLength(this.pathInstance.getTotalLength() / 2);
-        }
-        else {
-            var points = this.getVectors().map(function (vector) { return [
-                vector.x,
-                vector.y,
-            ]; });
-            var lineLenthCenter = lineCenter(points);
-            return {
-                x: lineLenthCenter[0] || points[0][0],
-                y: lineLenthCenter[1] || points[0][1],
-            };
-        }
-    };
     EdgeModel.prototype.getPolylinePath = function () {
         var points = this.getPoints();
         var str = "M".concat(points[0][0], ",").concat(points[0][1]);
@@ -168,11 +140,15 @@ var EdgeModel = /** @class */ (function (_super) {
         }
         return str;
     };
-    EdgeModel.prototype.getPath = function () {
-        return callIfFn(this.bazier)
-            ? this.getBazierPath()
-            : this.getPolylinePath();
-    };
+    Object.defineProperty(EdgeModel.prototype, "d", {
+        get: function () {
+            return callIfFn(this.bazier)
+                ? this.getBazierPath()
+                : this.getPolylinePath();
+        },
+        enumerable: false,
+        configurable: true
+    });
     EdgeModel.defaultData = {
         id: "",
         component: "Edge",
@@ -182,30 +158,42 @@ var EdgeModel = /** @class */ (function (_super) {
         verticies: [],
         cellType: "edge",
     };
+    __decorate([
+        computed
+    ], EdgeModel.prototype, "d", null);
     return EdgeModel;
 }(CellModel));
+var DEFAULT_ARROW_SIZE = 16;
 var Edge = observer(function (_a) {
     var model = _a.model;
     var Line = observer(function () {
         var context = useContext(FlowContext);
         var color = context.color;
-        var lineProps = __assign({ strokeLinecap: "round", strokeLinejoin: "round", fill: "none", strokeWidth: 3, stroke: color.deepGrey }, model.lineStyle({ isSelect: model.isSelect }));
-        return (React.createElement("path", __assign({ ref: model.arrowRef }, lineProps, { d: model.getPath(), 
-            // startHead={callIfFn(this.startHead)}
-            // endHead={callIfFn(this.endHead)}
-            strokeDasharray: callIfFn(model.lineDash) })));
+        var d = model.d, isSelect = model.isSelect;
+        var lineProps = {
+            strokeLinecap: "round",
+            strokeLinejoin: "round",
+            fill: "none",
+            strokeWidth: 3,
+            stroke: isSelect ? color.active : color.deepGrey,
+        };
+        var cos = Math.cos, sin = Math.sin, PI = Math.PI;
+        return (React.createElement(React.Fragment, null,
+            React.createElement("defs", null,
+                React.createElement("marker", { id: "arrow-end" },
+                    React.createElement("path", __assign({}, lineProps, { d: "M-".concat(DEFAULT_ARROW_SIZE * cos(PI / 6), ",").concat(DEFAULT_ARROW_SIZE * sin(PI / 6), " L0,0 L-").concat(DEFAULT_ARROW_SIZE * cos(PI / 6), ",-").concat(DEFAULT_ARROW_SIZE * sin(PI / 6), " Z") })))),
+            React.createElement("path", __assign({}, lineProps, { d: d, markerEnd: "url(#arrow-end)", strokeDasharray: callIfFn(model.lineDash) }))));
     });
     var Label = observer(function () {
         var text = model.labelFormatter(model.data.label);
-        var position = model.labelPosition();
-        console.log("trasnlate(".concat(position.x, ", ").concat(position.y, ")"));
+        var position = model.getPointAt(0.5);
         return (React.createElement("g", { ref: function (label) {
                 if (model.isMountEvents || !label)
                     return;
                 model.isMountEvents = true;
             }, transform: "translate(".concat(position.x, ", ").concat(position.y, ")") }, text && model.labelContent()));
     });
-    return (React.createElement("g", null,
+    return (React.createElement(React.Fragment, null,
         React.createElement(Line, null),
         React.createElement(Label, null)));
 });

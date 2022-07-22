@@ -1,13 +1,6 @@
 import { Port, NodeModel, FlowContext, observer } from "@ali/flow-infra-g";
-import type {
-  ModelType,
-  NodeData,
-  PortData,
-  PortDataType,
-} from "@ali/flow-infra-g";
-import { message } from "antd";
+import type { NodeData, PortData, PortDataType } from "@ali/flow-infra-g";
 import { useContext } from "react";
-import { useObserver } from "mobx-react";
 
 export type BasePortDataType = PortData<{
   label: string;
@@ -18,23 +11,13 @@ export type BaseNodeData = NodeData<{
   ports: BasePortDataType[];
 }>;
 
-export enum STATUS_ENUM {
-  WAIT,
-  PROCESS,
-  SUCCESS,
-  ERROR,
-}
-
 const BaseNode: React.FC<{
   model: NodeModel<BaseNodeData>;
 }> = observer(({ model }) => {
   const context = useContext(FlowContext);
-  const isSelect = model.isSelect;
   const { color } = context;
-  const { data } = model;
+  const { data, isSelect } = model;
   const { title, ports, width, height } = data;
-
-  console.log(model);
 
   const outPorts =
     ports?.filter((portData) => portData.portType === "out") || [];
@@ -51,7 +34,7 @@ const BaseNode: React.FC<{
         padding: 10,
       }}
     >
-      <h1>{`${title} [${STATUS_ENUM[data.status]}]`}</h1>
+      <h1>{`${title}`}</h1>
 
       {outPorts.map((portData: PortDataType) => (
         <Port

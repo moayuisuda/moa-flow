@@ -1,15 +1,14 @@
 import { Dir, Vector2d } from "../typings/common";
 import { PortDataType } from "../components";
 import React from "react";
-import { isVector2d, lineCenter } from "../utils";
+import { isVector2d } from "../utils";
 import { callIfFn } from "../utils/util";
-import { Arrow } from "../components";
 import { CellModel, CellDataType } from "./Cell";
 import { useContext } from "react";
 import { FlowContext } from "../Context";
 import { FlowModel } from "Model";
-import { useObserver } from "mobx-react";
 import { observer } from "mobx-react-lite";
+import { computed } from "mobx";
 
 const TEXT_HEIGHT = 16;
 const LABEL_PADDING = 4;
@@ -34,9 +33,6 @@ export class EdgeModel extends CellModel {
 
   data: EdgeDataType;
 
-  labelRef: React.RefObject<SVGTextElement>;
-  arrowRef: React.RefObject<Arrow>;
-
   protected bazier: boolean | (() => boolean) = true;
   protected startHead: Head | (() => Head) = false;
   protected endHead: Head | (() => Head) = true;
@@ -49,18 +45,6 @@ export class EdgeModel extends CellModel {
 
   constructor(data: any, context: FlowModel) {
     super(data, context);
-    this.labelRef = React.createRef();
-    this.arrowRef = React.createRef();
-  }
-
-  lineStyle({ isSelect }: { isSelect: boolean }) {
-    const { color } = this.context;
-
-    if (isSelect) {
-      return {
-        stroke: color.active,
-      };
-    } else return {};
   }
 
   protected formatVerticied = (verticies: Vector2d[]) => {
@@ -144,7 +128,7 @@ export class EdgeModel extends CellModel {
   }
 
   // 这个方法暴露出去，可自定义路由
-  protected route(vectors: Vector2d[]) {
+  route(vectors: Vector2d[]) {
     return vectors;
   }
 
@@ -155,6 +139,13 @@ export class EdgeModel extends CellModel {
     });
 
     return re;
+  }
+
+  getPointAt(ratio: number) {
+    this.pathInstance.setAttribute("d", this.getBazierPath());
+    return this.pathInstance.getPointAtLength(
+      ratio * this.pathInstance.getTotalLength()
+    );
   }
 
   labelContent() {
@@ -168,7 +159,6 @@ export class EdgeModel extends CellModel {
 
     const props = {
       dominantBaseline: "hanging",
-      ...this.labelStyle(),
     };
     const textInstance = document.createElementNS(
       "http://www.w3.org/2000/svg",
@@ -182,8 +172,9 @@ export class EdgeModel extends CellModel {
 
     return (
       <g
-        x={-(textBounds.width + LABEL_PADDING) / 2}
-        y={-(TEXT_HEIGHT + LABEL_PADDING) / 2}
+        transform={`translate(${-(textBounds.width + LABEL_PADDING) / 2}, ${
+          -(TEXT_HEIGHT + LABEL_PADDING) / 2
+        })`}
       >
         <rect
           width={textBounds.width + LABEL_PADDING * 2}
@@ -195,10 +186,6 @@ export class EdgeModel extends CellModel {
         </text>
       </g>
     );
-  }
-
-  labelStyle() {
-    return {};
   }
 
   labelFormatter(label: string) {
@@ -230,28 +217,6 @@ export class EdgeModel extends CellModel {
     ${target.x},${target.y}`;
   }
 
-  labelPosition() {
-    if (callIfFn(this.bazier)) {
-      this.pathInstance.setAttribute("d", this.getBazierPath());
-      console.log(this.pathInstance);
-
-      return this.pathInstance.getPointAtLength(
-        this.pathInstance.getTotalLength() / 2
-      );
-    } else {
-      const points = this.getVectors().map((vector) => [
-        vector.x,
-        vector.y,
-      ]) as [number, number][];
-      const lineLenthCenter = lineCenter(points);
-
-      return {
-        x: lineLenthCenter[0] || points[0][0],
-        y: lineLenthCenter[1] || points[0][1],
-      };
-    }
-  }
-
   getPolylinePath() {
     const points = this.getPoints();
 
@@ -263,43 +228,59 @@ export class EdgeModel extends CellModel {
     return str;
   }
 
-  getPath() {
+  @computed
+  get d() {
     return callIfFn(this.bazier)
       ? this.getBazierPath()
       : this.getPolylinePath();
   }
 }
 
+const DEFAULT_ARROW_SIZE = 16;
+
 export const Edge: React.FC<{ model: EdgeModel }> = observer(({ model }) => {
   const Line = observer(() => {
     const context = useContext(FlowContext);
     const { color } = context;
+    const { d, isSelect } = model;
 
     const lineProps = {
       strokeLinecap: "round",
       strokeLinejoin: "round",
       fill: "none",
       strokeWidth: 3,
-      stroke: color.deepGrey,
-      ...model.lineStyle({ isSelect: model.isSelect }),
+      stroke: isSelect ? color.active : color.deepGrey,
     } as any;
 
+    const { cos, sin, PI } = Math;
+
     return (
-      <path
-        ref={model.arrowRef}
-        {...lineProps}
-        d={model.getPath()}
-        // startHead={callIfFn(this.startHead)}
-        // endHead={callIfFn(this.endHead)}
-        strokeDasharray={callIfFn(model.lineDash)}
-      />
+      <>
+        <defs>
+          <marker id="arrow-end">
+            <path
+              {...lineProps}
+              d={`M-${DEFAULT_ARROW_SIZE * cos(PI / 6)},${
+                DEFAULT_ARROW_SIZE * sin(PI / 6)
+              } L0,0 L-${DEFAULT_ARROW_SIZE * cos(PI / 6)},-${
+                DEFAULT_ARROW_SIZE * sin(PI / 6)
+              } Z`}
+            />
+          </marker>
+        </defs>
+        <path
+          {...lineProps}
+          d={d}
+          markerEnd="url(#arrow-end)"
+          strokeDasharray={callIfFn(model.lineDash)}
+        />
+      </>
     );
   });
 
   const Label = observer(() => {
     const text = model.labelFormatter(model.data.label);
-    const position = model.labelPosition();
-    console.log(`trasnlate(${position.x}, ${position.y})`);
+    const position = model.getPointAt(0.5);
 
     return (
       <g
@@ -315,10 +296,10 @@ export const Edge: React.FC<{ model: EdgeModel }> = observer(({ model }) => {
   });
 
   return (
-    <g>
+    <>
       {/* 这个函数的返回只能返回 React.createElement(Line)，并没有收集model的依赖 */}
       <Line></Line>
       <Label></Label>
-    </g>
+    </>
   );
 });
