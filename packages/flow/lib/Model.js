@@ -1,8 +1,18 @@
 import { __decorate, __assign } from './node_modules/tslib/tslib.es6.js';
 import './node_modules/lodash/lodash.js';
 import { action, observable, computed, makeObservable } from 'mobx';
+import { EdgeModel, Edge } from './cells/Edge.js';
+import { NodeModel } from './cells/Node.js';
+import './components/Arrow.js';
+import 'react';
+import 'mobx-react';
+import './components/Interacotr.js';
+import { Port } from './components/Port.js';
+import './components/ContextMenu/index.js';
+import './components/SelectBoundsRect.js';
 import { color } from './theme/style.js';
 import { findIndex, arrayMove, remove, isRectsInterSect } from './utils/util.js';
+import { getRelativeBoundingBox } from './utils/coords.js';
 import { l as lodash } from './_virtual/lodash.js';
 import v4 from './packages/flow/node_modules/uuid/dist/esm-browser/v4.js';
 
@@ -22,10 +32,11 @@ var FlowModel = /** @class */ (function () {
         this.pendingRender = true;
         this._width = 1000;
         this._height = 600;
-        this._grid = 40;
+        this._grid = 0;
         this._linkEdge = "Edge";
         this.refs = {
-            stageRef: undefined,
+            stageRef: null,
+            svgRef: null,
         };
         this.hotKey = {
             RightMouseDown: false,
@@ -129,10 +140,16 @@ var FlowModel = /** @class */ (function () {
         this.wrapperRefsMap = new Map();
         // cell的<id, 实例>map，方便用id获取到组件实例
         this.cellsMap = new Map();
+        this.cellsModelMap = new Map();
         // cellData的<id, cellData>map，用来修改受控数据
         this.cellsDataMap = new Map();
         // 注册节点到model，方便动态引用
-        this.componentsMap = new Map();
+        this.componentsMap = new Map([
+            ["Edge", Edge],
+            ["Port", Port],
+        ]);
+        // component和model的映射
+        this.modelFactoriesMap = new Map([["Edge", EdgeModel]]);
         this.regist = function (name, component) {
             _this.componentsMap.set(name, component);
         };
@@ -173,17 +190,22 @@ var FlowModel = /** @class */ (function () {
                 isLinking: false,
             };
         };
-        this.getLocalBBox = function (id) {
-            var _a, _b, _c;
-            var instanceBounds = ((_a = _this.cellsMap.get(id)) === null || _a === void 0 ? void 0 : _a.wrapperRef.current.getLocalBounds()) ||
-                ((_c = (_b = _this.wrapperRefsMap.get(id)) === null || _b === void 0 ? void 0 : _b.current) === null || _c === void 0 ? void 0 : _c.getLocalBounds());
-            var _d = _this.getNodePosition(id), x = _d.x, y = _d.y;
+        /**
+         * @description 获取当前鼠标的[画布坐标]
+         */
+        // @TODO 在添加节点，拖拽线条时候并不需要svg的pointerEvents
+        this.getCursorCoord = function (e) {
+            var _a;
+            var stageBounds = (_a = _this.refs.stageRef) === null || _a === void 0 ? void 0 : _a.getBoundingClientRect();
             return {
-                x: instanceBounds.center[0] - instanceBounds.halfExtents[0] + x,
-                y: instanceBounds.center[1] - instanceBounds.halfExtents[1] + y,
-                width: instanceBounds.halfExtents[0] * 2,
-                height: instanceBounds.halfExtents[1] * 2,
+                x: (e.clientX - stageBounds.x - _this.x) / _this.scale,
+                y: (e.clientY - stageBounds.y - _this.y) / _this.scale,
             };
+        };
+        this.getLocalBBox = function (id) {
+            var _a;
+            var dom = (_a = _this.wrapperRefsMap.get(id)) === null || _a === void 0 ? void 0 : _a.current;
+            return getRelativeBoundingBox(dom, _this.refs.stageRef);
         };
         this.setCanvasData = function (canvasData) {
             _this.pendRender();
@@ -309,9 +331,10 @@ var FlowModel = /** @class */ (function () {
         // @action setAutoLayout = (layoutOption) => {};
         this.createCellData = function (component, initOptions) {
             var id = v4();
-            var metaData = Object.assign(_this.componentsMap.get(component).getMetaData(), {
+            var metaData = Object.assign(_this.modelFactoriesMap.get(component).defaultData, {
                 component: component,
             });
+            console.log(metaData);
             _this.insertRuntimeState(metaData);
             return Object.assign(metaData, __assign({ id: id, visible: true }, initOptions));
         };
@@ -336,10 +359,9 @@ var FlowModel = /** @class */ (function () {
             });
             return newCellData.id;
         };
-        this.setLinkingPosition = function (e) {
-            var cursorPos = _this.getStageCursor(e);
-            _this.buffer.link.target.x = cursorPos.x;
-            _this.buffer.link.target.y = cursorPos.y;
+        this.setLinkingPosition = function (coord) {
+            _this.buffer.link.target.x = coord.x;
+            _this.buffer.link.target.y = coord.y;
         };
         this.link = function (source, target) {
             var sourceCellData = _this.getCellData(source);
@@ -377,6 +399,9 @@ var FlowModel = /** @class */ (function () {
         this.getCellData = function (id) {
             return _this.cellsDataMap.get(id);
         };
+        this.getCellModel = function (id) {
+            return _this.cellsModelMap.get(id);
+        };
         this.getCellInstance = function (id) {
             return _this.cellsMap.get(id);
         };
@@ -397,20 +422,20 @@ var FlowModel = /** @class */ (function () {
         };
         this.sendEvent = function (cellId, params) {
             var events = _this.eventMap.get(cellId);
-            console.log(events);
             events &&
                 events.forEach(function (event) {
                     event(params);
                 });
         };
-        /**
-         * @description 获取当前鼠标的[画布坐标]
-         */
-        this.getStageCursor = function (e) {
-            return {
-                x: (e.canvas.x - _this.x) / _this.scale,
-                y: (e.canvas.y - _this.y) / _this.scale,
-            };
+        this.registModel = function (components) {
+            for (var key in components) {
+                _this.modelFactoriesMap.set(key, components[key]);
+            }
+        };
+        this.registComponents = function (components) {
+            for (var key in components) {
+                _this.regist(key, components[key]);
+            }
         };
         makeObservable(this);
         if (eventSender)
@@ -421,6 +446,11 @@ var FlowModel = /** @class */ (function () {
         this.cellsDataMap.set(cellData.id, cellData);
         function isNodeDataType(t) {
             return t.cellType === "node";
+        }
+        if (!this.modelFactoriesMap.get(cellData.component)) {
+            this.modelFactoriesMap.set(cellData.component, cellData.component || cellData.cellType === "node"
+                ? NodeModel
+                : EdgeModel);
         }
         if (isNodeDataType(cellData)) {
             if (cellData.ports) {

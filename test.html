@@ -1,64 +1,20 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <script src="https://unpkg.com/konva@8.3.5/konva.min.js"></script>
-    <meta charset="utf-8" />
-    <title>Konva Groups Demo</title>
-    <style>
-      body {
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-        background-color: #f0f0f0;
-      }
-    </style>
-  </head>
-  <body>
-    <div id="container"></div>
-    <script>
-      var width = window.innerWidth;
-      var height = window.innerHeight;
+<svg
+  viewBox="-40 0 150 100"
+  xmlns="http://www.w3.org/2000/svg"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+>
+  <g
+    fill="grey"
+    transform="rotate(-10 50 100)
+                translate(-36, 45.5)
+                skewX(40)
+                scale(1 0.5)"
+  >
+    <path
+      id="heart"
+      d="M 10,30 A 20,20 0,0,1 50,30 A 20,20 0,0,1 90,30 Q 90,60 50,90 Q 10,60 10,30 z"
+    />
+  </g>
 
-      var stage = new Konva.Stage({
-        container: "container",
-        width: width,
-        height: height,
-      });
-
-      var layer = new Konva.Layer();
-
-      /*
-       * create a group which will be used to combine
-       * multiple simple shapes.  Transforming the group will
-       * transform all of the simple shapes together as
-       * one unit
-       */
-      var group = new Konva.Group({
-        x: 120,
-        y: 40,
-      });
-
-      var colors = ["red", "orange", "yellow"];
-
-      var box = new Konva.Path({
-        data: 'M-10,10 L0,0 L-10,-10 Z',
-        stroke: "black",
-        strokeWidth: 4,
-      });
-
-      var dot = new Konva.Circle({
-        radius: 2,
-        stroke: "red",
-        strokeWidth: 4,
-      });
-
-      group.add(box);
-      group.add(dot);
-
-      group.rotate(50)
-
-      layer.add(group);
-      stage.add(layer);
-    </script>
-  </body>
-</html>
+  <use xlink:href="#heart" fill="none" stroke="red" />
+</svg>

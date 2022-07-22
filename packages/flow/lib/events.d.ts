@@ -1,10 +1,23 @@
+/// <reference types="react" />
 import Model from "./Model";
-import { Canvas } from '@antv/g';
-export declare const initClearState: (model: Model, stage: Canvas) => void;
-export declare const initLink: (model: Model, stage: Canvas) => void;
-export declare const initSelect: (model: Model) => void;
-export declare const initDrag: (model: Model, stage: Canvas) => void;
-export declare const initScale: (model: Model, stage: Canvas) => void;
-export declare const initMultiSelect: (model: Model, stage: Canvas) => void;
-export declare const initHotKeys: (model: Model, stage: Canvas) => void;
-export declare const initDataChangeListener: (model: Model) => void;
+import { BehaviorName, StageEventName, WindowEventName } from "./typings/common";
+declare type StageEventType = React.WheelEvent | React.MouseEvent;
+interface StageEventFn {
+    (e: StageEventType, model: Model): any;
+}
+interface WindowEventFn {
+    (e: KeyboardEvent, model: Model): any;
+}
+interface InitFn {
+    (model: Model): any;
+}
+declare type EventMaps = Partial<{
+    [key in StageEventName]: StageEventFn;
+} | {
+    [key in WindowEventName]: WindowEventFn;
+} | {
+    'init': InitFn;
+}>;
+export declare const behaviorsMap: Record<BehaviorName, EventMaps>;
+export declare const initEvents: (behaviors: BehaviorName[], model: Model) => Record<StageEventName, import("react").MouseEventHandler<HTMLDivElement> | undefined>;
+export {};

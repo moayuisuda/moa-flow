@@ -1,6 +1,6 @@
-import G, { InteractivePointerEvent } from "@antv/g";
 import React from "react";
-import { CellDataType } from "./cells/Cell";
+import { CellDataType, CellModel } from "./cells/Cell";
+import { Port } from "./components";
 import { AllCellDataType, CanvasDataType, Vector2d } from "./typings/common";
 declare type EventSender = (data: any) => void;
 export declare class FlowModel {
@@ -42,7 +42,8 @@ export declare class FlowModel {
     get contextMenuVisible(): boolean;
     set contextMenuVisible(visible: boolean);
     refs: {
-        stageRef: React.RefObject<G.Canvas> | undefined;
+        stageRef: HTMLDivElement | null;
+        svgRef: SVGElement | null;
     };
     hotKey: {
         RightMouseDown: boolean;
@@ -107,15 +108,15 @@ export declare class FlowModel {
         success: string;
         error: string;
     };
-    getWrapperRef: (id: string) => {
-        current: G.Group | null;
-    } | undefined;
+    getWrapperRef: (id: string) => React.RefObject<HTMLDivElement>;
     wrapperRefsMap: Map<string, {
-        current: G.Group | null;
+        current: HTMLDivElement | null;
     }>;
     cellsMap: Map<string, any>;
+    cellsModelMap: Map<string, CellModel>;
     cellsDataMap: Map<string, CellDataType>;
-    componentsMap: Map<any, any>;
+    componentsMap: Map<string, typeof Port | React.FC<{}>>;
+    modelFactoriesMap: Map<string, typeof CellModel>;
     regist: (name: string, component: any) => void;
     eventBus: {
         sender: EventSender | undefined;
@@ -128,12 +129,14 @@ export declare class FlowModel {
     emitEvent: (data: any) => void;
     setStageScale: (scale: number) => void;
     insertRuntimeState: (cellData: CellDataType) => void;
-    getLocalBBox: (id: string) => {
+    /**
+     * @description 获取当前鼠标的[画布坐标]
+     */
+    getCursorCoord: (e: React.MouseEvent) => {
         x: number;
         y: number;
-        width: number;
-        height: number;
     };
+    getLocalBBox: (id: string) => import("./utils/coords").BoundingBox;
     setCanvasData: (canvasData: CanvasDataType) => void;
     setCellId: (data: CellDataType) => void;
     setCellData: (id: string, data: any, rec?: boolean) => void;
@@ -164,12 +167,13 @@ export declare class FlowModel {
     };
     createCellData: (component: string, initOptions?: any) => any;
     addCell: (componentName: string, initOptions?: any) => any;
-    setLinkingPosition: (e: InteractivePointerEvent) => void;
+    setLinkingPosition: (coord: Vector2d) => void;
     link: (source: string, target: string) => void;
     setStagePosition: (x: number, y: number) => void;
     moveTo(id: string, index: number): void;
     getCell: (id: string) => any;
     getCellData: (id: string) => CellDataType | undefined;
+    getCellModel: (id: string) => CellModel | undefined;
     getCellInstance: (id: string) => any;
     getCellsData: () => any[];
     getNodePosition: (id: string) => {
@@ -177,12 +181,7 @@ export declare class FlowModel {
         y: number;
     };
     sendEvent: (cellId: string, params?: any) => void;
-    /**
-     * @description 获取当前鼠标的[画布坐标]
-     */
-    getStageCursor: (e: InteractivePointerEvent) => {
-        x: number;
-        y: number;
-    };
+    registModel: (components: Record<string, typeof CellModel>) => void;
+    registComponents: (components: Record<string, React.FC>) => void;
 }
 export default FlowModel;

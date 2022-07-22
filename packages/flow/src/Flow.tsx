@@ -1,54 +1,73 @@
-import { Renderer as CanvasRenderer } from "@antv/g-canvas";
-import { Canvas as RGCanvas, Circle, Group } from "@antv/react-g";
-import React, { createRef } from "react";
-import LinkingEdge from "./cells/LinkingEdge";
+import React from "react";
+import { LinkingEdge } from "./cells/LinkingEdge";
 import FlowModel from "./Model";
 
 import { computed } from "mobx";
 import { observer } from "mobx-react";
 import { FlowContext } from "./Context";
 
-import * as G from "@antv/g";
 import { getContextMenu, SelectBoundsRect } from "./components";
-import { registComponents } from "./utils/registComponents";
 
 import { useContext } from "react";
-import { CellDataType } from "./cells/Cell";
+import { CellDataType, CellModel } from "./cells/Cell";
 import { STAGE_ID } from "./constants";
-import {
-  initClearState,
-  initDataChangeListener,
-  initDrag,
-  initHotKeys,
-  initLink,
-  initMultiSelect,
-  initScale,
-  initSelect,
-} from "./events";
 import { color } from "./theme/style";
-import { getCanvas } from "./utils/getElement";
+import { initEvents } from "./events";
+import { BehaviorName, CanvasDataType } from "typings/common";
+import { Interactor } from "./components/Interacotr";
 
-const renderer = new CanvasRenderer();
+const PositionWrapper = observer(({ cellData }: { cellData: CellDataType }) => {
+  const isNode = cellData.cellType === "node";
+  const context = useContext(FlowContext);
+  const absolutePosition = isNode
+    ? context.getNodePosition(cellData.id)
+    : { x: 0, y: 0 };
+
+  const Component = context.componentsMap.get(cellData.component) as React.FC<{
+    model: CellModel;
+  }>;
+  if (!Component)
+    throw `[flow-infra] component ${cellData.component} is not regist.`;
+
+  return React.createElement(isNode ? "div" : "g", {
+    ref: context.getWrapperRef(cellData.id),
+    style: isNode
+      ? {
+          position: "absolute",
+          left: absolutePosition.x,
+          top: absolutePosition.y,
+        }
+      : {},
+      // 这里cellData没变符合pure，且在CellComponent中没有引用x，y，所以变化位置时不会重渲染
+    children: <CellComponent cellData={cellData} />,
+  });
+});
 
 const CellComponent = observer(({ cellData }: { cellData: CellDataType }) => {
-  const model = useContext(FlowContext);
-  const absolutePosition =
-    cellData.cellType === "node"
-      ? model.getNodePosition(cellData.id)
-      : { x: 0, y: 0 };
+  const isNode = cellData.cellType === "node";
+  const context = useContext(FlowContext);
 
-  return (
-    <Group {...absolutePosition}>
-      {React.createElement(
-        model.componentsMap.get(cellData.component) || Group,
-        {
-          data: cellData,
-          key: cellData.id,
-          wrapperRef: model.getWrapperRef(cellData.id),
-        }
-      )}
-    </Group>
-  );
+  const Component = context.componentsMap.get(cellData.component) as React.FC<{
+    model: CellModel;
+  }>;
+  if (!Component)
+    throw `[flow-infra] component ${cellData.component} is not regist.`;
+
+  const Model = context.modelFactoriesMap.get(
+    cellData.component
+  ) as typeof CellModel;
+  const cellModel = new Model(cellData, context);
+  context.cellsModelMap.set(cellData.id, cellModel);
+
+  return React.createElement(Interactor, {
+    key: cellData.id,
+    id: cellData.id,
+    inSvg: !isNode,
+    children: React.createElement(Component, {
+      model: cellModel, // 这里只是传了cellModel，最后返回了个ReactNode，但是cellModel内的属性并没有被读取，CellComponent也就没有收集Model的依赖
+      key: cellData.id,
+    }),
+  });
 });
 
 const Dots = observer(() => {
@@ -75,13 +94,19 @@ const Dots = observer(() => {
   }).get();
 
   return (
-    <Group>
-      {_dots.map((dot) => {
+    <div>
+      {/* {_dots.map((dot) => {
         return <Circle cx={dot.x} cy={dot.y} r={2} fill={color.deepGrey} />;
-      })}
-    </Group>
+      })} */}
+    </div>
   );
 });
+
+const getViewBox = (context: FlowModel) => {
+  return `${-context.x} ${-context.y} ${context.width / context.scale} ${
+    context.height / context.scale
+  }`;
+};
 
 @observer
 class Grid extends React.Component<{}> {
@@ -107,14 +132,15 @@ class Grid extends React.Component<{}> {
     }).get();
 
     return (
-      <Group
-        {..._gridPos}
-        zIndex={0}
-        ref={this.gridRef}
-        visibility={grid && this.context.scale >= 1 ? "visible" : "hidden"}
-      >
-        <Dots />
-      </Group>
+      // <Group
+      //   {..._gridPos}
+      //   zIndex={0}
+      //   ref={this.gridRef}
+      //   visibility={grid && this.context.scale >= 1 ? "visible" : "hidden"}
+      // >
+      //   <Dots />
+      // </Group>
+      <></>
     );
   }
 }
@@ -127,11 +153,11 @@ const Edges = observer(() => {
   );
 
   return (
-    <Group zIndex={1}>
+    <>
       {edgesData.map((cellData: CellDataType) => (
-        <CellComponent cellData={cellData} key={cellData.id} />
+        <PositionWrapper cellData={cellData} key={cellData.id} />
       ))}
-    </Group>
+    </>
   );
 });
 
@@ -143,11 +169,11 @@ const Nodes = observer(() => {
   });
 
   return (
-    <Group zIndex={2}>
+    <>
       {nodesData.slice(0, nodesData.length).map((cellData) => (
-        <CellComponent cellData={cellData} key={cellData.id} />
+        <PositionWrapper cellData={cellData} key={cellData.id} />
       ))}
-    </Group>
+    </>
   );
 });
 
@@ -155,10 +181,10 @@ const InteractTop = observer(() => {
   const context = useContext(FlowContext);
 
   return (
-    <Group zIndex={3}>
+    <>
       <LinkingEdge data={context.buffer.link} />
-      <SelectBoundsRect />
-    </Group>
+      {/* <SelectBoundsRect /> */}
+    </>
   );
 });
 
@@ -166,19 +192,25 @@ type FlowProps = {
   canvasData?: any;
   onEvent?: (e: { type: string; data: any }) => void;
   onLoad?: (model: FlowModel) => void;
-  zoom?: boolean;
+  scale?: boolean;
   modelRef?: any;
   width?: number;
   height?: number;
   grid?: number;
   multiSelect?: boolean;
+  components?: Record<string, React.FC<any>>;
+  linkEdge?: string;
 };
 @observer
 class Flow extends React.Component<FlowProps, {}> {
   flowModel: FlowModel;
-  stageRef;
 
-  constructor(props: FlowProps) {
+  constructor(
+    props: FlowProps = {
+      scale: true,
+      multiSelect: false,
+    }
+  ) {
     super(props);
 
     this.flowModel = new FlowModel(props.onEvent);
@@ -193,81 +225,91 @@ class Flow extends React.Component<FlowProps, {}> {
     this.props.onLoad && this.props.onLoad(this.flowModel);
 
     props.modelRef && (props.modelRef.current = this.flowModel);
-    const { refs } = this.flowModel;
-    this.stageRef = refs.stageRef = createRef<G.Canvas>();
-
-    registComponents(this.flowModel);
+    this.flowModel.registComponents(props.components || {});
   }
 
   componentDidMount = async () => {
     const { flowModel: model } = this;
 
-    const stage = this.stageRef.current as G.Canvas;
-    const { zoom = true, multiSelect = false } = this.props;
+    const stage = model.refs.stageRef as HTMLDivElement;
 
-    initClearState(model, stage);
-    initLink(model, stage);
-    initDrag(model, stage);
-    initSelect(model);
-
-    zoom && initScale(model, stage);
-
-    multiSelect && initMultiSelect(model, stage);
-    initHotKeys(model, stage);
-    initHotKeys(model, stage);
-    initDataChangeListener(model);
-
-    await this.stageRef.current?.ready;
     this.props.canvasData &&
       this.flowModel.setCanvasData(this.props.canvasData);
   };
+
+  getEvents() {
+    const extraEvents: BehaviorName[] = ["scale", "multiSelect"];
+    const defaultEvents: BehaviorName[] = [
+      "clearState",
+      "link",
+      "drag",
+      "select",
+      "hotkeys",
+    ];
+
+    const events: BehaviorName[] = [...defaultEvents];
+    extraEvents.forEach((event) => {
+      if (this.props[event as keyof FlowProps]) events.push(event);
+    });
+
+    return initEvents(events, this.flowModel);
+  }
 
   render() {
     const { flowModel: model } = this;
 
     return (
-      <div
-        style={{
-          overflow: "hidden",
-          position: "relative",
-          display: "inline-block",
-        }}
-        id={STAGE_ID}
-      >
-        <FlowContext.Provider value={model}>
+      <FlowContext.Provider value={model}>
+        <div>
           {getContextMenu(this.props.children)}
-          <RGCanvas
-            renderer={renderer}
-            ref={this.stageRef}
-            width={model.width}
-            height={model.height}
+          <div
+            style={{
+              overflow: "hidden",
+              display: "inline-block",
+              position: "absolute",
+              width: model.width,
+              height: model.height,
+            }}
+            id={STAGE_ID}
+            ref={(ref) => {
+              model.refs.stageRef = ref;
+            }}
+            {...this.getEvents()}
           >
-            <Group
-              transform={`scale(${model.scale}, ${model.scale})`}
-              // @ts-ignore
-              x={model.x}
-              y={model.y}
+            <div
+              style={{
+                zIndex: 1,
+                position: "absolute",
+                left: model.x,
+                top: model.y,
+                transform: `scale(${model.scale}, ${model.scale})`,
+                transformOrigin: "top left",
+                width: model.width,
+                height: model.height,
+              }}
             >
-              <FlowContext.Provider value={model}>
-                {model.grid && <Grid />}
-                {getCanvas(this.props.children)}
-              </FlowContext.Provider>
-            </Group>
-          </RGCanvas>
-        </FlowContext.Provider>
-      </div>
+              <Nodes />
+            </div>
+            <svg
+              viewBox={getViewBox(model)}
+              style={{
+                zIndex: 0,
+                position: "absolute",
+                pointerEvents: "visiblePainted",
+              }}
+              ref={(ref) => (model.refs.svgRef = ref)}
+              width={model.width}
+              height={model.height}
+            >
+              {/* {model.grid && <Grid />} */}
+              <Edges />
+              <InteractTop />
+            </svg>
+          </div>
+        </div>
+      </FlowContext.Provider>
     );
   }
 }
-
-export const Canvas = () => {
-  return (
-    <>
-      <Nodes />
-      <Edges />
-      <InteractTop />
-    </>
-  );
-};
 
 export default Flow;

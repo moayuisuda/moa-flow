@@ -1,48 +1,65 @@
-import Cell, { CellDataType } from "./Cell";
-import G from "@antv/g";
+import { CellModel, CellDataType } from "./Cell";
 
 export type NodeDataType = {
   x: number;
   y: number;
-  type: string;
-  ports?: [];
+  [index: string]: any;
 } & CellDataType;
 
-export type NodePropsType<D> = {
-  data: NodeDataType & D;
-  wrapperRef: {
-    current: null | G.Group;
-  };
-};
+// util type
+export type NodeData<D> = D & NodeDataType;
 
-abstract class Node<P = {}, S = {}> extends Cell<P & NodeDataType, S> {
-  static metaData: any = {
+export class NodeModel<D extends NodeDataType> extends CellModel {
+  static defaultData: NodeDataType = {
     x: 0,
     y: 0,
+    id: "",
+    component: "",
     cellType: "node",
   };
 
+  data: D;
+
   getLinkNodes() {
-    return this.context.getLinkNodes(this.props.data.id);
+    return this.context.getLinkNodes(this.data.id);
   }
 
   getLinkPorts() {
-    return this.context.getLinkPorts(this.props.data.id);
+    return this.context.getLinkPorts(this.data.id);
   }
 
   getNodeEdges() {
-    return this.context.getNodeEdges(this.props.data.id);
+    return this.context.getNodeEdges(this.data.id);
   }
 
   getPosition() {
-    return this.context.getNodePosition(this.getData().id);
+    return this.context.getNodePosition(this.data.id);
   }
 
   getChildren() {
     return this.context.canvasData.cells.filter((cellData) => {
-      cellData.parent === this.getData().id;
+      cellData.parent === this.data.id;
     });
   }
 }
 
-export default Node;
+// @TODO
+// type BizParams = {
+//   name: string;
+//   age: number;
+// };
+
+// class Base<T> {
+//   param: T;
+//   constructor() {}
+// }
+
+// class Biz extends Base<{ name: string; age: number }> {
+//   constructor() {
+//     super();
+//   }
+// }
+
+// const map: Record<string, typeof Base> = {
+//   Biz: Biz,
+// };

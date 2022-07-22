@@ -1,19 +1,13 @@
-import Cell, { CellDataType } from "./Cell";
-import G from "@antv/g";
+import { CellModel, CellDataType } from "./Cell";
 export declare type NodeDataType = {
     x: number;
     y: number;
-    type: string;
-    ports?: [];
+    [index: string]: any;
 } & CellDataType;
-export declare type NodePropsType<D> = {
-    data: NodeDataType & D;
-    wrapperRef: {
-        current: null | G.Group;
-    };
-};
-declare abstract class Node<P = {}, S = {}> extends Cell<P & NodeDataType, S> {
-    static metaData: any;
+export declare type NodeData<D> = D & NodeDataType;
+export declare class NodeModel<D extends NodeDataType> extends CellModel {
+    static defaultData: NodeDataType;
+    data: D;
     getLinkNodes(): string[];
     getLinkPorts(): string[];
     getNodeEdges(): string[];
@@ -23,4 +17,3 @@ declare abstract class Node<P = {}, S = {}> extends Cell<P & NodeDataType, S> {
     };
     getChildren(): any[];
 }
-export default Node;

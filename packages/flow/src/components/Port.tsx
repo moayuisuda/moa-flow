@@ -1,11 +1,10 @@
-import { Group } from "@antv/react-g";
-import { InteractivePointerEvent } from "@antv/g";
 import React from "react";
 
-import Cell from "../cells/Cell";
 import { CellDataType } from "../cells/Cell";
-import FlowModel from "../Model";
 import { isFunction } from "lodash";
+import { FlowContext } from "../Context";
+import { FlowModel } from "../Model";
+import { observer } from "mobx-react";
 
 export type PortDataType = {
   edges?: string[];
@@ -17,21 +16,37 @@ type PortPropsType = {
   x?: number;
   y?: number;
   anchor: { x: number; y: number } | (() => { x: number; y: number });
+  data: PortDataType;
 };
 
-export class Port extends Cell<PortDataType, {}, PortPropsType> {
-  wrapperRef: React.RefObject<any>;
-  static metaData = {
+export type PortData<D> = D & PortDataType;
+
+@observer
+export class Port extends React.Component<PortPropsType> {
+  static contextType = FlowContext;
+  // vscode 无法推断 this.context 的类型，需要显式声明 this.context 的类型
+  declare context: React.ContextType<typeof FlowContext>;
+
+  static defaultData: PortDataType = {
+    id: "",
+    component: "Port",
     cellType: "port",
     source: undefined,
     target: undefined,
   };
 
+  wrapperRef: React.RefObject<any>;
   constructor(
     props: PortPropsType & { data: PortDataType },
     context: FlowModel
   ) {
     super(props, context);
+    context.cellsMap.set(props.data.id, this);
+    this.wrapperRef = context.getWrapperRef(props.data.id);
+  }
+
+  get data() {
+    return this.props.data;
   }
 
   anchor() {
@@ -40,7 +55,7 @@ export class Port extends Cell<PortDataType, {}, PortPropsType> {
       : this.props.anchor;
   }
 
-  onLinkStart(e: InteractivePointerEvent) {
+  onLinkStart(e: React.MouseEvent) {
     e.stopPropagation();
 
     const {
@@ -60,7 +75,7 @@ export class Port extends Cell<PortDataType, {}, PortPropsType> {
     link.target = this.anchor();
   }
 
-  onLinkEnd(e: InteractivePointerEvent) {
+  onLinkEnd(e: React.MouseEvent) {
     e.stopPropagation();
 
     const {
@@ -98,17 +113,20 @@ export class Port extends Cell<PortDataType, {}, PortPropsType> {
     }
   }
 
-  content() {
+  render() {
     return (
-      <Group
-        cursor="crosshair"
-        onMousedown={(e: InteractivePointerEvent) => this.onLinkStart(e)}
-        onMouseup={(e: InteractivePointerEvent) => this.onLinkEnd(e)}
-        x={this.props.x || 0}
-        y={this.props.y || 0}
+      <div
+        ref={this.wrapperRef}
+        style={{
+          userSelect: 'none',
+          cursor: "crosshair",
+          display: 'inline-block'
+        }}
+        onMouseDown={(e) => this.onLinkStart(e)}
+        onMouseUp={(e) => this.onLinkEnd(e)}
       >
         {this.props.children}
-      </Group>
+      </div>
     );
   }
 }

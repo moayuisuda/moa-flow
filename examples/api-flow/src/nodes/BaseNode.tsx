@@ -1,10 +1,9 @@
 import type { ModelType, NodeDataType, PortDataType } from "@ali/flow-infra-g";
-import { ConsumerBridge, Graph, Interactor, Node } from "@ali/flow-infra-g";
+import { Interactor, Node } from "@ali/flow-infra-g";
 import { message } from "antd";
 import { Context } from "../Context";
 import { HANG_FLAG } from "../constants";
 
-const { Rect, Text, Circle, Group } = Graph;
 const { Port } = Interactor;
 
 export type BasePortDataType = PortDataType & {
@@ -27,10 +26,7 @@ export type BaseNodeDataType = {
   status: STATUS_ENUM;
 } & NodeDataType;
 
-class BaseNode<Data = {}, State = {}> extends Node<
-  BaseNodeDataType & Data,
-  State
-> {
+class BaseNode extends Node<BaseNodeDataType> {
   static metaData: any = {
     title: "",
     type: "",
@@ -169,7 +165,7 @@ class BaseNode<Data = {}, State = {}> extends Node<
   };
 
   getStroke() {
-    const isSelect = this.isSelect();
+    const isSelect = this.isSelect;
     const { color } = this.context;
 
     if (isSelect) {

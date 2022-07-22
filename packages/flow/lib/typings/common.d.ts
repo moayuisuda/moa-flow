@@ -25,3 +25,12 @@ export declare type Vector2d = {
     y: number;
 };
 export declare type Dir = [number, number];
+export declare type StageEventName = 'onMouseDown' | 'onMouseUp' | 'onMouseMove' | 'onWheel' | 'onClick';
+export declare type WindowEventName = 'onKeyDown' | 'onKeyUp';
+export declare type EventName = StageEventName | WindowEventName | 'init';
+export declare type BehaviorName = 'clearState' | 'link' | 'select' | 'drag' | 'scale' | 'multiSelect' | 'hotkeys';
+export declare type CellType = 'node' | 'port' | 'edge';
+export declare type Override<T, R> = Omit<T, keyof R> & R;
+export declare type Data<M, D> = Override<M, {
+    data: D;
+}>;

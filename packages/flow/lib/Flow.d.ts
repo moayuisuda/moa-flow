@@ -1,6 +1,5 @@
 import React from "react";
 import FlowModel from "./Model";
-import * as G from "@antv/g";
 declare type FlowProps = {
     canvasData?: any;
     onEvent?: (e: {
@@ -8,19 +7,20 @@ declare type FlowProps = {
         data: any;
     }) => void;
     onLoad?: (model: FlowModel) => void;
-    zoom?: boolean;
+    scale?: boolean;
     modelRef?: any;
     width?: number;
     height?: number;
     grid?: number;
     multiSelect?: boolean;
+    components?: Record<string, React.FC<any>>;
+    linkEdge?: string;
 };
 declare class Flow extends React.Component<FlowProps, {}> {
     flowModel: FlowModel;
-    stageRef: React.RefObject<G.Canvas>;
-    constructor(props: FlowProps);
+    constructor(props?: FlowProps);
     componentDidMount: () => Promise<void>;
+    getEvents(): Record<import("typings/common").StageEventName, React.MouseEventHandler<HTMLDivElement> | undefined>;
     render(): JSX.Element;
 }
-export declare const Canvas: () => JSX.Element;
 export default Flow;

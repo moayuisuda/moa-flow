@@ -22,10 +22,7 @@ declare class CommonNode extends Node<CommonNodeDataType, {}> {
         height: number;
     };
     getStroke: () => {
-        stroke: string;
-        lineWidth: number;
-    } | {
-        stroke: undefined;
+        stroke: any;
         lineWidth: number;
     };
     content(): JSX.Element;

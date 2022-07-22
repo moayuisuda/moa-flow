@@ -1,10 +1,10 @@
 import { observer } from "mobx-react";
 import React from "react";
 import { FlowContext } from "../Context";
-import { Group } from "@antv/react-g";
 import { isUndefined } from "lodash";
+import { CellModel } from "./Cell";
 @observer
-class LinkingEdge extends React.Component<{ data: any }> {
+export class LinkingEdge extends React.Component<{ data: any }> {
   static contextType = FlowContext;
   declare context: React.ContextType<typeof FlowContext>;
 
@@ -17,19 +17,24 @@ class LinkingEdge extends React.Component<{ data: any }> {
 
     if (isUndefined(data.source)) return <></>;
 
-    const RegistedEdge = this.context.componentsMap.get(this.context.linkEdge);
+    const RegistedEdge = this.context.componentsMap.get(
+      this.context.linkEdge
+    ) as React.FC<any>;
+    const Model = this.context.modelFactoriesMap.get(
+      data.component
+    ) as typeof CellModel;
 
     return (
-      <Group pointerEvents="none">
+      <g
+        style={{
+          pointerEvents: "none",
+        }}
+      >
         {React.createElement(RegistedEdge, {
-          data: {
-            id: "LINKING_EDGE",
-            ...this.props.data,
-          },
+          model: new Model(data, this.context),
+          key: data.id,
         })}
-      </Group>
+      </g>
     );
   }
 }
-
-export default LinkingEdge;

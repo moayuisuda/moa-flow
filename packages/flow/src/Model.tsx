@@ -1,15 +1,20 @@
-import G, { InteractivePointerEvent } from "@antv/g";
-import { isUndefined, merge, union, without } from "lodash";
+import { merge, union, without } from "lodash";
 import { action, makeObservable, observable, computed } from "mobx";
 import React from "react";
 import { v4 } from "uuid";
-import { CellDataType } from "./cells/Cell";
-import { EdgeDataType } from "./cells/Edge";
-import { NodeDataType } from "./cells/Node";
-import { PortDataType } from "./components";
+import { CellDataType, CellModel } from "./cells/Cell";
+import { Edge, EdgeDataType, EdgeModel } from "./cells/Edge";
+import { NodeModel, NodeDataType } from "./cells/Node";
+import { Port, PortDataType } from "./components";
 import { color } from "./theme/style";
-import { AllCellDataType, CanvasDataType, Vector2d } from "./typings/common";
+import {
+  AllCellDataType,
+  CanvasDataType,
+  Override,
+  Vector2d,
+} from "./typings/common";
 import { arrayMove, findIndex, isRectsInterSect, remove } from "./utils/util";
+import { getRelativeBoundingBox } from "./utils/coords";
 
 type EventSender = (data: any) => void;
 export class FlowModel {
@@ -34,6 +39,15 @@ export class FlowModel {
 
     function isNodeDataType(t: AllCellDataType): t is NodeDataType {
       return t.cellType === "node";
+    }
+
+    if (!this.modelFactoriesMap.get(cellData.component)) {
+      this.modelFactoriesMap.set(
+        cellData.component,
+        cellData.component || cellData.cellType === "node"
+          ? NodeModel
+          : EdgeModel
+      );
     }
 
     if (isNodeDataType(cellData)) {
@@ -87,7 +101,7 @@ export class FlowModel {
     this.width = size.width;
   }
 
-  @observable _grid: number = 40;
+  @observable _grid: number = 0;
   @computed
   get grid() {
     return this._grid;
@@ -138,7 +152,8 @@ export class FlowModel {
   }
 
   refs = {
-    stageRef: undefined as React.RefObject<G.Canvas> | undefined,
+    stageRef: null as HTMLDivElement | null,
+    svgRef: null as SVGElement | null,
   };
 
   @observable
@@ -264,23 +279,30 @@ export class FlowModel {
   // 全局颜色，可以由用户自定义
   @observable color = color;
 
-  getWrapperRef = (id: string) => {
+  getWrapperRef = (id: string): React.RefObject<HTMLDivElement> => {
     const ref = this.wrapperRefsMap.get(id);
 
     if (ref) return ref;
     else this.wrapperRefsMap.set(id, { current: null });
 
-    return this.wrapperRefsMap.get(id);
+    return this.wrapperRefsMap.get(id) as React.RefObject<HTMLDivElement>;
   };
   // function component的外层group ref的map
-  wrapperRefsMap = new Map<string, { current: G.Group | null }>();
+  wrapperRefsMap = new Map<string, { current: HTMLDivElement | null }>();
   // cell的<id, 实例>map，方便用id获取到组件实例
   cellsMap = new Map<string, React.Component<any, any> & any>();
+  cellsModelMap = new Map<string, CellModel>();
   // cellData的<id, cellData>map，用来修改受控数据
   cellsDataMap = new Map<string, CellDataType>();
 
   // 注册节点到model，方便动态引用
-  componentsMap = new Map();
+  componentsMap = new Map<string, typeof Port | React.FC>([
+    ["Edge", Edge],
+    ["Port", Port],
+  ]);
+  // component和model的映射
+  modelFactoriesMap = new Map<string, typeof CellModel>([["Edge", EdgeModel]]);
+
   regist = (name: string, component: any) => {
     this.componentsMap.set(name, component);
   };
@@ -325,18 +347,24 @@ export class FlowModel {
     };
   };
 
-  getLocalBBox = (id: string) => {
-    const instanceBounds =
-      this.cellsMap.get(id)?.wrapperRef.current.getLocalBounds() ||
-      this.wrapperRefsMap.get(id)?.current?.getLocalBounds();
+  /**
+   * @description 获取当前鼠标的[画布坐标]
+   */
 
-    const { x, y } = this.getNodePosition(id);
+  // @TODO 在添加节点，拖拽线条时候并不需要svg的pointerEvents
+  getCursorCoord = (e: React.MouseEvent) => {
+    const stageBounds = this.refs.stageRef?.getBoundingClientRect() as DOMRect;
+
     return {
-      x: instanceBounds.center[0] - instanceBounds.halfExtents[0] + x,
-      y: instanceBounds.center[1] - instanceBounds.halfExtents[1] + y,
-      width: instanceBounds.halfExtents[0] * 2,
-      height: instanceBounds.halfExtents[1] * 2,
+      x: (e.clientX - stageBounds.x - this.x) / this.scale,
+      y: (e.clientY - stageBounds.y - this.y) / this.scale,
     };
+  };
+
+  getLocalBBox = (id: string) => {
+    const dom = this.wrapperRefsMap.get(id)?.current as HTMLDivElement;
+
+    return getRelativeBoundingBox(dom, this.refs.stageRef as HTMLDivElement);
   };
 
   @action setCanvasData = (canvasData: CanvasDataType) => {
@@ -505,11 +533,13 @@ export class FlowModel {
     const id = v4();
 
     const metaData = Object.assign(
-      this.componentsMap.get(component).getMetaData(),
+      (this.modelFactoriesMap.get(component) as typeof CellModel).defaultData,
       {
         component,
       }
     );
+
+    console.log(metaData)
 
     this.insertRuntimeState(metaData);
 
@@ -548,11 +578,9 @@ export class FlowModel {
     return newCellData.id;
   };
 
-  @action setLinkingPosition = (e: InteractivePointerEvent) => {
-    const cursorPos = this.getStageCursor(e);
-
-    this.buffer.link.target.x = cursorPos.x;
-    this.buffer.link.target.y = cursorPos.y;
+  @action setLinkingPosition = (coord: Vector2d) => {
+    this.buffer.link.target.x = coord.x;
+    this.buffer.link.target.y = coord.y;
   };
 
   @action link = (source: string, target: string) => {
@@ -604,6 +632,10 @@ export class FlowModel {
     return this.cellsDataMap.get(id);
   };
 
+  getCellModel = (id: string) => {
+    return this.cellsModelMap.get(id);
+  };
+
   getCellInstance = (id: string) => {
     return this.cellsMap.get(id);
   };
@@ -630,22 +662,38 @@ export class FlowModel {
 
   sendEvent = (cellId: string, params?: any) => {
     const events = this.eventMap.get(cellId);
-    console.log(events);
     events &&
       events.forEach((event) => {
         event(params);
       });
   };
 
-  /**
-   * @description 获取当前鼠标的[画布坐标]
-   */
-  getStageCursor = (e: InteractivePointerEvent) => {
-    return {
-      x: (e.canvas.x - this.x) / this.scale,
-      y: (e.canvas.y - this.y) / this.scale,
-    };
+  registModel = (components: Record<string, typeof CellModel>) => {
+    for (let key in components) {
+      this.modelFactoriesMap.set(key, components[key]);
+    }
+  };
+
+  registComponents = (components: Record<string, React.FC>) => {
+    for (let key in components) {
+      this.regist(key, components[key]);
+    }
   };
 }
 
 export default FlowModel;
+
+type A = {
+  id: number;
+} & {
+  type: "node";
+};
+
+type C<T> = Override<A, T>;
+
+const c: C<{
+  id: string;
+}> = {
+  id: "asd",
+  type: "node",
+};

@@ -1,42 +1,66 @@
-import { __assign, __extends, __decorate, __awaiter, __generator } from './node_modules/tslib/tslib.es6.js';
-import { Renderer } from '@antv/g-canvas';
-import { Group, Circle, Canvas as Canvas$1 } from '@antv/react-g';
-import React, { useContext, createRef } from 'react';
-import LinkingEdge from './cells/LinkingEdge.js';
+import { __extends, __decorate, __spreadArray, __assign, __awaiter, __generator } from './node_modules/tslib/tslib.es6.js';
+import React, { useContext } from 'react';
+import { LinkingEdge } from './cells/LinkingEdge.js';
 import { FlowModel } from './Model.js';
 import { computed } from 'mobx';
 import { observer } from 'mobx-react';
 import { FlowContext } from './Context.js';
 import './components/Arrow.js';
-import './components/Interacotr.js';
+import { Interactor } from './components/Interacotr.js';
 import './components/Port.js';
-import './node_modules/react-dom/index.js';
 import { getContextMenu } from './components/ContextMenu/index.js';
-import { SelectBoundsRect } from './components/SelectBoundsRect.js';
-import { registComponents } from './utils/registComponents.js';
+import './components/SelectBoundsRect.js';
 import { STAGE_ID } from './constants.js';
-import { initClearState, initLink, initDrag, initSelect, initScale, initMultiSelect, initHotKeys } from './events.js';
-import { color } from './theme/style.js';
-import { getCanvas } from './utils/getElement.js';
+import { initEvents } from './events.js';
 
-var renderer = new Renderer();
+var PositionWrapper = observer(function (_a) {
+    var cellData = _a.cellData;
+    var isNode = cellData.cellType === "node";
+    var context = useContext(FlowContext);
+    var absolutePosition = isNode
+        ? context.getNodePosition(cellData.id)
+        : { x: 0, y: 0 };
+    var Component = context.componentsMap.get(cellData.component);
+    if (!Component)
+        throw "[flow-infra] component ".concat(cellData.component, " is not regist.");
+    return React.createElement(isNode ? "div" : "g", {
+        ref: context.getWrapperRef(cellData.id),
+        style: isNode
+            ? {
+                position: "absolute",
+                left: absolutePosition.x,
+                top: absolutePosition.y,
+            }
+            : {},
+        // 这里cellData没变符合pure，且在CellComponent中没有引用x，y，所以变化位置时不会重渲染
+        children: React.createElement(CellComponent, { cellData: cellData }),
+    });
+});
 var CellComponent = observer(function (_a) {
     var cellData = _a.cellData;
-    var model = useContext(FlowContext);
-    var absolutePosition = cellData.cellType === "node"
-        ? model.getNodePosition(cellData.id)
-        : { x: 0, y: 0 };
-    return (React.createElement(Group, __assign({}, absolutePosition), React.createElement(model.componentsMap.get(cellData.component) || Group, {
-        data: cellData,
+    var isNode = cellData.cellType === "node";
+    var context = useContext(FlowContext);
+    var Component = context.componentsMap.get(cellData.component);
+    if (!Component)
+        throw "[flow-infra] component ".concat(cellData.component, " is not regist.");
+    var Model = context.modelFactoriesMap.get(cellData.component);
+    var cellModel = new Model(cellData, context);
+    context.cellsModelMap.set(cellData.id, cellModel);
+    return React.createElement(Interactor, {
         key: cellData.id,
-        wrapperRef: model.getWrapperRef(cellData.id),
-    })));
+        id: cellData.id,
+        inSvg: !isNode,
+        children: React.createElement(Component, {
+            model: cellModel,
+            key: cellData.id,
+        }),
+    });
 });
-var Dots = observer(function () {
+observer(function () {
     var model = useContext(FlowContext);
     // const EXTRA = model.grid as number;
     var EXTRA = 0;
-    var _dots = computed(function () {
+    computed(function () {
         var re = [];
         for (var i = -EXTRA; i <= model.height + EXTRA; i += model.grid) {
             for (var j = -EXTRA; j <= model.width + EXTRA; j += model.grid) {
@@ -48,11 +72,12 @@ var Dots = observer(function () {
         }
         return re;
     }).get();
-    return (React.createElement(Group, null, _dots.map(function (dot) {
-        return React.createElement(Circle, { cx: dot.x, cy: dot.y, r: 2, fill: color.deepGrey });
-    })));
+    return (React.createElement("div", null));
 });
-var Grid = /** @class */ (function (_super) {
+var getViewBox = function (context) {
+    return "".concat(-context.x, " ").concat(-context.y, " ").concat(context.width / context.scale, " ").concat(context.height / context.scale);
+};
+/** @class */ ((function (_super) {
     __extends(Grid, _super);
     function Grid(props) {
         var _this = _super.call(this, props) || this;
@@ -62,67 +87,62 @@ var Grid = /** @class */ (function (_super) {
     Grid.prototype.render = function () {
         var _this = this;
         var grid = this.context.grid;
-        var _gridPos = computed(function () {
+        computed(function () {
             return {
                 x: -Math.round(_this.context.x / _this.context.scale / grid) * grid,
                 y: -Math.round(_this.context.y / _this.context.scale / grid) * grid,
             };
         }).get();
-        return (React.createElement(Group, __assign({}, _gridPos, { zIndex: 0, ref: this.gridRef, visibility: grid && this.context.scale >= 1 ? "visible" : "hidden" }),
-            React.createElement(Dots, null)));
+        return (
+        // <Group
+        //   {..._gridPos}
+        //   zIndex={0}
+        //   ref={this.gridRef}
+        //   visibility={grid && this.context.scale >= 1 ? "visible" : "hidden"}
+        // >
+        //   <Dots />
+        // </Group>
+        React.createElement(React.Fragment, null));
     };
     Grid.contextType = FlowContext;
     Grid = __decorate([
         observer
     ], Grid);
     return Grid;
-}(React.Component));
+})(React.Component));
 var Edges = observer(function () {
     var context = useContext(FlowContext);
     var edgesData = context.canvasData.cells.filter(function (cellData) { return cellData.cellType === "edge"; });
-    return (React.createElement(Group, { zIndex: 1 }, edgesData.map(function (cellData) { return (React.createElement(CellComponent, { cellData: cellData, key: cellData.id })); })));
+    return (React.createElement(React.Fragment, null, edgesData.map(function (cellData) { return (React.createElement(PositionWrapper, { cellData: cellData, key: cellData.id })); })));
 });
 var Nodes = observer(function () {
     var context = useContext(FlowContext);
     var nodesData = context.canvasData.cells.filter(function (cellData) {
         return cellData.cellType !== "edge";
     });
-    return (React.createElement(Group, { zIndex: 2 }, nodesData.slice(0, nodesData.length).map(function (cellData) { return (React.createElement(CellComponent, { cellData: cellData, key: cellData.id })); })));
+    return (React.createElement(React.Fragment, null, nodesData.slice(0, nodesData.length).map(function (cellData) { return (React.createElement(PositionWrapper, { cellData: cellData, key: cellData.id })); })));
 });
 var InteractTop = observer(function () {
     var context = useContext(FlowContext);
-    return (React.createElement(Group, { zIndex: 3 },
-        React.createElement(LinkingEdge, { data: context.buffer.link }),
-        React.createElement(SelectBoundsRect, null)));
+    return (React.createElement(React.Fragment, null,
+        React.createElement(LinkingEdge, { data: context.buffer.link })));
 });
 var Flow = /** @class */ (function (_super) {
     __extends(Flow, _super);
     function Flow(props) {
+        if (props === void 0) { props = {
+            scale: true,
+            multiSelect: false,
+        }; }
         var _this = _super.call(this, props) || this;
         _this.componentDidMount = function () { return __awaiter(_this, void 0, void 0, function () {
-            var model, stage, _a, _b, zoom, _c, multiSelect;
-            var _d;
-            return __generator(this, function (_e) {
-                switch (_e.label) {
-                    case 0:
-                        model = this.flowModel;
-                        stage = this.stageRef.current;
-                        _a = this.props, _b = _a.zoom, zoom = _b === void 0 ? true : _b, _c = _a.multiSelect, multiSelect = _c === void 0 ? false : _c;
-                        initClearState(model, stage);
-                        initLink(model, stage);
-                        initDrag(model, stage);
-                        initSelect(model);
-                        zoom && initScale(model, stage);
-                        multiSelect && initMultiSelect(model, stage);
-                        initHotKeys(model, stage);
-                        initHotKeys(model, stage);
-                        return [4 /*yield*/, ((_d = this.stageRef.current) === null || _d === void 0 ? void 0 : _d.ready)];
-                    case 1:
-                        _e.sent();
-                        this.props.canvasData &&
-                            this.flowModel.setCanvasData(this.props.canvasData);
-                        return [2 /*return*/];
-                }
+            var model;
+            return __generator(this, function (_a) {
+                model = this.flowModel;
+                model.refs.stageRef;
+                this.props.canvasData &&
+                    this.flowModel.setCanvasData(this.props.canvasData);
+                return [2 /*return*/];
             });
         }); };
         _this.flowModel = new FlowModel(props.onEvent);
@@ -135,38 +155,63 @@ var Flow = /** @class */ (function (_super) {
         }
         _this.props.onLoad && _this.props.onLoad(_this.flowModel);
         props.modelRef && (props.modelRef.current = _this.flowModel);
-        var refs = _this.flowModel.refs;
-        _this.stageRef = refs.stageRef = createRef();
-        registComponents(_this.flowModel);
+        _this.flowModel.registComponents(props.components || {});
         return _this;
     }
+    Flow.prototype.getEvents = function () {
+        var _this = this;
+        var extraEvents = ["scale", "multiSelect"];
+        var defaultEvents = [
+            "clearState",
+            "link",
+            "drag",
+            "select",
+            "hotkeys",
+        ];
+        var events = __spreadArray([], defaultEvents, true);
+        extraEvents.forEach(function (event) {
+            if (_this.props[event])
+                events.push(event);
+        });
+        return initEvents(events, this.flowModel);
+    };
     Flow.prototype.render = function () {
         var model = this.flowModel;
-        return (React.createElement("div", { style: {
-                overflow: "hidden",
-                position: "relative",
-                display: "inline-block",
-            }, id: STAGE_ID },
-            React.createElement(FlowContext.Provider, { value: model },
+        return (React.createElement(FlowContext.Provider, { value: model },
+            React.createElement("div", null,
                 getContextMenu(this.props.children),
-                React.createElement(Canvas$1, { renderer: renderer, ref: this.stageRef, width: model.width, height: model.height },
-                    React.createElement(Group, { transform: "scale(".concat(model.scale, ", ").concat(model.scale, ")"), 
-                        // @ts-ignore
-                        x: model.x, y: model.y },
-                        React.createElement(FlowContext.Provider, { value: model },
-                            model.grid && React.createElement(Grid, null),
-                            getCanvas(this.props.children)))))));
+                React.createElement("div", __assign({ style: {
+                        overflow: "hidden",
+                        display: "inline-block",
+                        position: "absolute",
+                        width: model.width,
+                        height: model.height,
+                    }, id: STAGE_ID, ref: function (ref) {
+                        model.refs.stageRef = ref;
+                    } }, this.getEvents()),
+                    React.createElement("div", { style: {
+                            zIndex: 1,
+                            position: "absolute",
+                            left: model.x,
+                            top: model.y,
+                            transform: "scale(".concat(model.scale, ", ").concat(model.scale, ")"),
+                            transformOrigin: "top left",
+                            width: model.width,
+                            height: model.height,
+                        } },
+                        React.createElement(Nodes, null)),
+                    React.createElement("svg", { viewBox: getViewBox(model), style: {
+                            zIndex: 0,
+                            position: "absolute",
+                            pointerEvents: "visiblePainted",
+                        }, ref: function (ref) { return (model.refs.svgRef = ref); }, width: model.width, height: model.height },
+                        React.createElement(Edges, null),
+                        React.createElement(InteractTop, null))))));
     };
     Flow = __decorate([
         observer
     ], Flow);
     return Flow;
 }(React.Component));
-var Canvas = function () {
-    return (React.createElement(React.Fragment, null,
-        React.createElement(Nodes, null),
-        React.createElement(Edges, null),
-        React.createElement(InteractTop, null)));
-};
 
-export { Canvas, Flow as default };
+export { Flow as default };

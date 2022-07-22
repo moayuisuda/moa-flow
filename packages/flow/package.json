@@ -26,7 +26,6 @@
     "watch": "rollup -cw"
   },
   "dependencies": {
-    "@antv/g-canvas": "^1.0.21",
     "@antv/react-g": "^1.0.15",
     "lodash": "^4.17.21",
     "mobx": "6.4.1",

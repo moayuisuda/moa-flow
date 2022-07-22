@@ -32,3 +32,13 @@ export type Vector2d = {
 }
 
 export type Dir = [number, number]
+
+export type StageEventName = 'onMouseDown' | 'onMouseUp' | 'onMouseMove' | 'onWheel' | 'onClick'
+export type WindowEventName = 'onKeyDown' | 'onKeyUp'
+export type EventName = StageEventName | WindowEventName | 'init'
+export type BehaviorName = 'clearState' | 'link' | 'select' | 'drag' | 'scale' | 'multiSelect' | 'hotkeys'
+
+export type CellType = 'node' | 'port' | 'edge'
+
+export type Override<T, R> = Omit<T, keyof R> & R;
+export type Data<M, D> = Override<M, { data: D }>

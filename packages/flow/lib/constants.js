@@ -15,5 +15,8 @@ __spreadArray(__spreadArray([], COMMON_RESERVED_WORDS, true), [
 __spreadArray(__spreadArray([], COMMON_RESERVED_WORDS, true), [
     'component', "source", "target", 'visible',
 ], false);
+var STAGE_EVENT_NAMES = ['onMouseDown', 'onMouseUp', 'onMouseMove', 'onWheel', 'onClick'];
+var WINDOW_EVENT_NAMES = ['onKeyDown', 'onKeyUp'];
+__spreadArray(__spreadArray(__spreadArray([], STAGE_EVENT_NAMES, true), WINDOW_EVENT_NAMES, true), ['init'], false);
 
-export { COMMON_RESERVED_WORDS, EVT_LEFTCLICK, EVT_RIGHTCLICK, STAGE_ID };
+export { COMMON_RESERVED_WORDS, EVT_LEFTCLICK, EVT_RIGHTCLICK, STAGE_EVENT_NAMES, STAGE_ID, WINDOW_EVENT_NAMES };

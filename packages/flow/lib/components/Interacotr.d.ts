@@ -2,12 +2,10 @@ import React from "react";
 import { FlowContext } from "../Context";
 import { Port } from "./Port";
 declare type InteractorType = {
-    x?: number;
-    y?: number;
     id: string;
-    draggable?: boolean;
-    selectable?: boolean;
+    inSvg?: boolean;
     topOnFocus?: boolean;
+    children: React.ReactNode;
 };
 export declare class Interactor extends React.Component<InteractorType> {
     static contextType: React.Context<import("../Model").FlowModel>;

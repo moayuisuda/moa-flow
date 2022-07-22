@@ -47,7 +47,7 @@ class BizNode extends Node<BizNodeDataType, { modalVisible: boolean }> {
   }
 
   getStroke = () => {
-    const isSelect = this.isSelect();
+    const isSelect = this.isSelect;
     const { color } = this.context;
 
     if (isSelect) {

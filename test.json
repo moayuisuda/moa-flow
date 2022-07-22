@@ -1,0 +1,63 @@
+{
+  "scale": 1,
+  "x": 100,
+  "y": 100,
+  "cells": [
+    {
+      "id": "1",
+      "cellType": "node",
+      "component": "BaseNode",
+      "x": 107,
+      "y": -44,
+      "visible": true,
+      "ports": [
+        {
+          "cellType": "port",
+          "label": "age",
+          "id": "1-0",
+          "portType": "in",
+          "host": "1"
+        },
+        {
+          "cellType": "port",
+          "label": "father",
+          "id": "1-1",
+          "portType": "out",
+          "fold": false,
+          "host": "1",
+          "edges": ["63a51fa7-e165-4de2-8671-054e0339cbd7"]
+        }
+      ],
+      "$state": { "isSelect": false, "isLinking": false }
+    },
+    {
+      "x": 400,
+      "y": 201,
+      "id": "cca79375-ad66-43d1-b2b9-8529085cf6ed",
+      "component": "BaseNode",
+      "cellType": "node",
+      "$state": { "isSelect": false, "isLinking": false },
+      "visible": true,
+      "ports": [
+        {
+          "portType": "out",
+          "host": "cca79375-ad66-43d1-b2b9-8529085cf6ed",
+          "cellType": "port",
+          "id": "26ba34d7-2205-49ca-bab1-f3b9ef9fdb57",
+          "edges": ["63a51fa7-e165-4de2-8671-054e0339cbd7"]
+        }
+      ]
+    },
+    {
+      "id": "63a51fa7-e165-4de2-8671-054e0339cbd7",
+      "component": "Edge",
+      "source": "26ba34d7-2205-49ca-bab1-f3b9ef9fdb57",
+      "target": "1-1",
+      "label": "",
+      "verticies": [],
+      "cellType": "edge",
+      "$state": { "isSelect": false, "isLinking": false },
+      "visible": true
+    }
+  ]
+}

@@ -2,5 +2,31 @@
   "scale": 1,
   "x": 100,
   "y": 100,
-  "cells": []
+  "cells": [
+    {
+      "id": "1",
+      "cellType": "node",
+      "component": "BaseNode",
+      "x": 30,
+      "y": 30,
+      "visible": true,
+      "ports": [
+        {
+          "cellType": "port",
+          "label": "age",
+          "id": "1-0",
+          "portType": "in",
+          "host": "1"
+        },
+        {
+          "cellType": "port",
+          "label": "father",
+          "id": "1-1",
+          "portType": "out",
+          "fold": false,
+          "host": "1"
+        }
+      ]
+    }
+  ]
 }

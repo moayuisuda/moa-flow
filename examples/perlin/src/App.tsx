@@ -2,46 +2,21 @@ import { Button, message, Space } from "antd";
 import "antd/dist/antd.css";
 import { useEffect, useRef, useState } from "react";
 
-import {
-  Canvas,
-  CellDataType,
-  Flow,
-  ModelType,
-  ContextMenu,
-} from "@ali/flow-infra-g";
+import { CellDataType, Flow, ModelType, ContextMenu } from "@ali/flow-infra-g";
 
 // @ts-ignore
-
 import { flatten } from "lodash";
-import { autorun } from "mobx";
-import FlowEdge from "./FlowEdge";
-import BlockNode from "./nodes/BlockNode";
-import InputNode from "./nodes/InputNode";
-import ProcessNode from "./nodes/ProcessNode";
 import testData from "./test.json";
+import BaseNode from "./nodes/BaseNode";
 
 function App() {
   const modelRef = useRef<ModelType>();
-  const [nodeList, setNodeList] = useState<[string, Function][]>([]);
+  const [nodeList, setNodeList] = useState<string[]>([]);
 
   useEffect(() => {
     const model = modelRef.current as ModelType;
 
-    // 注册节点
-    model.regist("InputNode", InputNode);
-    model.regist("ProcessNode", ProcessNode);
-    model.regist("BlockNode", BlockNode);
-    model.regist("FlowEdge", FlowEdge);
-
-    model.linkEdge = "FlowEdge";
-
-    setNodeList(
-      Array.from(modelRef.current?.componentsMap as Map<string, any>).filter(
-        ([_, Component]) => {
-          return Component.getMetaData().cellType === "node";
-        }
-      )
-    );
+    setNodeList(["BaseNode"]);
 
     model.extra = {
       taskPool: {},
@@ -49,7 +24,6 @@ function App() {
 
     // 将默认连线设置为FlowEdge
   }, []);
-  console.log({ nodeList });
 
   const handleSave = () => {
     const data = JSON.stringify(modelRef.current?.canvasData);
@@ -100,75 +74,100 @@ function App() {
         </Space>
       </div>
 
-      <Flow multiSelect modelRef={modelRef} grid={40} canvasData={testData}>
-        <Canvas />
-
+      <Flow
+        components={{
+          BaseNode: BaseNode,
+        }}
+        linkEdge="FlowEdge"
+        // multiSelect
+        modelRef={modelRef}
+        // grid={40}
+        canvasData={testData}
+      >
         <ContextMenu>
-          {(context: ModelType) => {
-            return (
-              <Space direction="vertical">
-                <Button
-                  onClick={() => {
-                    const { getCellData, selectCells } = context;
-                    const cellData = getCellData(selectCells[0]);
+          <Space direction="vertical">
+            <Button
+              onClick={() => {
+                const { deleCell, selectCells } = modelRef.current as ModelType;
+                deleCell(selectCells[0]);
+              }}
+            >
+              删除
+            </Button>
+            <Button
+              onClick={() => {
+                const { getCellData, selectCells } =
+                  modelRef.current as ModelType;
+                const cellData = getCellData(selectCells[0]);
+                if (
+                  !(
+                    cellData &&
+                    nodeList
+                      .map((nodeName) => nodeName)
+                      .includes(cellData.component)
+                  )
+                )
+                  message.info("请选择接口节点");
+                else {
+                  message.info(`${cellData.title}开始执行`);
+                  process(cellData.id);
+                }
+              }}
+            >
+              执行此节点
+            </Button>
+            <Button
+              onClick={() => {
+                const { getCell, selectCells } = modelRef.current as ModelType;
+                const cellInstance = getCell(selectCells[0]);
 
-                    if (
-                      !(
-                        cellData &&
-                        nodeList
-                          .map(([nodeName]) => nodeName)
-                          .includes(cellData.component)
-                      )
-                    )
-                      message.info("请选择接口节点");
-                    else {
-                      autorun(() => {
-                        process(cellData.id);
-                      });
-                      message.info(`${cellData.title}开始执行`);
-                    }
+                if (
+                  !(
+                    cellInstance &&
+                    nodeList
+                      .map((nodeName) => nodeName)
+                      .includes(cellInstance.getData().component)
+                  )
+                )
+                  message.info("请选择接口节点");
+                else {
+                  cellInstance.process();
+                  message.info(`开始执行到${cellInstance.getData().title}`);
+                }
+              }}
+            >
+              以此节点为终点执行
+            </Button>
+            {nodeList.map((name) => {
+              return (
+                <Button
+                  key={name}
+                  onClick={() => {
+                    const initDatasMap = {
+                      BaseNode: {
+                        ports: [
+                          {
+                            portType: "out",
+                          },
+                        ],
+                      },
+                    };
+
+                    const model = modelRef.current as ModelType;
+                    (modelRef.current as ModelType).addCell(name, {
+                      x: -model.x + model.width / 2,
+                      y: -model.y + model.height / 2,
+                      ...initDatasMap[name as keyof typeof initDatasMap],
+                    });
+
+                    model.contextMenuVisible = false;
                   }}
                 >
-                  执行此节点
+                  {`增添${name}节点`}
                 </Button>
-                <Button
-                  onClick={() => {
-                    const { getCell, selectCells } = context;
-                    const cellInstance = getCell(selectCells[0]);
-
-                    if (
-                      !(
-                        cellInstance &&
-                        nodeList
-                          .map(([nodeName]) => nodeName)
-                          .includes(cellInstance.getData().component)
-                      )
-                    )
-                      message.info("请选择接口节点");
-                    else {
-                      cellInstance.process();
-                      message.info(`开始执行到${cellInstance.getData().title}`);
-                    }
-                  }}
-                >
-                  以此节点为终点执行
-                </Button>
-                {nodeList.map(([name]) => {
-                  return (
-                    <Button
-                      onClick={() => {
-                        context.addCell(name, {
-                          title: name,
-                        });
-                      }}
-                    >
-                      {`增添${name}节点`}
-                    </Button>
-                  );
-                })}
-              </Space>
-            );
-          }}
+              );
+            })}
+          </Space>
         </ContextMenu>
       </Flow>
     </div>

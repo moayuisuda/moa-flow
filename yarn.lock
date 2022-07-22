@@ -295,69 +295,12 @@
     lodash "^4.17.21"
     resize-observer-polyfill "^1.5.1"
 
-"@antv/g-canvas@^1.0.21":
-  version "1.1.8"
-  resolved "https://registry.npm.alibaba-inc.com/@antv/g-canvas/download/@antv/g-canvas-1.1.8.tgz"
-  integrity sha512-pUbEVb1UEwAIue9Ia5CyoY0Z9u6DMX97GDuxvrQWC3iRrXvblYfr1QqSHxUwPeViyN78rv8VemKy+Fk77/uxpw==
-  dependencies:
-    "@antv/g-plugin-canvas-path-generator" "^0.0.1"
-    "@antv/g-plugin-canvas-picker" "^1.1.8"
-    "@antv/g-plugin-canvas-renderer" "^1.1.8"
-    "@antv/g-plugin-dom-interaction" "^1.1.8-alpha.1"
-    "@antv/g-plugin-html-renderer" "^1.1.8-alpha.1"
-    "@antv/g-plugin-image-loader" "^0.0.1-alpha.1"
-    tslib "^2.3.1"
-
 "@antv/g-math@^1.1.8-alpha.0":
   version "1.1.8-alpha.0"
   resolved "https://registry.npm.alibaba-inc.com/@antv/g-math/download/@antv/g-math-1.1.8-alpha.0.tgz"
   integrity sha512-97Ffs5FrmGAonFNy/sYInZug5rbr3VeaPuFdySiuYFTpVIS8S/8Dqg19x77G7qfxPbTV1qy+r1i2QHfZN5QDvg==
   dependencies:
     gl-matrix "^3.1.0"
-    tslib "^2.3.1"
-
-"@antv/g-plugin-canvas-path-generator@^0.0.1":
-  version "0.0.1"
-  resolved "https://registry.npm.alibaba-inc.com/@antv/g-plugin-canvas-path-generator/download/@antv/g-plugin-canvas-path-generator-0.0.1.tgz"
-  integrity sha512-l6O+PfsEAnAnuSJzWU1B0VVOhzLtnRlQXcq2v5MgPDsE5yVPbRuMtQQwDk43OGOzFYtmapEzzS5I/j6KBpk61A==
-  dependencies:
-    "@antv/g-math" "^1.1.8-alpha.0"
-    tslib "^2.3.1"
-
-"@antv/g-plugin-canvas-picker@^1.1.8":
-  version "1.1.8"
-  resolved "https://registry.npm.alibaba-inc.com/@antv/g-plugin-canvas-picker/download/@antv/g-plugin-canvas-picker-1.1.8.tgz"
-  integrity sha512-fAh4C10/HsLmSvenWjmH8igJAsFwXX4H//tf16gWD50LsrklFA09IWYrX7xiJN2QVbdz9o8H0GUdSCDIK73mLQ==
-  dependencies:
-    tslib "^2.3.1"
-
-"@antv/g-plugin-canvas-renderer@^1.1.8":
-  version "1.1.8"
-  resolved "https://registry.npm.alibaba-inc.com/@antv/g-plugin-canvas-renderer/download/@antv/g-plugin-canvas-renderer-1.1.8.tgz"
-  integrity sha512-1GGBf7Q5keNhVtRjStheD9MPctGpzNSRzD5ARUXpasPv83GFd0hhsipUGu/cWgYnLwYjjkdUikSJo+a/VfRUow==
-  dependencies:
-    "@antv/g-math" "^1.1.8-alpha.0"
-    tslib "^2.3.1"
-
-"@antv/g-plugin-dom-interaction@^1.1.8-alpha.1":
-  version "1.1.8-alpha.1"
-  resolved "https://registry.npm.alibaba-inc.com/@antv/g-plugin-dom-interaction/download/@antv/g-plugin-dom-interaction-1.1.8-alpha.1.tgz"
-  integrity sha512-lu7kNEt1YLNP3hjHNokJxGdyqQwN1eNa6MJ3rXxc1r4v7ZeschNarPkZsaVmV78auzk1dhGnc7a67+I+Ut7pPg==
-  dependencies:
-    tslib "^2.3.1"
-
-"@antv/g-plugin-html-renderer@^1.1.8-alpha.1":
-  version "1.1.8-alpha.1"
-  resolved "https://registry.npm.alibaba-inc.com/@antv/g-plugin-html-renderer/download/@antv/g-plugin-html-renderer-1.1.8-alpha.1.tgz"
-  integrity sha512-XXcvE+Qahk+L1l7rkGB1YAXkPk4bqhqVTGu/7eSyzkHQ0OsuDhMGVbkBCO4V16H2fWxXf7XrcZyQ1eVvvtJOHA==
-  dependencies:
-    tslib "^2.3.1"
-
-"@antv/g-plugin-image-loader@^0.0.1-alpha.1":
-  version "0.0.1-alpha.1"
-  resolved "https://registry.npm.alibaba-inc.com/@antv/g-plugin-image-loader/download/@antv/g-plugin-image-loader-0.0.1-alpha.1.tgz"
-  integrity sha512-ggnNTvNSdgYkoZGxoXyqUU18moN/0dGpko/cf7eT4v/3/aQR6IwvwWuYLPcsuMAsKm2Cn7e8ruspRP/iEFkvkw==
-  dependencies:
     tslib "^2.3.1"
 
 "@antv/g@^5.1.8":

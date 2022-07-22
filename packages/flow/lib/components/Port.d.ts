@@ -1,8 +1,7 @@
-import { InteractivePointerEvent } from "@antv/g";
 import React from "react";
-import Cell from "../cells/Cell";
 import { CellDataType } from "../cells/Cell";
-import FlowModel from "../Model";
+import { FlowContext } from "../Context";
+import { FlowModel } from "../Model";
 export declare type PortDataType = {
     edges?: string[];
     host?: string;
@@ -18,23 +17,24 @@ declare type PortPropsType = {
         x: number;
         y: number;
     });
+    data: PortDataType;
 };
-export declare class Port extends Cell<PortDataType, {}, PortPropsType> {
+export declare type PortData<D> = D & PortDataType;
+export declare class Port extends React.Component<PortPropsType> {
+    static contextType: React.Context<FlowModel>;
+    context: React.ContextType<typeof FlowContext>;
+    static defaultData: PortDataType;
     wrapperRef: React.RefObject<any>;
-    static metaData: {
-        cellType: string;
-        source: undefined;
-        target: undefined;
-    };
     constructor(props: PortPropsType & {
         data: PortDataType;
     }, context: FlowModel);
+    get data(): PortDataType;
     anchor(): {
         x: number;
         y: number;
     };
-    onLinkStart(e: InteractivePointerEvent): void;
-    onLinkEnd(e: InteractivePointerEvent): void;
-    content(): JSX.Element;
+    onLinkStart(e: React.MouseEvent): void;
+    onLinkEnd(e: React.MouseEvent): void;
+    render(): JSX.Element;
 }
 export {};

@@ -1,62 +1,51 @@
 import { __extends, __spreadArray, __assign } from '../node_modules/tslib/tslib.es6.js';
-import Cell from './Cell.js';
-import { Group, Rect, Text } from '@antv/react-g';
-import { Arrow } from '../components/Arrow.js';
-import React from 'react';
-import 'mobx-react';
-import { Interactor } from '../components/Interacotr.js';
-import '../components/Port.js';
-import '../node_modules/react-dom/index.js';
-import '../Context.js';
-import '../components/ContextMenu/index.js';
-import '../components/SelectBoundsRect.js';
-import '../Flow.js';
-import { titleCase } from '../utils/string.js';
-import { callIfFn, isVector2d } from '../utils/util.js';
+import React, { useContext } from 'react';
+import { isVector2d, callIfFn } from '../utils/util.js';
 import { lineCenter } from '../utils/vector.js';
-import * as G from '@antv/g';
-import { autorun } from 'mobx';
+import { CellModel } from './Cell.js';
+import { FlowContext } from '../Context.js';
+import '../node_modules/mobx-react-lite/es/index.js';
+import { observer } from '../node_modules/mobx-react-lite/es/observer.js';
 
 var TEXT_HEIGHT = 16;
 var LABEL_PADDING = 4;
-var Edge = /** @class */ (function (_super) {
-    __extends(Edge, _super);
-    function Edge(props, context) {
-        var _this = _super.call(this, props, context) || this;
-        _this.bazier = false;
+var EdgeModel = /** @class */ (function (_super) {
+    __extends(EdgeModel, _super);
+    function EdgeModel(data, context) {
+        var _this = _super.call(this, data, context) || this;
+        _this.bazier = true;
         _this.startHead = false;
         _this.endHead = true;
         _this.lineDash = [0, 0];
         _this.animate = false;
-        _this.pathInstance = new G.Path();
+        _this.pathInstance = document.createElementNS("http://www.w3.org/2000/svg", "path");
         _this.isMountEvents = false;
         _this.formatVerticied = function (verticies) {
             return verticies;
         };
         _this.getLinkPortsData = function () {
             return {
-                source: isVector2d(_this.props.data.source)
-                    ? _this.props.data.source
-                    : _this.context.cellsDataMap.get(_this.props.data.source),
-                target: isVector2d(_this.props.data.target)
-                    ? _this.props.data.target
-                    : _this.context.cellsDataMap.get(_this.props.data.target),
+                source: isVector2d(_this.data.source)
+                    ? _this.data.source
+                    : _this.context.cellsDataMap.get(_this.data.source),
+                target: isVector2d(_this.data.target)
+                    ? _this.data.target
+                    : _this.context.cellsDataMap.get(_this.data.target),
             };
         };
         _this.getAnchors = function () {
-            var data = _this.props.data;
             var sourceAnchor;
             var targetAnchor;
-            if (isVector2d(data.source))
-                sourceAnchor = data.source;
+            if (isVector2d(_this.data.source))
+                sourceAnchor = _this.data.source;
             else {
-                var sourceInstance = _this.context.cellsMap.get(data.source);
+                var sourceInstance = _this.context.cellsMap.get(_this.data.source);
                 sourceAnchor = sourceInstance.anchor();
             }
-            if (isVector2d(data.target))
-                targetAnchor = data.target;
+            if (isVector2d(_this.data.target))
+                targetAnchor = _this.data.target;
             else {
-                var targetInstance = _this.context.cellsMap.get(data.target);
+                var targetInstance = _this.context.cellsMap.get(_this.data.target);
                 targetAnchor = targetInstance.anchor();
             }
             return {
@@ -68,30 +57,7 @@ var Edge = /** @class */ (function (_super) {
         _this.arrowRef = React.createRef();
         return _this;
     }
-    Edge.prototype.initAnimate = function () {
-        var _a, _b, _c;
-        if (callIfFn(this.animate)) {
-            var lineDash = callIfFn(this.lineDash);
-            var LENGTH = lineDash[0] + lineDash[1];
-            (_c = (_b = (_a = this.arrowRef.current) === null || _a === void 0 ? void 0 : _a.bodyRef.current) === null || _b === void 0 ? void 0 : _b.animate) === null || _c === void 0 ? void 0 : _c.call(_b, [{ lineDashOffset: LENGTH }, { lineDashOffset: 0 }], {
-                duration: 500,
-                iterations: Infinity,
-            });
-        }
-    };
-    Edge.prototype.componentDidMount = function () {
-        var _this = this;
-        _super.prototype.componentDidMount.call(this);
-        autorun(function () {
-            if (_this.props.data.visible === true) {
-                requestAnimationFrame(function () {
-                    // 确保didUpdate之后再设置动画
-                    _this.initAnimate();
-                });
-            }
-        });
-    };
-    Edge.prototype.lineStyle = function (_a) {
+    EdgeModel.prototype.lineStyle = function (_a) {
         var isSelect = _a.isSelect;
         var color = this.context.color;
         if (isSelect) {
@@ -102,22 +68,22 @@ var Edge = /** @class */ (function (_super) {
         else
             return {};
     };
-    Edge.prototype.getPoints = function () {
+    EdgeModel.prototype.getPoints = function () {
         var routeResult = this.route(this.getVectors());
         return this.vectorsToPoints(routeResult);
     };
-    Edge.prototype.getVectors = function () {
+    EdgeModel.prototype.getVectors = function () {
         var anchors = this.getAnchors();
-        var verticies = this.props.data.verticies || [];
+        var verticies = this.data.verticies || [];
         return __spreadArray(__spreadArray([anchors.source], verticies, true), [anchors.target], false);
     };
-    Edge.prototype.getLinkNodesData = function () {
-        var data = this.props.data;
+    EdgeModel.prototype.getLinkNodesData = function () {
+        var data = this.data;
         var source;
         var target;
         if (!isVector2d(data.source)) {
-            var sourcePort = this.context.cellsDataMap.get(data.source);
-            source = this.context.cellsDataMap.get(sourcePort.host);
+            var sourcePort = this.context.cellsMap.get(data.source);
+            source = this.context.cellsMap.get(sourcePort.host);
         }
         if (!isVector2d(data.target)) {
             var targetPort = this.context.cellsDataMap.get(data.target);
@@ -129,40 +95,58 @@ var Edge = /** @class */ (function (_super) {
         };
     };
     // 这个方法暴露出去，可自定义路由
-    Edge.prototype.route = function (vectors) {
+    EdgeModel.prototype.route = function (vectors) {
         return vectors;
     };
-    Edge.prototype.vectorsToPoints = function (vectors) {
+    EdgeModel.prototype.vectorsToPoints = function (vectors) {
         var re = [];
         vectors.forEach(function (vector) {
             re.push([vector.x, vector.y]);
         });
         return re;
     };
-    Edge.prototype.labelContent = function () {
-        var _a, _b;
-        var _c = this.context; _c.color; var stageRef = _c.refs.stageRef;
-        var text = this.labelFormatter(this.props.data.label);
+    EdgeModel.prototype.labelContent = function () {
+        var _a = this.context; _a.color; var svgRef = _a.refs.svgRef;
+        var text = this.labelFormatter(this.data.label);
         if (!text)
             return React.createElement(React.Fragment, null);
-        var props = __assign({ text: text, textBaseline: "top" }, this.labelStyle());
-        var textInstance = new G.Text({
-            style: props,
-        });
-        (_a = stageRef === null || stageRef === void 0 ? void 0 : stageRef.current) === null || _a === void 0 ? void 0 : _a.appendChild(textInstance);
+        var props = __assign({ dominantBaseline: "hanging" }, this.labelStyle());
+        var textInstance = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        textInstance.innerHTML = text;
+        svgRef.appendChild(textInstance);
         var textBounds = textInstance.getBBox();
-        (_b = stageRef === null || stageRef === void 0 ? void 0 : stageRef.current) === null || _b === void 0 ? void 0 : _b.removeChild(textInstance);
-        return (React.createElement(Group, { x: -(textBounds.width + LABEL_PADDING) / 2, y: -(TEXT_HEIGHT + LABEL_PADDING) / 2 },
-            React.createElement(Rect, { width: textBounds.width + LABEL_PADDING * 2, height: TEXT_HEIGHT + LABEL_PADDING * 2, fill: "white" }),
-            React.createElement(Text, __assign({ x: LABEL_PADDING, y: LABEL_PADDING }, props))));
+        svgRef.removeChild(textInstance);
+        return (React.createElement("g", { x: -(textBounds.width + LABEL_PADDING) / 2, y: -(TEXT_HEIGHT + LABEL_PADDING) / 2 },
+            React.createElement("rect", { width: textBounds.width + LABEL_PADDING * 2, height: TEXT_HEIGHT + LABEL_PADDING * 2, fill: "white" }),
+            React.createElement("text", __assign({ x: LABEL_PADDING, y: LABEL_PADDING }, props), text)));
     };
-    Edge.prototype.labelStyle = function () {
+    EdgeModel.prototype.labelStyle = function () {
         return {};
     };
-    Edge.prototype.labelPosition = function () {
+    EdgeModel.prototype.labelFormatter = function (label) {
+        return "label + asd";
+    };
+    EdgeModel.prototype.isLinking = function () {
+        return this.state.isLinking;
+    };
+    EdgeModel.prototype.getBazierDir = function () {
+        var _a = this.getAnchors(), source = _a.source, target = _a.target;
+        var LENGTH = (target.x - source.x) * 0.5;
+        return {
+            source: [LENGTH, 0],
+            target: [-LENGTH, 0],
+        };
+    };
+    EdgeModel.prototype.getBazierPath = function () {
+        var _a = this.getAnchors(), source = _a.source, target = _a.target;
+        var dir = this.getBazierDir();
+        return "M".concat(source.x, ",").concat(source.y, " \n    C").concat(source.x + dir.source[0], ",").concat(source.y + dir.source[1], " ").concat(target.x + dir.target[0], ",").concat(target.y + dir.target[1], " \n    ").concat(target.x, ",").concat(target.y);
+    };
+    EdgeModel.prototype.labelPosition = function () {
         if (callIfFn(this.bazier)) {
-            this.pathInstance.style.setProperty("path", this.getBazierPath());
-            return this.pathInstance.getPoint(0.5);
+            this.pathInstance.setAttribute("d", this.getBazierPath());
+            console.log(this.pathInstance);
+            return this.pathInstance.getPointAtLength(this.pathInstance.getTotalLength() / 2);
         }
         else {
             var points = this.getVectors().map(function (vector) { return [
@@ -176,56 +160,7 @@ var Edge = /** @class */ (function (_super) {
             };
         }
     };
-    Edge.prototype.labelRender = function () {
-        var _this = this;
-        var text = this.labelFormatter(this.props.data.label);
-        return (React.createElement(Group, __assign({ ref: function (label) {
-                if (_this.isMountEvents || !label)
-                    return;
-                [
-                    "mouseenter",
-                    "mouseleave",
-                    "mousedown",
-                    "mouseup",
-                    "dblclick",
-                    "click",
-                ].forEach(function (eventName) {
-                    label.on(eventName, function (e) {
-                        var instanceEventFn = _this["onLabel".concat(titleCase(eventName))];
-                        instanceEventFn && instanceEventFn.call(_this, e);
-                        _this.context.emitEvent({
-                            type: "label:".concat(eventName),
-                            data: {
-                                e: e,
-                                cellData: _this.props.data,
-                                cell: _this,
-                            },
-                        });
-                    });
-                });
-                _this.isMountEvents = true;
-            } }, this.labelPosition()), text && this.labelContent()));
-    };
-    Edge.prototype.labelFormatter = function (label) {
-        return label;
-    };
-    Edge.prototype.isLinking = function () {
-        return this.props.data.$state.isLinking;
-    };
-    Edge.prototype.getBazierDir = function () {
-        var _a = this.getAnchors(), source = _a.source, target = _a.target;
-        var LENGTH = (target.x - source.x) * 0.5;
-        return {
-            source: [LENGTH, 0],
-            target: [-LENGTH, 0],
-        };
-    };
-    Edge.prototype.getBazierPath = function () {
-        var _a = this.getAnchors(), source = _a.source, target = _a.target;
-        var dir = this.getBazierDir();
-        return "M".concat(source.x, ",").concat(source.y, " \n    C").concat(source.x + dir.source[0], ",").concat(source.y + dir.source[1], " ").concat(target.x + dir.target[0], ",").concat(target.y + dir.target[1], " \n    ").concat(target.x, ",").concat(target.y);
-    };
-    Edge.prototype.getPolylinePath = function () {
+    EdgeModel.prototype.getPolylinePath = function () {
         var points = this.getPoints();
         var str = "M".concat(points[0][0], ",").concat(points[0][1]);
         for (var i = 1; i < points.length; i++) {
@@ -233,27 +168,46 @@ var Edge = /** @class */ (function (_super) {
         }
         return str;
     };
-    Edge.prototype.getPath = function () {
+    EdgeModel.prototype.getPath = function () {
         return callIfFn(this.bazier)
             ? this.getBazierPath()
             : this.getPolylinePath();
     };
-    Edge.prototype.edgeRender = function () {
-        var color = this.context.color;
-        var lineProps = __assign({ lineCap: "round", lineJoin: "round", lineWidth: 3, stroke: color.deepGrey }, this.lineStyle({ isSelect: this.isSelect() }));
-        return (React.createElement(Group, null,
-            React.createElement(Arrow, __assign({ ref: this.arrowRef }, lineProps, { path: this.getPath(), startHead: callIfFn(this.startHead), endHead: callIfFn(this.endHead), lineDash: callIfFn(this.lineDash) }))));
-    };
-    Edge.prototype.content = function () {
-        return (React.createElement(Interactor, { id: this.props.data.id, draggable: false },
-            this.edgeRender(),
-            this.labelRender(),
-            this.lineExtra && this.lineExtra()));
-    };
-    Edge.metaData = {
+    EdgeModel.defaultData = {
+        id: "",
+        component: "Edge",
+        source: "",
+        target: "",
+        label: "",
+        verticies: [],
         cellType: "edge",
     };
-    return Edge;
-}(Cell));
+    return EdgeModel;
+}(CellModel));
+var Edge = observer(function (_a) {
+    var model = _a.model;
+    var Line = observer(function () {
+        var context = useContext(FlowContext);
+        var color = context.color;
+        var lineProps = __assign({ strokeLinecap: "round", strokeLinejoin: "round", fill: "none", strokeWidth: 3, stroke: color.deepGrey }, model.lineStyle({ isSelect: model.isSelect }));
+        return (React.createElement("path", __assign({ ref: model.arrowRef }, lineProps, { d: model.getPath(), 
+            // startHead={callIfFn(this.startHead)}
+            // endHead={callIfFn(this.endHead)}
+            strokeDasharray: callIfFn(model.lineDash) })));
+    });
+    var Label = observer(function () {
+        var text = model.labelFormatter(model.data.label);
+        var position = model.labelPosition();
+        console.log("trasnlate(".concat(position.x, ", ").concat(position.y, ")"));
+        return (React.createElement("g", { ref: function (label) {
+                if (model.isMountEvents || !label)
+                    return;
+                model.isMountEvents = true;
+            }, transform: "translate(".concat(position.x, ", ").concat(position.y, ")") }, text && model.labelContent()));
+    });
+    return (React.createElement("g", null,
+        React.createElement(Line, null),
+        React.createElement(Label, null)));
+});
 
-export { Edge as default };
+export { Edge, EdgeModel };

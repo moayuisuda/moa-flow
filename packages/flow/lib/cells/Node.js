@@ -1,35 +1,54 @@
 import { __extends } from '../node_modules/tslib/tslib.es6.js';
-import Cell from './Cell.js';
+import { CellModel } from './Cell.js';
 
-var Node = /** @class */ (function (_super) {
-    __extends(Node, _super);
-    function Node() {
+var NodeModel = /** @class */ (function (_super) {
+    __extends(NodeModel, _super);
+    function NodeModel() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    Node.prototype.getLinkNodes = function () {
-        return this.context.getLinkNodes(this.props.data.id);
+    NodeModel.prototype.getLinkNodes = function () {
+        return this.context.getLinkNodes(this.data.id);
     };
-    Node.prototype.getLinkPorts = function () {
-        return this.context.getLinkPorts(this.props.data.id);
+    NodeModel.prototype.getLinkPorts = function () {
+        return this.context.getLinkPorts(this.data.id);
     };
-    Node.prototype.getNodeEdges = function () {
-        return this.context.getNodeEdges(this.props.data.id);
+    NodeModel.prototype.getNodeEdges = function () {
+        return this.context.getNodeEdges(this.data.id);
     };
-    Node.prototype.getPosition = function () {
-        return this.context.getNodePosition(this.getData().id);
+    NodeModel.prototype.getPosition = function () {
+        return this.context.getNodePosition(this.data.id);
     };
-    Node.prototype.getChildren = function () {
+    NodeModel.prototype.getChildren = function () {
         var _this = this;
         return this.context.canvasData.cells.filter(function (cellData) {
-            cellData.parent === _this.getData().id;
+            cellData.parent === _this.data.id;
         });
     };
-    Node.metaData = {
+    NodeModel.defaultData = {
         x: 0,
         y: 0,
+        id: "",
+        component: "",
         cellType: "node",
     };
-    return Node;
-}(Cell));
+    return NodeModel;
+}(CellModel));
+// @TODO
+// type BizParams = {
+//   name: string;
+//   age: number;
+// };
+// class Base<T> {
+//   param: T;
+//   constructor() {}
+// }
+// class Biz extends Base<{ name: string; age: number }> {
+//   constructor() {
+//     super();
+//   }
+// }
+// const map: Record<string, typeof Base> = {
+//   Biz: Biz,
+// };
 
-export { Node as default };
+export { NodeModel };

@@ -1,17 +1,18 @@
-import Cell, { CellDataType } from "./Cell";
-import { NodeDataType } from "./Node";
-import FlowModel from "../Model";
-import { Group, Text, Rect } from "@antv/react-g";
 import { Dir, Vector2d } from "../typings/common";
-import { Interactor, PortDataType } from "../components";
+import { PortDataType } from "../components";
 import React from "react";
-import { isVector2d, lineCenter, titleCase } from "../utils";
-import { InteractivePointerEvent } from "@antv/g";
-import * as G from "@antv/g";
-import type { DisplayObject } from "@antv/g";
+import { isVector2d, lineCenter } from "../utils";
 import { callIfFn } from "../utils/util";
-import { autorun } from "mobx";
 import { Arrow } from "../components";
+import { CellModel, CellDataType } from "./Cell";
+import { useContext } from "react";
+import { FlowContext } from "../Context";
+import { FlowModel } from "Model";
+import { useObserver } from "mobx-react";
+import { observer } from "mobx-react-lite";
+
+const TEXT_HEIGHT = 16;
+const LABEL_PADDING = 4;
 
 export type EdgeDataType = {
   source: string | Vector2d;
@@ -19,66 +20,40 @@ export type EdgeDataType = {
   label: string;
   verticies?: Vector2d[];
 } & CellDataType;
-const TEXT_HEIGHT = 16;
-const LABEL_PADDING = 4;
-
 type Head = React.ReactNode | boolean;
-abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
-  static metaData: any = {
+export class EdgeModel extends CellModel {
+  static defaultData: EdgeDataType = {
+    id: "",
+    component: "Edge", // 这里一般会被重置为FLowEdge这种业务类的线条
+    source: "",
+    target: "",
+    label: "",
+    verticies: [],
     cellType: "edge",
   };
-  labelRef: React.RefObject<G.Group>;
+
+  data: EdgeDataType;
+
+  labelRef: React.RefObject<SVGTextElement>;
   arrowRef: React.RefObject<Arrow>;
 
-  protected bazier: boolean | (() => boolean) = false;
+  protected bazier: boolean | (() => boolean) = true;
   protected startHead: Head | (() => Head) = false;
   protected endHead: Head | (() => Head) = true;
-  protected lineDash: [number, number] | (() => [number, number]) = [0, 0];
+  lineDash: [number, number] | (() => [number, number]) = [0, 0];
   protected animate: boolean | (() => boolean) = false;
 
-  pathInstance = new G.Path();
+  pathInstance = document.createElementNS("http://www.w3.org/2000/svg", "path");
 
   isMountEvents = false;
 
-  constructor(
-    props: {
-      data: EdgeDataType;
-    },
-    context: FlowModel
-  ) {
-    super(props, context);
+  constructor(data: any, context: FlowModel) {
+    super(data, context);
     this.labelRef = React.createRef();
     this.arrowRef = React.createRef();
   }
 
-  initAnimate() {
-    if (callIfFn(this.animate)) {
-      const lineDash = callIfFn(this.lineDash);
-      const LENGTH = lineDash[0] + lineDash[1];
-      (this.arrowRef.current?.bodyRef.current as DisplayObject)?.animate?.(
-        [{ lineDashOffset: LENGTH }, { lineDashOffset: 0 }],
-        {
-          duration: 500,
-          iterations: Infinity,
-        }
-      );
-    }
-  }
-
-  componentDidMount(): void {
-    super.componentDidMount();
-
-    autorun(() => {
-      if (this.props.data.visible === true) {
-        requestAnimationFrame(() => {
-          // 确保didUpdate之后再设置动画
-          this.initAnimate();
-        });
-      }
-    });
-  }
-
-  protected lineStyle({ isSelect }: { isSelect: boolean }) {
+  lineStyle({ isSelect }: { isSelect: boolean }) {
     const { color } = this.context;
 
     if (isSelect) {
@@ -94,32 +69,35 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
 
   getLinkPortsData = () => {
     return {
-      source: isVector2d(this.props.data.source)
-        ? (this.props.data.source as Vector2d)
+      source: isVector2d(this.data.source)
+        ? (this.data.source as Vector2d)
         : (this.context.cellsDataMap.get(
-            this.props.data.source as string
+            this.data.source as string
           ) as PortDataType),
-      target: isVector2d(this.props.data.target)
-        ? (this.props.data.target as Vector2d)
+      target: isVector2d(this.data.target)
+        ? (this.data.target as Vector2d)
         : (this.context.cellsDataMap.get(
-            this.props.data.target as string
+            this.data.target as string
           ) as PortDataType),
     };
   };
 
   getAnchors = () => {
-    const { data } = this.props;
     let sourceAnchor;
     let targetAnchor;
 
-    if (isVector2d(data.source)) sourceAnchor = data.source;
+    if (isVector2d(this.data.source)) sourceAnchor = this.data.source;
     else {
-      const sourceInstance = this.context.cellsMap.get(data.source as string);
+      const sourceInstance = this.context.cellsMap.get(
+        this.data.source as string
+      );
       sourceAnchor = sourceInstance.anchor();
     }
-    if (isVector2d(data.target)) targetAnchor = data.target;
+    if (isVector2d(this.data.target)) targetAnchor = this.data.target;
     else {
-      const targetInstance = this.context.cellsMap.get(data.target as string);
+      const targetInstance = this.context.cellsMap.get(
+        this.data.target as string
+      );
       targetAnchor = targetInstance.anchor();
     }
 
@@ -137,32 +115,26 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
 
   getVectors() {
     const anchors = this.getAnchors();
-    const verticies = this.props.data.verticies || [];
+    const verticies = this.data.verticies || [];
 
     return [anchors.source, ...verticies, anchors.target];
   }
 
   getLinkNodesData() {
-    const { data } = this.props;
+    const { data } = this;
     let source;
     let target;
 
     if (!isVector2d(data.source)) {
-      const sourcePort = this.context.cellsDataMap.get(
-        data.source as string
-      ) as PortDataType;
-      source = this.context.cellsDataMap.get(
-        sourcePort.host as string
-      ) as NodeDataType;
+      const sourcePort = this.context.cellsMap.get(data.source as string);
+      source = this.context.cellsMap.get(sourcePort.host as string);
     }
 
     if (!isVector2d(data.target)) {
       const targetPort = this.context.cellsDataMap.get(
         data.target as string
       ) as PortDataType;
-      target = this.context.cellsDataMap.get(
-        targetPort.host as string
-      ) as NodeDataType;
+      target = this.context.cellsDataMap.get(targetPort.host as string);
     }
 
     return {
@@ -188,37 +160,40 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
   labelContent() {
     const {
       color,
-      refs: { stageRef },
+      refs: { svgRef },
     } = this.context;
 
-    const text = this.labelFormatter(this.props.data.label);
+    const text = this.labelFormatter(this.data.label);
     if (!text) return <></>;
 
     const props = {
-      text,
-      textBaseline: "top" as "top",
+      dominantBaseline: "hanging",
       ...this.labelStyle(),
     };
-    const textInstance = new G.Text({
-      style: props,
-    });
+    const textInstance = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "text"
+    );
+    textInstance.innerHTML = text;
 
-    stageRef?.current?.appendChild(textInstance);
+    (svgRef as SVGElement).appendChild(textInstance);
     const textBounds = textInstance.getBBox();
-    stageRef?.current?.removeChild(textInstance);
+    (svgRef as SVGElement).removeChild(textInstance);
 
     return (
-      <Group
+      <g
         x={-(textBounds.width + LABEL_PADDING) / 2}
         y={-(TEXT_HEIGHT + LABEL_PADDING) / 2}
       >
-        <Rect
+        <rect
           width={textBounds.width + LABEL_PADDING * 2}
           height={TEXT_HEIGHT + LABEL_PADDING * 2}
           fill="white"
-        ></Rect>
-        <Text x={LABEL_PADDING} y={LABEL_PADDING} {...props} />
-      </Group>
+        ></rect>
+        <text x={LABEL_PADDING} y={LABEL_PADDING} {...props}>
+          {text}
+        </text>
+      </g>
     );
   }
 
@@ -226,71 +201,12 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
     return {};
   }
 
-  labelPosition() {
-    if (callIfFn(this.bazier)) {
-      this.pathInstance.style.setProperty("path", this.getBazierPath());
-
-      return this.pathInstance.getPoint(0.5);
-    } else {
-      const points = this.getVectors().map((vector) => [
-        vector.x,
-        vector.y,
-      ]) as [number, number][];
-      const lineLenthCenter = lineCenter(points);
-
-      return {
-        x: lineLenthCenter[0] || points[0][0],
-        y: lineLenthCenter[1] || points[0][1],
-      };
-    }
-  }
-
-  protected labelRender() {
-    const text = this.labelFormatter(this.props.data.label);
-
-    return (
-      <Group
-        ref={(label) => {
-          if (this.isMountEvents || !label) return;
-
-          [
-            "mouseenter",
-            "mouseleave",
-            "mousedown",
-            "mouseup",
-            "dblclick",
-            "click",
-          ].forEach((eventName) => {
-            label.on(eventName, (e: InteractivePointerEvent) => {
-              const instanceEventFn = this[`onLabel${titleCase(eventName)}`];
-              instanceEventFn && instanceEventFn.call(this, e);
-
-              this.context.emitEvent({
-                type: `label:${eventName}`,
-                data: {
-                  e,
-                  cellData: this.props.data,
-                  cell: this,
-                },
-              });
-            });
-          });
-
-          this.isMountEvents = true;
-        }}
-        {...this.labelPosition()}
-      >
-        {text && this.labelContent()}
-      </Group>
-    );
-  }
-
   labelFormatter(label: string) {
-    return label;
+    return "label + asd";
   }
 
   isLinking() {
-    return this.props.data.$state.isLinking;
+    return this.state.isLinking;
   }
 
   getBazierDir(): { source: Dir; target: Dir } {
@@ -314,6 +230,28 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
     ${target.x},${target.y}`;
   }
 
+  labelPosition() {
+    if (callIfFn(this.bazier)) {
+      this.pathInstance.setAttribute("d", this.getBazierPath());
+      console.log(this.pathInstance);
+
+      return this.pathInstance.getPointAtLength(
+        this.pathInstance.getTotalLength() / 2
+      );
+    } else {
+      const points = this.getVectors().map((vector) => [
+        vector.x,
+        vector.y,
+      ]) as [number, number][];
+      const lineLenthCenter = lineCenter(points);
+
+      return {
+        x: lineLenthCenter[0] || points[0][0],
+        y: lineLenthCenter[1] || points[0][1],
+      };
+    }
+  }
+
   getPolylinePath() {
     const points = this.getPoints();
 
@@ -330,43 +268,57 @@ abstract class Edge<P = {}, S = {}> extends Cell<EdgeDataType & P, {} & S> {
       ? this.getBazierPath()
       : this.getPolylinePath();
   }
+}
 
-  lineExtra: () => JSX.Element;
-
-  protected edgeRender() {
-    const { color } = this.context;
+export const Edge: React.FC<{ model: EdgeModel }> = observer(({ model }) => {
+  const Line = observer(() => {
+    const context = useContext(FlowContext);
+    const { color } = context;
 
     const lineProps = {
-      lineCap: "round",
-      lineJoin: "round",
-      lineWidth: 3,
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+      fill: "none",
+      strokeWidth: 3,
       stroke: color.deepGrey,
-      ...this.lineStyle({ isSelect: this.isSelect() }),
+      ...model.lineStyle({ isSelect: model.isSelect }),
     } as any;
 
     return (
-      <Group>
-        <Arrow
-          ref={this.arrowRef}
-          {...lineProps}
-          path={this.getPath()}
-          startHead={callIfFn(this.startHead)}
-          endHead={callIfFn(this.endHead)}
-          lineDash={callIfFn(this.lineDash)}
-        />
-      </Group>
+      <path
+        ref={model.arrowRef}
+        {...lineProps}
+        d={model.getPath()}
+        // startHead={callIfFn(this.startHead)}
+        // endHead={callIfFn(this.endHead)}
+        strokeDasharray={callIfFn(model.lineDash)}
+      />
     );
-  }
+  });
 
-  content() {
+  const Label = observer(() => {
+    const text = model.labelFormatter(model.data.label);
+    const position = model.labelPosition();
+    console.log(`trasnlate(${position.x}, ${position.y})`);
+
     return (
-      <Interactor id={this.props.data.id} draggable={false}>
-        {this.edgeRender()}
-        {this.labelRender()}
-        {this.lineExtra && this.lineExtra()}
-      </Interactor>
+      <g
+        ref={(label) => {
+          if (model.isMountEvents || !label) return;
+          model.isMountEvents = true;
+        }}
+        transform={`translate(${position.x}, ${position.y})`}
+      >
+        {text && model.labelContent()}
+      </g>
     );
-  }
-}
+  });
 
-export default Edge;
+  return (
+    <g>
+      {/* 这个函数的返回只能返回 React.createElement(Line)，并没有收集model的依赖 */}
+      <Line></Line>
+      <Label></Label>
+    </g>
+  );
+});

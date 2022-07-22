@@ -1,58 +1,53 @@
-import { __extends } from '../node_modules/tslib/tslib.es6.js';
-import { Group } from '@antv/react-g';
-import '../node_modules/lodash/lodash.js';
-import { observer } from 'mobx-react';
-import React from 'react';
-import { FlowContext } from '../Context.js';
-import { l as lodash } from '../_virtual/lodash.js';
+import { __decorate } from '../node_modules/tslib/tslib.es6.js';
+import { observable, computed, action, makeObservable } from 'mobx';
 
-// D: data, S: state, P: props
-var Cell = /** @class */ (function (_super) {
-    __extends(Cell, _super);
-    function Cell(props, context) {
-        var _this = _super.call(this, props) || this;
-        context.cellsMap.set(props.data.id, _this);
-        _this.wrapperRef = React.createRef();
-        return _this;
+var CellModel = /** @class */ (function () {
+    function CellModel(data, context) {
+        this.state = {
+            isSelect: false,
+            isLinking: false,
+        };
+        this.data = data;
+        this.context = context;
+        // console.log(this.data);
+        makeObservable(this);
     }
-    Cell.prototype.onMount = function () { };
-    Cell.regist = function (name, model) {
-        model.componentsMap.set(name, this);
+    Object.defineProperty(CellModel.prototype, "isSelect", {
+        get: function () {
+            return this.state.isSelect;
+        },
+        set: function (isSelect) {
+            console.log('set select');
+            this.state.isSelect = isSelect;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    CellModel.prototype.getWrapperRef = function () {
+        return this.context.getWrapperRef(this.data.id);
     };
-    Cell.getMetaData = function () {
-        var re = {};
-        var curr = this;
-        // 合并父类metaData
-        while (curr !== React.Component) {
-            Object.assign(re, curr.metaData);
-            curr = curr.__proto__;
-        }
-        return lodash.exports.cloneDeep(re);
-    };
-    Cell.prototype.setData = function (data, rec) {
+    CellModel.prototype.setData = function (data, rec) {
         if (rec === void 0) { rec = true; }
-        this.context.setCellData(this.props.data.id, data, rec);
+        this.context.setCellData(this.data.id, data, rec);
     };
-    Cell.prototype.componentDidMount = function () {
-        this.onMount && this.onMount();
+    CellModel.defaultData = {
+        id: "",
+        component: "",
+        cellType: "",
     };
-    Cell.prototype.getData = function () {
-        return this.props.data;
-    };
-    Cell.prototype.isSelect = function () {
-        return this.props.data.$state.isSelect;
-    };
-    Cell.prototype.render = function () {
-        var _this = this;
-        return (React.createElement(Group, { ref: function (ref) {
-                _this.wrapperRef.current = ref;
-            } }, !this.context.pendingRender &&
-            (lodash.exports.isUndefined(this.props.data.visible) || this.props.data.visible) ? (React.createElement(Group, null, this.content())) : (React.createElement(React.Fragment, null))));
-    };
-    Cell.contextType = FlowContext;
-    Cell.metaData = { id: "" };
-    return Cell;
-}(React.Component));
-var Cell$1 = observer(Cell);
+    __decorate([
+        observable
+    ], CellModel.prototype, "data", void 0);
+    __decorate([
+        observable
+    ], CellModel.prototype, "state", void 0);
+    __decorate([
+        computed
+    ], CellModel.prototype, "isSelect", null);
+    __decorate([
+        action
+    ], CellModel.prototype, "setData", null);
+    return CellModel;
+}());
 
-export { Cell$1 as default };
+export { CellModel };

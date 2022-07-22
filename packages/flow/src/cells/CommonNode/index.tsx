@@ -31,7 +31,7 @@ class CommonNode extends Node<CommonNodeDataType, {}> {
   }
 
   getStroke = () => {
-    const isSelect = this.isSelect();
+    const isSelect = this.isSelect;
     const { color } = this.context;
 
     if (isSelect) {

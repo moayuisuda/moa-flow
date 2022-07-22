@@ -2,171 +2,191 @@ import Model from "./Model";
 import { autorun } from "mobx"
 import { without } from 'lodash';
 import { NodeDataType } from "./cells/Node";
-import { CellDataType } from './cells/Cell';
-import { EVT_LEFTCLICK, EVT_RIGHTCLICK, STAGE_ID } from './constants';
-import { Vector2d } from "./typings/common";
-import { InteractivePointerEvent, Canvas } from '@antv/g';
+import { CellDataType, CellModel } from './cells/Cell';
+import { EVT_LEFTCLICK, EVT_RIGHTCLICK, STAGE_EVENT_NAMES, WINDOW_EVENT_NAMES } from './constants';
+import { BehaviorName, StageEventName, Vector2d, WindowEventName } from "./typings/common";
 
-export const initClearState = (model: Model, stage: Canvas) => {
-    stage.on('mousedown', (e: InteractivePointerEvent) => {
-        if (e.button === EVT_LEFTCLICK) {
-            model.contextMenuVisible = false
-        }
-        if (!model.buffer.select.isSelecting && e.button === EVT_LEFTCLICK)
-            model.clearSelect();
-    })
+type StageEventType = React.WheelEvent | React.MouseEvent
+interface StageEventFn {
+    (e: StageEventType, model: Model): any
 }
 
-export const initLink = (model: Model, stage: Canvas) => {
-    stage.on('mouseup', (e: InteractivePointerEvent) => {
-        model.clearLinkBuffer();
-    })
-
-    stage.on('mousemove', (e: InteractivePointerEvent) => {
-        const {
-            buffer: { link },
-        } = model;
-
-        if (!link.source) return;
-        model.setLinkingPosition(e);
-    })
+interface WindowEventFn {
+    (e: KeyboardEvent, model: Model): any
+}
+interface InitFn {
+    (model: Model): any
 }
 
-export const initSelect = (model: Model) => {
-    // 非受控设置select的节点
-    let prevSelectCells: string[] = []
-    autorun(() => {
-        // 上次存在这次不存在的就是需要设置为false的
-        const toFalseCells = without(prevSelectCells, ...model.selectCells)
-        // 这次存在上次不存在的就是需要设置为true的
-        const toTrueCells = without(model.selectCells, ...prevSelectCells)
+const INPUT_NODELIST = ['TEXTAREA', 'INPUT']
 
-        toFalseCells.forEach(cellId => {
-            const cellData = model.getCellData(cellId) as CellDataType
-            cellData && (cellData.$state.isSelect = false)
-        })
+type EventMaps = Partial<{
+    [key in StageEventName]: StageEventFn
+} | {
+        [key in WindowEventName]: WindowEventFn
+    } | {
+        'init': InitFn
+    }>
 
-        toTrueCells.forEach(cellId => {
-            const cellData = model.getCellData(cellId) as CellDataType
-            cellData && (cellData.$state.isSelect = true)
-        })
-
-        prevSelectCells = model.selectCells.slice();
-    })
-}
-
-export const initDrag = (model: Model, stage: Canvas) => {
-    // 移动选择的节点
-    // 暂存节点原本的zIndex，方便还原到原本的layer
-    let zIndexCache: {
-        [id: string]: number
-    } = {}
-    const { drag, select } = model.buffer
-
-    // 移动整个stage
-    stage.on('mousemove', (e: InteractivePointerEvent) => {
-        const movement = {
-            x: (e.canvas.x - drag.start.x),
-            y: (e.canvas.y - drag.start.y)
+export const behaviorsMap: Record<BehaviorName, EventMaps> = {
+    clearState: {
+        onMouseDown: (e, model) => {
+            if (!model.buffer.select.isSelecting && e.button === EVT_LEFTCLICK)
+                model.clearSelect();
+        },
+        onClick: (e, model) => {
+            if (e.button === EVT_LEFTCLICK) {
+                model.contextMenuVisible = false
+            }
         }
+    },
+    link: {
+        onMouseUp: (e, model) => {
+            model.clearLinkBuffer();
+        },
+        onMouseMove: (e: React.MouseEvent, model) => {
+            const {
+                buffer: { link },
+            } = model;
 
-        if (model.hotKey["Space"] && model.hotKey['LeftMouseDown']) {
-            // stage并不受scale的影响，不用处理
-            model.setStagePosition(
-                model.x + movement.x,
-                model.y + movement.y
-            );
+            if (!link.source) return;
+            model.setLinkingPosition(model.getCursorCoord(e));
         }
+    },
+    select: {
+        init: (model) => {
+            // 非受控设置select的节点
+            let prevSelectCells: string[] = []
+            autorun(() => {
+                // 上次存在这次不存在的就是需要设置为false的
+                const toFalseCells = without(prevSelectCells, ...model.selectCells)
+                // 这次存在上次不存在的就是需要设置为true的
+                const toTrueCells = without(model.selectCells, ...prevSelectCells)
 
-        if (select.isSelecting) {
-            // if (stage.isListening()) stage.listening(false);
+                console.log(toFalseCells, toTrueCells)
+                toFalseCells.forEach(cellId => {
+                    const cellModel = model.getCellModel(cellId) as CellModel
+                    cellModel && (cellModel.state.isSelect = false)
+                })
 
-            model.selectCells.forEach(id => {
-                const cellData = model.getCellData(id) as NodeDataType & CellDataType
+                toTrueCells.forEach(cellId => {
+                    const cellModel = model.getCellModel(cellId) as CellModel
+                    console.log(cellModel)
+                    cellModel && (cellModel.isSelect = true)
+                })
 
-                if (cellData.cellType === 'node') {
-                    model.setCellData(cellData.id, {
-                        x: cellData.x + movement.x / model.scale,
-                        y: cellData.y + movement.y / model.scale,
-                    });
-                }
+                prevSelectCells = model.selectCells.slice();
             })
         }
+    },
+    drag: {
+        onMouseMove: (e, model) => {
+            const { drag, select } = model.buffer
+            const coord = model.getCursorCoord(e)
+            const movement = {
+                x: (coord.x - drag.start.x),
+                y: (coord.y - drag.start.y)
+            }
 
-        drag.start.x = e.canvas.x
-        drag.start.y = e.canvas.y
-    })
+            // 移动整个stage
+            if (model.hotKey["Space"] && model.hotKey['LeftMouseDown']) {
+                model.setStagePosition(
+                    model.x + movement.x,
+                    model.y + movement.y
+                );
+            }
 
-    stage.on('mouseup', () => {
-        if (select.isSelecting) {
-            model.selectCells.forEach(id => {
-                const cellData = model.getCellData(id) as NodeDataType & CellDataType
+            if (select.isSelecting) {
+                model.selectCells.forEach(id => {
+                    const cellData = model.getCellData(id) as NodeDataType & CellDataType
 
-                if (cellData.cellType === 'node') {
-                    if (model.grid)
-                        model.setCellData(cellData.id, model.snap({
-                            x: cellData.x,
-                            y: cellData.y
-                        }));
-                }
-            })
+                    if (cellData.cellType === 'node') {
+                        model.setCellData(cellData.id, {
+                            x: cellData.x + movement.x,
+                            y: cellData.y + movement.y,
+                        });
+                    }
+                })
+            }
 
-            select.isSelecting = false
+            drag.start.x = coord.x
+            drag.start.y = coord.y
+        },
+        onMouseUp: (e, model) => {
+            const { select } = model.buffer
+            if (select.isSelecting) {
+                model.selectCells.forEach(id => {
+                    const cellData = model.getCellData(id) as NodeDataType & CellDataType
+
+                    if (cellData.cellType === 'node') {
+                        if (model.grid)
+                            model.setCellData(cellData.id, model.snap({
+                                x: cellData.x,
+                                y: cellData.y
+                            }));
+                    }
+                })
+
+                select.isSelecting = false
+            }
         }
-    })
-}
+    },
+    scale: {
+        onWheel: (e: React.WheelEvent, model) => {
+            let scaleBy = 1.02
+            e.preventDefault()
+            e.stopPropagation()
 
-export const initScale = (model: Model, stage: Canvas) => {
-    let scaleBy = 1.02;
+            const oldScale = model.canvasData.scale;
+            const pointer = model.getCursorCoord(e) as Vector2d;
 
-    document.querySelector(`#${STAGE_ID}`)?.addEventListener('wheel', e => {
-        e.preventDefault()
-    })
+            var mousePointTo = {
+                x: (pointer.x - model.x) / oldScale,
+                y: (pointer.y - model.y) / oldScale,
+            };
 
-    stage.on('wheel', (e: InteractivePointerEvent) => {
+            // how to scale? Zoom in? Or zoom out?
 
-        // stop default scrolling
-        e.stopPropagation()
+            let direction = e.deltaY > 0 ? 1 : -1;
 
-        const oldScale = model.canvasData.scale;
-        const pointer = e.canvas as Vector2d;
+            // in that case lets revert direction
+            if (e.ctrlKey) {
+                direction = -direction;
+            }
 
-        var mousePointTo = {
-            x: (pointer.x - model.x) / oldScale,
-            y: (pointer.y - model.y) / oldScale,
-        };
+            const newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy;
 
-        // how to scale? Zoom in? Or zoom out?
+            model.setStageScale(newScale);
 
-        let direction = e.deltaY > 0 ? 1 : -1;
+            const newPos = {
+                x: pointer.x - mousePointTo.x * newScale,
+                y: pointer.y - mousePointTo.y * newScale,
+            };
 
-        // in that case lets revert direction
-        if (e.ctrlKey) {
-            direction = -direction;
+            model.setStagePosition(newPos.x, newPos.y);
         }
-
-        const newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy;
-
-        model.setStageScale(newScale);
-
-        const newPos = {
-            x: pointer.x - mousePointTo.x * newScale,
-            y: pointer.y - mousePointTo.y * newScale,
-        };
-
-        model.setStagePosition(newPos.x, newPos.y);
-    });
-}
-
-export const initMultiSelect = (model: Model, stage: Canvas) => {
-
-    if (model.hotKey['Space']) return
-
-    // 设置多选矩形框起始点
-    stage.on('mousedown', (e: InteractivePointerEvent) => {
-        if (model.buffer.select.isSelecting) return
-        if (!model.hotKey["Space"] && e.button === EVT_LEFTCLICK) {
-            const pos = model.getStageCursor(e);
+    },
+    multiSelect: {
+        onMouseDown: (e, model) => {
+            // if (model.hotKey['Space']) return
+            if (model.buffer.select.isSelecting) return
+            if (!model.hotKey["Space"] && e.button === EVT_LEFTCLICK) {
+                const pos = model.getCursorCoord(e);
+                model.setMultiSelect({
+                    start: {
+                        x: pos.x,
+                        y: pos.y,
+                    },
+                    end: {
+                        x: pos.x,
+                        y: pos.y,
+                    },
+                });
+            }
+        },
+        onMouseUp: (e, model) => {
+            if (model.buffer.select.isSelecting) return
+            const pos = model.getCursorCoord(e)
             model.setMultiSelect({
                 start: {
                     x: pos.x,
@@ -176,75 +196,91 @@ export const initMultiSelect = (model: Model, stage: Canvas) => {
                     x: pos.x,
                     y: pos.y,
                 },
-            });
+            }, true);
+        },
+        onMouseMove: (e, model) => {
+            if (model.buffer.select.isSelecting) return
+            if (!model.hotKey["Space"] && model.hotKey["LeftMouseDown"]) {
+                const pos = model.getCursorCoord(e);
+                model.setMultiSelect({
+                    end: {
+                        x: pos.x,
+                        y: pos.y,
+                    },
+                });
+            }
         }
-    })
+    },
+    hotkeys: {
+        onMouseDown: (e, model) => {
+            e.preventDefault()
 
-    // 矩形多选框 鼠标up时
-    stage.on('mouseup', (e: InteractivePointerEvent) => {
-        if (model.buffer.select.isSelecting) return
-        const pos = model.getStageCursor(e)
-        model.setMultiSelect({
-            start: {
-                x: pos.x,
-                y: pos.y,
-            },
-            end: {
-                x: pos.x,
-                y: pos.y,
-            },
-        }, true);
-    })
-
-    // 动态设置多选矩形框大小
-    stage.on('mousemove', (e: InteractivePointerEvent) => {
-        if (model.buffer.select.isSelecting) return
-        if (!model.hotKey["Space"] && model.hotKey["LeftMouseDown"]) {
-            const pos = model.getStageCursor(e);
-            model.setMultiSelect({
-                end: {
-                    x: pos.x,
-                    y: pos.y,
-                },
-            });
+            switch (e.button) {
+                case EVT_LEFTCLICK: model.setHotKey('LeftMouseDown', true); break;
+                case EVT_RIGHTCLICK: model.setHotKey('RightMouseDown', true)
+            }
+        },
+        onMouseUp: (e, model) => {
+            switch (e.button) {
+                case EVT_LEFTCLICK: model.setHotKey('LeftMouseDown', false)
+            }
+        },
+        onKeyDown: (e, model) => {
+            switch (e.code) {
+                case 'Space':
+                    if (INPUT_NODELIST.includes((e.target as HTMLElement).nodeName)) return
+                    e.preventDefault()
+                    model.setHotKey(e.code, true)
+            }
+        },
+        onKeyUp: (e, model) => {
+            switch (e.code) {
+                case 'Space':
+                    if (INPUT_NODELIST.includes(((e.target as HTMLElement)).nodeName)) return
+                    e.preventDefault()
+                    model.setHotKey(e.code, false)
+            }
         }
-    })
+    },
 }
 
-const INPUT_NODELIST = ['TEXTAREA', 'INPUT']
-export const initHotKeys = (model: Model, stage: Canvas) => {
-    stage.on('mousedown', (e: InteractivePointerEvent) => {
-        e.preventDefault()
 
-        switch (e.button) {
-            case EVT_LEFTCLICK: model.setHotKey('LeftMouseDown', true); break;
-            case EVT_RIGHTCLICK: model.setHotKey('RightMouseDown', true)
-        }
-    })
+export const initEvents = (behaviors: BehaviorName[], model: Model) => {
+    const events: Record<StageEventName, React.MouseEventHandler<HTMLDivElement> | undefined> = {
+        'onMouseMove': undefined, 'onMouseDown': undefined, 'onMouseUp': undefined, 'onWheel': undefined, 'onClick': undefined
+    }
 
-    stage.on('mouseup', (e: InteractivePointerEvent) => {
-        switch (e.button) {
-            case EVT_LEFTCLICK: model.setHotKey('LeftMouseDown', false)
+    for (let behavior in behaviorsMap) {
+        let initFn;
+        if (initFn = (behaviorsMap[behavior as BehaviorName] as {
+            'init': InitFn
+        })['init']) {
+            initFn(model)
         }
-    })
+    }
 
-    window.addEventListener('keydown', e => {
-        switch (e.code) {
-            case 'Space':
-                if (INPUT_NODELIST.includes(e.target.nodeName)) return
-                e.preventDefault()
-                model.setHotKey(e.code, true)
+    for (let eventKey of STAGE_EVENT_NAMES) {
+        events[eventKey as StageEventName] = (e: StageEventType) => {
+            behaviors.forEach(behavior => {
+                const cb = (behaviorsMap[behavior as BehaviorName] as {
+                    [key in StageEventName]: StageEventFn
+                })[eventKey as StageEventName] as StageEventFn
+                if (cb) cb(e, model)
+            })
         }
-    })
+    }
 
-    window.addEventListener('keyup', e => {
-        switch (e.code) {
-            case 'Space':
-                if (INPUT_NODELIST.includes(e.target.nodeName)) return
-                e.preventDefault()
-                model.setHotKey(e.code, false)
-        }
-    })
+    for (let eventKey of WINDOW_EVENT_NAMES) {
+        behaviors.forEach(behavior => {
+            const cb = (behaviorsMap[behavior as BehaviorName] as {
+                [key in WindowEventName]: WindowEventFn
+            })[eventKey as WindowEventName] as WindowEventFn
+            if (cb) {
+                window.addEventListener(eventKey.toLocaleLowerCase().replace('on', ''), e => cb(e as KeyboardEvent, model)
+                )
+            }
+        })
+    }
+
+    return events;
 }
-
-export const initDataChangeListener = (model: Model) => { }
