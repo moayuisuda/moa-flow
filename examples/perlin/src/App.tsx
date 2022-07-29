@@ -79,7 +79,7 @@ function App() {
           BaseNode: BaseNode,
         }}
         linkEdge="FlowEdge"
-        // multiSelect
+        multiSelect
         modelRef={modelRef}
         // grid={40}
         canvasData={testData}

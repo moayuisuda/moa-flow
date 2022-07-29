@@ -1,4 +1,3 @@
-import { Rect } from "@antv/react-g";
 import React from "react";
 import { FlowContext } from "../Context";
 import { observer } from "mobx-react";
@@ -16,13 +15,14 @@ export class SelectBoundsRect extends React.Component<{}, {}> {
     return (
       <>
         {!hotKey["Space"] && hotKey["LeftMouseDown"] && (
-          <Rect
+          <rect
             x={Math.min(select.start.x, select.end.x)}
             y={Math.min(select.start.y, select.end.y)}
             width={Math.abs(select.start.x - select.end.x)}
             height={Math.abs(select.start.y - select.end.y)}
             stroke={color.primary}
-            lineWidth={2}
+            strokeWidth={2}
+            fill="none"
           />
         )}
       </>

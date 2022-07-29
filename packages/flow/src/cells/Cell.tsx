@@ -48,7 +48,6 @@ export class CellModel {
     return this.state.isSelect;
   }
   set isSelect(isSelect: boolean) {
-    console.log('set select')
     this.state.isSelect = isSelect;
   }
 

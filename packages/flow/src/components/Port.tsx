@@ -9,20 +9,23 @@ import { observer } from "mobx-react";
 export type PortDataType = {
   edges?: string[];
   host?: string;
+  [index: string]: any;
 } & CellDataType;
 
-type PortPropsType = {
-  link?: (source: any, target: any) => boolean;
+type PortPropsType<D extends PortDataType> = {
+  link?: (source: D, target: D) => boolean;
   x?: number;
   y?: number;
   anchor: { x: number; y: number } | (() => { x: number; y: number });
-  data: PortDataType;
+  data: D;
 };
 
 export type PortData<D> = D & PortDataType;
 
 @observer
-export class Port extends React.Component<PortPropsType> {
+export class Port<D extends PortDataType> extends React.Component<
+  PortPropsType<D>
+> {
   static contextType = FlowContext;
   // vscode 无法推断 this.context 的类型，需要显式声明 this.context 的类型
   declare context: React.ContextType<typeof FlowContext>;
@@ -36,10 +39,7 @@ export class Port extends React.Component<PortPropsType> {
   };
 
   wrapperRef: React.RefObject<any>;
-  constructor(
-    props: PortPropsType & { data: PortDataType },
-    context: FlowModel
-  ) {
+  constructor(props: PortPropsType<D>, context: FlowModel) {
     super(props, context);
     context.cellsMap.set(props.data.id, this);
     this.wrapperRef = context.getWrapperRef(props.data.id);
@@ -100,7 +100,7 @@ export class Port extends React.Component<PortPropsType> {
         else adoptSource = false;
       }
       if (this.props.link) {
-        if (this.props.link(sourceData as PortDataType, this.props.data))
+        if (this.props.link(sourceData as any, this.props.data))
           adoptTarget = true;
         else adoptTarget = false;
       }
@@ -118,9 +118,9 @@ export class Port extends React.Component<PortPropsType> {
       <div
         ref={this.wrapperRef}
         style={{
-          userSelect: 'none',
+          userSelect: "none",
           cursor: "crosshair",
-          display: 'inline-block'
+          display: "inline-block",
         }}
         onMouseDown={(e) => this.onLinkStart(e)}
         onMouseUp={(e) => this.onLinkEnd(e)}

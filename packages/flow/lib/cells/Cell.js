@@ -17,7 +17,6 @@ var CellModel = /** @class */ (function () {
             return this.state.isSelect;
         },
         set: function (isSelect) {
-            console.log('set select');
             this.state.isSelect = isSelect;
         },
         enumerable: false,

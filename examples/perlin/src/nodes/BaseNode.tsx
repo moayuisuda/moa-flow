@@ -36,7 +36,7 @@ const BaseNode: React.FC<{
     >
       <h1>{`${title}`}</h1>
 
-      {outPorts.map((portData: PortDataType) => (
+      {outPorts.map((portData) => (
         <Port
           key={portData.id}
           data={portData}
@@ -44,7 +44,8 @@ const BaseNode: React.FC<{
             x: data.x + 20,
             y: data.y + 80,
           })}
-          link={(target: PortDataType, source: PortDataType) => {
+          link={(source, target) => {
+            alert(source);
             return true;
           }}
         >

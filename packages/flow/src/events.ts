@@ -14,6 +14,8 @@ interface StageEventFn {
 interface WindowEventFn {
     (e: KeyboardEvent, model: Model): any
 }
+
+//一开始挂载在window上的fn
 interface InitFn {
     (model: Model): any
 }
@@ -63,15 +65,13 @@ export const behaviorsMap: Record<BehaviorName, EventMaps> = {
                 // 这次存在上次不存在的就是需要设置为true的
                 const toTrueCells = without(model.selectCells, ...prevSelectCells)
 
-                console.log(toFalseCells, toTrueCells)
                 toFalseCells.forEach(cellId => {
                     const cellModel = model.getCellModel(cellId) as CellModel
-                    cellModel && (cellModel.state.isSelect = false)
+                    cellModel && (cellModel.isSelect = false)
                 })
 
                 toTrueCells.forEach(cellId => {
                     const cellModel = model.getCellModel(cellId) as CellModel
-                    console.log(cellModel)
                     cellModel && (cellModel.isSelect = true)
                 })
 
@@ -91,8 +91,8 @@ export const behaviorsMap: Record<BehaviorName, EventMaps> = {
             // 移动整个stage
             if (model.hotKey["Space"] && model.hotKey['LeftMouseDown']) {
                 model.setStagePosition(
-                    model.x + movement.x,
-                    model.y + movement.y
+                    model.x + e.movementX,
+                    model.y + e.movementY
                 );
             }
 
@@ -138,7 +138,7 @@ export const behaviorsMap: Record<BehaviorName, EventMaps> = {
             e.stopPropagation()
 
             const oldScale = model.canvasData.scale;
-            const pointer = model.getCursorCoord(e) as Vector2d;
+            const pointer = model.getCursorCoord(e, false) as Vector2d;
 
             var mousePointTo = {
                 x: (pointer.x - model.x) / oldScale,
@@ -146,7 +146,6 @@ export const behaviorsMap: Record<BehaviorName, EventMaps> = {
             };
 
             // how to scale? Zoom in? Or zoom out?
-
             let direction = e.deltaY > 0 ? 1 : -1;
 
             // in that case lets revert direction
@@ -245,42 +244,63 @@ export const behaviorsMap: Record<BehaviorName, EventMaps> = {
 }
 
 
+const PASSIVE_EVENTS = ['onWheel']
+
 export const initEvents = (behaviors: BehaviorName[], model: Model) => {
     const events: Record<StageEventName, React.MouseEventHandler<HTMLDivElement> | undefined> = {
-        'onMouseMove': undefined, 'onMouseDown': undefined, 'onMouseUp': undefined, 'onWheel': undefined, 'onClick': undefined
+        'onMouseMove': undefined, 'onMouseDown': undefined, 'onMouseUp': undefined, 'onClick': undefined, 'onWheel': undefined
     }
 
-    for (let behavior in behaviorsMap) {
-        let initFn;
-        if (initFn = (behaviorsMap[behavior as BehaviorName] as {
-            'init': InitFn
-        })['init']) {
-            initFn(model)
+    if (!model.isInitEvents) {
+        for (let behavior in behaviorsMap) {
+            let initFn;
+            if (initFn = (behaviorsMap[behavior as BehaviorName] as {
+                'init': InitFn
+            })['init']) {
+                initFn(model)
+            }
         }
-    }
 
-    for (let eventKey of STAGE_EVENT_NAMES) {
-        events[eventKey as StageEventName] = (e: StageEventType) => {
+        for (let eventKey of WINDOW_EVENT_NAMES) {
             behaviors.forEach(behavior => {
                 const cb = (behaviorsMap[behavior as BehaviorName] as {
-                    [key in StageEventName]: StageEventFn
-                })[eventKey as StageEventName] as StageEventFn
-                if (cb) cb(e, model)
+                    [key in WindowEventName]: WindowEventFn
+                })[eventKey as WindowEventName] as WindowEventFn
+                if (cb) {
+                    window.addEventListener(eventKey.toLocaleLowerCase().replace('on', ''), e => cb(e as KeyboardEvent, model)
+                    )
+                }
             })
         }
     }
 
-    for (let eventKey of WINDOW_EVENT_NAMES) {
-        behaviors.forEach(behavior => {
-            const cb = (behaviorsMap[behavior as BehaviorName] as {
-                [key in WindowEventName]: WindowEventFn
-            })[eventKey as WindowEventName] as WindowEventFn
-            if (cb) {
-                window.addEventListener(eventKey.toLocaleLowerCase().replace('on', ''), e => cb(e as KeyboardEvent, model)
-                )
+    for (let eventKey of STAGE_EVENT_NAMES) {
+        if (PASSIVE_EVENTS.includes(eventKey)) {
+            if (!model.isInitEvents) {
+                behaviors.forEach(behavior => {
+                    const cb = (behaviorsMap[behavior as BehaviorName] as {
+                        [key in StageEventName]: StageEventFn
+                    })[eventKey as StageEventName] as StageEventFn
+
+                    if (cb) {
+                        Promise.resolve().then(() => {
+                            model.refs.stageRef?.addEventListener(eventKey.replace('on', '').toLocaleLowerCase(), e => cb(e as any, model))
+                        })
+                    }
+                })
             }
-        })
+        } else {
+            events[eventKey as StageEventName] = (e: StageEventType) => {
+                behaviors.forEach(behavior => {
+                    const cb = (behaviorsMap[behavior as BehaviorName] as {
+                        [key in StageEventName]: StageEventFn
+                    })[eventKey as StageEventName] as StageEventFn
+                    if (cb) cb(e, model)
+                })
+            }
+        }
     }
 
+    model.isInitEvents = true
     return events;
 }

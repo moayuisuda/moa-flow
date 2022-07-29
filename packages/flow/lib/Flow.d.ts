@@ -19,7 +19,6 @@ declare type FlowProps = {
 declare class Flow extends React.Component<FlowProps, {}> {
     flowModel: FlowModel;
     constructor(props?: FlowProps);
-    componentDidMount: () => Promise<void>;
     getEvents(): Record<import("typings/common").StageEventName, React.MouseEventHandler<HTMLDivElement> | undefined>;
     render(): JSX.Element;
 }

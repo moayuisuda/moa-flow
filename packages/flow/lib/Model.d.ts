@@ -10,6 +10,7 @@ export declare class FlowModel {
     setCellsDataMap: () => void;
     setCellDataMap(cellData: AllCellDataType): void;
     extra: any;
+    isInitEvents: boolean;
     pendingRender: boolean;
     trigRender(): void;
     pendRender(): void;
@@ -43,7 +44,8 @@ export declare class FlowModel {
     set contextMenuVisible(visible: boolean);
     refs: {
         stageRef: HTMLDivElement | null;
-        svgRef: SVGElement | null;
+        svgContainerRef: SVGElement | null;
+        divContainerRef: HTMLDivElement | null;
     };
     hotKey: {
         RightMouseDown: boolean;
@@ -132,7 +134,7 @@ export declare class FlowModel {
     /**
      * @description 获取当前鼠标的[画布坐标]
      */
-    getCursorCoord: (e: React.MouseEvent) => {
+    getCursorCoord: (e: React.MouseEvent, isCanvasCoord?: boolean) => {
         x: number;
         y: number;
     };

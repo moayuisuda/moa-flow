@@ -5,9 +5,10 @@ import { FlowModel } from "../Model";
 export declare type PortDataType = {
     edges?: string[];
     host?: string;
+    [index: string]: any;
 } & CellDataType;
-declare type PortPropsType = {
-    link?: (source: any, target: any) => boolean;
+declare type PortPropsType<D extends PortDataType> = {
+    link?: (source: D, target: D) => boolean;
     x?: number;
     y?: number;
     anchor: {
@@ -17,18 +18,16 @@ declare type PortPropsType = {
         x: number;
         y: number;
     });
-    data: PortDataType;
+    data: D;
 };
 export declare type PortData<D> = D & PortDataType;
-export declare class Port extends React.Component<PortPropsType> {
+export declare class Port<D extends PortDataType> extends React.Component<PortPropsType<D>> {
     static contextType: React.Context<FlowModel>;
     context: React.ContextType<typeof FlowContext>;
     static defaultData: PortDataType;
     wrapperRef: React.RefObject<any>;
-    constructor(props: PortPropsType & {
-        data: PortDataType;
-    }, context: FlowModel);
-    get data(): PortDataType;
+    constructor(props: PortPropsType<D>, context: FlowModel);
+    get data(): D;
     anchor(): {
         x: number;
         y: number;

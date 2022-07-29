@@ -1,7 +1,7 @@
 import { __spreadArray } from './node_modules/tslib/tslib.es6.js';
 import { autorun } from 'mobx';
 import './node_modules/lodash/lodash.js';
-import { EVT_LEFTCLICK, EVT_RIGHTCLICK, STAGE_EVENT_NAMES, WINDOW_EVENT_NAMES } from './constants.js';
+import { EVT_LEFTCLICK, EVT_RIGHTCLICK, WINDOW_EVENT_NAMES, STAGE_EVENT_NAMES } from './constants.js';
 import { l as lodash } from './_virtual/lodash.js';
 
 var INPUT_NODELIST = ['TEXTAREA', 'INPUT'];
@@ -37,14 +37,12 @@ var behaviorsMap = {
                 var toFalseCells = lodash.exports.without.apply(void 0, __spreadArray([prevSelectCells], model.selectCells, false));
                 // 这次存在上次不存在的就是需要设置为true的
                 var toTrueCells = lodash.exports.without.apply(void 0, __spreadArray([model.selectCells], prevSelectCells, false));
-                console.log(toFalseCells, toTrueCells);
                 toFalseCells.forEach(function (cellId) {
                     var cellModel = model.getCellModel(cellId);
-                    cellModel && (cellModel.state.isSelect = false);
+                    cellModel && (cellModel.isSelect = false);
                 });
                 toTrueCells.forEach(function (cellId) {
                     var cellModel = model.getCellModel(cellId);
-                    console.log(cellModel);
                     cellModel && (cellModel.isSelect = true);
                 });
                 prevSelectCells = model.selectCells.slice();
@@ -61,7 +59,7 @@ var behaviorsMap = {
             };
             // 移动整个stage
             if (model.hotKey["Space"] && model.hotKey['LeftMouseDown']) {
-                model.setStagePosition(model.x + movement.x, model.y + movement.y);
+                model.setStagePosition(model.x + e.movementX, model.y + e.movementY);
             }
             if (select.isSelecting) {
                 model.selectCells.forEach(function (id) {
@@ -100,7 +98,7 @@ var behaviorsMap = {
             e.preventDefault();
             e.stopPropagation();
             var oldScale = model.canvasData.scale;
-            var pointer = model.getCursorCoord(e);
+            var pointer = model.getCursorCoord(e, false);
             var mousePointTo = {
                 x: (pointer.x - model.x) / oldScale,
                 y: (pointer.y - model.y) / oldScale,
@@ -203,41 +201,60 @@ var behaviorsMap = {
         }
     },
 };
+var PASSIVE_EVENTS = ['onWheel'];
 var initEvents = function (behaviors, model) {
     var events = {
-        'onMouseMove': undefined, 'onMouseDown': undefined, 'onMouseUp': undefined, 'onWheel': undefined, 'onClick': undefined
+        'onMouseMove': undefined, 'onMouseDown': undefined, 'onMouseUp': undefined, 'onClick': undefined, 'onWheel': undefined
     };
-    for (var behavior in behaviorsMap) {
-        var initFn = void 0;
-        if (initFn = behaviorsMap[behavior]['init']) {
-            initFn(model);
+    if (!model.isInitEvents) {
+        for (var behavior in behaviorsMap) {
+            var initFn = void 0;
+            if (initFn = behaviorsMap[behavior]['init']) {
+                initFn(model);
+            }
         }
-    }
-    var _loop_1 = function (eventKey) {
-        events[eventKey] = function (e) {
+        var _loop_1 = function (eventKey) {
             behaviors.forEach(function (behavior) {
                 var cb = behaviorsMap[behavior][eventKey];
-                if (cb)
-                    cb(e, model);
+                if (cb) {
+                    window.addEventListener(eventKey.toLocaleLowerCase().replace('on', ''), function (e) { return cb(e, model); });
+                }
             });
         };
-    };
-    for (var _i = 0, STAGE_EVENT_NAMES_1 = STAGE_EVENT_NAMES; _i < STAGE_EVENT_NAMES_1.length; _i++) {
-        var eventKey = STAGE_EVENT_NAMES_1[_i];
-        _loop_1(eventKey);
+        for (var _i = 0, WINDOW_EVENT_NAMES_1 = WINDOW_EVENT_NAMES; _i < WINDOW_EVENT_NAMES_1.length; _i++) {
+            var eventKey = WINDOW_EVENT_NAMES_1[_i];
+            _loop_1(eventKey);
+        }
     }
     var _loop_2 = function (eventKey) {
-        behaviors.forEach(function (behavior) {
-            var cb = behaviorsMap[behavior][eventKey];
-            if (cb) {
-                window.addEventListener(eventKey.toLocaleLowerCase().replace('on', ''), function (e) { return cb(e, model); });
+        if (PASSIVE_EVENTS.includes(eventKey)) {
+            if (!model.isInitEvents) {
+                behaviors.forEach(function (behavior) {
+                    var cb = behaviorsMap[behavior][eventKey];
+                    if (cb) {
+                        Promise.resolve().then(function () {
+                            var _a;
+                            (_a = model.refs.stageRef) === null || _a === void 0 ? void 0 : _a.addEventListener(eventKey.replace('on', '').toLocaleLowerCase(), function (e) { return cb(e, model); });
+                        });
+                    }
+                });
             }
-        });
+        }
+        else {
+            events[eventKey] = function (e) {
+                behaviors.forEach(function (behavior) {
+                    var cb = behaviorsMap[behavior][eventKey];
+                    if (cb)
+                        cb(e, model);
+                });
+            };
+        }
     };
-    for (var _a = 0, WINDOW_EVENT_NAMES_1 = WINDOW_EVENT_NAMES; _a < WINDOW_EVENT_NAMES_1.length; _a++) {
-        var eventKey = WINDOW_EVENT_NAMES_1[_a];
+    for (var _a = 0, STAGE_EVENT_NAMES_1 = STAGE_EVENT_NAMES; _a < STAGE_EVENT_NAMES_1.length; _a++) {
+        var eventKey = STAGE_EVENT_NAMES_1[_a];
         _loop_2(eventKey);
     }
+    model.isInitEvents = true;
     return events;
 };
 

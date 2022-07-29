@@ -97,7 +97,7 @@ var EdgeModel = /** @class */ (function (_super) {
         return this.pathInstance.getPointAtLength(ratio * this.pathInstance.getTotalLength());
     };
     EdgeModel.prototype.labelContent = function () {
-        var _a = this.context; _a.color; var svgRef = _a.refs.svgRef;
+        var _a = this.context; _a.color; var svgContainerRef = _a.refs.svgContainerRef;
         var text = this.labelFormatter(this.data.label);
         if (!text)
             return React.createElement(React.Fragment, null);
@@ -106,9 +106,9 @@ var EdgeModel = /** @class */ (function (_super) {
         };
         var textInstance = document.createElementNS("http://www.w3.org/2000/svg", "text");
         textInstance.innerHTML = text;
-        svgRef.appendChild(textInstance);
+        svgContainerRef.appendChild(textInstance);
         var textBounds = textInstance.getBBox();
-        svgRef.removeChild(textInstance);
+        svgContainerRef.removeChild(textInstance);
         return (React.createElement("g", { transform: "translate(".concat(-(textBounds.width + LABEL_PADDING) / 2, ", ").concat(-(TEXT_HEIGHT + LABEL_PADDING) / 2, ")") },
             React.createElement("rect", { width: textBounds.width + LABEL_PADDING * 2, height: TEXT_HEIGHT + LABEL_PADDING * 2, fill: "white" }),
             React.createElement("text", __assign({ x: LABEL_PADDING, y: LABEL_PADDING }, props), text)));
@@ -163,7 +163,7 @@ var EdgeModel = /** @class */ (function (_super) {
     ], EdgeModel.prototype, "d", null);
     return EdgeModel;
 }(CellModel));
-var DEFAULT_ARROW_SIZE = 16;
+var DEFAULT_ARROW_SIZE = 4;
 var Edge = observer(function (_a) {
     var model = _a.model;
     var Line = observer(function () {
@@ -174,15 +174,19 @@ var Edge = observer(function (_a) {
             strokeLinecap: "round",
             strokeLinejoin: "round",
             fill: "none",
-            strokeWidth: 3,
+            strokeWidth: 2,
             stroke: isSelect ? color.active : color.deepGrey,
         };
         var cos = Math.cos, sin = Math.sin, PI = Math.PI;
+        var arrowOffset = [
+            lineProps.strokeWidth / 2 || 0,
+            lineProps.strokeWidth / 2 || 0,
+        ];
         return (React.createElement(React.Fragment, null,
             React.createElement("defs", null,
-                React.createElement("marker", { id: "arrow-end" },
-                    React.createElement("path", __assign({}, lineProps, { d: "M-".concat(DEFAULT_ARROW_SIZE * cos(PI / 6), ",").concat(DEFAULT_ARROW_SIZE * sin(PI / 6), " L0,0 L-").concat(DEFAULT_ARROW_SIZE * cos(PI / 6), ",-").concat(DEFAULT_ARROW_SIZE * sin(PI / 6), " Z") })))),
-            React.createElement("path", __assign({}, lineProps, { d: d, markerEnd: "url(#arrow-end)", strokeDasharray: callIfFn(model.lineDash) }))));
+                React.createElement("marker", { id: "arrow-end", markerWidth: "100", markerHeight: "100", refX: arrowOffset[0] + DEFAULT_ARROW_SIZE * cos(PI / 6), refY: arrowOffset[1] + DEFAULT_ARROW_SIZE * sin(PI / 6), orient: "auto" },
+                    React.createElement("path", __assign({}, lineProps, { d: "M".concat(arrowOffset[0], ",").concat(arrowOffset[1], " L").concat(arrowOffset[0], ",").concat(DEFAULT_ARROW_SIZE * sin(PI / 6) * 2 + arrowOffset[1], " L").concat(DEFAULT_ARROW_SIZE * cos(PI / 6) + arrowOffset[0], ",").concat(DEFAULT_ARROW_SIZE * sin(PI / 6) + arrowOffset[1], " Z") })))),
+            React.createElement("path", __assign({}, lineProps, { d: d, markerEnd: "url(#arrow-end)" }))));
     });
     var Label = observer(function () {
         var text = model.labelFormatter(model.data.label);

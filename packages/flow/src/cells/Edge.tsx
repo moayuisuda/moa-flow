@@ -151,7 +151,7 @@ export class EdgeModel extends CellModel {
   labelContent() {
     const {
       color,
-      refs: { svgRef },
+      refs: { svgContainerRef },
     } = this.context;
 
     const text = this.labelFormatter(this.data.label);
@@ -166,9 +166,9 @@ export class EdgeModel extends CellModel {
     );
     textInstance.innerHTML = text;
 
-    (svgRef as SVGElement).appendChild(textInstance);
+    (svgContainerRef as SVGElement).appendChild(textInstance);
     const textBounds = textInstance.getBBox();
-    (svgRef as SVGElement).removeChild(textInstance);
+    (svgContainerRef as SVGElement).removeChild(textInstance);
 
     return (
       <g
@@ -236,7 +236,7 @@ export class EdgeModel extends CellModel {
   }
 }
 
-const DEFAULT_ARROW_SIZE = 16;
+const DEFAULT_ARROW_SIZE = 4;
 
 export const Edge: React.FC<{ model: EdgeModel }> = observer(({ model }) => {
   const Line = observer(() => {
@@ -248,22 +248,33 @@ export const Edge: React.FC<{ model: EdgeModel }> = observer(({ model }) => {
       strokeLinecap: "round",
       strokeLinejoin: "round",
       fill: "none",
-      strokeWidth: 3,
+      strokeWidth: 2,
       stroke: isSelect ? color.active : color.deepGrey,
     } as any;
 
     const { cos, sin, PI } = Math;
+    const arrowOffset = [
+      lineProps.strokeWidth / 2 || 0,
+      lineProps.strokeWidth / 2 || 0,
+    ];
 
     return (
       <>
         <defs>
-          <marker id="arrow-end">
+          <marker
+            id="arrow-end"
+            markerWidth="100"
+            markerHeight="100"
+            refX={arrowOffset[0] + DEFAULT_ARROW_SIZE * cos(PI / 6)}
+            refY={arrowOffset[1] + DEFAULT_ARROW_SIZE * sin(PI / 6)}
+            orient="auto"
+          >
             <path
               {...lineProps}
-              d={`M-${DEFAULT_ARROW_SIZE * cos(PI / 6)},${
-                DEFAULT_ARROW_SIZE * sin(PI / 6)
-              } L0,0 L-${DEFAULT_ARROW_SIZE * cos(PI / 6)},-${
-                DEFAULT_ARROW_SIZE * sin(PI / 6)
+              d={`M${arrowOffset[0]},${arrowOffset[1]} L${arrowOffset[0]},${
+                DEFAULT_ARROW_SIZE * sin(PI / 6) * 2 + arrowOffset[1]
+              } L${DEFAULT_ARROW_SIZE * cos(PI / 6) + arrowOffset[0]},${
+                DEFAULT_ARROW_SIZE * sin(PI / 6) + arrowOffset[1]
               } Z`}
             />
           </marker>
@@ -272,7 +283,7 @@ export const Edge: React.FC<{ model: EdgeModel }> = observer(({ model }) => {
           {...lineProps}
           d={d}
           markerEnd="url(#arrow-end)"
-          strokeDasharray={callIfFn(model.lineDash)}
+          // strokeDasharray={callIfFn(model.lineDash)}
         />
       </>
     );

@@ -1,14 +1,14 @@
 {
   "scale": 1,
-  "x": 100,
-  "y": 100,
+  "x": 50,
+  "y": 50,
   "cells": [
     {
       "id": "1",
       "cellType": "node",
       "component": "BaseNode",
-      "x": 30,
-      "y": 30,
+      "x": 0,
+      "y": 0,
       "visible": true,
       "ports": [
         {

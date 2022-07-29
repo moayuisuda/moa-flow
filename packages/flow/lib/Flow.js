@@ -1,4 +1,4 @@
-import { __extends, __decorate, __spreadArray, __assign, __awaiter, __generator } from './node_modules/tslib/tslib.es6.js';
+import { __extends, __decorate, __spreadArray, __assign } from './node_modules/tslib/tslib.es6.js';
 import React, { useContext } from 'react';
 import { LinkingEdge } from './cells/LinkingEdge.js';
 import { FlowModel } from './Model.js';
@@ -9,7 +9,7 @@ import './components/Arrow.js';
 import { Interactor } from './components/Interacotr.js';
 import './components/Port.js';
 import { getContextMenu } from './components/ContextMenu/index.js';
-import './components/SelectBoundsRect.js';
+import { SelectBoundsRect } from './components/SelectBoundsRect.js';
 import { STAGE_ID } from './constants.js';
 import { initEvents } from './events.js';
 
@@ -75,7 +75,7 @@ observer(function () {
     return (React.createElement("div", null));
 });
 var getViewBox = function (context) {
-    return "".concat(-context.x, " ").concat(-context.y, " ").concat(context.width / context.scale, " ").concat(context.height / context.scale);
+    return "".concat(-context.x / context.scale, " ").concat(-context.y / context.scale, " ").concat(context.width / context.scale, " ").concat(context.height / context.scale);
 };
 /** @class */ ((function (_super) {
     __extends(Grid, _super);
@@ -120,12 +120,29 @@ var Nodes = observer(function () {
     var nodesData = context.canvasData.cells.filter(function (cellData) {
         return cellData.cellType !== "edge";
     });
-    return (React.createElement(React.Fragment, null, nodesData.slice(0, nodesData.length).map(function (cellData) { return (React.createElement(PositionWrapper, { cellData: cellData, key: cellData.id })); })));
-});
-var InteractTop = observer(function () {
-    var context = useContext(FlowContext);
     return (React.createElement(React.Fragment, null,
-        React.createElement(LinkingEdge, { data: context.buffer.link })));
+        React.createElement("div", { style: {
+                zIndex: 1,
+                position: "absolute",
+                pointerEvents: "none",
+                left: context.x,
+                top: context.y,
+                transform: "scale(".concat(context.scale, ", ").concat(context.scale, ")"),
+                transformOrigin: "top left",
+                width: context.width,
+                height: context.height,
+            }, ref: function (ref) { return (context.refs.divContainerRef = ref); } }, nodesData.slice(0, nodesData.length).map(function (cellData) { return (React.createElement(PositionWrapper, { cellData: cellData, key: cellData.id })); }))));
+});
+var LinesAndInterect = observer(function () {
+    var context = useContext(FlowContext);
+    return (React.createElement("svg", { viewBox: getViewBox(context), style: {
+            zIndex: 0,
+            position: "absolute",
+            pointerEvents: "none",
+        }, ref: function (ref) { return (context.refs.svgContainerRef = ref); }, width: context.width, height: context.height },
+        React.createElement(Edges, null),
+        React.createElement(LinkingEdge, { data: context.buffer.link }),
+        React.createElement(SelectBoundsRect, null)));
 });
 var Flow = /** @class */ (function (_super) {
     __extends(Flow, _super);
@@ -135,17 +152,9 @@ var Flow = /** @class */ (function (_super) {
             multiSelect: false,
         }; }
         var _this = _super.call(this, props) || this;
-        _this.componentDidMount = function () { return __awaiter(_this, void 0, void 0, function () {
-            var model;
-            return __generator(this, function (_a) {
-                model = this.flowModel;
-                model.refs.stageRef;
-                this.props.canvasData &&
-                    this.flowModel.setCanvasData(this.props.canvasData);
-                return [2 /*return*/];
-            });
-        }); };
         _this.flowModel = new FlowModel(props.onEvent);
+        _this.props.canvasData &&
+            _this.flowModel.setCanvasData(_this.props.canvasData);
         _this.props.grid && (_this.flowModel.grid = _this.props.grid);
         if (_this.props.width && _this.props.height) {
             _this.flowModel.size = {
@@ -167,6 +176,7 @@ var Flow = /** @class */ (function (_super) {
             "drag",
             "select",
             "hotkeys",
+            "scale",
         ];
         var events = __spreadArray([], defaultEvents, true);
         extraEvents.forEach(function (event) {
@@ -186,27 +196,12 @@ var Flow = /** @class */ (function (_super) {
                         position: "absolute",
                         width: model.width,
                         height: model.height,
+                        cursor: model.hotKey["Space"] ? "move" : "auto",
                     }, id: STAGE_ID, ref: function (ref) {
                         model.refs.stageRef = ref;
                     } }, this.getEvents()),
-                    React.createElement("div", { style: {
-                            zIndex: 1,
-                            position: "absolute",
-                            left: model.x,
-                            top: model.y,
-                            transform: "scale(".concat(model.scale, ", ").concat(model.scale, ")"),
-                            transformOrigin: "top left",
-                            width: model.width,
-                            height: model.height,
-                        } },
-                        React.createElement(Nodes, null)),
-                    React.createElement("svg", { viewBox: getViewBox(model), style: {
-                            zIndex: 0,
-                            position: "absolute",
-                            pointerEvents: "visiblePainted",
-                        }, ref: function (ref) { return (model.refs.svgRef = ref); }, width: model.width, height: model.height },
-                        React.createElement(Edges, null),
-                        React.createElement(InteractTop, null))))));
+                    React.createElement(Nodes, null),
+                    React.createElement(LinesAndInterect, null)))));
     };
     Flow = __decorate([
         observer

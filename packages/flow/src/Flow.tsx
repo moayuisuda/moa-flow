@@ -38,7 +38,7 @@ const PositionWrapper = observer(({ cellData }: { cellData: CellDataType }) => {
           top: absolutePosition.y,
         }
       : {},
-      // 这里cellData没变符合pure，且在CellComponent中没有引用x，y，所以变化位置时不会重渲染
+    // 这里cellData没变符合pure，且在CellComponent中没有引用x，y，所以变化位置时不会重渲染
     children: <CellComponent cellData={cellData} />,
   });
 });
@@ -103,9 +103,9 @@ const Dots = observer(() => {
 });
 
 const getViewBox = (context: FlowModel) => {
-  return `${-context.x} ${-context.y} ${context.width / context.scale} ${
-    context.height / context.scale
-  }`;
+  return `${-context.x / context.scale} ${-context.y / context.scale} ${
+    context.width / context.scale
+  } ${context.height / context.scale}`;
 };
 
 @observer
@@ -170,21 +170,48 @@ const Nodes = observer(() => {
 
   return (
     <>
-      {nodesData.slice(0, nodesData.length).map((cellData) => (
-        <PositionWrapper cellData={cellData} key={cellData.id} />
-      ))}
+      <div
+        style={{
+          zIndex: 1,
+          position: "absolute",
+          pointerEvents: "none",
+          left: context.x,
+          top: context.y,
+          transform: `scale(${context.scale}, ${context.scale})`,
+          transformOrigin: "top left",
+          width: context.width,
+          height: context.height,
+        }}
+        ref={(ref) => (context.refs.divContainerRef = ref)}
+      >
+        {nodesData.slice(0, nodesData.length).map((cellData) => (
+          <PositionWrapper cellData={cellData} key={cellData.id} />
+        ))}
+      </div>
     </>
   );
 });
 
-const InteractTop = observer(() => {
+const LinesAndInterect = observer(() => {
   const context = useContext(FlowContext);
 
   return (
-    <>
+    <svg
+      viewBox={getViewBox(context)}
+      style={{
+        zIndex: 0,
+        position: "absolute",
+        pointerEvents: "none",
+      }}
+      ref={(ref) => (context.refs.svgContainerRef = ref)}
+      width={context.width}
+      height={context.height}
+    >
+      {/* {model.grid && <Grid />} */}
+      <Edges />
       <LinkingEdge data={context.buffer.link} />
-      {/* <SelectBoundsRect /> */}
-    </>
+      <SelectBoundsRect />
+    </svg>
   );
 });
 
@@ -214,6 +241,8 @@ class Flow extends React.Component<FlowProps, {}> {
     super(props);
 
     this.flowModel = new FlowModel(props.onEvent);
+    this.props.canvasData &&
+      this.flowModel.setCanvasData(this.props.canvasData);
     this.props.grid && (this.flowModel.grid = this.props.grid);
 
     if (this.props.width && this.props.height) {
@@ -228,15 +257,6 @@ class Flow extends React.Component<FlowProps, {}> {
     this.flowModel.registComponents(props.components || {});
   }
 
-  componentDidMount = async () => {
-    const { flowModel: model } = this;
-
-    const stage = model.refs.stageRef as HTMLDivElement;
-
-    this.props.canvasData &&
-      this.flowModel.setCanvasData(this.props.canvasData);
-  };
-
   getEvents() {
     const extraEvents: BehaviorName[] = ["scale", "multiSelect"];
     const defaultEvents: BehaviorName[] = [
@@ -245,6 +265,7 @@ class Flow extends React.Component<FlowProps, {}> {
       "drag",
       "select",
       "hotkeys",
+      "scale",
     ];
 
     const events: BehaviorName[] = [...defaultEvents];
@@ -269,6 +290,7 @@ class Flow extends React.Component<FlowProps, {}> {
               position: "absolute",
               width: model.width,
               height: model.height,
+              cursor: model.hotKey["Space"] ? "move" : "auto",
             }}
             id={STAGE_ID}
             ref={(ref) => {
@@ -276,35 +298,8 @@ class Flow extends React.Component<FlowProps, {}> {
             }}
             {...this.getEvents()}
           >
-            <div
-              style={{
-                zIndex: 1,
-                position: "absolute",
-                left: model.x,
-                top: model.y,
-                transform: `scale(${model.scale}, ${model.scale})`,
-                transformOrigin: "top left",
-                width: model.width,
-                height: model.height,
-              }}
-            >
-              <Nodes />
-            </div>
-            <svg
-              viewBox={getViewBox(model)}
-              style={{
-                zIndex: 0,
-                position: "absolute",
-                pointerEvents: "visiblePainted",
-              }}
-              ref={(ref) => (model.refs.svgRef = ref)}
-              width={model.width}
-              height={model.height}
-            >
-              {/* {model.grid && <Grid />} */}
-              <Edges />
-              <InteractTop />
-            </svg>
+            <Nodes />
+            <LinesAndInterect />
           </div>
         </div>
       </FlowContext.Provider>

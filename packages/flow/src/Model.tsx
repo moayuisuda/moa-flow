@@ -60,6 +60,7 @@ export class FlowModel {
   }
 
   extra: any = {};
+  isInitEvents = false;
 
   pendingRender: boolean = true;
   @action
@@ -153,7 +154,8 @@ export class FlowModel {
 
   refs = {
     stageRef: null as HTMLDivElement | null,
-    svgRef: null as SVGElement | null,
+    svgContainerRef: null as SVGElement | null,
+    divContainerRef: null as HTMLDivElement | null,
   };
 
   @observable
@@ -350,25 +352,33 @@ export class FlowModel {
   /**
    * @description 获取当前鼠标的[画布坐标]
    */
-
-  // @TODO 在添加节点，拖拽线条时候并不需要svg的pointerEvents
-  getCursorCoord = (e: React.MouseEvent) => {
+  getCursorCoord = (e: React.MouseEvent, isCanvasCoord: boolean = true) => {
     const stageBounds = this.refs.stageRef?.getBoundingClientRect() as DOMRect;
 
-    return {
-      x: (e.clientX - stageBounds.x - this.x) / this.scale,
-      y: (e.clientY - stageBounds.y - this.y) / this.scale,
-    };
+    if (isCanvasCoord) {
+      return {
+        x: (e.clientX - stageBounds.x - this.x) / this.scale,
+        y: (e.clientY - stageBounds.y - this.y) / this.scale,
+      };
+    } else {
+      return {
+        x: e.clientX - stageBounds.x,
+        y: e.clientY - stageBounds.y,
+      };
+    }
   };
 
   getLocalBBox = (id: string) => {
     const dom = this.wrapperRefsMap.get(id)?.current as HTMLDivElement;
 
-    return getRelativeBoundingBox(dom, this.refs.stageRef as HTMLDivElement);
+    return getRelativeBoundingBox(
+      dom,
+      this.refs.divContainerRef as HTMLDivElement
+    );
   };
 
   @action setCanvasData = (canvasData: CanvasDataType) => {
-    this.pendRender();
+    // this.pendRender();
 
     canvasData.cells.forEach((cellData) => {
       this.insertRuntimeState(cellData);
@@ -380,7 +390,7 @@ export class FlowModel {
     // this.cellsMap.clear();
     this.setCellsDataMap();
 
-    this.trigRender();
+    // this.trigRender();
   };
 
   @action setCellId = (data: CellDataType) => {
@@ -538,8 +548,6 @@ export class FlowModel {
         component,
       }
     );
-
-    console.log(metaData)
 
     this.insertRuntimeState(metaData);
 

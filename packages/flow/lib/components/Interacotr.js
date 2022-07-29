@@ -14,7 +14,6 @@ var Interactor = /** @class */ (function (_super) {
         var onMouseDown = function (e) {
             e.stopPropagation();
             var _a = _this.context, selectCells = _a.selectCells, _b = _a.buffer, select = _b.select, drag = _b.drag;
-            console.log(selectCells);
             if (!selectCells.includes(_this.props.id)) {
                 context.setSelectedCells([id]);
             }
@@ -26,7 +25,11 @@ var Interactor = /** @class */ (function (_super) {
             drag.start.x = coord.x;
             drag.start.y = coord.y;
         };
-        return inSvg ? (React.createElement("g", { onMouseDown: onMouseDown }, this.props.children)) : (React.createElement("div", { onMouseDown: onMouseDown }, this.props.children));
+        return inSvg ? (React.createElement("g", { style: {
+                pointerEvents: "auto",
+            }, onMouseDown: onMouseDown }, this.props.children)) : (React.createElement("div", { style: {
+                pointerEvents: "auto",
+            }, onMouseDown: onMouseDown }, this.props.children));
     };
     Interactor.contextType = FlowContext;
     return Interactor;

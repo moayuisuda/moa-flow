@@ -72,9 +72,9 @@ var Port = /** @class */ (function (_super) {
     Port.prototype.render = function () {
         var _this = this;
         return (React.createElement("div", { ref: this.wrapperRef, style: {
-                userSelect: 'none',
+                userSelect: "none",
                 cursor: "crosshair",
-                display: 'inline-block'
+                display: "inline-block",
             }, onMouseDown: function (e) { return _this.onLinkStart(e); }, onMouseUp: function (e) { return _this.onLinkEnd(e); } }, this.props.children));
     };
     Port.contextType = FlowContext;

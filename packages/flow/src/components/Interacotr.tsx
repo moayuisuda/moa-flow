@@ -36,7 +36,6 @@ export class Interactor extends React.Component<InteractorType> {
         buffer: { select, drag },
       } = this.context;
 
-      console.log(selectCells)
       if (!selectCells.includes(this.props.id)) {
         context.setSelectedCells([id]);
       }
@@ -56,9 +55,23 @@ export class Interactor extends React.Component<InteractorType> {
     };
 
     return inSvg ? (
-      <g onMouseDown={onMouseDown}>{this.props.children}</g>
+      <g
+        style={{
+          pointerEvents: "auto",
+        }}
+        onMouseDown={onMouseDown}
+      >
+        {this.props.children}
+      </g>
     ) : (
-      <div onMouseDown={onMouseDown}>{this.props.children}</div>
+      <div
+        style={{
+          pointerEvents: "auto",
+        }}
+        onMouseDown={onMouseDown}
+      >
+        {this.props.children}
+      </div>
     );
   }
 }

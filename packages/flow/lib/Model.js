@@ -29,6 +29,7 @@ var FlowModel = /** @class */ (function () {
             });
         };
         this.extra = {};
+        this.isInitEvents = false;
         this.pendingRender = true;
         this._width = 1000;
         this._height = 600;
@@ -36,7 +37,8 @@ var FlowModel = /** @class */ (function () {
         this._linkEdge = "Edge";
         this.refs = {
             stageRef: null,
-            svgRef: null,
+            svgContainerRef: null,
+            divContainerRef: null,
         };
         this.hotKey = {
             RightMouseDown: false,
@@ -193,22 +195,30 @@ var FlowModel = /** @class */ (function () {
         /**
          * @description 获取当前鼠标的[画布坐标]
          */
-        // @TODO 在添加节点，拖拽线条时候并不需要svg的pointerEvents
-        this.getCursorCoord = function (e) {
+        this.getCursorCoord = function (e, isCanvasCoord) {
             var _a;
+            if (isCanvasCoord === void 0) { isCanvasCoord = true; }
             var stageBounds = (_a = _this.refs.stageRef) === null || _a === void 0 ? void 0 : _a.getBoundingClientRect();
-            return {
-                x: (e.clientX - stageBounds.x - _this.x) / _this.scale,
-                y: (e.clientY - stageBounds.y - _this.y) / _this.scale,
-            };
+            if (isCanvasCoord) {
+                return {
+                    x: (e.clientX - stageBounds.x - _this.x) / _this.scale,
+                    y: (e.clientY - stageBounds.y - _this.y) / _this.scale,
+                };
+            }
+            else {
+                return {
+                    x: e.clientX - stageBounds.x,
+                    y: e.clientY - stageBounds.y,
+                };
+            }
         };
         this.getLocalBBox = function (id) {
             var _a;
             var dom = (_a = _this.wrapperRefsMap.get(id)) === null || _a === void 0 ? void 0 : _a.current;
-            return getRelativeBoundingBox(dom, _this.refs.stageRef);
+            return getRelativeBoundingBox(dom, _this.refs.divContainerRef);
         };
         this.setCanvasData = function (canvasData) {
-            _this.pendRender();
+            // this.pendRender();
             canvasData.cells.forEach(function (cellData) {
                 _this.insertRuntimeState(cellData);
             });
@@ -217,7 +227,7 @@ var FlowModel = /** @class */ (function () {
             // this.cellsDataMap.clear();
             // this.cellsMap.clear();
             _this.setCellsDataMap();
-            _this.trigRender();
+            // this.trigRender();
         };
         this.setCellId = function (data) {
             data.id = v4();
@@ -334,7 +344,6 @@ var FlowModel = /** @class */ (function () {
             var metaData = Object.assign(_this.modelFactoriesMap.get(component).defaultData, {
                 component: component,
             });
-            console.log(metaData);
             _this.insertRuntimeState(metaData);
             return Object.assign(metaData, __assign({ id: id, visible: true }, initOptions));
         };
