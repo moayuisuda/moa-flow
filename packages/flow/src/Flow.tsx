@@ -8,12 +8,11 @@ import { FlowContext } from "./Context";
 
 import { getContextMenu, SelectBoundsRect } from "./components";
 
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { CellDataType, CellModel } from "./cells/Cell";
 import { STAGE_ID } from "./constants";
-import { color } from "./theme/style";
 import { initEvents } from "./events";
-import { BehaviorName, CanvasDataType } from "typings/common";
+import { BehaviorName } from "typings/common";
 import { Interactor } from "./components/Interacotr";
 
 const PositionWrapper = observer(({ cellData }: { cellData: CellDataType }) => {
@@ -26,8 +25,9 @@ const PositionWrapper = observer(({ cellData }: { cellData: CellDataType }) => {
   const Component = context.componentsMap.get(cellData.component) as React.FC<{
     model: CellModel;
   }>;
+
   if (!Component)
-    throw `[flow-infra] component ${cellData.component} is not regist.`;
+    throw `[flow-infra] component ${cellData.component} not regist.`;
 
   return React.createElement(isNode ? "div" : "g", {
     ref: context.getWrapperRef(cellData.id),
@@ -53,11 +53,7 @@ const CellComponent = observer(({ cellData }: { cellData: CellDataType }) => {
   if (!Component)
     throw `[flow-infra] component ${cellData.component} is not regist.`;
 
-  const Model = context.modelFactoriesMap.get(
-    cellData.component
-  ) as typeof CellModel;
-  const cellModel = new Model(cellData, context);
-  context.cellsModelMap.set(cellData.id, cellModel);
+  const cellModel = context.cellsModelMap.get(cellData.id) as CellModel;
 
   return React.createElement(Interactor, {
     key: cellData.id,
@@ -74,6 +70,12 @@ const Dots = observer(() => {
   const model = useContext(FlowContext);
   // const EXTRA = model.grid as number;
   const EXTRA = 0;
+  const ref = React.useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const context = ref.current as HTMLCanvasElement;
+    console.log(context);
+  });
 
   const _dots = computed(() => {
     const re = [];
@@ -98,6 +100,7 @@ const Dots = observer(() => {
       {/* {_dots.map((dot) => {
         return <Circle cx={dot.x} cy={dot.y} r={2} fill={color.deepGrey} />;
       })} */}
+      <canvas ref={ref}></canvas>
     </div>
   );
 });
@@ -123,24 +126,31 @@ class Grid extends React.Component<{}> {
 
   render() {
     const grid = this.context.grid as number;
+    const { context } = this;
 
-    const _gridPos = computed(() => {
+    const _gridStyles = computed(() => {
       return {
-        x: -Math.round(this.context.x / this.context.scale / grid) * grid,
-        y: -Math.round(this.context.y / this.context.scale / grid) * grid,
+        left: -Math.round(this.context.x / this.context.scale / grid) * grid,
+        top: -Math.round(this.context.y / this.context.scale / grid) * grid,
+        transform: `scale(${context.scale}, ${context.scale})`,
+        width: context.width,
+        height: context.height,
       };
-    }).get();
+    }).get() as React.CSSProperties;
 
     return (
-      // <Group
-      //   {..._gridPos}
-      //   zIndex={0}
-      //   ref={this.gridRef}
-      //   visibility={grid && this.context.scale >= 1 ? "visible" : "hidden"}
-      // >
-      //   <Dots />
-      // </Group>
-      <></>
+      <div
+        style={{
+          zIndex: 0,
+          position: "absolute",
+          pointerEvents: "none",
+          transformOrigin: "top left",
+          ..._gridStyles,
+        }}
+        ref={this.gridRef}
+      >
+        <Dots />
+      </div>
     );
   }
 }
@@ -207,7 +217,6 @@ const LinesAndInterect = observer(() => {
       width={context.width}
       height={context.height}
     >
-      {/* {model.grid && <Grid />} */}
       <Edges />
       <LinkingEdge data={context.buffer.link} />
       <SelectBoundsRect />
@@ -226,6 +235,7 @@ type FlowProps = {
   grid?: number;
   multiSelect?: boolean;
   components?: Record<string, React.FC<any>>;
+  models?: Record<string, typeof CellModel>;
   linkEdge?: string;
 };
 @observer
@@ -254,6 +264,7 @@ class Flow extends React.Component<FlowProps, {}> {
     this.props.onLoad && this.props.onLoad(this.flowModel);
 
     props.modelRef && (props.modelRef.current = this.flowModel);
+    this.flowModel.registModels(props.models || {});
     this.flowModel.registComponents(props.components || {});
   }
 
@@ -298,6 +309,7 @@ class Flow extends React.Component<FlowProps, {}> {
             }}
             {...this.getEvents()}
           >
+            {model.grid && <Grid />}
             <Nodes />
             <LinesAndInterect />
           </div>

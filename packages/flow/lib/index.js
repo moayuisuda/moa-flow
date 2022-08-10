@@ -2,6 +2,7 @@ export { default as Flow } from './Flow.js';
 export { autorun } from 'mobx';
 export { Observer, observer } from 'mobx-react';
 export { FlowContext } from './Context.js';
+export { DagreLayout } from '@antv/layout';
 export { useEvent } from './hooks/useEvent.js';
 export { useModel } from './hooks/useModel.js';
 export { Content } from './hooks/useContent.js';

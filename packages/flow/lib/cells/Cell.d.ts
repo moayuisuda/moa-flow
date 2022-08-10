@@ -1,4 +1,4 @@
-import React from "react";
+/// <reference types="react" />
 import { FlowModel } from "../Model";
 export declare type CellDataType = {
     id: string;
@@ -17,6 +17,6 @@ export declare class CellModel {
     constructor(data: any, context: FlowModel);
     get isSelect(): boolean;
     set isSelect(isSelect: boolean);
-    getWrapperRef(): React.RefObject<HTMLDivElement>;
+    getWrapperRef(): import("react").RefObject<HTMLDivElement>;
     setData(data: any, rec?: boolean): void;
 }

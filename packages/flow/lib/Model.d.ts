@@ -2,6 +2,7 @@ import React from "react";
 import { CellDataType, CellModel } from "./cells/Cell";
 import { Port } from "./components";
 import { AllCellDataType, CanvasDataType, Vector2d } from "./typings/common";
+import { DagreLayout } from '@antv/layout';
 declare type EventSender = (data: any) => void;
 export declare class FlowModel {
     eventMap: Map<string, Map<string, Function>>;
@@ -167,6 +168,7 @@ export declare class FlowModel {
         x: number;
         y: number;
     };
+    setLayout: (dagreLayout: DagreLayout) => void;
     createCellData: (component: string, initOptions?: any) => any;
     addCell: (componentName: string, initOptions?: any) => any;
     setLinkingPosition: (coord: Vector2d) => void;
@@ -183,7 +185,7 @@ export declare class FlowModel {
         y: number;
     };
     sendEvent: (cellId: string, params?: any) => void;
-    registModel: (components: Record<string, typeof CellModel>) => void;
+    registModels: (models: Record<string, typeof CellModel>) => void;
     registComponents: (components: Record<string, React.FC>) => void;
 }
 export default FlowModel;

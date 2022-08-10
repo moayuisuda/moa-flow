@@ -295,47 +295,67 @@
     lodash "^4.17.21"
     resize-observer-polyfill "^1.5.1"
 
-"@antv/g-math@^1.1.8-alpha.0":
-  version "1.1.8-alpha.0"
-  resolved "https://registry.npm.alibaba-inc.com/@antv/g-math/download/@antv/g-math-1.1.8-alpha.0.tgz"
-  integrity sha512-97Ffs5FrmGAonFNy/sYInZug5rbr3VeaPuFdySiuYFTpVIS8S/8Dqg19x77G7qfxPbTV1qy+r1i2QHfZN5QDvg==
+"@antv/g-webgpu-core@^0.5.5", "@antv/g-webgpu-core@^0.5.6":
+  version "0.5.6"
+  resolved "https://registry.npm.alibaba-inc.com/@antv/g-webgpu-core/download/@antv/g-webgpu-core-0.5.6.tgz#68cde0b5d0b44b5794371c2523682f4734da3c6c"
+  integrity sha1-aM3gtdC0S1eUNxwlI2gvRzTaPGw=
   dependencies:
-    gl-matrix "^3.1.0"
-    tslib "^2.3.1"
-
-"@antv/g@^5.1.8":
-  version "5.1.8"
-  resolved "https://registry.npm.alibaba-inc.com/@antv/g/download/@antv/g-5.1.8.tgz"
-  integrity sha512-lvsnwzKxy5B1aRjPAZFT1w3+gD8llpggpsy/zlqOL4i3v++bsK4iE3fJZDlnmq0YQ7V1aaaxswetNsZ/XVYZ3A==
-  dependencies:
-    "@antv/g-math" "^1.1.8-alpha.0"
-    "@antv/util" "^3.0.2"
-    "@types/offscreencanvas" "^2019.6.4"
-    d3-color "^1.4.0"
     eventemitter3 "^4.0.0"
     gl-matrix "^3.1.0"
-    mana-syringe "^0.3.0"
-    rbush "^3.0.1"
+    inversify "^5.0.1"
+    inversify-inject-decorators "^3.1.0"
+    probe.gl "^3.1.1"
     reflect-metadata "^0.1.13"
-    request-animation-frame-polyfill "^1.1.2"
-    tslib "^2.3.1"
 
-"@antv/react-g@^1.0.15":
-  version "1.1.8"
-  resolved "https://registry.npm.alibaba-inc.com/@antv/react-g/download/@antv/react-g-1.1.8.tgz"
-  integrity sha512-nZ2nTdBA45LR+ZYVSiaR1qpA8iJHgT8O1qEwkbEhEf5+FlUM2XGNV5G1UNEAQt/5uiS4aoKYIgN2NzdL6TbKyA==
+"@antv/g-webgpu-engine@^0.5.5":
+  version "0.5.6"
+  resolved "https://registry.npm.alibaba-inc.com/@antv/g-webgpu-engine/download/@antv/g-webgpu-engine-0.5.6.tgz#be7c1bf8e4b1822d72a302d628034345e0577bbd"
+  integrity sha1-vnwb+OSxgi1yowLWKANDReBXe70=
   dependencies:
-    "@antv/g" "^5.1.8"
-    react-reconciler "^0.26.2"
-    scheduler "^0.20.2"
-    tslib "^2.3.1"
+    "@antv/g-webgpu-core" "^0.5.6"
+    "@webgpu/glslang" "^0.0.15"
+    "@webgpu/types" "^0.0.31"
+    gl-matrix "^3.1.0"
+    hammerjs "^2.0.8"
+    inversify "^5.0.1"
+    inversify-inject-decorators "^3.1.0"
+    probe.gl "^3.1.1"
+    reflect-metadata "^0.1.13"
+    regl "^1.3.11"
 
-"@antv/util@^3.0.2":
-  version "3.0.2"
-  resolved "https://registry.npm.alibaba-inc.com/@antv/util/download/@antv/util-3.0.2.tgz"
-  integrity sha512-Be24iVf8HoJGYXEMMFps2teNt7o96n+up0kOXsJniyxYpxEDtRwnNprMm6C+Tva0p8oojh4H50HAvT8Vx4xDTQ==
+"@antv/g-webgpu@0.5.5":
+  version "0.5.5"
+  resolved "https://registry.npm.alibaba-inc.com/@antv/g-webgpu/download/@antv/g-webgpu-0.5.5.tgz#003d411453ed03e7dd916bd6c6db26a2b53d1991"
+  integrity sha1-AD1BFFPtA+fdkWvWxtsmorU9GZE=
   dependencies:
-    fast-deep-equal "^3.1.3"
+    "@antv/g-webgpu-core" "^0.5.5"
+    "@antv/g-webgpu-engine" "^0.5.5"
+    "@webgpu/types" "^0.0.31"
+    gl-matrix "^3.1.0"
+    gl-vec2 "^1.3.0"
+    hammerjs "^2.0.8"
+    inversify "^5.0.1"
+    inversify-inject-decorators "^3.1.0"
+    polyline-miter-util "^1.0.1"
+    polyline-normals "^2.0.2"
+    probe.gl "^3.1.1"
+    reflect-metadata "^0.1.13"
+
+"@antv/graphlib@^1.0.0":
+  version "1.2.0"
+  resolved "https://registry.npm.alibaba-inc.com/@antv/graphlib/download/@antv/graphlib-1.2.0.tgz#c88f97d4b3456d261480a1207ffc4fbc5d7dcf0d"
+  integrity sha512-hhJOMThec51nU4Fe5p/viLlNIL71uDEgYFzKPajWjr2715SFG1HAgiP6AVylIeqBcAZ04u3Lw7usjl/TuI5RuQ==
+
+"@antv/layout@^0.2.5":
+  version "0.2.5"
+  resolved "https://registry.npm.alibaba-inc.com/@antv/layout/download/@antv/layout-0.2.5.tgz#bdb02d2eebd2f11dccdf0af5aca74e2fd32d62d0"
+  integrity sha512-YezISSc5wp88QLvytS2mm/3sFvJYTafIWEvjvp4DIIfIkt8fzZZSJHXJVky3VIqGwbkmD278lMWQQmQ8W1EWEA==
+  dependencies:
+    "@antv/g-webgpu" "0.5.5"
+    "@antv/graphlib" "^1.0.0"
+    d3-force "^2.0.1"
+    dagre-compound "^0.0.11"
+    ml-matrix "^6.5.0"
 
 "@apideck/better-ajv-errors@^0.3.1":
   version "0.3.4"
@@ -2736,6 +2756,28 @@
     schema-utils "^3.0.0"
     source-map "^0.7.3"
 
+"@probe.gl/env@3.5.0":
+  version "3.5.0"
+  resolved "https://registry.npm.alibaba-inc.com/@probe.gl/env/download/@probe.gl/env-3.5.0.tgz#c6d8fbf414fda3eba7b3813cc274e76245216fe0"
+  integrity sha512-YdlpZZshhyYxvWDBmZ5RIW2pTR14Pw4p9czMlt/v7F6HbFzWfAdmH7q6xVwFRYxUpQLwhWensWyv4aFysiWl4g==
+  dependencies:
+    "@babel/runtime" "^7.0.0"
+
+"@probe.gl/log@3.5.0":
+  version "3.5.0"
+  resolved "https://registry.npm.alibaba-inc.com/@probe.gl/log/download/@probe.gl/log-3.5.0.tgz#6589822ab771eadf77787ffc6ecf73e59d181c64"
+  integrity sha512-nW/qz2X1xY08WU/TsmJP6/6IPNcaY5fS/vLjpC4ahJuE2Mezga4hGM/R2X5JWE/nkPc+BsC5GnAnD13rwAxS7g==
+  dependencies:
+    "@babel/runtime" "^7.0.0"
+    "@probe.gl/env" "3.5.0"
+
+"@probe.gl/stats@3.5.0":
+  version "3.5.0"
+  resolved "https://registry.npm.alibaba-inc.com/@probe.gl/stats/download/@probe.gl/stats-3.5.0.tgz#774495772f06e898aae28c1d315c9edac07f3425"
+  integrity sha512-IH2M+F3c8HR1DTroBARePUFG7wIewumtKA0UFqx51Z7S4hKrD60wFbpMmg0AcF4FvHAXMBoC+kYi1UKW9XbAOw==
+  dependencies:
+    "@babel/runtime" "^7.0.0"
+
 "@qixian.cs/path-to-regexp@^6.1.0":
   version "6.1.0"
   resolved "https://registry.npm.alibaba-inc.com/@qixian.cs/path-to-regexp/download/@qixian.cs/path-to-regexp-6.1.0.tgz"
@@ -3244,11 +3286,6 @@
   resolved "https://registry.npm.alibaba-inc.com/@types/normalize-package-data/download/@types/normalize-package-data-2.4.1.tgz"
   integrity sha1-0zV0eaD9/dWQf+Z+F+CoXJBuEwE=
 
-"@types/offscreencanvas@^2019.6.4":
-  version "2019.7.0"
-  resolved "https://registry.npm.alibaba-inc.com/@types/offscreencanvas/download/@types/offscreencanvas-2019.7.0.tgz"
-  integrity sha512-PGcyveRIpL1XIqK8eBsmRBt76eFgtzuPiSTyKHZxnGemp2yzGzWpjYKAfK3wIMiU7eH+851yEpiuP8JZerTmWg==
-
 "@types/parse-json@^4.0.0":
   version "4.0.0"
   resolved "https://registry.npm.alibaba-inc.com/@types/parse-json/download/@types/parse-json-4.0.0.tgz"
@@ -3625,6 +3662,16 @@
   dependencies:
     "@webassemblyjs/ast" "1.11.1"
     "@xtuc/long" "4.2.2"
+
+"@webgpu/glslang@^0.0.15":
+  version "0.0.15"
+  resolved "https://registry.npm.alibaba-inc.com/@webgpu/glslang/download/@webgpu/glslang-0.0.15.tgz#f5ccaf6015241e6175f4b90906b053f88483d1f2"
+  integrity sha1-9cyvYBUkHmF19LkJBrBT+ISD0fI=
+
+"@webgpu/types@^0.0.31":
+  version "0.0.31"
+  resolved "https://registry.npm.alibaba-inc.com/@webgpu/types/download/@webgpu/types-0.0.31.tgz#c05ec6e60024bf1836f31236ecd7677a969a2a2c"
+  integrity sha1-wF7G5gAkvxg28xI27NdnepaaKiw=
 
 "@xtuc/ieee754@^1.2.0":
   version "1.2.0"
@@ -5515,10 +5562,34 @@ csstype@^3.0.2:
   resolved "https://registry.npm.alibaba-inc.com/csstype/download/csstype-3.1.0.tgz"
   integrity sha512-uX1KG+x9h5hIJsaKR9xHUeUraxf8IODOwq9JLNPq6BwB04a/xgpq3rcx47l5BZu5zBPlgD342tdke3Hom/nJRA==
 
-d3-color@^1.4.0:
-  version "1.4.1"
-  resolved "https://registry.npm.alibaba-inc.com/d3-color/download/d3-color-1.4.1.tgz"
-  integrity sha1-xSACv4hGraRCTVXZeYL+8m6zvIo=
+"d3-dispatch@1 - 2":
+  version "2.0.0"
+  resolved "https://registry.npm.alibaba-inc.com/d3-dispatch/download/d3-dispatch-2.0.0.tgz#8a18e16f76dd3fcaef42163c97b926aa9b55e7cf"
+  integrity sha1-ihjhb3bdP8rvQhY8l7kmqptV588=
+
+d3-force@^2.0.1:
+  version "2.1.1"
+  resolved "https://registry.npm.alibaba-inc.com/d3-force/download/d3-force-2.1.1.tgz#f20ccbf1e6c9e80add1926f09b51f686a8bc0937"
+  integrity sha1-8gzL8ebJ6ArdGSbwm1H2hqi8CTc=
+  dependencies:
+    d3-dispatch "1 - 2"
+    d3-quadtree "1 - 2"
+    d3-timer "1 - 2"
+
+"d3-quadtree@1 - 2":
+  version "2.0.0"
+  resolved "https://registry.npm.alibaba-inc.com/d3-quadtree/download/d3-quadtree-2.0.0.tgz#edbad045cef88701f6fee3aee8e93fb332d30f9d"
+  integrity sha1-7brQRc74hwH2/uOu6Ok/szLTD50=
+
+"d3-timer@1 - 2":
+  version "2.0.0"
+  resolved "https://registry.npm.alibaba-inc.com/d3-timer/download/d3-timer-2.0.0.tgz#055edb1d170cfe31ab2da8968deee940b56623e6"
+  integrity sha1-BV7bHRcM/jGrLaiWje7pQLVmI+Y=
+
+dagre-compound@^0.0.11:
+  version "0.0.11"
+  resolved "https://registry.npm.alibaba-inc.com/dagre-compound/download/dagre-compound-0.0.11.tgz#8d3d1004d756f420582d29f28c92045375018987"
+  integrity sha512-UrSgRP9LtOZCYb9e5doolZXpc7xayyszgyOs7uakTK4n4KsLegLVTRRtq01GpQd/iZjYw5fWMapx9ed+c80MAQ==
 
 damerau-levenshtein@^1.0.7:
   version "1.0.8"
@@ -7019,6 +7090,11 @@ gl-matrix@^3.1.0:
   resolved "https://registry.npm.alibaba-inc.com/gl-matrix/download/gl-matrix-3.4.3.tgz"
   integrity sha1-/BGR6DIACf1NIOkzlZXGBB3cIsk=
 
+gl-vec2@^1.0.0, gl-vec2@^1.3.0:
+  version "1.3.0"
+  resolved "https://registry.npm.alibaba-inc.com/gl-vec2/download/gl-vec2-1.3.0.tgz#83d472ed46034de8e09cbc857123fb6c81c51199"
+  integrity sha1-g9Ry7UYDTejgnLyFcSP7bIHFEZk=
+
 glob-parent@^5.1.1, glob-parent@^5.1.2, glob-parent@~5.1.2:
   version "5.1.2"
   resolved "https://registry.npm.alibaba-inc.com/glob-parent/download/glob-parent-5.1.2.tgz"
@@ -7101,6 +7177,11 @@ gzip-size@^6.0.0:
   integrity sha1-BlNn/VDCOcBnHLy61b4+LusQ5GI=
   dependencies:
     duplexer "^0.1.2"
+
+hammerjs@^2.0.8:
+  version "2.0.8"
+  resolved "https://registry.npm.alibaba-inc.com/hammerjs/download/hammerjs-2.0.8.tgz#04ef77862cff2bb79d30f7692095930222bf60f1"
+  integrity sha1-BO93hiz/K7edMPdpIJWTAiK/YPE=
 
 handle-thing@^2.0.0:
   version "2.0.1"
@@ -7602,6 +7683,11 @@ invariant@^2.2.4:
   dependencies:
     loose-envify "^1.0.0"
 
+inversify-inject-decorators@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.npm.alibaba-inc.com/inversify-inject-decorators/download/inversify-inject-decorators-3.1.0.tgz#d9941080bad77cec8a65ee29d905e4d5d73e1e95"
+  integrity sha1-2ZQQgLrXfOyKZe4p2QXk1dc+HpU=
+
 inversify@^5.0.1:
   version "5.1.1"
   resolved "https://registry.npm.alibaba-inc.com/inversify/download/inversify-5.1.1.tgz"
@@ -7621,6 +7707,11 @@ ipaddr.js@^2.0.1:
   version "2.0.1"
   resolved "https://registry.npm.alibaba-inc.com/ipaddr.js/download/ipaddr.js-2.0.1.tgz"
   integrity sha1-7KJWp6h36Reus2iwp0l930LvgcA=
+
+is-any-array@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.npm.alibaba-inc.com/is-any-array/download/is-any-array-2.0.0.tgz#e71bc13741537c06afac03c07885967ef56d8742"
+  integrity sha1-5xvBN0FTfAavrAPAeIWWfvVth0I=
 
 is-arrayish@^0.2.1:
   version "0.2.1"
@@ -8994,13 +9085,6 @@ makeerror@1.0.12:
   dependencies:
     tmpl "1.0.5"
 
-mana-syringe@^0.3.0:
-  version "0.3.1"
-  resolved "https://registry.npm.alibaba-inc.com/mana-syringe/download/mana-syringe-0.3.1.tgz"
-  integrity sha512-27Gd/Yd9PAOP7JOYYLQmhZMxvt8sIbSqCHAamSVXbrWFe+KNkIE+78mloPfl/YSMPlooBO9abcB5j0ZozQ7fkg==
-  dependencies:
-    inversify "^5.0.1"
-
 map-obj@^1.0.0:
   version "1.0.1"
   resolved "https://registry.npm.alibaba-inc.com/map-obj/download/map-obj-1.0.1.tgz"
@@ -9293,6 +9377,37 @@ mkdirp@^1.0.3, mkdirp@^1.0.4:
   version "1.0.4"
   resolved "https://registry.npm.alibaba-inc.com/mkdirp/download/mkdirp-1.0.4.tgz"
   integrity sha1-PrXtYmInVteaXw4qIh3+utdcL34=
+
+ml-array-max@^1.2.4:
+  version "1.2.4"
+  resolved "https://registry.npm.alibaba-inc.com/ml-array-max/download/ml-array-max-1.2.4.tgz#2373e2b7e51c8807e456cc0ef364c5863713623b"
+  integrity sha512-BlEeg80jI0tW6WaPyGxf5Sa4sqvcyY6lbSn5Vcv44lp1I2GR6AWojfUvLnGTNsIXrZ8uqWmo8VcG1WpkI2ONMQ==
+  dependencies:
+    is-any-array "^2.0.0"
+
+ml-array-min@^1.2.3:
+  version "1.2.3"
+  resolved "https://registry.npm.alibaba-inc.com/ml-array-min/download/ml-array-min-1.2.3.tgz#662f027c400105816b849cc3cd786915d0801495"
+  integrity sha512-VcZ5f3VZ1iihtrGvgfh/q0XlMobG6GQ8FsNyQXD3T+IlstDv85g8kfV0xUG1QPRO/t21aukaJowDzMTc7j5V6Q==
+  dependencies:
+    is-any-array "^2.0.0"
+
+ml-array-rescale@^1.3.7:
+  version "1.3.7"
+  resolved "https://registry.npm.alibaba-inc.com/ml-array-rescale/download/ml-array-rescale-1.3.7.tgz#c4d129320d113a732e62dd963dc1695bba9a5340"
+  integrity sha512-48NGChTouvEo9KBctDfHC3udWnQKNKEWN0ziELvY3KG25GR5cA8K8wNVzracsqSW1QEkAXjTNx+ycgAv06/1mQ==
+  dependencies:
+    is-any-array "^2.0.0"
+    ml-array-max "^1.2.4"
+    ml-array-min "^1.2.3"
+
+ml-matrix@^6.5.0:
+  version "6.10.2"
+  resolved "https://registry.npm.alibaba-inc.com/ml-matrix/download/ml-matrix-6.10.2.tgz#520f42322c34c0ed7a9916c11f9d693167d197b6"
+  integrity sha512-+yxwzMazC76DAsgEvDrdCfRMH7+lO7UdnuWllavnPeWkPD2oIBA6rLzvst7BFYUxzgRz/h6V6lLzYIYtTvINbw==
+  dependencies:
+    is-any-array "^2.0.0"
+    ml-array-rescale "^1.3.7"
 
 mobx-react-lite@^3.3.0:
   version "3.4.0"
@@ -10175,6 +10290,20 @@ pkg-up@^3.1.0:
   dependencies:
     find-up "^3.0.0"
 
+polyline-miter-util@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.npm.alibaba-inc.com/polyline-miter-util/download/polyline-miter-util-1.0.1.tgz#b693f2389ea0ded36a6bcf5ecd2ece4b6917d957"
+  integrity sha1-tpPyOJ6g3tNqa89ezS7OS2kX2Vc=
+  dependencies:
+    gl-vec2 "^1.0.0"
+
+polyline-normals@^2.0.2:
+  version "2.0.2"
+  resolved "https://registry.npm.alibaba-inc.com/polyline-normals/download/polyline-normals-2.0.2.tgz#a1737e75d8c0dccb1a591f9cb27f09eef4b7d135"
+  integrity sha1-oXN+ddjA3MsaWR+csn8J7vS30TU=
+  dependencies:
+    polyline-miter-util "^1.0.1"
+
 postcss-attribute-case-insensitive@^5.0.1:
   version "5.0.1"
   resolved "https://registry.npm.alibaba-inc.com/postcss-attribute-case-insensitive/download/postcss-attribute-case-insensitive-5.0.1.tgz"
@@ -10779,6 +10908,16 @@ pretty-format@^28.1.1:
     ansi-styles "^5.0.0"
     react-is "^18.0.0"
 
+probe.gl@^3.1.1:
+  version "3.5.0"
+  resolved "https://registry.npm.alibaba-inc.com/probe.gl/download/probe.gl-3.5.0.tgz#084c0ef3a233e1c055cd8a88efb67abb11eba483"
+  integrity sha512-KWj8u0PNytr/rVwcQFcN7O8SK7n/ITOsUZ91l4fSX95oHhKvVCI7eadrzFUzFRlXkFfBWpMWZXFHITsHHHUctw==
+  dependencies:
+    "@babel/runtime" "^7.0.0"
+    "@probe.gl/env" "3.5.0"
+    "@probe.gl/log" "3.5.0"
+    "@probe.gl/stats" "3.5.0"
+
 process-nextick-args@~2.0.0:
   version "2.0.1"
   resolved "https://registry.npm.alibaba-inc.com/process-nextick-args/download/process-nextick-args-2.0.1.tgz"
@@ -10963,11 +11102,6 @@ quick-lru@^5.1.1:
   resolved "https://registry.npm.alibaba-inc.com/quick-lru/download/quick-lru-5.1.1.tgz"
   integrity sha1-NmST5rPkKjpoheLpnRj4D7eoyTI=
 
-quickselect@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.npm.alibaba-inc.com/quickselect/download/quickselect-2.0.0.tgz"
-  integrity sha1-8ZaApIal7vtYEwPgI+mPqvJd0Bg=
-
 raf@^3.4.0, raf@^3.4.1:
   version "3.4.1"
   resolved "https://registry.npm.alibaba-inc.com/raf/download/raf-3.4.1.tgz"
@@ -11004,13 +11138,6 @@ raw-body@2.5.1:
     http-errors "2.0.0"
     iconv-lite "0.4.24"
     unpipe "1.0.0"
-
-rbush@^3.0.1:
-  version "3.0.1"
-  resolved "https://registry.npm.alibaba-inc.com/rbush/download/rbush-3.0.1.tgz"
-  integrity sha1-X6+op5s7mv3+UAhAOnIMwd6ILs8=
-  dependencies:
-    quickselect "^2.0.0"
 
 rc-align@^4.0.0:
   version "4.0.12"
@@ -11595,15 +11722,6 @@ react-lifecycles-compat@^3.0.4:
   resolved "https://registry.npm.alibaba-inc.com/react-lifecycles-compat/download/react-lifecycles-compat-3.0.4.tgz"
   integrity sha1-TxonOv38jzSIqMUWv9p4+HI1I2I=
 
-react-reconciler@^0.26.2:
-  version "0.26.2"
-  resolved "https://registry.npm.alibaba-inc.com/react-reconciler/download/react-reconciler-0.26.2.tgz"
-  integrity sha1-u60OLRMJQj92zzwzCaxsluBenZE=
-  dependencies:
-    loose-envify "^1.1.0"
-    object-assign "^4.1.1"
-    scheduler "^0.20.2"
-
 react-refresh@^0.11.0:
   version "0.11.0"
   resolved "https://registry.npm.alibaba-inc.com/react-refresh/download/react-refresh-0.11.0.tgz"
@@ -11940,6 +12058,11 @@ regjsparser@^0.8.2:
   dependencies:
     jsesc "~0.5.0"
 
+regl@^1.3.11:
+  version "1.7.0"
+  resolved "https://registry.npm.alibaba-inc.com/regl/download/regl-1.7.0.tgz#0d185431044a356bf80e9b775b11b935ef2746d3"
+  integrity sha1-DRhUMQRKNWv4Dpt3WxG5Ne8nRtM=
+
 relateurl@^0.2.7:
   version "0.2.7"
   resolved "https://registry.npm.alibaba-inc.com/relateurl/download/relateurl-0.2.7.tgz"
@@ -11955,11 +12078,6 @@ renderkid@^3.0.0:
     htmlparser2 "^6.1.0"
     lodash "^4.17.21"
     strip-ansi "^6.0.1"
-
-request-animation-frame-polyfill@^1.1.2:
-  version "1.1.2"
-  resolved "https://registry.npm.alibaba-inc.com/request-animation-frame-polyfill/download/request-animation-frame-polyfill-1.1.2.tgz"
-  integrity sha1-tfmL0qS6q704WYms7bG2bD5bUcM=
 
 request@^2.88.0, request@^2.88.2:
   version "2.88.2"
@@ -13278,7 +13396,7 @@ tslib@^1.8.1, tslib@^1.9.0:
   resolved "https://registry.npm.alibaba-inc.com/tslib/download/tslib-1.14.1.tgz"
   integrity sha1-zy04vcNKE0vK8QkcQfZhni9nLQA=
 
-tslib@^2.0.0, tslib@^2.0.3, tslib@^2.3.0, tslib@^2.3.1:
+tslib@^2.0.0, tslib@^2.0.3, tslib@^2.3.0:
   version "2.4.0"
   resolved "https://registry.npm.alibaba-inc.com/tslib/download/tslib-2.4.0.tgz"
   integrity sha512-d6xOpEDfsi2CZVlPQzGeux8XMwLT9hssAsaPYExaQMuYskwb+x1x7J371tWlbBdWHroy99KnVB6qIkUbs5X3UQ==

@@ -1,5 +1,5 @@
-import { __extends, __decorate, __spreadArray, __assign } from './node_modules/tslib/tslib.es6.js';
-import React, { useContext } from 'react';
+import { __extends, __assign, __decorate, __spreadArray } from './node_modules/tslib/tslib.es6.js';
+import React, { useContext, useEffect } from 'react';
 import { LinkingEdge } from './cells/LinkingEdge.js';
 import { FlowModel } from './Model.js';
 import { computed } from 'mobx';
@@ -22,7 +22,7 @@ var PositionWrapper = observer(function (_a) {
         : { x: 0, y: 0 };
     var Component = context.componentsMap.get(cellData.component);
     if (!Component)
-        throw "[flow-infra] component ".concat(cellData.component, " is not regist.");
+        throw "[flow-infra] component ".concat(cellData.component, " not regist.");
     return React.createElement(isNode ? "div" : "g", {
         ref: context.getWrapperRef(cellData.id),
         style: isNode
@@ -43,9 +43,7 @@ var CellComponent = observer(function (_a) {
     var Component = context.componentsMap.get(cellData.component);
     if (!Component)
         throw "[flow-infra] component ".concat(cellData.component, " is not regist.");
-    var Model = context.modelFactoriesMap.get(cellData.component);
-    var cellModel = new Model(cellData, context);
-    context.cellsModelMap.set(cellData.id, cellModel);
+    var cellModel = context.cellsModelMap.get(cellData.id);
     return React.createElement(Interactor, {
         key: cellData.id,
         id: cellData.id,
@@ -56,10 +54,15 @@ var CellComponent = observer(function (_a) {
         }),
     });
 });
-observer(function () {
+var Dots = observer(function () {
     var model = useContext(FlowContext);
     // const EXTRA = model.grid as number;
     var EXTRA = 0;
+    var ref = React.useRef(null);
+    useEffect(function () {
+        var context = ref.current;
+        console.log(context);
+    });
     computed(function () {
         var re = [];
         for (var i = -EXTRA; i <= model.height + EXTRA; i += model.grid) {
@@ -72,12 +75,13 @@ observer(function () {
         }
         return re;
     }).get();
-    return (React.createElement("div", null));
+    return (React.createElement("div", null,
+        React.createElement("canvas", { ref: ref })));
 });
 var getViewBox = function (context) {
     return "".concat(-context.x / context.scale, " ").concat(-context.y / context.scale, " ").concat(context.width / context.scale, " ").concat(context.height / context.scale);
 };
-/** @class */ ((function (_super) {
+var Grid = /** @class */ (function (_super) {
     __extends(Grid, _super);
     function Grid(props) {
         var _this = _super.call(this, props) || this;
@@ -87,29 +91,25 @@ var getViewBox = function (context) {
     Grid.prototype.render = function () {
         var _this = this;
         var grid = this.context.grid;
-        computed(function () {
+        var context = this.context;
+        var _gridStyles = computed(function () {
             return {
-                x: -Math.round(_this.context.x / _this.context.scale / grid) * grid,
-                y: -Math.round(_this.context.y / _this.context.scale / grid) * grid,
+                left: -Math.round(_this.context.x / _this.context.scale / grid) * grid,
+                top: -Math.round(_this.context.y / _this.context.scale / grid) * grid,
+                transform: "scale(".concat(context.scale, ", ").concat(context.scale, ")"),
+                width: context.width,
+                height: context.height,
             };
         }).get();
-        return (
-        // <Group
-        //   {..._gridPos}
-        //   zIndex={0}
-        //   ref={this.gridRef}
-        //   visibility={grid && this.context.scale >= 1 ? "visible" : "hidden"}
-        // >
-        //   <Dots />
-        // </Group>
-        React.createElement(React.Fragment, null));
+        return (React.createElement("div", { style: __assign({ zIndex: 0, position: "absolute", pointerEvents: "none", transformOrigin: "top left" }, _gridStyles), ref: this.gridRef },
+            React.createElement(Dots, null)));
     };
     Grid.contextType = FlowContext;
     Grid = __decorate([
         observer
     ], Grid);
     return Grid;
-})(React.Component));
+}(React.Component));
 var Edges = observer(function () {
     var context = useContext(FlowContext);
     var edgesData = context.canvasData.cells.filter(function (cellData) { return cellData.cellType === "edge"; });
@@ -164,6 +164,7 @@ var Flow = /** @class */ (function (_super) {
         }
         _this.props.onLoad && _this.props.onLoad(_this.flowModel);
         props.modelRef && (props.modelRef.current = _this.flowModel);
+        _this.flowModel.registModels(props.models || {});
         _this.flowModel.registComponents(props.components || {});
         return _this;
     }
@@ -200,6 +201,7 @@ var Flow = /** @class */ (function (_super) {
                     }, id: STAGE_ID, ref: function (ref) {
                         model.refs.stageRef = ref;
                     } }, this.getEvents()),
+                    model.grid && React.createElement(Grid, null),
                     React.createElement(Nodes, null),
                     React.createElement(LinesAndInterect, null)))));
     };

@@ -168,7 +168,6 @@ var behaviorsMap = {
     },
     hotkeys: {
         onMouseDown: function (e, model) {
-            e.preventDefault();
             switch (e.button) {
                 case EVT_LEFTCLICK:
                     model.setHotKey('LeftMouseDown', true);

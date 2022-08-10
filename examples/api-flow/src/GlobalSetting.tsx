@@ -8,6 +8,7 @@ type IProps = {
   visible: boolean;
   setVisible: (visible: boolean) => void;
   onSubmit: (values: IForm) => void;
+  defaultData: IForm;
 };
 
 type IOption = {
@@ -18,12 +19,12 @@ type IOption = {
 };
 
 type IForm = {
-  appId: string;
-  tagName: string;
-  domain: string;
+  appId?: string;
+  tagName?: string;
+  domain?: string;
 };
 
-const GlobalSettingDrawer = ({ visible, setVisible, onSubmit }: IProps) => {
+const GlobalSettingDrawer = ({ visible, setVisible, onSubmit, defaultData }: IProps) => {
   const [form] = Form.useForm();
   const [appOptions, setAppOptions] = useState<IOption[]>([]);
   const [tagOptions, setTagOptions] = useState<IOption[]>([]);
@@ -51,8 +52,11 @@ const GlobalSettingDrawer = ({ visible, setVisible, onSubmit }: IProps) => {
   };
 
   useEffect(() => {
+    if (visible && defaultData) {
+      form.setFieldsValue(defaultData);
+    }
     // 初始化时，获取基础信息，如果有值，触发onSubmit()
-  }, []);
+  }, [visible]);
 
   return (
     <Drawer

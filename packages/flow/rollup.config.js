@@ -21,6 +21,7 @@ export default {
     "@antv/react-g",
     "@antv/g",
     "@antv/g-canvas",
+    "@antv/layout"
   ],
   input: "src/index.ts",
   output: {

@@ -218,7 +218,6 @@ var FlowModel = /** @class */ (function () {
             return getRelativeBoundingBox(dom, _this.refs.divContainerRef);
         };
         this.setCanvasData = function (canvasData) {
-            // this.pendRender();
             canvasData.cells.forEach(function (cellData) {
                 _this.insertRuntimeState(cellData);
             });
@@ -227,7 +226,6 @@ var FlowModel = /** @class */ (function () {
             // this.cellsDataMap.clear();
             // this.cellsMap.clear();
             _this.setCellsDataMap();
-            // this.trigRender();
         };
         this.setCellId = function (data) {
             data.id = v4();
@@ -237,6 +235,7 @@ var FlowModel = /** @class */ (function () {
             var cellData = _this.getCellData(id);
             _this.emitEvent({
                 type: "data:change",
+                id: id,
             });
             if (!rec)
                 Object.assign(cellData, data);
@@ -337,15 +336,31 @@ var FlowModel = /** @class */ (function () {
                 y: Math.round(vector.y / grid) * grid,
             };
         };
-        // 自动布局，用自动布局的三方库对每一个节点的x，y进行计算
-        // @action setAutoLayout = (layoutOption) => {};
+        this.setLayout = function (dagreLayout) {
+            var nodesData = _this.canvasData.cells.filter(function (cellData) {
+                return cellData.cellType !== "edge";
+            });
+            var edgesData = _this.canvasData.cells.filter(function (cellData) { return cellData.cellType === "edge"; });
+            console.log(edgesData.map(function (edgeData) { return ({
+                source: _this.getCellInstance(edgeData.source).data.host,
+                target: _this.getCellInstance(edgeData.target).data.host
+            }); }));
+            var result = dagreLayout.layout({
+                nodes: nodesData,
+                edges: edgesData.map(function (edgeData) { return ({
+                    source: _this.getCellInstance(edgeData.source).data.host,
+                    target: _this.getCellInstance(edgeData.target).data.host
+                }); })
+            });
+            _this.canvasData.cells = (result.nodes || []).concat(edgesData);
+        };
         this.createCellData = function (component, initOptions) {
             var id = v4();
             var metaData = Object.assign(_this.modelFactoriesMap.get(component).defaultData, {
                 component: component,
             });
             _this.insertRuntimeState(metaData);
-            return Object.assign(metaData, __assign({ id: id, visible: true }, initOptions));
+            return lodash.exports.cloneDeep(Object.assign(metaData, __assign({ id: id, visible: true }, initOptions)));
         };
         this.addCell = function (componentName, initOptions) {
             var newCellData = _this.createCellData(componentName, initOptions);
@@ -436,9 +451,9 @@ var FlowModel = /** @class */ (function () {
                     event(params);
                 });
         };
-        this.registModel = function (components) {
-            for (var key in components) {
-                _this.modelFactoriesMap.set(key, components[key]);
+        this.registModels = function (models) {
+            for (var key in models) {
+                _this.modelFactoriesMap.set(key, models[key]);
             }
         };
         this.registComponents = function (components) {
@@ -461,6 +476,9 @@ var FlowModel = /** @class */ (function () {
                 ? NodeModel
                 : EdgeModel);
         }
+        var Model = this.modelFactoriesMap.get(cellData.component);
+        var cellModel = new Model(cellData, this);
+        this.cellsModelMap.set(cellData.id, cellModel);
         if (isNodeDataType(cellData)) {
             if (cellData.ports) {
                 cellData.ports.forEach(function (portData) {
@@ -663,6 +681,9 @@ var FlowModel = /** @class */ (function () {
     __decorate([
         action
     ], FlowModel.prototype, "deleCell", void 0);
+    __decorate([
+        action
+    ], FlowModel.prototype, "setLayout", void 0);
     __decorate([
         action
     ], FlowModel.prototype, "addCell", void 0);

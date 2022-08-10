@@ -118,9 +118,7 @@ export class Port<D extends PortDataType> extends React.Component<
       <div
         ref={this.wrapperRef}
         style={{
-          userSelect: "none",
           cursor: "crosshair",
-          display: "inline-block",
         }}
         onMouseDown={(e) => this.onLinkStart(e)}
         onMouseUp={(e) => this.onLinkEnd(e)}

@@ -1,12 +1,12 @@
-import { Button, Divider, message, Space } from "antd";
+import { Button, Divider, message, Space, Upload, Dropdown, Menu } from "antd";
+import { PageContainer } from "@alipay/tech-ui";
 import "antd/dist/antd.css";
 import { useEffect, useRef, useState } from "react";
 import type { ModelType } from "@ali/flow-infra-g";
-import { Canvas, Flow, ContextMenu } from "@ali/flow-infra-g";
+import { Flow, ContextMenu, DagreLayout } from "@ali/flow-infra-g";
 
-import ProcessNode from "./nodes/ProcessNode";
-import InterfaceNode from "./nodes/InterfaceNode";
-import FlowEdge from "./FlowEdge";
+import { ProcessNode, ProcessNodeModel } from "./nodes/ProcessNode";
+// import FlowEdge from "./FlowEdge";
 import { Context } from "./Context";
 import GlobalSetting from "./GlobalSetting";
 import type {
@@ -20,11 +20,22 @@ import { flatten } from "lodash";
 
 import { mockSchema } from "./mockData";
 import testData from "./test.json";
+import { InterfaceNodeModel, InterfaceNode } from "./nodes/InterfaceNode/index";
+
+import * as colors from "@ant-design/colors";
+import { BaseNodeModel } from "./nodes/BaseNode";
+import { FlowEdgeModel } from "./FlowEdge";
+
+type IGlobalSetting = {
+  appId?: string;
+  tagName?: string;
+  domain?: string;
+};
 
 function App() {
   const modelRef = useRef<ModelType>();
   const [interfaceSchema, setInterfaceSchema] = useState<ISchema>(mockSchema);
-  const interfaceSchemaRef = useRef();
+  const [globalSetting, setGlobalSetting] = useState<IGlobalSetting>({});
   const [globalSettingVisible, setGlobalSettingVisible] =
     useState<boolean>(false);
   const [nodeList, setNodeList] = useState<[string, Function][]>([]);
@@ -32,42 +43,110 @@ function App() {
   useEffect(() => {
     const model = modelRef.current as ModelType;
 
-    // 注册节点
-    model.regist("InterfaceNode", InterfaceNode);
-    model.regist("ProcessNode", ProcessNode);
-    model.regist("FlowEdge", FlowEdge);
-
     model.extra = {
       taskPool: {},
-      interfaceSchemaRef,
+      interfaceSchema,
     };
+    model.color.primary = colors.blue.primary as string;
+    model.color.active = colors.blue.primary as string;
 
-    // 将默认连线设置为FlowEdge
-    model.linkEdge = "FlowEdge";
+    // model.linkEdge = "FlowEdge";
 
     setNodeList(
-      Array.from(modelRef.current?.componentsMap as Map<string, any>).filter(
-        ([_, Component]) => {
-          return Component.getMetaData().cellType === "node";
-        }
-      )
+      Array.from(
+        modelRef.current?.modelFactoriesMap as Map<string, any>
+      ).filter(([_, Component]) => {
+        return Component.defaultData.cellType === "node";
+      })
     );
+    setTimeout(() => {
+      // 默认还原
+      // handleRestore();
+    }, 1000);
   }, []);
 
-  useEffect(() => {
-    interfaceSchemaRef.current = interfaceSchema;
-
-    interfaceSchemaRef.current = interfaceSchema;
-  }, [interfaceSchema]);
-
   const handleSave = () => {
-    const data = JSON.stringify(modelRef.current?.canvasData);
+    const data = JSON.stringify({
+      ...globalSetting,
+      ...modelRef.current?.canvasData,
+    });
     localStorage.setItem("FLOW_DATA", data);
   };
 
+  const handleExport = () => {
+    function saveJSON(data: any, filename: string) {
+      if (!data) {
+        alert("保存的数据为空");
+        return;
+      }
+      if (!filename) filename = "json.json";
+      let saveData = "";
+      if (typeof data === "object") {
+        saveData = JSON.stringify(data, undefined, 4);
+      }
+      var blob = new Blob([saveData], { type: "text/json" }),
+        e = document.createEvent("MouseEvents"),
+        a = document.createElement("a");
+      a.download = filename;
+      a.href = window.URL.createObjectURL(blob);
+      a.dataset.downloadurl = ["text/json", a.download, a.href].join(":");
+      e.initMouseEvent(
+        "click",
+        true,
+        false,
+        window,
+        0,
+        0,
+        0,
+        0,
+        0,
+        false,
+        false,
+        false,
+        false,
+        0,
+        null
+      );
+      a.dispatchEvent(e);
+    }
+    saveJSON(
+      { ...globalSetting, ...modelRef.current?.canvasData },
+      "data.json"
+    );
+  };
+
+  const handleImport = ({ file, onSuccess }: any) => {
+    const start = 0;
+    const stop = file.size - 1;
+    const reader = new FileReader();
+    reader.onloadend = (evt) => {
+      if (evt.target?.readyState == FileReader.DONE) {
+        const content = evt.target.result as string;
+        if (content) {
+          const remoteData = JSON.parse(content);
+          getInterfaceSchema(remoteData);
+          modelRef.current?.setCanvasData(remoteData);
+        }
+        onSuccess();
+      }
+    };
+    const blob = file.slice(start, stop + 1);
+    reader.readAsText(blob, "utf-8");
+  };
+
+  const DEFAULT_CANVAS_DATA = {
+    scale: 1,
+    x: 0,
+    y: 0,
+    cells: [],
+  };
+
   const handleRestore = () => {
-    const data = localStorage.getItem("FLOW_DATA");
-    if (data) modelRef.current?.setCanvasData(JSON.parse(data));
+    const data =
+      localStorage.getItem("FLOW_DATA") || JSON.stringify(DEFAULT_CANVAS_DATA);
+    const remoteData = JSON.parse(data);
+    getInterfaceSchema(remoteData);
+    if (data) modelRef.current?.setCanvasData(remoteData);
   };
 
   const getInterfaceSchema = async ({
@@ -75,16 +154,21 @@ function App() {
     tagName,
     domain,
   }: {
-    appId: string;
-    tagName: string;
-    domain: string;
+    appId?: string;
+    tagName?: string;
+    domain?: string;
   }) => {
+    setGlobalSetting({ appId, tagName, domain });
     const schema = await getSchemaByTag({ appId, tagName });
     if (schema) {
-      setInterfaceSchema({
+      const interfaceSchema = {
         ...schema,
+        appId,
+        tagName,
         domain,
-      });
+      }
+      setInterfaceSchema(interfaceSchema);
+      (modelRef.current as ModelType).extra.interfaceSchema = interfaceSchema;
     }
   };
 
@@ -109,126 +193,178 @@ function App() {
     const leaveNodes = getLeaveNodes(id);
     return Promise.all([
       leaveNodes.map((leaveNodeId) =>
-        modelRef.current?.getCellInstance(leaveNodeId).process(id)
+        (modelRef.current?.getCellModel(leaveNodeId) as BaseNodeModel).process(
+          id
+        )
       ),
     ]);
   };
 
   return (
-    <div className="App"> 
-      <Context.Provider value={{ interfaceSchema }}>
-        <div style={{ marginBottom: 16 }}>
-          <Space>
-            <Button type="primary" onClick={handleRestore}>
-              还原
-            </Button>
-            <Button type="primary" onClick={handleSave}>
-              保存
-            </Button>
-            <Button
-              style={{ marginLeft: 16 }}
-              onClick={() => setGlobalSettingVisible(true)}
-            >
-              全局设置
-            </Button>
-          </Space>
-        </div>
-        <GlobalSetting
-          visible={globalSettingVisible}
-          setVisible={setGlobalSettingVisible}
-          onSubmit={getInterfaceSchema}
-        />
-
-        <Flow
-          width={window.innerWidth}
-          height={window.innerHeight}
-          multiSelect
-          modelRef={modelRef}
-          grid={40}
-          canvasData={testData}
-        >
-          <Context.Provider value={{ interfaceSchema }}>
-            <Canvas />
-          </Context.Provider>
-
-          <ContextMenu>
-            <Space direction="vertical">
-              <Button
-                onClick={() => {
-                  const { deleCell, selectCells } =
-                    modelRef.current as ModelType;
-                  deleCell(selectCells[0]);
-                }}
+    <div className="App">
+      <PageContainer
+        title="联调链路"
+        extra={
+          <div>
+            <Space>
+              <Button onClick={() => {
+                modelRef.current?.setLayout(new DagreLayout({
+                  type: 'dagre',
+                  rankdir: 'LR',
+                  align: 'UR',
+                  ranksep: 160,
+                  nodesep: 80,
+                  controlPoints: true,
+                }))
+                // 布局参考 https://x6.antv.vision/zh/docs/tutorial/advanced/layout#%E5%B8%83%E5%B1%80%E6%B5%81%E7%A8%8B
+              }}>自动布局</Button>
+              <Dropdown.Button
+                type="primary"
+                overlay={
+                  <Menu>
+                    <Menu.Item key={'import'}>
+                      <Upload
+                        customRequest={handleImport}
+                        fileList={[]}
+                        accept=".json"
+                      >
+                        文件导入
+                      </Upload>
+                    </Menu.Item>
+                  </Menu>
+                }
+                onClick={handleRestore}
               >
-                删除
-              </Button>
-              <Button
-                onClick={() => {
-                  const { getCellData, selectCells } =
-                    modelRef.current as ModelType;
-                  const cellData = getCellData(selectCells[0]);
-                  if (
-                    !(
-                      cellData &&
-                      nodeList
-                        .map(([nodeName]) => nodeName)
-                        .includes(cellData.component)
-                    )
-                  )
-                    message.info("请选择接口节点");
-                  else {
-                    message.info(`${cellData.title}开始执行`);
-                    process(cellData.id);
-                  }
-                }}
+                还原
+              </Dropdown.Button>
+              <Dropdown.Button
+                type="primary"
+                overlay={
+                  <Menu>
+                    <Menu.Item onClick={handleExport} key={'export'}>导出文件</Menu.Item>
+                  </Menu>
+                }
+                onClick={handleSave}
               >
-                执行此节点
-              </Button>
+                保存
+              </Dropdown.Button>
               <Button
-                onClick={() => {
-                  const { getCell, selectCells } =
-                    modelRef.current as ModelType;
-                  const cellInstance = getCell(selectCells[0]);
-
-                  if (
-                    !(
-                      cellInstance &&
-                      nodeList
-                        .map(([nodeName]) => nodeName)
-                        .includes(cellInstance.getData().component)
-                    )
-                  )
-                    message.info("请选择接口节点");
-                  else {
-                    cellInstance.process();
-                    message.info(`开始执行到${cellInstance.getData().title}`);
-                  }
-                }}
+                style={{ marginLeft: 16 }}
+                onClick={() => setGlobalSettingVisible(true)}
               >
-                以此节点为终点执行
+                全局设置
               </Button>
-              <Divider />
-              {nodeList.map(([name]) => {
-                return (
-                  <Button
-                    onClick={() => {
-                      const model = modelRef.current as ModelType;
-                      (modelRef.current as ModelType).addCell(name, {
-                        title: name,
-                        x: -model.x + model.width / 2,
-                        y: -model.y + model.height / 2,
-                      });
-                      model.contextMenuVisible = false;
-                    }}
-                  >
-                    {`增添${name}节点`}
-                  </Button>
-                );
-              })}
             </Space>
-          </ContextMenu>
-        </Flow>
-      </Context.Provider>
+          </div>
+        }
+      >
+        <Context.Provider value={{ interfaceSchema }}>
+          <GlobalSetting
+            visible={globalSettingVisible}
+            setVisible={setGlobalSettingVisible}
+            onSubmit={getInterfaceSchema}
+            defaultData={globalSetting}
+          />
+          <Flow
+            // view
+            components={{
+              InterfaceNode: InterfaceNode,
+              ProcessNode: ProcessNode,
+            }}
+            // model
+            models={{
+              InterfaceNode: InterfaceNodeModel,
+              ProcessNode: ProcessNodeModel,
+              Edge: FlowEdgeModel,
+            }}
+            width={window.innerWidth}
+            height={window.innerHeight}
+            multiSelect
+            modelRef={modelRef}
+            grid={40}
+            canvasData={testData}
+          >
+            <ContextMenu>
+              <Space direction="vertical">
+                <Button
+                  onClick={() => {
+                    const { deleCell, selectCells } =
+                      modelRef.current as ModelType;
+                    deleCell(selectCells[0]);
+                  }}
+                >
+                  删除
+                </Button>
+                <Button
+                  onClick={() => {
+                    const { getCellModel, selectCells } =
+                      modelRef.current as ModelType;
+                    const nodeModel = getCellModel(selectCells[0]);
+
+                    if (
+                      !(
+                        nodeModel &&
+                        nodeList
+                          .map(([nodeName]) => nodeName)
+                          .includes(nodeModel.data.component)
+                      )
+                    )
+                      message.info("请选择接口节点");
+                    else {
+                      message.info(`${nodeModel.data.title}开始执行`);
+                      process(nodeModel.data.id);
+                    }
+                  }}
+                >
+                  执行此节点及后续节点
+                </Button>
+                <Button
+                  onClick={() => {
+                    const { getCellModel, selectCells } =
+                      modelRef.current as ModelType;
+                    const nodeModel = getCellModel(selectCells[0]);
+
+                    if (
+                      !(
+                        nodeModel &&
+                        nodeList
+                          .map(([nodeName]) => nodeName)
+                          .includes(nodeModel.data.component)
+                      )
+                    )
+                      message.info("请选择接口节点");
+                    else {
+                      (nodeModel as InterfaceNodeModel).process();
+                      message.info(`开始执行到${nodeModel.data.title}`);
+                    }
+                  }}
+                >
+                  以此节点为终点执行
+                </Button>
+                <Divider />
+                {nodeList.map(([name]) => {
+                  return (
+                    <Button
+                      key={name}
+                      onClick={() => {
+                        const model = modelRef.current as ModelType;
+                        (modelRef.current as ModelType).addCell(name, {
+                          title: name,
+                          x: -model.x + model.width / 2,
+                          y: -model.y + model.height / 2,
+                        });
+                        model.contextMenuVisible = false;
+                      }}
+                    >
+                      {`增添${name}节点`}
+                    </Button>
+                  );
+                })}
+              </Space>
+            </ContextMenu>
+          </Flow>
+        </Context.Provider>
+      </PageContainer>
     </div>
   );
 }

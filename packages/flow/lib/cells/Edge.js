@@ -13,11 +13,9 @@ var EdgeModel = /** @class */ (function (_super) {
     __extends(EdgeModel, _super);
     function EdgeModel(data, context) {
         var _this = _super.call(this, data, context) || this;
-        _this.bazier = true;
+        _this.bazier = false;
         _this.startHead = false;
         _this.endHead = true;
-        _this.lineDash = [0, 0];
-        _this.animate = false;
         _this.pathInstance = document.createElementNS("http://www.w3.org/2000/svg", "path");
         _this.isMountEvents = false;
         _this.formatVerticied = function (verticies) {
@@ -98,7 +96,7 @@ var EdgeModel = /** @class */ (function (_super) {
     };
     EdgeModel.prototype.labelContent = function () {
         var _a = this.context; _a.color; var svgContainerRef = _a.refs.svgContainerRef;
-        var text = this.labelFormatter(this.data.label);
+        var text = this.label(this.data.label);
         if (!text)
             return React.createElement(React.Fragment, null);
         var props = {
@@ -113,8 +111,8 @@ var EdgeModel = /** @class */ (function (_super) {
             React.createElement("rect", { width: textBounds.width + LABEL_PADDING * 2, height: TEXT_HEIGHT + LABEL_PADDING * 2, fill: "white" }),
             React.createElement("text", __assign({ x: LABEL_PADDING, y: LABEL_PADDING }, props), text)));
     };
-    EdgeModel.prototype.labelFormatter = function (label) {
-        return "label + asd";
+    EdgeModel.prototype.label = function (label) {
+        return label;
     };
     EdgeModel.prototype.isLinking = function () {
         return this.state.isLinking;
@@ -189,7 +187,7 @@ var Edge = observer(function (_a) {
             React.createElement("path", __assign({}, lineProps, { d: d, markerEnd: "url(#arrow-end)" }))));
     });
     var Label = observer(function () {
-        var text = model.labelFormatter(model.data.label);
+        var text = model.label(model.data.label);
         var position = model.getPointAt(0.5);
         return (React.createElement("g", { ref: function (label) {
                 if (model.isMountEvents || !label)

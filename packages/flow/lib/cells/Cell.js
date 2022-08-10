@@ -9,7 +9,6 @@ var CellModel = /** @class */ (function () {
         };
         this.data = data;
         this.context = context;
-        // console.log(this.data);
         makeObservable(this);
     }
     Object.defineProperty(CellModel.prototype, "isSelect", {

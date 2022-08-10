@@ -16,15 +16,13 @@ export declare class EdgeModel extends CellModel {
     protected bazier: boolean | (() => boolean);
     protected startHead: Head | (() => Head);
     protected endHead: Head | (() => Head);
-    lineDash: [number, number] | (() => [number, number]);
-    protected animate: boolean | (() => boolean);
     pathInstance: SVGPathElement;
     isMountEvents: boolean;
     constructor(data: any, context: FlowModel);
     protected formatVerticied: (verticies: Vector2d[]) => Vector2d[];
     getLinkPortsData: () => {
-        source: PortDataType | Vector2d;
-        target: PortDataType | Vector2d;
+        source: Vector2d | PortDataType;
+        target: Vector2d | PortDataType;
     };
     getAnchors: () => {
         source: any;
@@ -40,7 +38,7 @@ export declare class EdgeModel extends CellModel {
     private vectorsToPoints;
     getPointAt(ratio: number): DOMPoint;
     labelContent(): JSX.Element;
-    labelFormatter(label: string): string;
+    label(label: string): string;
     isLinking(): boolean;
     getBazierDir(): {
         source: Dir;

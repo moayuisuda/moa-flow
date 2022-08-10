@@ -33,11 +33,9 @@ export class EdgeModel extends CellModel {
 
   data: EdgeDataType;
 
-  protected bazier: boolean | (() => boolean) = true;
+  protected bazier: boolean | (() => boolean) = false;
   protected startHead: Head | (() => Head) = false;
   protected endHead: Head | (() => Head) = true;
-  lineDash: [number, number] | (() => [number, number]) = [0, 0];
-  protected animate: boolean | (() => boolean) = false;
 
   pathInstance = document.createElementNS("http://www.w3.org/2000/svg", "path");
 
@@ -154,7 +152,7 @@ export class EdgeModel extends CellModel {
       refs: { svgContainerRef },
     } = this.context;
 
-    const text = this.labelFormatter(this.data.label);
+    const text = this.label(this.data.label);
     if (!text) return <></>;
 
     const props = {
@@ -188,8 +186,8 @@ export class EdgeModel extends CellModel {
     );
   }
 
-  labelFormatter(label: string) {
-    return "label + asd";
+  label(label: string) {
+    return label;
   }
 
   isLinking() {
@@ -283,14 +281,13 @@ export const Edge: React.FC<{ model: EdgeModel }> = observer(({ model }) => {
           {...lineProps}
           d={d}
           markerEnd="url(#arrow-end)"
-          // strokeDasharray={callIfFn(model.lineDash)}
         />
       </>
     );
   });
 
   const Label = observer(() => {
-    const text = model.labelFormatter(model.data.label);
+    const text = model.label(model.data.label);
     const position = model.getPointAt(0.5);
 
     return (

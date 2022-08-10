@@ -1,50 +1,54 @@
-import type { ModelType } from "@ali/flow-infra-g";
-import { ConsumerBridge, Graph, Portal } from "@ali/flow-infra-g";
 import { Modal } from "antd";
+import lodash from "lodash";
 import { Context } from "../../Context";
 import NodeConfigForm from "./NodeConfigForm";
-import BaseNode, { STATUS_ENUM } from "../BaseNode";
 import { InterfaceNodeDataType } from "./types";
-import { createRef } from "react";
+import trcall from "./trcall";
+import mockCall from "./mockcall";
+// @ts-ignore
+import { getInterfaceByName } from "@alipay/connect-util";
+import { BaseNodeModel, STATUS_ENUM, NodeFrame } from "../BaseNode";
+import { useState, useRef, useContext } from "react";
+import { EllipsisOutlined, SettingOutlined } from "@ant-design/icons";
 
-const { Rect, Text, Group } = Graph;
-
-class InterfaceNode extends BaseNode<
-  InterfaceNodeDataType,
-  { modalVisible: boolean }
-> {
-  static metaData = {
+export class InterfaceNodeModel extends BaseNodeModel<InterfaceNodeDataType> {
+  static defaultData = {
+    title: "",
+    type: "",
+    cacheData: undefined,
+    status: STATUS_ENUM.WAIT,
+    ports: [
+      {
+        portType: "in",
+      },
+      {
+        portType: "out",
+      },
+    ],
+    x: 0,
+    y: 0,
+    id: "",
+    component: "",
+    cellType: "node",
     interface: "",
     inputParams: [],
-    type: "",
   };
 
-  formRef: React.RefObject<{
-    submit: Function;
-  }>;
-
-  constructor(props: { data: InterfaceNodeDataType }, context: ModelType) {
-    super(props, context);
-
-    this.state = {
-      modalVisible: false,
-    };
-
-    this.formRef = createRef();
-  }
-
-  // @TODO 执行实际的接口请求
   excute = () => {
-    const data = this.props.data;
-
-    return fetch(this.getUrl(data.interface), {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(this.getParams()),
-    }).then((res) => res.json());
+    const { type: interfaceType, interface: interfaceArr, scene } = this.data;
+    const interfaceSchema = this.context.extra.interfaceSchema;
+    if (interfaceType !== "HTTP") {
+      // 先用tr接口兼容监管的场景
+      return trcall(interfaceArr, this.getParams(), interfaceSchema);
+    } else {
+      return mockCall(this.getUrl(interfaceArr, false), this.getParams(), {
+        method: getInterfaceByName({
+          schema: interfaceSchema,
+          name: interfaceArr.join("."),
+        })?.protocols.http?.method,
+        scene,
+      });
+    }
   };
 
   // @TODO 把inputParams转化为接口的参数
@@ -53,14 +57,19 @@ class InterfaceNode extends BaseNode<
       [key: string]: any;
     };
 
-    const inputParams = this.getData().inputParams;
+    const inputParams = this.data.inputParams;
     inputParams.forEach((param) => {
       if (param.assignmentType === "variable") {
-        console.log('moa-flow', param.value)
+        const nodeId = param.value?.[0];
+        // 需要用节点ID取值
         const nodeData = this.context.getCellData(
-          param.value
+          nodeId
         ) as InterfaceNodeDataType;
-        re[param.name] = nodeData.cacheData;
+        // TODO 需要判断是否是array
+        re[param.name] = lodash.get(
+          { [nodeId]: nodeData.cacheData },
+          param.value
+        );
       } else re[param.name] = param.value;
     });
 
@@ -68,82 +77,58 @@ class InterfaceNode extends BaseNode<
   }
 
   // 转化为真实url
-  getUrl(interfaceArr: string[]) {
-    // const interfaceSchema = this.context.extra.interfaceSchemaRef.current;
-    // const { domain, apis } = interfaceSchema;
-    // const protocols = apis?.[interfaceArr.join('.')]?.protocols;
-    // const url = protocols.http?.path;
-    // return `${domain}${url}`;
-    return 'https://c7201052-b5c3-4023-a628-ad23c75a7819.mock.pstmn.io/test1'
-  }
-
-  view() {
-    const { data } = this.props;
-    const { width } = this;
-
-    return (
-      <ConsumerBridge context={Context}>
-        {(InterfaceContext) => (
-          <Group>
-            <Text
-              x={20}
-              y={70}
-              textBaseline="middle"
-              text={"status: " + STATUS_ENUM[data.status]}
-            />
-
-            <Portal>
-              <Modal
-                title={data.id}
-                destroyOnClose
-                visible={this.state.modalVisible}
-                width={800}
-                onOk={async () => {
-                  await this.formRef.current?.submit();
-                  this.setState({
-                    modalVisible: false,
-                  });
-                }}
-                onCancel={() => {
-                  this.setState({
-                    modalVisible: false,
-                  });
-                }}
-              >
-                <NodeConfigForm
-                  ref={this.formRef}
-                  id={data.id}
-                  interfaceSchema={InterfaceContext.interfaceSchema}
-                />
-              </Modal>
-            </Portal>
-
-            <Group
-              // @ts-ignore
-              x={width}
-              cursor="pointer"
-              onClick={() => this.setState({ modalVisible: true })}
-            >
-              <Rect
-                width={40}
-                height={40}
-                radius={[0, 4, 4, 0]}
-                fill={this.context.color.active}
-              ></Rect>
-              <Text
-                y={20}
-                x={8}
-                textBaseline="middle"
-                fill="white"
-                text={"Edit"}
-                fontSize={12}
-              />
-            </Group>
-          </Group>
-        )}
-      </ConsumerBridge>
-    );
+  getUrl(interfaceArr: string[] | string, includeDomain?: boolean) {
+    const interfaceSchema = this.context.extra.interfaceSchema;
+    const { domain, apis } = interfaceSchema;
+    if (typeof interfaceArr === "string") {
+      return `${domain}${interfaceArr}`;
+    }
+    const protocols = apis?.[interfaceArr.join(".")]?.protocols;
+    const url = protocols.http?.path;
+    if (includeDomain) return `${domain}${url}`;
+    return url;
   }
 }
 
-export default InterfaceNode;
+export const InterfaceNode: React.FC<{
+  model: InterfaceNodeModel;
+}> = ({ model }) => {
+  const { data } = model;
+  const InterfaceContext = useContext(Context);
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const formRef = useRef<{
+    submit: Function;
+  }>();
+
+  return (
+    <NodeFrame
+      model={model}
+      actions={[
+        <SettingOutlined key="setting" onClick={() => setModalVisible(true)} />,
+        <EllipsisOutlined key="ellipsis" />,
+      ]}
+    >
+      <h1 style={{ margin: 0 }}>{"status: " + STATUS_ENUM[data.status]}</h1>
+      <Modal
+        title={data.id}
+        destroyOnClose
+        visible={modalVisible}
+        width={800}
+        onOk={async () => {
+          await formRef.current?.submit();
+          setModalVisible(false);
+        }}
+        onCancel={() => {
+          setModalVisible(false);
+        }}
+      >
+        <NodeConfigForm
+          ref={formRef}
+          id={data.id}
+          interfaceSchema={InterfaceContext.interfaceSchema}
+        />
+      </Modal>
+    </NodeFrame>
+  );
+};

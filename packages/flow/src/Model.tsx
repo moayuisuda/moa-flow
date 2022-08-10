@@ -1,4 +1,4 @@
-import { merge, union, without } from "lodash";
+import { cloneDeep, merge, union, without } from "lodash";
 import { action, makeObservable, observable, computed } from "mobx";
 import React from "react";
 import { v4 } from "uuid";
@@ -15,6 +15,7 @@ import {
 } from "./typings/common";
 import { arrayMove, findIndex, isRectsInterSect, remove } from "./utils/util";
 import { getRelativeBoundingBox } from "./utils/coords";
+import { DagreLayout } from '@antv/layout'
 
 type EventSender = (data: any) => void;
 export class FlowModel {
@@ -49,6 +50,12 @@ export class FlowModel {
           : EdgeModel
       );
     }
+
+    const Model = this.modelFactoriesMap.get(
+      cellData.component
+    ) as typeof CellModel;
+    const cellModel = new Model(cellData, this);
+    this.cellsModelMap.set(cellData.id, cellModel);
 
     if (isNodeDataType(cellData)) {
       if (cellData.ports) {
@@ -378,8 +385,6 @@ export class FlowModel {
   };
 
   @action setCanvasData = (canvasData: CanvasDataType) => {
-    // this.pendRender();
-
     canvasData.cells.forEach((cellData) => {
       this.insertRuntimeState(cellData);
     });
@@ -389,8 +394,6 @@ export class FlowModel {
     // this.cellsDataMap.clear();
     // this.cellsMap.clear();
     this.setCellsDataMap();
-
-    // this.trigRender();
   };
 
   @action setCellId = (data: CellDataType) => {
@@ -401,6 +404,7 @@ export class FlowModel {
     const cellData = this.getCellData(id);
     this.emitEvent({
       type: "data:change",
+      id,
     });
 
     if (!rec) Object.assign(cellData, data);
@@ -536,8 +540,29 @@ export class FlowModel {
     };
   };
 
-  // 自动布局，用自动布局的三方库对每一个节点的x，y进行计算
-  // @action setAutoLayout = (layoutOption) => {};
+  @action setLayout = (dagreLayout: DagreLayout) => {
+    const nodesData = this.canvasData.cells.filter((cellData) => {
+      return cellData.cellType !== "edge";
+    });
+    const edgesData = this.canvasData.cells.filter(
+      (cellData: CellDataType) => cellData.cellType === "edge"
+    )
+
+    console.log(edgesData.map(edgeData => ({
+      source: this.getCellInstance(edgeData.source).data.host,
+      target: this.getCellInstance(edgeData.target).data.host
+    })))
+
+    const result = dagreLayout.layout({
+      nodes: nodesData,
+      edges: edgesData.map(edgeData => ({
+        source: this.getCellInstance(edgeData.source).data.host,
+        target: this.getCellInstance(edgeData.target).data.host
+      }))
+    })
+
+    this.canvasData.cells = (result.nodes || []).concat(edgesData)
+  };
 
   createCellData = (component: string, initOptions?: any) => {
     const id = v4();
@@ -551,11 +576,13 @@ export class FlowModel {
 
     this.insertRuntimeState(metaData);
 
-    return Object.assign(metaData, {
-      id,
-      visible: true,
-      ...initOptions,
-    });
+    return cloneDeep(
+      Object.assign(metaData, {
+        id,
+        visible: true,
+        ...initOptions,
+      })
+    );
   };
 
   @action addCell = (componentName: string, initOptions?: any) => {
@@ -676,9 +703,9 @@ export class FlowModel {
       });
   };
 
-  registModel = (components: Record<string, typeof CellModel>) => {
-    for (let key in components) {
-      this.modelFactoriesMap.set(key, components[key]);
+  registModels = (models: Record<string, typeof CellModel>) => {
+    for (let key in models) {
+      this.modelFactoriesMap.set(key, models[key]);
     }
   };
 

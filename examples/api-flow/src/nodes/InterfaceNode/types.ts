@@ -1,4 +1,4 @@
-import BaseNode, {
+import {
     BaseNodeDataType,
     BasePortDataType,
 } from "../BaseNode";

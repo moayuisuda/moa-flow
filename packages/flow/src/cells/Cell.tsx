@@ -1,11 +1,9 @@
 import {
   action,
-  makeAutoObservable,
   observable,
   makeObservable,
   computed,
 } from "mobx";
-import React from "react";
 import { FlowModel } from "../Model";
 
 export type CellDataType = {
@@ -39,7 +37,6 @@ export class CellModel {
   constructor(data: any, context: FlowModel) {
     this.data = data;
     this.context = context;
-    // console.log(this.data);
     makeObservable(this);
   }
 

@@ -112,8 +112,8 @@ const ParamsConfigTable = ({
           />
         )
         else {
-          const interfaceSchema = context.extra.interfaceSchemaRef.current;
-          type IDef = { definition: { title: string; type: string; properties: { [key: string]: IDef } }; title: string; id: string; type: string;};
+          const interfaceSchema = context.extra.interfaceSchema;
+          type IDef = { definition: { title: string; type: string; properties: { [key: string]: IDef } }; title: string; id: string; type: string; };
           // (def: IDef) => { value: string; label: string; children: any[] | undefined }[]
           const getOutputParam: any = (def: IDef) => {
             console.log('moa-flow', 'def.definition', def, def.definition)

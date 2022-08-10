@@ -1,5 +1,6 @@
 import React from "react";
 import FlowModel from "./Model";
+import { CellModel } from "./cells/Cell";
 declare type FlowProps = {
     canvasData?: any;
     onEvent?: (e: {
@@ -14,6 +15,7 @@ declare type FlowProps = {
     grid?: number;
     multiSelect?: boolean;
     components?: Record<string, React.FC<any>>;
+    models?: Record<string, typeof CellModel>;
     linkEdge?: string;
 };
 declare class Flow extends React.Component<FlowProps, {}> {

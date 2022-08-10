@@ -212,8 +212,6 @@ export const behaviorsMap: Record<BehaviorName, EventMaps> = {
     },
     hotkeys: {
         onMouseDown: (e, model) => {
-            e.preventDefault()
-
             switch (e.button) {
                 case EVT_LEFTCLICK: model.setHotKey('LeftMouseDown', true); break;
                 case EVT_RIGHTCLICK: model.setHotKey('RightMouseDown', true)

@@ -1,15 +1,19 @@
-import type { ModelType, NodeDataType, PortDataType } from "@ali/flow-infra-g";
-import { Interactor, Node } from "@ali/flow-infra-g";
-import { message } from "antd";
-import { Context } from "../Context";
+import {
+  ModelType,
+  NodeData,
+  PortData,
+  NodeModel,
+  PortDataType,
+  Port,
+  observer,
+} from "@ali/flow-infra-g";
+import { Card, CardProps, message } from "antd";
 import { HANG_FLAG } from "../constants";
 
-const { Port } = Interactor;
-
-export type BasePortDataType = PortDataType & {
+export type BasePortDataType = PortData<{
   label: string;
   portType: "in" | "out";
-};
+}>;
 
 export enum STATUS_ENUM {
   WAIT,
@@ -20,14 +24,14 @@ export enum STATUS_ENUM {
   HANG,
 }
 
-export type BaseNodeDataType = {
+export type BaseNodeDataType = NodeData<{
   ports: BasePortDataType[];
   cacheData: any;
   status: STATUS_ENUM;
-} & NodeDataType;
+}>;
 
-class BaseNode extends Node<BaseNodeDataType> {
-  static metaData: any = {
+export class BaseNodeModel<D = {}> extends NodeModel<BaseNodeDataType & D> {
+  static defaultData: any = {
     title: "",
     type: "",
     cacheData: undefined,
@@ -40,10 +44,12 @@ class BaseNode extends Node<BaseNodeDataType> {
         portType: "out",
       },
     ],
+    x: 0,
+    y: 0,
+    id: "",
+    component: "",
+    cellType: "node",
   };
-
-  width: number = 220;
-  height: number = 100;
 
   constructor(props: { data: BaseNodeDataType }, context: ModelType) {
     super(props, context);
@@ -51,7 +57,7 @@ class BaseNode extends Node<BaseNodeDataType> {
 
   // 怎样处理数据，并作用在自己的cacheData，返回的都是promise
   excute = async () => {
-    return this.props.data.cacheData;
+    return this.data.cacheData;
   };
 
   checkHang = () => {
@@ -61,7 +67,7 @@ class BaseNode extends Node<BaseNodeDataType> {
     if (inNodes.length === 0) return false;
 
     inNodes.forEach((id) => {
-      const output = (this.context.getCell(id) as BaseNode).output();
+      const output = (this.context.getCellModel(id) as BaseNodeModel).output();
       if (output !== HANG_FLAG) isAllPreHang = false;
     });
 
@@ -70,7 +76,7 @@ class BaseNode extends Node<BaseNodeDataType> {
 
   // 执行前置依赖节点
   processPreNode = (start?: string) => {
-    const data = this.props.data;
+    const data = this.data;
     const inPortData = data.ports.find(
       (portData) => portData.portType === "in"
     ) as BasePortDataType;
@@ -81,14 +87,14 @@ class BaseNode extends Node<BaseNodeDataType> {
 
     return Promise.all(
       linkNodes.map((linkNodeData) => {
-        const instance = this.context.getCellInstance(linkNodeData.id);
-        return instance.process(start);
+        const model = this.context.getCellModel(linkNodeData.id) as BaseNodeModel;
+        return model.process(start);
       })
     );
   };
 
   onTaksError(e: any) {
-    message.error(`[${this.props.data.title}] ${e}`);
+    message.error(`[${this.data.title}] ${e}`);
     console.error(e);
   }
 
@@ -97,7 +103,7 @@ class BaseNode extends Node<BaseNodeDataType> {
     const { taskPool } = this.context.extra;
 
     try {
-      if (start !== this.props.data.id) await this.processPreNode(start);
+      if (start !== this.data.id) await this.processPreNode(start);
       this.setData({
         status: STATUS_ENUM.PROCESS,
       });
@@ -132,16 +138,16 @@ class BaseNode extends Node<BaseNodeDataType> {
 
       return Promise.reject(e);
     } finally {
-      taskPool[this.getData().id] = undefined;
+      taskPool[this.data.id] = undefined;
     }
   };
 
   output() {
-    return this.getData().cacheData;
+    return this.data.cacheData;
   }
 
   getInNodes() {
-    const data = this.props.data;
+    const data = this.data;
     const { ports } = data;
 
     const inPorts =
@@ -156,11 +162,11 @@ class BaseNode extends Node<BaseNodeDataType> {
   process = async (start?: string) => {
     // 如果task池已经有在执行的相同task，就直接返回有的
     const { taskPool } = this.context.extra;
-    if (taskPool[this.getData().id]) return taskPool[this.getData().id];
+    if (taskPool[this.data.id]) return taskPool[this.data.id];
 
     const taskPromise = this.task(start);
 
-    taskPool[this.getData().id] = taskPromise;
+    taskPool[this.data.id] = taskPromise;
     return taskPromise;
   };
 
@@ -191,108 +197,92 @@ class BaseNode extends Node<BaseNodeDataType> {
       [STATUS_ENUM.HANG]: color.deepGrey,
     };
 
-    return { fill: fillMap[this.props.data.status] };
-  }
-
-  view() {
-    return <></>;
-  }
-
-  // 只有这个方法是必须的
-  content() {
-    const { color } = this.context;
-    const { data } = this.props;
-    const { title, ports } = data;
-    const { width, height } = this;
-
-    const inPorts =
-      ports?.filter((portData) => portData.portType === "in") || [];
-    const outPorts =
-      ports?.filter((portData) => portData.portType === "out") || [];
-
-    const position = this.getPosition();
-
-    return (
-      <ConsumerBridge context={Context}>
-        {(bizContext) => (
-          <Interactor {...this.props.data}>
-            <Rect
-              width={width}
-              height={height}
-              shadowColor="rgba(0,0,0,0.1)"
-              shadowBlur={10}
-              radius={[10, 0, 10, 10]}
-              {...this.getFill()}
-              {...this.getStroke()}
-            />
-            <Rect
-              width={width}
-              height={40}
-              fill={color.deepGrey}
-              radius={[10, 0, 0, 0]}
-            />
-            <Text
-              x={10}
-              y={20}
-              fontWeight="bold"
-              textBaseline="middle"
-              text={`${title} [${STATUS_ENUM[data.status]}]`}
-              fill="white"
-            />
-
-            {/* in的port */}
-            {inPorts.map((portData: PortDataType) => (
-              <Port
-                y={70}
-                data={portData}
-                key={portData.label}
-                anchor={{
-                  x: position.x - 20,
-                  y: position.y + 70,
-                }}
-                link={(target: PortDataType, source: PortDataType) => {
-                  return true;
-                }}
-              >
-                <Circle
-                  lineWidth={4}
-                  stroke={color.primary}
-                  fill="white"
-                  r={10}
-                ></Circle>
-              </Port>
-            ))}
-
-            {/* out的port */}
-            {outPorts.map((portData: PortDataType) => (
-              // @ts-ignore
-              <Group x={width} y={70} key={portData.id}>
-                <Port
-                  data={portData}
-                  anchor={{
-                    x: position.x + width + 20,
-                    y: position.y + 70,
-                  }}
-                  link={(target: PortDataType, source: PortDataType) => {
-                    return true;
-                  }}
-                >
-                  <Circle
-                    lineWidth={4}
-                    stroke={color.primary}
-                    fill="white"
-                    r={10}
-                  ></Circle>
-                </Port>
-              </Group>
-            ))}
-
-            {this.view()}
-          </Interactor>
-        )}
-      </ConsumerBridge>
-    );
+    return { fill: fillMap[this.data.status] };
   }
 }
 
-export default BaseNode;
+export const NodeFrame: React.FC<
+  {
+    model: BaseNodeModel;
+  } & CardProps
+> = observer(({ model, children, ...others }) => {
+  const { color } = model.context;
+  const { data, isSelect } = model;
+  const { title, ports, x, y } = data;
+
+  const inPorts = ports?.filter((portData) => portData.portType === "in") || [];
+  const outPorts =
+    ports?.filter((portData) => portData.portType === "out") || [];
+
+  const portStyleProps: React.CSSProperties = {
+    position: "absolute",
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    border: "2px solid",
+    top: 100,
+    borderColor: color.deepGrey,
+    backgroundColor: "white",
+  };
+
+  const fillMap = {
+    [STATUS_ENUM.WAIT]: "white",
+    [STATUS_ENUM.PROCESS]: color.grey,
+    [STATUS_ENUM.ERROR]: color.error,
+    [STATUS_ENUM.SUCCESS]: color.success,
+    [STATUS_ENUM.HANG]: color.deepGrey,
+  };
+
+  return (
+    <Card
+      title={title}
+      style={{
+        // 防止border造成位置错位，所以该用outline
+        border: 'none',
+        outlineColor: isSelect ? color.active : color.deepGrey,
+        outlineWidth: 2,
+        outlineStyle: "solid",
+        width: 300,
+      }}
+      headStyle={{
+        backgroundColor: fillMap[data.status]
+      }}
+      {...others}
+    >
+      {children}
+
+      {inPorts.map((portData: PortDataType) => (
+        <Port
+          key={portData.id}
+          data={portData}
+          anchor={{
+            x: x - 15,
+            y: y + 110,
+          }}
+          link={(target: PortDataType, source: PortDataType) => {
+            return true;
+          }}
+        >
+          <div style={{ ...portStyleProps, left: -10 }}></div>
+        </Port>
+      ))}
+      {outPorts.map((portData: PortDataType) => (
+        <Port
+          key={portData.id}
+          data={portData}
+          anchor={{
+            x: x + 310,
+            y: y + 110,
+          }}
+        >
+          <div
+            style={{
+              ...portStyleProps,
+              right: -10,
+            }}
+          ></div>
+        </Port>
+      ))}
+    </Card>
+  );
+});
