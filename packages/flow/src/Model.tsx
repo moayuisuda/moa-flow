@@ -42,6 +42,8 @@ export class FlowModel {
       return t.cellType === "node";
     }
 
+    if (cellData.cellType === 'port') return
+
     if (!this.modelFactoriesMap.get(cellData.component)) {
       this.modelFactoriesMap.set(
         cellData.component,
@@ -197,6 +199,10 @@ export class FlowModel {
   // 一些中间状态，比如连线中的开始节点的暂存，不应该让外部感知
   @observable
   buffer = {
+    debug: {
+      x: 0,
+      y: 0
+    },
     contextMenu: {
       visible: false,
     },
@@ -364,8 +370,8 @@ export class FlowModel {
 
     if (isCanvasCoord) {
       return {
-        x: (e.clientX - stageBounds.x - this.x) / this.scale,
-        y: (e.clientY - stageBounds.y - this.y) / this.scale,
+        x: ((e.clientX - stageBounds.x) / this.scale - this.x),
+        y: ((e.clientY - stageBounds.y) / this.scale - this.y),
       };
     } else {
       return {
@@ -547,11 +553,6 @@ export class FlowModel {
     const edgesData = this.canvasData.cells.filter(
       (cellData: CellDataType) => cellData.cellType === "edge"
     )
-
-    console.log(edgesData.map(edgeData => ({
-      source: this.getCellInstance(edgeData.source).data.host,
-      target: this.getCellInstance(edgeData.target).data.host
-    })))
 
     const result = dagreLayout.layout({
       nodes: nodesData,

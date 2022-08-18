@@ -57,6 +57,10 @@ export declare class FlowModel {
     getLinkingPort: () => string | undefined;
     clearPortEdge: (edgeId: string) => void;
     buffer: {
+        debug: {
+            x: number;
+            y: number;
+        };
         contextMenu: {
             visible: boolean;
         };

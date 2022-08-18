@@ -15,7 +15,7 @@ var LinkingEdge = /** @class */ (function (_super) {
         if (lodash.exports.isUndefined(data.source))
             return React.createElement(React.Fragment, null);
         var RegistedEdge = this.context.componentsMap.get(this.context.linkEdge);
-        var Model = this.context.modelFactoriesMap.get(data.component);
+        var Model = this.context.modelFactoriesMap.get(this.context.linkEdge);
         return (React.createElement("g", { style: {
                 pointerEvents: "none",
             } }, React.createElement(RegistedEdge, {

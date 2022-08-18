@@ -2,7 +2,6 @@ import React from "react";
 import { LinkingEdge } from "./cells/LinkingEdge";
 import FlowModel from "./Model";
 
-import { computed } from "mobx";
 import { observer } from "mobx-react";
 import { FlowContext } from "./Context";
 
@@ -33,10 +32,10 @@ const PositionWrapper = observer(({ cellData }: { cellData: CellDataType }) => {
     ref: context.getWrapperRef(cellData.id),
     style: isNode
       ? {
-          position: "absolute",
-          left: absolutePosition.x,
-          top: absolutePosition.y,
-        }
+        position: "absolute",
+        left: absolutePosition.x,
+        top: absolutePosition.y,
+      }
       : {},
     // 这里cellData没变符合pure，且在CellComponent中没有引用x，y，所以变化位置时不会重渲染
     children: <CellComponent cellData={cellData} />,
@@ -66,49 +65,9 @@ const CellComponent = observer(({ cellData }: { cellData: CellDataType }) => {
   });
 });
 
-const Dots = observer(() => {
-  const model = useContext(FlowContext);
-  // const EXTRA = model.grid as number;
-  const EXTRA = 0;
-  const ref = React.useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const context = ref.current as HTMLCanvasElement;
-    console.log(context);
-  });
-
-  const _dots = computed(() => {
-    const re = [];
-    for (let i = -EXTRA; i <= model.height + EXTRA; i += model.grid as number) {
-      for (
-        let j = -EXTRA;
-        j <= model.width + EXTRA;
-        j += model.grid as number
-      ) {
-        re.push({
-          x: j,
-          y: i,
-        });
-      }
-    }
-
-    return re;
-  }).get();
-
-  return (
-    <div>
-      {/* {_dots.map((dot) => {
-        return <Circle cx={dot.x} cy={dot.y} r={2} fill={color.deepGrey} />;
-      })} */}
-      <canvas ref={ref}></canvas>
-    </div>
-  );
-});
-
 const getViewBox = (context: FlowModel) => {
-  return `${-context.x / context.scale} ${-context.y / context.scale} ${
-    context.width / context.scale
-  } ${context.height / context.scale}`;
+  return `${-context.x} ${-context.y} ${context.width / context.scale
+    } ${context.height / context.scale}`;
 };
 
 @observer
@@ -117,40 +76,24 @@ class Grid extends React.Component<{}> {
   // vscode 无法推断 this.context 的类型，需要显式声明 this.context 的类型
   declare context: React.ContextType<typeof FlowContext>;
 
-  gridRef: any;
-
   constructor(props: any) {
     super(props);
-    this.gridRef = React.createRef();
   }
 
   render() {
     const grid = this.context.grid as number;
-    const { context } = this;
-
-    const _gridStyles = computed(() => {
-      return {
-        left: -Math.round(this.context.x / this.context.scale / grid) * grid,
-        top: -Math.round(this.context.y / this.context.scale / grid) * grid,
-        transform: `scale(${context.scale}, ${context.scale})`,
-        width: context.width,
-        height: context.height,
-      };
-    }).get() as React.CSSProperties;
+    const { context } = this
+    const radius = 2
 
     return (
-      <div
-        style={{
-          zIndex: 0,
-          position: "absolute",
-          pointerEvents: "none",
-          transformOrigin: "top left",
-          ..._gridStyles,
-        }}
-        ref={this.gridRef}
-      >
-        <Dots />
-      </div>
+      <>
+        <defs>
+          <pattern id="dot" width={grid} height={grid} patternUnits="userSpaceOnUse">
+            <circle cx={radius} cy={radius} r={radius} fill={context.color.deepGrey} />
+          </pattern>
+        </defs>
+        <rect x={-this.context.x} y={-this.context.y} width="100%" height="100%" fill="url(#dot)" />
+      </>
     );
   }
 }
@@ -179,26 +122,25 @@ const Nodes = observer(() => {
   });
 
   return (
-    <>
-      <div
-        style={{
-          zIndex: 1,
-          position: "absolute",
-          pointerEvents: "none",
-          left: context.x,
-          top: context.y,
-          transform: `scale(${context.scale}, ${context.scale})`,
-          transformOrigin: "top left",
-          width: context.width,
-          height: context.height,
-        }}
-        ref={(ref) => (context.refs.divContainerRef = ref)}
-      >
-        {nodesData.slice(0, nodesData.length).map((cellData) => (
-          <PositionWrapper cellData={cellData} key={cellData.id} />
-        ))}
-      </div>
-    </>
+    <div
+      style={{
+        zIndex: 1,
+        position: "absolute",
+        pointerEvents: "none",
+        // 这里div的left和right是不受scale控制的，所以要额外*scale
+        left: context.x * context.scale,
+        top: context.y * context.scale,
+        transform: `scale(${context.scale}, ${context.scale})`,
+        transformOrigin: "top left",
+        width: context.width,
+        height: context.height,
+      }}
+      ref={(ref) => (context.refs.divContainerRef = ref)}
+    >
+      {nodesData.slice(0, nodesData.length).map((cellData) => (
+        <PositionWrapper cellData={cellData} key={cellData.id} />
+      ))}
+    </div>
   );
 });
 
@@ -217,6 +159,7 @@ const LinesAndInterect = observer(() => {
       width={context.width}
       height={context.height}
     >
+      {context.grid && <Grid />}
       <Edges />
       <LinkingEdge data={context.buffer.link} />
       <SelectBoundsRect />
@@ -292,27 +235,24 @@ class Flow extends React.Component<FlowProps, {}> {
 
     return (
       <FlowContext.Provider value={model}>
-        <div>
-          {getContextMenu(this.props.children)}
-          <div
-            style={{
-              overflow: "hidden",
-              display: "inline-block",
-              position: "absolute",
-              width: model.width,
-              height: model.height,
-              cursor: model.hotKey["Space"] ? "move" : "auto",
-            }}
-            id={STAGE_ID}
-            ref={(ref) => {
-              model.refs.stageRef = ref;
-            }}
-            {...this.getEvents()}
-          >
-            {model.grid && <Grid />}
-            <Nodes />
-            <LinesAndInterect />
-          </div>
+        {getContextMenu(this.props.children)}
+        <div
+          style={{
+            overflow: "hidden",
+            display: "inline-block",
+            position: "absolute",
+            width: model.width,
+            height: model.height,
+            cursor: model.hotKey["Space"] ? "move" : "auto",
+          }}
+          id={STAGE_ID}
+          ref={(ref) => {
+            model.refs.stageRef = ref;
+          }}
+          {...this.getEvents()}
+        >
+          <Nodes />
+          <LinesAndInterect />
         </div>
       </FlowContext.Provider>
     );

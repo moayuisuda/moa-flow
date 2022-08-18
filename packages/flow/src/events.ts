@@ -81,18 +81,18 @@ export const behaviorsMap: Record<BehaviorName, EventMaps> = {
     },
     drag: {
         onMouseMove: (e, model) => {
-            const { drag, select } = model.buffer
-            const coord = model.getCursorCoord(e)
+            const { select } = model.buffer
+            // 这里是 e.movementX 不是 movement.x，如果用movement.x，那每一次移动，上次的dragStart实际已经不适用于新的坐标系了，而e.movement就不会，只记录从鼠标开始到结束
             const movement = {
-                x: (coord.x - drag.start.x),
-                y: (coord.y - drag.start.y)
+                x: e.movementX / model.scale,
+                y: e.movementY / model.scale
             }
 
             // 移动整个stage
             if (model.hotKey["Space"] && model.hotKey['LeftMouseDown']) {
                 model.setStagePosition(
-                    model.x + e.movementX,
-                    model.y + e.movementY
+                    model.x + movement.x,
+                    model.y + movement.y
                 );
             }
 
@@ -108,9 +108,6 @@ export const behaviorsMap: Record<BehaviorName, EventMaps> = {
                     }
                 })
             }
-
-            drag.start.x = coord.x
-            drag.start.y = coord.y
         },
         onMouseUp: (e, model) => {
             const { select } = model.buffer
@@ -133,17 +130,17 @@ export const behaviorsMap: Record<BehaviorName, EventMaps> = {
     },
     scale: {
         onWheel: (e: React.WheelEvent, model) => {
-            let scaleBy = 1.02
+            /**
+             * 获取当前坐标 p0
+             * 获取鼠标当前位置在scale后的坐标 p1
+             * p1与p0的差
+             */
+            let scaleBy = 1.01
             e.preventDefault()
             e.stopPropagation()
 
-            const oldScale = model.canvasData.scale;
-            const pointer = model.getCursorCoord(e, false) as Vector2d;
-
-            var mousePointTo = {
-                x: (pointer.x - model.x) / oldScale,
-                y: (pointer.y - model.y) / oldScale,
-            };
+            const oldScale = model.scale;
+            const oldPointer = model.getCursorCoord(e) as Vector2d;
 
             // how to scale? Zoom in? Or zoom out?
             let direction = e.deltaY > 0 ? 1 : -1;
@@ -154,15 +151,21 @@ export const behaviorsMap: Record<BehaviorName, EventMaps> = {
             }
 
             const newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy;
+            const scaleTo = direction > 0 ? scaleBy : (1 / scaleBy)
 
             model.setStageScale(newScale);
 
-            const newPos = {
-                x: pointer.x - mousePointTo.x * newScale,
-                y: pointer.y - mousePointTo.y * newScale,
-            };
+            const preCursorNowPointer = {
+                x: (oldPointer.x + model.x) / scaleTo - model.x,
+                y: (oldPointer.y + model.y) / scaleTo - model.y,
+            }
+            // 用原本的pointer的坐标减去之前鼠标相同位置的现在pointer画布坐标
+            const moveBack = {
+                x: oldPointer.x - preCursorNowPointer.x,
+                y: oldPointer.y - preCursorNowPointer.y
+            }
 
-            model.setStagePosition(newPos.x, newPos.y);
+            model.setStagePosition(model.x - moveBack.x, model.y - moveBack.y);
         }
     },
     multiSelect: {

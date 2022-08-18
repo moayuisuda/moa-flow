@@ -1,8 +1,7 @@
-import { __extends, __assign, __decorate, __spreadArray } from './node_modules/tslib/tslib.es6.js';
-import React, { useContext, useEffect } from 'react';
+import { __extends, __decorate, __spreadArray, __assign } from './node_modules/tslib/tslib.es6.js';
+import React, { useContext } from 'react';
 import { LinkingEdge } from './cells/LinkingEdge.js';
 import { FlowModel } from './Model.js';
-import { computed } from 'mobx';
 import { observer } from 'mobx-react';
 import { FlowContext } from './Context.js';
 import './components/Arrow.js';
@@ -54,55 +53,23 @@ var CellComponent = observer(function (_a) {
         }),
     });
 });
-var Dots = observer(function () {
-    var model = useContext(FlowContext);
-    // const EXTRA = model.grid as number;
-    var EXTRA = 0;
-    var ref = React.useRef(null);
-    useEffect(function () {
-        var context = ref.current;
-        console.log(context);
-    });
-    computed(function () {
-        var re = [];
-        for (var i = -EXTRA; i <= model.height + EXTRA; i += model.grid) {
-            for (var j = -EXTRA; j <= model.width + EXTRA; j += model.grid) {
-                re.push({
-                    x: j,
-                    y: i,
-                });
-            }
-        }
-        return re;
-    }).get();
-    return (React.createElement("div", null,
-        React.createElement("canvas", { ref: ref })));
-});
 var getViewBox = function (context) {
-    return "".concat(-context.x / context.scale, " ").concat(-context.y / context.scale, " ").concat(context.width / context.scale, " ").concat(context.height / context.scale);
+    return "".concat(-context.x, " ").concat(-context.y, " ").concat(context.width / context.scale, " ").concat(context.height / context.scale);
 };
 var Grid = /** @class */ (function (_super) {
     __extends(Grid, _super);
     function Grid(props) {
-        var _this = _super.call(this, props) || this;
-        _this.gridRef = React.createRef();
-        return _this;
+        return _super.call(this, props) || this;
     }
     Grid.prototype.render = function () {
-        var _this = this;
         var grid = this.context.grid;
         var context = this.context;
-        var _gridStyles = computed(function () {
-            return {
-                left: -Math.round(_this.context.x / _this.context.scale / grid) * grid,
-                top: -Math.round(_this.context.y / _this.context.scale / grid) * grid,
-                transform: "scale(".concat(context.scale, ", ").concat(context.scale, ")"),
-                width: context.width,
-                height: context.height,
-            };
-        }).get();
-        return (React.createElement("div", { style: __assign({ zIndex: 0, position: "absolute", pointerEvents: "none", transformOrigin: "top left" }, _gridStyles), ref: this.gridRef },
-            React.createElement(Dots, null)));
+        var radius = 2;
+        return (React.createElement(React.Fragment, null,
+            React.createElement("defs", null,
+                React.createElement("pattern", { id: "dot", width: grid, height: grid, patternUnits: "userSpaceOnUse" },
+                    React.createElement("circle", { cx: radius, cy: radius, r: radius, fill: context.color.deepGrey }))),
+            React.createElement("rect", { x: -this.context.x, y: -this.context.y, width: "100%", height: "100%", fill: "url(#dot)" })));
     };
     Grid.contextType = FlowContext;
     Grid = __decorate([
@@ -120,18 +87,18 @@ var Nodes = observer(function () {
     var nodesData = context.canvasData.cells.filter(function (cellData) {
         return cellData.cellType !== "edge";
     });
-    return (React.createElement(React.Fragment, null,
-        React.createElement("div", { style: {
-                zIndex: 1,
-                position: "absolute",
-                pointerEvents: "none",
-                left: context.x,
-                top: context.y,
-                transform: "scale(".concat(context.scale, ", ").concat(context.scale, ")"),
-                transformOrigin: "top left",
-                width: context.width,
-                height: context.height,
-            }, ref: function (ref) { return (context.refs.divContainerRef = ref); } }, nodesData.slice(0, nodesData.length).map(function (cellData) { return (React.createElement(PositionWrapper, { cellData: cellData, key: cellData.id })); }))));
+    return (React.createElement("div", { style: {
+            zIndex: 1,
+            position: "absolute",
+            pointerEvents: "none",
+            // 这里div的left和right是不受scale控制的，所以要额外*scale
+            left: context.x * context.scale,
+            top: context.y * context.scale,
+            transform: "scale(".concat(context.scale, ", ").concat(context.scale, ")"),
+            transformOrigin: "top left",
+            width: context.width,
+            height: context.height,
+        }, ref: function (ref) { return (context.refs.divContainerRef = ref); } }, nodesData.slice(0, nodesData.length).map(function (cellData) { return (React.createElement(PositionWrapper, { cellData: cellData, key: cellData.id })); })));
 });
 var LinesAndInterect = observer(function () {
     var context = useContext(FlowContext);
@@ -140,6 +107,7 @@ var LinesAndInterect = observer(function () {
             position: "absolute",
             pointerEvents: "none",
         }, ref: function (ref) { return (context.refs.svgContainerRef = ref); }, width: context.width, height: context.height },
+        context.grid && React.createElement(Grid, null),
         React.createElement(Edges, null),
         React.createElement(LinkingEdge, { data: context.buffer.link }),
         React.createElement(SelectBoundsRect, null)));
@@ -189,21 +157,19 @@ var Flow = /** @class */ (function (_super) {
     Flow.prototype.render = function () {
         var model = this.flowModel;
         return (React.createElement(FlowContext.Provider, { value: model },
-            React.createElement("div", null,
-                getContextMenu(this.props.children),
-                React.createElement("div", __assign({ style: {
-                        overflow: "hidden",
-                        display: "inline-block",
-                        position: "absolute",
-                        width: model.width,
-                        height: model.height,
-                        cursor: model.hotKey["Space"] ? "move" : "auto",
-                    }, id: STAGE_ID, ref: function (ref) {
-                        model.refs.stageRef = ref;
-                    } }, this.getEvents()),
-                    model.grid && React.createElement(Grid, null),
-                    React.createElement(Nodes, null),
-                    React.createElement(LinesAndInterect, null)))));
+            getContextMenu(this.props.children),
+            React.createElement("div", __assign({ style: {
+                    overflow: "hidden",
+                    display: "inline-block",
+                    position: "absolute",
+                    width: model.width,
+                    height: model.height,
+                    cursor: model.hotKey["Space"] ? "move" : "auto",
+                }, id: STAGE_ID, ref: function (ref) {
+                    model.refs.stageRef = ref;
+                } }, this.getEvents()),
+                React.createElement(Nodes, null),
+                React.createElement(LinesAndInterect, null))));
     };
     Flow = __decorate([
         observer

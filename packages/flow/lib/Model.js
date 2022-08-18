@@ -60,6 +60,10 @@ var FlowModel = /** @class */ (function () {
         };
         // 一些中间状态，比如连线中的开始节点的暂存，不应该让外部感知
         this.buffer = {
+            debug: {
+                x: 0,
+                y: 0
+            },
             contextMenu: {
                 visible: false,
             },
@@ -201,8 +205,8 @@ var FlowModel = /** @class */ (function () {
             var stageBounds = (_a = _this.refs.stageRef) === null || _a === void 0 ? void 0 : _a.getBoundingClientRect();
             if (isCanvasCoord) {
                 return {
-                    x: (e.clientX - stageBounds.x - _this.x) / _this.scale,
-                    y: (e.clientY - stageBounds.y - _this.y) / _this.scale,
+                    x: ((e.clientX - stageBounds.x) / _this.scale - _this.x),
+                    y: ((e.clientY - stageBounds.y) / _this.scale - _this.y),
                 };
             }
             else {
@@ -341,10 +345,6 @@ var FlowModel = /** @class */ (function () {
                 return cellData.cellType !== "edge";
             });
             var edgesData = _this.canvasData.cells.filter(function (cellData) { return cellData.cellType === "edge"; });
-            console.log(edgesData.map(function (edgeData) { return ({
-                source: _this.getCellInstance(edgeData.source).data.host,
-                target: _this.getCellInstance(edgeData.target).data.host
-            }); }));
             var result = dagreLayout.layout({
                 nodes: nodesData,
                 edges: edgesData.map(function (edgeData) { return ({
@@ -471,6 +471,8 @@ var FlowModel = /** @class */ (function () {
         function isNodeDataType(t) {
             return t.cellType === "node";
         }
+        if (cellData.cellType === 'port')
+            return;
         if (!this.modelFactoriesMap.get(cellData.component)) {
             this.modelFactoriesMap.set(cellData.component, cellData.component || cellData.cellType === "node"
                 ? NodeModel

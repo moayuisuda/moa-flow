@@ -21,7 +21,7 @@ export class LinkingEdge extends React.Component<{ data: any }> {
       this.context.linkEdge
     ) as React.FC<any>;
     const Model = this.context.modelFactoriesMap.get(
-      data.component
+      this.context.linkEdge
     ) as typeof CellModel;
 
     return (

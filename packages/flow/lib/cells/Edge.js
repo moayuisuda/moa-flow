@@ -189,11 +189,11 @@ var Edge = observer(function (_a) {
     var Label = observer(function () {
         var text = model.label(model.data.label);
         var position = model.getPointAt(0.5);
-        return (React.createElement("g", { ref: function (label) {
+        return (React.createElement(React.Fragment, null, text && model.labelContent() && React.createElement("g", { ref: function (label) {
                 if (model.isMountEvents || !label)
                     return;
                 model.isMountEvents = true;
-            }, transform: "translate(".concat(position.x, ", ").concat(position.y, ")") }, text && model.labelContent()));
+            }, transform: "translate(".concat(position.x, ", ").concat(position.y, ")") }, model.labelContent())));
     });
     return (React.createElement(React.Fragment, null,
         React.createElement(Line, null),

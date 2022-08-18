@@ -54,13 +54,13 @@ export class EdgeModel extends CellModel {
       source: isVector2d(this.data.source)
         ? (this.data.source as Vector2d)
         : (this.context.cellsDataMap.get(
-            this.data.source as string
-          ) as PortDataType),
+          this.data.source as string
+        ) as PortDataType),
       target: isVector2d(this.data.target)
         ? (this.data.target as Vector2d)
         : (this.context.cellsDataMap.get(
-            this.data.target as string
-          ) as PortDataType),
+          this.data.target as string
+        ) as PortDataType),
     };
   };
 
@@ -170,9 +170,8 @@ export class EdgeModel extends CellModel {
 
     return (
       <g
-        transform={`translate(${-(textBounds.width + LABEL_PADDING) / 2}, ${
-          -(TEXT_HEIGHT + LABEL_PADDING) / 2
-        })`}
+        transform={`translate(${-(textBounds.width + LABEL_PADDING) / 2}, ${-(TEXT_HEIGHT + LABEL_PADDING) / 2
+          })`}
       >
         <rect
           width={textBounds.width + LABEL_PADDING * 2}
@@ -209,9 +208,8 @@ export class EdgeModel extends CellModel {
     const dir = this.getBazierDir();
 
     return `M${source.x},${source.y} 
-    C${source.x + dir.source[0]},${source.y + dir.source[1]} ${
-      target.x + dir.target[0]
-    },${target.y + dir.target[1]} 
+    C${source.x + dir.source[0]},${source.y + dir.source[1]} ${target.x + dir.target[0]
+      },${target.y + dir.target[1]} 
     ${target.x},${target.y}`;
   }
 
@@ -269,11 +267,9 @@ export const Edge: React.FC<{ model: EdgeModel }> = observer(({ model }) => {
           >
             <path
               {...lineProps}
-              d={`M${arrowOffset[0]},${arrowOffset[1]} L${arrowOffset[0]},${
-                DEFAULT_ARROW_SIZE * sin(PI / 6) * 2 + arrowOffset[1]
-              } L${DEFAULT_ARROW_SIZE * cos(PI / 6) + arrowOffset[0]},${
-                DEFAULT_ARROW_SIZE * sin(PI / 6) + arrowOffset[1]
-              } Z`}
+              d={`M${arrowOffset[0]},${arrowOffset[1]} L${arrowOffset[0]},${DEFAULT_ARROW_SIZE * sin(PI / 6) * 2 + arrowOffset[1]
+                } L${DEFAULT_ARROW_SIZE * cos(PI / 6) + arrowOffset[0]},${DEFAULT_ARROW_SIZE * sin(PI / 6) + arrowOffset[1]
+                } Z`}
             />
           </marker>
         </defs>
@@ -291,15 +287,17 @@ export const Edge: React.FC<{ model: EdgeModel }> = observer(({ model }) => {
     const position = model.getPointAt(0.5);
 
     return (
-      <g
-        ref={(label) => {
-          if (model.isMountEvents || !label) return;
-          model.isMountEvents = true;
-        }}
-        transform={`translate(${position.x}, ${position.y})`}
-      >
-        {text && model.labelContent()}
-      </g>
+      <>
+        {text && model.labelContent() && <g
+          ref={(label) => {
+            if (model.isMountEvents || !label) return;
+            model.isMountEvents = true;
+          }}
+          transform={`translate(${position.x}, ${position.y})`}
+        >
+          {model.labelContent()}
+        </g>}
+      </>
     );
   });
 

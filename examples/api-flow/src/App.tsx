@@ -211,10 +211,10 @@ function App() {
                 modelRef.current?.setLayout(new DagreLayout({
                   type: 'dagre',
                   rankdir: 'LR',
-                  align: 'UR',
-                  ranksep: 160,
+                  align: 'UL',
+                  begin: [0, 0],
                   nodesep: 80,
-                  controlPoints: true,
+                  ranksep: 160,
                 }))
                 // 布局参考 https://x6.antv.vision/zh/docs/tutorial/advanced/layout#%E5%B8%83%E5%B1%80%E6%B5%81%E7%A8%8B
               }}>自动布局</Button>

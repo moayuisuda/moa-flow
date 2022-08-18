@@ -89,7 +89,7 @@ export class ProcessNodeModel extends BaseNodeModel<ProcessNodeDataType> {
         `
           ${str}
       `
-      );
+      ); 
 
       func(source, success, error, hang);
       // 如果没有显式调用任何一个方法，则置为HANG
