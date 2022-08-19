@@ -7,7 +7,7 @@ import {
   PortDataType,
   NodeDataType,
   Portal,
-} from "@ali/flow-infra-g";
+} from "@ali/moa-flow";
 import { message, Input, Modal } from "antd";
 const { Rect, Text, Circle, HTML } = Graph;
 

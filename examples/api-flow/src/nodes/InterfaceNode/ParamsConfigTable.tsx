@@ -6,7 +6,7 @@ import type { IParamFront } from "../../types";
 import { Select, Input, Tooltip, Cascader } from "antd";
 /** @ts-ignore */
 import { getInterfaceByName } from '@alipay/connect-util';
-import { useModel } from "@ali/flow-infra-g";
+import { useModel } from "@ali/moa-flow";
 import { InterfaceNodeDataType, InterfacePortDataType } from "./types";
 
 const ParamsConfigTable = ({

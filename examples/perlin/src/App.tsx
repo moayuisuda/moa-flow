@@ -2,7 +2,7 @@ import { Button, message, Space } from "antd";
 import "antd/dist/antd.css";
 import { useEffect, useRef, useState } from "react";
 
-import { CellDataType, Flow, ModelType, ContextMenu } from "@ali/flow-infra-g";
+import { CellDataType, Flow, ModelType, ContextMenu } from "@ali/moa-flow";
 
 // @ts-ignore
 import { flatten } from "lodash";

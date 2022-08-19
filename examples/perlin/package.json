@@ -28,7 +28,7 @@
     ]
   },
   "dependencies": {
-    "@ali/flow-infra-g": "^1.0.0",
+    "@ali/moa-flow": "^1.0.0",
     "@alipay/connect-util": "^0.0.0-S29001104120.0",
     "@alipay/tech-ui": "^2.26.1",
     "@testing-library/jest-dom": "^5.16.4",

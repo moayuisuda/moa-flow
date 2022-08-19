@@ -1,4 +1,4 @@
-import { useModel } from "@ali/flow-infra-g";
+import { useModel } from "@ali/moa-flow";
 import { Input } from "antd";
 import { forwardRef, useImperativeHandle } from "react";
 import { Form } from "antd";

@@ -2,8 +2,8 @@ import { Button, Divider, message, Space, Upload, Dropdown, Menu } from "antd";
 import { PageContainer } from "@alipay/tech-ui";
 import "antd/dist/antd.css";
 import { useEffect, useRef, useState } from "react";
-import type { ModelType } from "@ali/flow-infra-g";
-import { Flow, ContextMenu, DagreLayout } from "@ali/flow-infra-g";
+import type { ModelType } from "@ali/moa-flow";
+import { Flow, ContextMenu, DagreLayout } from "@ali/moa-flow";
 
 import { ProcessNode, ProcessNodeModel } from "./nodes/ProcessNode";
 // import FlowEdge from "./FlowEdge";

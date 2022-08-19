@@ -1,4 +1,4 @@
-import { useModel } from "@ali/flow-infra-g";
+import { useModel } from "@ali/moa-flow";
 import {
   ProFormCascader,
   ProFormGroup,

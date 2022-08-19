@@ -1,5 +1,5 @@
-import { Port, NodeModel, FlowContext, observer } from "@ali/flow-infra-g";
-import type { NodeData, PortData, PortDataType } from "@ali/flow-infra-g";
+import { Port, NodeModel, FlowContext, observer } from "@ali/moa-flow";
+import type { NodeData, PortData, PortDataType } from "@ali/moa-flow";
 import { useContext } from "react";
 
 export type BasePortDataType = PortData<{
