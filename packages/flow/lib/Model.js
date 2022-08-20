@@ -1,8 +1,7 @@
 import { __decorate, __assign } from './node_modules/tslib/tslib.es6.js';
 import './node_modules/lodash/lodash.js';
 import { action, observable, computed, makeObservable } from 'mobx';
-import { EdgeModel, Edge } from './cells/Edge.js';
-import { NodeModel } from './cells/Node.js';
+import { Edge, EdgeModel } from './cells/Edge.js';
 import './components/Arrow.js';
 import 'react';
 import 'mobx-react';
@@ -319,7 +318,7 @@ var FlowModel = /** @class */ (function () {
         this.deleCell = function (id) {
             var matchCell = _this.getCellData(id);
             if (!matchCell) {
-                console.error("[flow-infra] can not find match dele Cell");
+                console.error("[moa-flow] can not find match dele Cell");
                 return;
             }
             if (matchCell.cellType === "edge")
@@ -474,9 +473,8 @@ var FlowModel = /** @class */ (function () {
         if (cellData.cellType === 'port')
             return;
         if (!this.modelFactoriesMap.get(cellData.component)) {
-            this.modelFactoriesMap.set(cellData.component, cellData.component || cellData.cellType === "node"
-                ? NodeModel
-                : EdgeModel);
+            console.error("[moa-flow] can not find model match component ".concat(cellData.component));
+            return;
         }
         var Model = this.modelFactoriesMap.get(cellData.component);
         var cellModel = new Model(cellData, this);

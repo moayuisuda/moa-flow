@@ -88,7 +88,7 @@ class Grid extends React.Component<{}> {
     return (
       <>
         <defs>
-          <pattern id="dot" width={grid} height={grid} patternUnits="userSpaceOnUse">
+          <pattern id="dot" x={-radius} y={-radius} width={grid} height={grid} patternUnits="userSpaceOnUse">
             <circle cx={radius} cy={radius} r={radius} fill={context.color.deepGrey} />
           </pattern>
         </defs>
@@ -194,6 +194,8 @@ class Flow extends React.Component<FlowProps, {}> {
     super(props);
 
     this.flowModel = new FlowModel(props.onEvent);
+    this.flowModel.registModels(props.models || {});
+    this.flowModel.registComponents(props.components || {});
     this.props.canvasData &&
       this.flowModel.setCanvasData(this.props.canvasData);
     this.props.grid && (this.flowModel.grid = this.props.grid);
@@ -207,8 +209,6 @@ class Flow extends React.Component<FlowProps, {}> {
     this.props.onLoad && this.props.onLoad(this.flowModel);
 
     props.modelRef && (props.modelRef.current = this.flowModel);
-    this.flowModel.registModels(props.models || {});
-    this.flowModel.registComponents(props.components || {});
   }
 
   getEvents() {

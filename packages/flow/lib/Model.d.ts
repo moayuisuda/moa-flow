@@ -15,10 +15,10 @@ export declare class FlowModel {
     pendingRender: boolean;
     trigRender(): void;
     pendRender(): void;
-    _width: number;
+    private _width;
     get width(): number;
     set width(width: number);
-    _height: number;
+    private _height;
     get height(): number;
     set height(height: number);
     get size(): {
@@ -29,10 +29,10 @@ export declare class FlowModel {
         width: number;
         height: number;
     });
-    _grid: number;
+    private _grid;
     get grid(): number;
     set grid(grid: number);
-    _linkEdge: string;
+    private _linkEdge;
     get linkEdge(): string;
     set linkEdge(linkEdge: string);
     get scale(): number;

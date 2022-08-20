@@ -46,6 +46,7 @@ export class FlowModel {
 
     if (!this.modelFactoriesMap.get(cellData.component)) {
       console.error(`[moa-flow] can not find model match component ${cellData.component}`)
+      return
     }
 
     const Model = this.modelFactoriesMap.get(

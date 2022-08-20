@@ -242,7 +242,8 @@ export const NodeFrame: React.FC<
         outlineColor: isSelect ? color.active : color.deepGrey,
         outlineWidth: 2,
         outlineStyle: "solid",
-        width: 300,
+        width: 400,
+        height: 200
       }}
       headStyle={{
         backgroundColor: fillMap[data.status]

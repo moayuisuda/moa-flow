@@ -21,7 +21,7 @@ var PositionWrapper = observer(function (_a) {
         : { x: 0, y: 0 };
     var Component = context.componentsMap.get(cellData.component);
     if (!Component)
-        throw "[flow-infra] component ".concat(cellData.component, " not regist.");
+        throw "[moa-flow] component ".concat(cellData.component, " not regist.");
     return React.createElement(isNode ? "div" : "g", {
         ref: context.getWrapperRef(cellData.id),
         style: isNode
@@ -41,7 +41,7 @@ var CellComponent = observer(function (_a) {
     var context = useContext(FlowContext);
     var Component = context.componentsMap.get(cellData.component);
     if (!Component)
-        throw "[flow-infra] component ".concat(cellData.component, " is not regist.");
+        throw "[moa-flow] component ".concat(cellData.component, " is not regist.");
     var cellModel = context.cellsModelMap.get(cellData.id);
     return React.createElement(Interactor, {
         key: cellData.id,
@@ -67,7 +67,7 @@ var Grid = /** @class */ (function (_super) {
         var radius = 2;
         return (React.createElement(React.Fragment, null,
             React.createElement("defs", null,
-                React.createElement("pattern", { id: "dot", width: grid, height: grid, patternUnits: "userSpaceOnUse" },
+                React.createElement("pattern", { id: "dot", x: -radius, y: -radius, width: grid, height: grid, patternUnits: "userSpaceOnUse" },
                     React.createElement("circle", { cx: radius, cy: radius, r: radius, fill: context.color.deepGrey }))),
             React.createElement("rect", { x: -this.context.x, y: -this.context.y, width: "100%", height: "100%", fill: "url(#dot)" })));
     };
@@ -121,6 +121,8 @@ var Flow = /** @class */ (function (_super) {
         }; }
         var _this = _super.call(this, props) || this;
         _this.flowModel = new FlowModel(props.onEvent);
+        _this.flowModel.registModels(props.models || {});
+        _this.flowModel.registComponents(props.components || {});
         _this.props.canvasData &&
             _this.flowModel.setCanvasData(_this.props.canvasData);
         _this.props.grid && (_this.flowModel.grid = _this.props.grid);
@@ -132,8 +134,6 @@ var Flow = /** @class */ (function (_super) {
         }
         _this.props.onLoad && _this.props.onLoad(_this.flowModel);
         props.modelRef && (props.modelRef.current = _this.flowModel);
-        _this.flowModel.registModels(props.models || {});
-        _this.flowModel.registComponents(props.components || {});
         return _this;
     }
     Flow.prototype.getEvents = function () {
