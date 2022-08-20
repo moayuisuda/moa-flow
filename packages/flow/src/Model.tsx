@@ -45,12 +45,7 @@ export class FlowModel {
     if (cellData.cellType === 'port') return
 
     if (!this.modelFactoriesMap.get(cellData.component)) {
-      this.modelFactoriesMap.set(
-        cellData.component,
-        cellData.component || cellData.cellType === "node"
-          ? NodeModel
-          : EdgeModel
-      );
+      console.error(`[moa-flow] can not find model match component ${cellData.component}`)
     }
 
     const Model = this.modelFactoriesMap.get(
@@ -81,7 +76,7 @@ export class FlowModel {
     this.pendingRender = true;
   }
 
-  @observable _width: number = 1000;
+  @observable private _width: number = 1000;
   @computed
   get width() {
     return this._width;
@@ -90,7 +85,7 @@ export class FlowModel {
     this._width = width as number;
   }
 
-  @observable _height: number = 600;
+  @observable private _height: number = 600;
   @computed
   get height() {
     return this._height;
@@ -111,7 +106,7 @@ export class FlowModel {
     this.width = size.width;
   }
 
-  @observable _grid: number = 0;
+  @observable private _grid: number = 0;
   @computed
   get grid() {
     return this._grid;
@@ -120,7 +115,7 @@ export class FlowModel {
     this._grid = grid;
   }
 
-  _linkEdge = "Edge";
+  private _linkEdge = "Edge";
   @computed
   get linkEdge() {
     return this._linkEdge;
@@ -520,7 +515,7 @@ export class FlowModel {
   @action deleCell = (id: string) => {
     const matchCell = this.getCellData(id);
     if (!matchCell) {
-      console.error("[flow-infra] can not find match dele Cell");
+      console.error("[moa-flow] can not find match dele Cell");
       return;
     }
 

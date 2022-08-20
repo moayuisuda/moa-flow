@@ -26,7 +26,7 @@ const PositionWrapper = observer(({ cellData }: { cellData: CellDataType }) => {
   }>;
 
   if (!Component)
-    throw `[flow-infra] component ${cellData.component} not regist.`;
+    throw `[moa-flow] component ${cellData.component} not regist.`;
 
   return React.createElement(isNode ? "div" : "g", {
     ref: context.getWrapperRef(cellData.id),
@@ -50,7 +50,7 @@ const CellComponent = observer(({ cellData }: { cellData: CellDataType }) => {
     model: CellModel;
   }>;
   if (!Component)
-    throw `[flow-infra] component ${cellData.component} is not regist.`;
+    throw `[moa-flow] component ${cellData.component} is not regist.`;
 
   const cellModel = context.cellsModelMap.get(cellData.id) as CellModel;
 
