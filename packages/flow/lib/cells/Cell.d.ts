@@ -7,7 +7,7 @@ export declare type CellDataType = {
     [key: string]: any;
 };
 export declare class CellModel {
-    static defaultData: CellDataType;
+    defaultData: () => any;
     context: FlowModel;
     data: CellDataType;
     state: {
@@ -17,6 +17,7 @@ export declare class CellModel {
     constructor(data: any, context: FlowModel);
     get isSelect(): boolean;
     set isSelect(isSelect: boolean);
-    getWrapperRef(): import("react").RefObject<HTMLDivElement>;
-    setData(data: any, rec?: boolean): void;
+    getWrapperRef: () => import("react").RefObject<HTMLDivElement>;
+    setData: (data: any, rec?: boolean) => void;
+    static getDefaultData(): CellDataType;
 }

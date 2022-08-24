@@ -1,3 +1,4 @@
+import { cloneDeep } from "lodash";
 import {
   action,
   observable,
@@ -14,11 +15,11 @@ export type CellDataType = {
 };
 
 export class CellModel {
-  static defaultData: CellDataType = {
+  defaultData = (): any => ({
     id: "",
     component: "",
     cellType: "",
-  };
+  });
 
   context: FlowModel;
 
@@ -30,9 +31,9 @@ export class CellModel {
     isSelect: boolean;
     isLinking: boolean;
   } = {
-    isSelect: false,
-    isLinking: false,
-  };
+      isSelect: false,
+      isLinking: false,
+    };
 
   constructor(data: any, context: FlowModel) {
     this.data = data;
@@ -48,12 +49,25 @@ export class CellModel {
     this.state.isSelect = isSelect;
   }
 
-  getWrapperRef() {
+  getWrapperRef = () => {
     return this.context.getWrapperRef(this.data.id);
   }
 
   @action
-  setData(data: any, rec: boolean = true) {
+  setData = (data: any, rec: boolean = true) => {
     this.context.setCellData(this.data.id, data, rec);
+  }
+
+  static getDefaultData() {
+    const re = {};
+    let curr = this as any;
+
+    // 合并父类metaData
+    while (curr !== (CellModel)) {
+      Object.assign(re, (new curr).defaultData());
+      curr = curr.__proto__;
+    }
+
+    return cloneDeep(re) as CellDataType;
   }
 }

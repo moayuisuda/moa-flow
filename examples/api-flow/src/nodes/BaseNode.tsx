@@ -1,5 +1,5 @@
 import {
-  ModelType,
+  FlowModel,
   NodeData,
   PortData,
   NodeModel,
@@ -11,7 +11,6 @@ import { Card, CardProps, message } from "antd";
 import { HANG_FLAG } from "../constants";
 
 export type BasePortDataType = PortData<{
-  label: string;
   portType: "in" | "out";
 }>;
 
@@ -31,7 +30,7 @@ export type BaseNodeDataType = NodeData<{
 }>;
 
 export class BaseNodeModel<D = {}> extends NodeModel<BaseNodeDataType & D> {
-  static defaultData: any = {
+  defaultData = () => ({
     title: "",
     type: "",
     cacheData: undefined,
@@ -44,14 +43,9 @@ export class BaseNodeModel<D = {}> extends NodeModel<BaseNodeDataType & D> {
         portType: "out",
       },
     ],
-    x: 0,
-    y: 0,
-    id: "",
-    component: "",
-    cellType: "node",
-  };
+  });
 
-  constructor(props: { data: BaseNodeDataType }, context: ModelType) {
+  constructor(props: { data: BaseNodeDataType }, context: FlowModel) {
     super(props, context);
   }
 

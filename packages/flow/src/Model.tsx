@@ -4,7 +4,7 @@ import React from "react";
 import { v4 } from "uuid";
 import { CellDataType, CellModel } from "./cells/Cell";
 import { Edge, EdgeDataType, EdgeModel } from "./cells/Edge";
-import { NodeModel, NodeDataType } from "./cells/Node";
+import { NodeDataType } from "./cells/Node";
 import { Port, PortDataType } from "./components";
 import { color } from "./theme/style";
 import {
@@ -69,11 +69,11 @@ export class FlowModel {
 
   pendingRender: boolean = true;
   @action
-  trigRender() {
+  trigRender = () => {
     this.pendingRender = false;
   }
   @action
-  pendRender() {
+  pendRender = () => {
     this.pendingRender = true;
   }
 
@@ -565,7 +565,7 @@ export class FlowModel {
     const id = v4();
 
     const metaData = Object.assign(
-      (this.modelFactoriesMap.get(component) as typeof CellModel).defaultData,
+      (this.modelFactoriesMap.get(component) as typeof CellModel).getDefaultData(),
       {
         component,
       }
@@ -573,13 +573,12 @@ export class FlowModel {
 
     this.insertRuntimeState(metaData);
 
-    return cloneDeep(
-      Object.assign(metaData, {
-        id,
-        visible: true,
-        ...initOptions,
-      })
-    );
+    return Object.assign(metaData, {
+      id,
+      visible: true,
+      ...initOptions,
+    })
+
   };
 
   @action addCell = (componentName: string, initOptions?: any) => {

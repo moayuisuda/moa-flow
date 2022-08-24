@@ -9,7 +9,7 @@ import { Vector2d, FlowInfraEventType } from "./typings/common";
 import { FlowContext } from './Context';
 import { DagreLayout } from "@antv/layout";
 
-type ModelType = Model;
+type FlowModel = Model;
 
 export * from './hooks'
 export {
@@ -22,7 +22,7 @@ export {
 };
 
 export type {
-  ModelType,
+  FlowModel,
   FlowInfraEventType,
   Vector2d,
 };

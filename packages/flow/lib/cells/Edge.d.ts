@@ -11,7 +11,15 @@ export declare type EdgeDataType = {
 } & CellDataType;
 declare type Head = React.ReactNode | boolean;
 export declare class EdgeModel extends CellModel {
-    static defaultData: EdgeDataType;
+    defaultData: () => {
+        id: string;
+        component: string;
+        source: string;
+        target: string;
+        label: string;
+        verticies: never[];
+        cellType: string;
+    };
     data: EdgeDataType;
     protected bazier: boolean | (() => boolean);
     protected startHead: Head | (() => Head);
@@ -29,23 +37,23 @@ export declare class EdgeModel extends CellModel {
         target: any;
     };
     private getPoints;
-    getVectors(): any[];
-    getLinkNodesData(): {
+    getVectors: () => any[];
+    getLinkNodesData: () => {
         source: any;
         target: CellDataType | undefined;
     };
     route(vectors: Vector2d[]): Vector2d[];
     private vectorsToPoints;
-    getPointAt(ratio: number): DOMPoint;
-    labelContent(): JSX.Element;
+    getPointAt: (ratio: number) => DOMPoint;
+    labelContent: () => JSX.Element;
     label(label: string): string;
-    isLinking(): boolean;
-    getBazierDir(): {
+    isLinking: () => boolean;
+    getBazierDir: () => {
         source: Dir;
         target: Dir;
     };
-    getBazierPath(): string;
-    getPolylinePath(): string;
+    getBazierPath: () => string;
+    getPolylinePath: () => string;
     get d(): string;
 }
 export declare const Edge: React.FC<{

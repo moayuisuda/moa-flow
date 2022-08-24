@@ -2,7 +2,7 @@ import { Button, Divider, message, Space, Upload, Dropdown, Menu } from "antd";
 import { PageContainer } from "@alipay/tech-ui";
 import "antd/dist/antd.css";
 import { useEffect, useRef, useState } from "react";
-import type { ModelType } from "@ali/moa-flow";
+import type { FlowModel } from "@ali/moa-flow";
 import { Flow, ContextMenu, DagreLayout } from "@ali/moa-flow";
 
 import { ProcessNode, ProcessNodeModel } from "./nodes/ProcessNode";
@@ -33,7 +33,7 @@ type IGlobalSetting = {
 };
 
 function App() {
-  const modelRef = useRef<ModelType>();
+  const flowModelRef = useRef<FlowModel>();
   const [interfaceSchema, setInterfaceSchema] = useState<ISchema>(mockSchema);
   const [globalSetting, setGlobalSetting] = useState<IGlobalSetting>({});
   const [globalSettingVisible, setGlobalSettingVisible] =
@@ -41,7 +41,7 @@ function App() {
   const [nodeList, setNodeList] = useState<[string, Function][]>([]);
 
   useEffect(() => {
-    const model = modelRef.current as ModelType;
+    const model = flowModelRef.current as FlowModel;
 
     model.extra = {
       taskPool: {},
@@ -54,9 +54,9 @@ function App() {
 
     setNodeList(
       Array.from(
-        modelRef.current?.modelFactoriesMap as Map<string, any>
+        flowModelRef.current?.modelFactoriesMap as Map<string, any>
       ).filter(([_, Component]) => {
-        return Component.defaultData.cellType === "node";
+        return Component.getDefaultData().cellType === "node";
       })
     );
     setTimeout(() => {
@@ -68,7 +68,7 @@ function App() {
   const handleSave = () => {
     const data = JSON.stringify({
       ...globalSetting,
-      ...modelRef.current?.canvasData,
+      ...flowModelRef.current?.canvasData,
     });
     localStorage.setItem("FLOW_DATA", data);
   };
@@ -110,7 +110,7 @@ function App() {
       a.dispatchEvent(e);
     }
     saveJSON(
-      { ...globalSetting, ...modelRef.current?.canvasData },
+      { ...globalSetting, ...flowModelRef.current?.canvasData },
       "data.json"
     );
   };
@@ -125,7 +125,7 @@ function App() {
         if (content) {
           const remoteData = JSON.parse(content);
           getInterfaceSchema(remoteData);
-          modelRef.current?.setCanvasData(remoteData);
+          flowModelRef.current?.setCanvasData(remoteData);
         }
         onSuccess();
       }
@@ -146,7 +146,7 @@ function App() {
       localStorage.getItem("FLOW_DATA") || JSON.stringify(DEFAULT_CANVAS_DATA);
     const remoteData = JSON.parse(data);
     getInterfaceSchema(remoteData);
-    if (data) modelRef.current?.setCanvasData(remoteData);
+    if (data) flowModelRef.current?.setCanvasData(remoteData);
   };
 
   const getInterfaceSchema = async ({
@@ -168,12 +168,12 @@ function App() {
         domain,
       }
       setInterfaceSchema(interfaceSchema);
-      (modelRef.current as ModelType).extra.interfaceSchema = interfaceSchema;
+      (flowModelRef.current as FlowModel).extra.interfaceSchema = interfaceSchema;
     }
   };
 
   const getLeaveNodes = (id: string): string[] => {
-    const model = modelRef.current as ModelType;
+    const model = flowModelRef.current as FlowModel;
     const data = model?.getCellData(id) as InterfaceNodeDataType;
 
     const inPortData = data.ports.find(
@@ -193,7 +193,7 @@ function App() {
     const leaveNodes = getLeaveNodes(id);
     return Promise.all([
       leaveNodes.map((leaveNodeId) =>
-        (modelRef.current?.getCellModel(leaveNodeId) as BaseNodeModel).process(
+        (flowModelRef.current?.getCellModel(leaveNodeId) as BaseNodeModel).process(
           id
         )
       ),
@@ -208,7 +208,7 @@ function App() {
           <div>
             <Space>
               <Button onClick={() => {
-                modelRef.current?.setLayout(new DagreLayout({
+                flowModelRef.current?.setLayout(new DagreLayout({
                   type: 'dagre',
                   rankdir: 'LR',
                   align: 'UL',
@@ -280,7 +280,7 @@ function App() {
             width={window.innerWidth}
             height={window.innerHeight}
             multiSelect
-            modelRef={modelRef}
+            flowModelRef={flowModelRef}
             grid={40}
             canvasData={testData}
           >
@@ -289,7 +289,7 @@ function App() {
                 <Button
                   onClick={() => {
                     const { deleCell, selectCells } =
-                      modelRef.current as ModelType;
+                      flowModelRef.current as FlowModel;
                     deleCell(selectCells[0]);
                   }}
                 >
@@ -298,7 +298,7 @@ function App() {
                 <Button
                   onClick={() => {
                     const { getCellModel, selectCells } =
-                      modelRef.current as ModelType;
+                      flowModelRef.current as FlowModel;
                     const nodeModel = getCellModel(selectCells[0]);
 
                     if (
@@ -321,7 +321,7 @@ function App() {
                 <Button
                   onClick={() => {
                     const { getCellModel, selectCells } =
-                      modelRef.current as ModelType;
+                      flowModelRef.current as FlowModel;
                     const nodeModel = getCellModel(selectCells[0]);
 
                     if (
@@ -347,8 +347,8 @@ function App() {
                     <Button
                       key={name}
                       onClick={() => {
-                        const model = modelRef.current as ModelType;
-                        (modelRef.current as ModelType).addCell(name, {
+                        const model = flowModelRef.current as FlowModel;
+                        (flowModelRef.current as FlowModel).addCell(name, {
                           title: name,
                           x: -model.x + model.width / 2,
                           y: -model.y + model.height / 2,

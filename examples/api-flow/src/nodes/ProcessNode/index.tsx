@@ -15,7 +15,7 @@ export type ProcessNodeDataType = {
   processSource: string;
 } & BaseNodeDataType;
 export class ProcessNodeModel extends BaseNodeModel<ProcessNodeDataType> {
-  static defaultData = {
+  defaultData = () => ({
     title: "",
     type: "",
     cacheData: undefined,
@@ -28,13 +28,8 @@ export class ProcessNodeModel extends BaseNodeModel<ProcessNodeDataType> {
         portType: "out",
       },
     ],
-    x: 0,
-    y: 0,
-    id: "",
-    component: "",
-    cellType: "node",
     processSource: "success(source)",
-  };
+  });
 
   // 执行实际的接口请求
   excute = async () => {

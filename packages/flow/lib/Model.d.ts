@@ -13,8 +13,8 @@ export declare class FlowModel {
     extra: any;
     isInitEvents: boolean;
     pendingRender: boolean;
-    trigRender(): void;
-    pendRender(): void;
+    trigRender: () => void;
+    pendRender: () => void;
     private _width;
     get width(): number;
     set width(width: number);

@@ -172,7 +172,7 @@ type FlowProps = {
   onEvent?: (e: { type: string; data: any }) => void;
   onLoad?: (model: FlowModel) => void;
   scale?: boolean;
-  modelRef?: any;
+  flowModelRef?: any;
   width?: number;
   height?: number;
   grid?: number;
@@ -208,7 +208,7 @@ class Flow extends React.Component<FlowProps, {}> {
     }
     this.props.onLoad && this.props.onLoad(this.flowModel);
 
-    props.modelRef && (props.modelRef.current = this.flowModel);
+    props.flowModelRef && (props.flowModelRef.current = this.flowModel);
   }
 
   getEvents() {

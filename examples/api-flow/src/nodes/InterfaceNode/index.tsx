@@ -12,7 +12,7 @@ import { useState, useRef, useContext } from "react";
 import { EllipsisOutlined, SettingOutlined } from "@ant-design/icons";
 
 export class InterfaceNodeModel extends BaseNodeModel<InterfaceNodeDataType> {
-  static defaultData = {
+  defaultData = () => ({
     title: "",
     type: "",
     cacheData: undefined,
@@ -25,14 +25,9 @@ export class InterfaceNodeModel extends BaseNodeModel<InterfaceNodeDataType> {
         portType: "out",
       },
     ],
-    x: 0,
-    y: 0,
-    id: "",
-    component: "",
-    cellType: "node",
     interface: "",
     inputParams: [],
-  };
+  });
 
   excute = () => {
     const { type: interfaceType, interface: interfaceArr, scene } = this.data;

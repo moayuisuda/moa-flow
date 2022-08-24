@@ -10,33 +10,33 @@ export type NodeDataType = {
 export type NodeData<D> = D & NodeDataType;
 
 export class NodeModel<D extends NodeDataType> extends CellModel {
-  static defaultData: NodeDataType = {
+  defaultData = (): any => ({
     x: 0,
     y: 0,
     id: "",
     component: "",
     cellType: "node",
-  };
+  });
 
   data: D;
 
-  getLinkNodes() {
+  getLinkNodes = () => {
     return this.context.getLinkNodes(this.data.id);
   }
 
-  getLinkPorts() {
+  getLinkPorts = () => {
     return this.context.getLinkPorts(this.data.id);
   }
 
-  getNodeEdges() {
+  getNodeEdges = () => {
     return this.context.getNodeEdges(this.data.id);
   }
 
-  getPosition() {
+  getPosition = () => {
     return this.context.getNodePosition(this.data.id);
   }
 
-  getChildren() {
+  getChildren = () => {
     return this.context.canvasData.cells.filter((cellData) => {
       cellData.parent === this.data.id;
     });

@@ -6,14 +6,14 @@ export declare type NodeDataType = {
 } & CellDataType;
 export declare type NodeData<D> = D & NodeDataType;
 export declare class NodeModel<D extends NodeDataType> extends CellModel {
-    static defaultData: NodeDataType;
+    defaultData: () => any;
     data: D;
-    getLinkNodes(): string[];
-    getLinkPorts(): string[];
-    getNodeEdges(): string[];
-    getPosition(): {
+    getLinkNodes: () => string[];
+    getLinkPorts: () => string[];
+    getNodeEdges: () => string[];
+    getPosition: () => {
         x: number;
         y: number;
     };
-    getChildren(): any[];
+    getChildren: () => any[];
 }

@@ -21,7 +21,7 @@ export type EdgeDataType = {
 } & CellDataType;
 type Head = React.ReactNode | boolean;
 export class EdgeModel extends CellModel {
-  static defaultData: EdgeDataType = {
+  defaultData = () => ({
     id: "",
     component: "Edge", // 这里一般会被重置为FLowEdge这种业务类的线条
     source: "",
@@ -29,7 +29,7 @@ export class EdgeModel extends CellModel {
     label: "",
     verticies: [],
     cellType: "edge",
-  };
+  });
 
   data: EdgeDataType;
 
@@ -89,20 +89,20 @@ export class EdgeModel extends CellModel {
     };
   };
 
-  private getPoints() {
+  private getPoints = () => {
     const routeResult = this.route(this.getVectors());
 
     return this.vectorsToPoints(routeResult);
   }
 
-  getVectors() {
+  getVectors = () => {
     const anchors = this.getAnchors();
     const verticies = this.data.verticies || [];
 
     return [anchors.source, ...verticies, anchors.target];
   }
 
-  getLinkNodesData() {
+  getLinkNodesData = () => {
     const { data } = this;
     let source;
     let target;
@@ -139,14 +139,14 @@ export class EdgeModel extends CellModel {
     return re;
   }
 
-  getPointAt(ratio: number) {
+  getPointAt = (ratio: number) => {
     this.pathInstance.setAttribute("d", this.getBazierPath());
     return this.pathInstance.getPointAtLength(
       ratio * this.pathInstance.getTotalLength()
     );
   }
 
-  labelContent() {
+  labelContent = () => {
     const {
       color,
       refs: { svgContainerRef },
@@ -189,21 +189,21 @@ export class EdgeModel extends CellModel {
     return label;
   }
 
-  isLinking() {
+  isLinking = () => {
     return this.state.isLinking;
   }
 
-  getBazierDir(): { source: Dir; target: Dir } {
+  getBazierDir = () => {
     const { source, target } = this.getAnchors();
     const LENGTH = (target.x - source.x) * 0.5;
 
     return {
       source: [LENGTH, 0],
       target: [-LENGTH, 0],
-    };
+    } as { source: Dir; target: Dir };
   }
 
-  getBazierPath() {
+  getBazierPath = () => {
     const { source, target } = this.getAnchors();
     const dir = this.getBazierDir();
 
@@ -213,7 +213,7 @@ export class EdgeModel extends CellModel {
     ${target.x},${target.y}`;
   }
 
-  getPolylinePath() {
+  getPolylinePath = () => {
     const points = this.getPoints();
 
     let str = `M${points[0][0]},${points[0][1]}`;

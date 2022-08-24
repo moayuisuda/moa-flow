@@ -30,10 +30,7 @@
   "dependencies": {
     "@ali/moa-flow": "^1.0.0",
     "@alipay/connect-util": "^1.0.1",
-    "@testing-library/jest-dom": "^5.16.4",
-    "@testing-library/react": "^13.3.0",
-    "@testing-library/user-event": "^13.5.0",
-    "@types/jest": "^27.5.2",
+    "@alipay/tech-ui": "^2.29.0",
     "@types/node": "^16.11.39",
     "@types/react": "^17.0.39",
     "@types/react-dom": "^17.0.12",

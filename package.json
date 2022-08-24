@@ -31,9 +31,5 @@
   ],
   "publishConfig": {
     "registry": "https://registry.npm.alibaba-inc.com"
-  },
-  "dependencies": {
-    "@alipay/connect-util": "^0.0.0-S29001104120.0",
-    "big.js": "^6.2.1"
   }
 }

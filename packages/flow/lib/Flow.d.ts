@@ -9,7 +9,7 @@ declare type FlowProps = {
     }) => void;
     onLoad?: (model: FlowModel) => void;
     scale?: boolean;
-    modelRef?: any;
+    flowModelRef?: any;
     width?: number;
     height?: number;
     grid?: number;

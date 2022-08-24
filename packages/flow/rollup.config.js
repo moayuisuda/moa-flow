@@ -21,12 +21,12 @@ export default {
     "@antv/react-g",
     "@antv/g",
     "@antv/g-canvas",
-    "@antv/layout"
+    "@antv/layout",
   ],
   input: "src/index.ts",
   output: {
     dir: "lib",
-    preserveModules: true,
+    preserveModules: false,
     preserveModulesRoot: "src",
     // tsconfig的module是项目使用的模块管理方式，target的是目标代码stage(如es5就是var)，format则是打包后的格式
     format: "esm",
@@ -46,6 +46,5 @@ export default {
       modules: true,
       plugins: [],
     }),
-    // uglify(),
   ],
 };
