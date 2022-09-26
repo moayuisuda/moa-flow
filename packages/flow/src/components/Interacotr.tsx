@@ -29,29 +29,29 @@ export class Interactor extends React.Component<InteractorType> {
     const onMouseDown = (
       e: React.MouseEvent<HTMLDivElement | SVGGElement, MouseEvent>
     ) => {
-      e.stopPropagation();
-
       const {
         selectCells,
         buffer: { select, drag },
       } = this.context;
 
-      if (!selectCells.includes(this.props.id)) {
-        context.setSelectedCells([id]);
+      if (!select.isSelecting) {
+        if (!selectCells.includes(this.props.id)) {
+          context.setSelectedCells([id]);
+        }
+
+        // drag
+        if (topOnFocus)
+          this.context.moveTo(
+            this.props.id,
+            this.context.canvasData.cells.length - 1
+          );
+
+        select.isSelecting = true;
+
+        const coord = this.context.getCursorCoord(e);
+        drag.start.x = coord.x;
+        drag.start.y = coord.y;
       }
-
-      // drag
-      if (topOnFocus)
-        this.context.moveTo(
-          this.props.id,
-          this.context.canvasData.cells.length - 1
-        );
-
-      select.isSelecting = true;
-
-      const coord = this.context.getCursorCoord(e);
-      drag.start.x = coord.x;
-      drag.start.y = coord.y;
     };
 
     return inSvg ? (

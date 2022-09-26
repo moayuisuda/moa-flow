@@ -18,6 +18,6 @@ export declare class CellModel {
     get isSelect(): boolean;
     set isSelect(isSelect: boolean);
     getWrapperRef: () => import("react").RefObject<HTMLDivElement>;
-    setData: (data: any, rec?: boolean) => void;
+    setData: (data: any, deepMerge?: boolean) => void;
     static getDefaultData(): CellDataType;
 }

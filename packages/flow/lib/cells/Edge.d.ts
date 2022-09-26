@@ -25,7 +25,6 @@ export declare class EdgeModel extends CellModel {
     protected startHead: Head | (() => Head);
     protected endHead: Head | (() => Head);
     pathInstance: SVGPathElement;
-    isMountEvents: boolean;
     constructor(data: any, context: FlowModel);
     protected formatVerticied: (verticies: Vector2d[]) => Vector2d[];
     getLinkPortsData: () => {
@@ -38,9 +37,9 @@ export declare class EdgeModel extends CellModel {
     };
     private getPoints;
     getVectors: () => any[];
-    getLinkNodesData: () => {
-        source: any;
-        target: CellDataType | undefined;
+    getLinkNodes: () => {
+        source: string | undefined;
+        target: string | undefined;
     };
     route(vectors: Vector2d[]): Vector2d[];
     private vectorsToPoints;
@@ -55,6 +54,14 @@ export declare class EdgeModel extends CellModel {
     getBazierPath: () => string;
     getPolylinePath: () => string;
     get d(): string;
+    defaultLineProps: () => {
+        strokeLinecap: string;
+        strokeLinejoin: string;
+        fill: string;
+        strokeWidth: number;
+        stroke: string;
+    };
+    lineProps: () => {};
 }
 export declare const Edge: React.FC<{
     model: EdgeModel;

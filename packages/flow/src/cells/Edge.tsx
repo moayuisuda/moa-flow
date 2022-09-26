@@ -1,5 +1,5 @@
 import { Dir, Vector2d } from "../typings/common";
-import { PortDataType } from "../components";
+import { PortDataType, PortDir } from "../components";
 import React from "react";
 import { isVector2d } from "../utils";
 import { callIfFn } from "../utils/util";
@@ -12,6 +12,13 @@ import { computed } from "mobx";
 
 const TEXT_HEIGHT = 16;
 const LABEL_PADDING = 4;
+
+const dirMap = {
+  'left': [-1, 0],
+  'right': [1, 0],
+  'top': [0, -1],
+  'bottom': [0, 1]
+}
 
 export type EdgeDataType = {
   source: string | Vector2d;
@@ -33,13 +40,11 @@ export class EdgeModel extends CellModel {
 
   data: EdgeDataType;
 
-  protected bazier: boolean | (() => boolean) = false;
+  protected bazier: boolean | (() => boolean) = true;
   protected startHead: Head | (() => Head) = false;
   protected endHead: Head | (() => Head) = true;
 
   pathInstance = document.createElementNS("http://www.w3.org/2000/svg", "path");
-
-  isMountEvents = false;
 
   constructor(data: any, context: FlowModel) {
     super(data, context);
@@ -102,21 +107,21 @@ export class EdgeModel extends CellModel {
     return [anchors.source, ...verticies, anchors.target];
   }
 
-  getLinkNodesData = () => {
+  getLinkNodes = () => {
     const { data } = this;
     let source;
     let target;
 
     if (!isVector2d(data.source)) {
-      const sourcePort = this.context.cellsMap.get(data.source as string);
-      source = this.context.cellsMap.get(sourcePort.host as string);
+      const sourcePort = this.context.cellsDataMap.get(data.source as string) as PortDataType;
+      source = sourcePort.host;
     }
 
     if (!isVector2d(data.target)) {
       const targetPort = this.context.cellsDataMap.get(
         data.target as string
       ) as PortDataType;
-      target = this.context.cellsDataMap.get(targetPort.host as string);
+      target = targetPort.host;
     }
 
     return {
@@ -130,7 +135,7 @@ export class EdgeModel extends CellModel {
     return vectors;
   }
 
-  private vectorsToPoints(vectors: Vector2d[]) {
+  private vectorsToPoints = (vectors: Vector2d[]) => {
     const re: [number, number][] = [];
     vectors.forEach((vector) => {
       re.push([vector.x, vector.y]);
@@ -148,7 +153,6 @@ export class EdgeModel extends CellModel {
 
   labelContent = () => {
     const {
-      color,
       refs: { svgContainerRef },
     } = this.context;
 
@@ -195,12 +199,26 @@ export class EdgeModel extends CellModel {
 
   getBazierDir = () => {
     const { source, target } = this.getAnchors();
-    const LENGTH = (target.x - source.x) * 0.5;
+    const { props: { dir: sourceDir } } = this.context.cellsMap.get(
+      this.data.source as string
+    );
+    const LENGTH = Math.abs((target.x - source.x) * 0.5);
 
-    return {
-      source: [LENGTH, 0],
-      target: [-LENGTH, 0],
-    } as { source: Dir; target: Dir };
+    if (isVector2d(this.data.target)) {
+      return {
+        source: [LENGTH * dirMap[sourceDir as PortDir][0], LENGTH * dirMap[sourceDir as PortDir][1]],
+        target: [0, 0],
+      } as { source: Dir; target: Dir };
+    } else {
+      const { props: { dir: targetDir } } = this.context.cellsMap.get(
+        this.data.target as string
+      );
+
+      return {
+        source: [LENGTH * dirMap[sourceDir as PortDir][0], LENGTH * dirMap[sourceDir as PortDir][1]],
+        target: [LENGTH * dirMap[targetDir as PortDir][0], LENGTH * dirMap[targetDir as PortDir][1]],
+      } as { source: Dir; target: Dir };
+    }
   }
 
   getBazierPath = () => {
@@ -230,23 +248,27 @@ export class EdgeModel extends CellModel {
       ? this.getBazierPath()
       : this.getPolylinePath();
   }
+
+  defaultLineProps = () => ({
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    fill: "none",
+    strokeWidth: 2,
+    stroke: this.isSelect ? this.context.color.active : this.context.color.deepGrey,
+  });
+
+  lineProps = () => {
+    return {}
+  }
 }
 
 const DEFAULT_ARROW_SIZE = 4;
 
 export const Edge: React.FC<{ model: EdgeModel }> = observer(({ model }) => {
   const Line = observer(() => {
-    const context = useContext(FlowContext);
-    const { color } = context;
-    const { d, isSelect } = model;
+    const { d } = model;
 
-    const lineProps = {
-      strokeLinecap: "round",
-      strokeLinejoin: "round",
-      fill: "none",
-      strokeWidth: 2,
-      stroke: isSelect ? color.active : color.deepGrey,
-    } as any;
+    const lineProps = Object.assign(model.defaultLineProps(), model.lineProps()) as any
 
     const { cos, sin, PI } = Math;
     const arrowOffset = [
@@ -258,7 +280,7 @@ export const Edge: React.FC<{ model: EdgeModel }> = observer(({ model }) => {
       <>
         <defs>
           <marker
-            id="arrow-end"
+            id={`arrow-end--${model.data.id}`}
             markerWidth="100"
             markerHeight="100"
             refX={arrowOffset[0] + DEFAULT_ARROW_SIZE * cos(PI / 6)}
@@ -266,7 +288,12 @@ export const Edge: React.FC<{ model: EdgeModel }> = observer(({ model }) => {
             orient="auto"
           >
             <path
-              {...lineProps}
+              className="moa-edge__arrow"
+              stroke={lineProps.stroke}
+              strokeWidth={lineProps.strokeWidth}
+              strokeLinecap={lineProps.strokeLinecap}
+              strokeLinejoin={lineProps.strokeLinejoin}
+              fill={lineProps.fill}
               d={`M${arrowOffset[0]},${arrowOffset[1]} L${arrowOffset[0]},${DEFAULT_ARROW_SIZE * sin(PI / 6) * 2 + arrowOffset[1]
                 } L${DEFAULT_ARROW_SIZE * cos(PI / 6) + arrowOffset[0]},${DEFAULT_ARROW_SIZE * sin(PI / 6) + arrowOffset[1]
                 } Z`}
@@ -274,30 +301,24 @@ export const Edge: React.FC<{ model: EdgeModel }> = observer(({ model }) => {
           </marker>
         </defs>
         <path
+          className="moa-edge"
           {...lineProps}
           d={d}
-          markerEnd="url(#arrow-end)"
+          markerEnd={`url(#${`arrow-end--${model.data.id}`})`}
         />
       </>
     );
   });
 
   const Label = observer(() => {
-    const text = model.label(model.data.label);
     const position = model.getPointAt(0.5);
 
     return (
-      <>
-        {text && model.labelContent() && <g
-          ref={(label) => {
-            if (model.isMountEvents || !label) return;
-            model.isMountEvents = true;
-          }}
-          transform={`translate(${position.x}, ${position.y})`}
-        >
-          {model.labelContent()}
-        </g>}
-      </>
+      <g
+        transform={`translate(${position.x}, ${position.y})`}
+      >
+        {model.labelContent()}
+      </g>
     );
   });
 

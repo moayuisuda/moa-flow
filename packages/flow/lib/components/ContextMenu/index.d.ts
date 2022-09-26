@@ -1,5 +1,7 @@
 import React from "react";
-declare class ContextMenu extends React.Component<{}, {
+declare class ContextMenu extends React.Component<{
+    children?: React.ReactNode;
+}, {
     pos: {
         x: number;
         y: number;

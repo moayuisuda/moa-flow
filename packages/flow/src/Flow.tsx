@@ -86,14 +86,24 @@ class Grid extends React.Component<{}> {
     const radius = 2
 
     return (
-      <>
+      <svg
+        viewBox={getViewBox(context)}
+        style={{
+          zIndex: 0,
+          position: "absolute",
+          pointerEvents: "none",
+        }}
+        ref={(ref) => (context.refs.svgContainerRef = ref)}
+        width={context.width}
+        height={context.height}
+      >
         <defs>
           <pattern id="dot" x={-radius} y={-radius} width={grid} height={grid} patternUnits="userSpaceOnUse">
-            <circle cx={radius} cy={radius} r={radius} fill={context.color.deepGrey} />
+            <circle className="moa-grid__dot" cx={radius} cy={radius} r={radius} fill={context.color.deepGrey} />
           </pattern>
         </defs>
         <rect x={-this.context.x} y={-this.context.y} width="100%" height="100%" fill="url(#dot)" />
-      </>
+      </svg>
     );
   }
 }
@@ -151,7 +161,7 @@ const LinesAndInterect = observer(() => {
     <svg
       viewBox={getViewBox(context)}
       style={{
-        zIndex: 0,
+        zIndex: 2,
         position: "absolute",
         pointerEvents: "none",
       }}
@@ -159,7 +169,6 @@ const LinesAndInterect = observer(() => {
       width={context.width}
       height={context.height}
     >
-      {context.grid && <Grid />}
       <Edges />
       <LinkingEdge data={context.buffer.link} />
       <SelectBoundsRect />
@@ -180,6 +189,7 @@ type FlowProps = {
   components?: Record<string, React.FC<any>>;
   models?: Record<string, typeof CellModel>;
   linkEdge?: string;
+  children?: React.ReactNode
 };
 @observer
 class Flow extends React.Component<FlowProps, {}> {
@@ -196,6 +206,7 @@ class Flow extends React.Component<FlowProps, {}> {
     this.flowModel = new FlowModel(props.onEvent);
     this.flowModel.registModels(props.models || {});
     this.flowModel.registComponents(props.components || {});
+    this.props.linkEdge && (this.flowModel.linkEdge = this.props.linkEdge);
     this.props.canvasData &&
       this.flowModel.setCanvasData(this.props.canvasData);
     this.props.grid && (this.flowModel.grid = this.props.grid);
@@ -235,12 +246,11 @@ class Flow extends React.Component<FlowProps, {}> {
 
     return (
       <FlowContext.Provider value={model}>
-        {getContextMenu(this.props.children)}
         <div
           style={{
             overflow: "hidden",
             display: "inline-block",
-            position: "absolute",
+            position: "relative",
             width: model.width,
             height: model.height,
             cursor: model.hotKey["Space"] ? "move" : "auto",
@@ -251,9 +261,11 @@ class Flow extends React.Component<FlowProps, {}> {
           }}
           {...this.getEvents()}
         >
+          {this.flowModel.grid && <Grid />}
           <Nodes />
           <LinesAndInterect />
         </div>
+        {getContextMenu(this.props.children)}
       </FlowContext.Provider>
     );
   }

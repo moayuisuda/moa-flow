@@ -6,7 +6,7 @@ import { CellModel } from "./Cell";
 @observer
 export class LinkingEdge extends React.Component<{ data: any }> {
   static contextType = FlowContext;
-  declare context: React.ContextType<typeof FlowContext>;
+  declare context: React.ContextType<typeof FlowContext>
 
   constructor(props: any) {
     super(props);
@@ -24,6 +24,8 @@ export class LinkingEdge extends React.Component<{ data: any }> {
       this.context.linkEdge
     ) as typeof CellModel;
 
+    const defaultData = this.context.createCellData(this.context.linkEdge, { id: 'LINKING_EDGE' });
+
     return (
       <g
         style={{
@@ -31,7 +33,7 @@ export class LinkingEdge extends React.Component<{ data: any }> {
         }}
       >
         {React.createElement(RegistedEdge, {
-          model: new Model(data, this.context),
+          model: new Model(Object.assign(defaultData, data), this.context),
           key: data.id,
         })}
       </g>

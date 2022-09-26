@@ -54,19 +54,24 @@ export class CellModel {
   }
 
   @action
-  setData = (data: any, rec: boolean = true) => {
-    this.context.setCellData(this.data.id, data, rec);
+  setData = (data: any, deepMerge: boolean = true) => {
+    this.context.setCellData(this.data.id, data, deepMerge);
   }
 
   static getDefaultData() {
     const re = {};
     let curr = this as any;
+    const factoryList = []
 
     // 合并父类metaData
     while (curr !== (CellModel)) {
-      Object.assign(re, (new curr).defaultData());
+      factoryList.push(curr)
       curr = curr.__proto__;
     }
+
+    factoryList.reverse().forEach(factory => {
+      Object.assign(re, (new factory).defaultData());
+    })
 
     return cloneDeep(re) as CellDataType;
   }

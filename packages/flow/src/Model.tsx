@@ -4,7 +4,7 @@ import React from "react";
 import { v4 } from "uuid";
 import { CellDataType, CellModel } from "./cells/Cell";
 import { Edge, EdgeDataType, EdgeModel } from "./cells/Edge";
-import { NodeDataType } from "./cells/Node";
+import { NodeDataType, NodeModel, NodeData } from './cells/Node';
 import { Port, PortDataType } from "./components";
 import { color } from "./theme/style";
 import {
@@ -13,7 +13,7 @@ import {
   Override,
   Vector2d,
 } from "./typings/common";
-import { arrayMove, findIndex, isRectsInterSect, remove } from "./utils/util";
+import { arrayMove, findIndex, isRectsInterSect, remove, isVector2d } from './utils/util';
 import { getRelativeBoundingBox } from "./utils/coords";
 import { DagreLayout } from '@antv/layout'
 
@@ -45,13 +45,12 @@ export class FlowModel {
     if (cellData.cellType === 'port') return
 
     if (!this.modelFactoriesMap.get(cellData.component)) {
-      console.error(`[moa-flow] can not find model match component ${cellData.component}`)
-      return
+      console.warn(`[moa-flow] can not find model match component ${cellData.component}, use default NodeModel`)
     }
 
     const Model = this.modelFactoriesMap.get(
       cellData.component
-    ) as typeof CellModel;
+    ) as typeof CellModel || NodeModel;
     const cellModel = new Model(cellData, this);
     this.cellsModelMap.set(cellData.id, cellModel);
 
@@ -402,14 +401,14 @@ export class FlowModel {
     data.id = v4();
   };
 
-  @action setCellData = (id: string, data: any, rec: boolean = true) => {
+  @action setCellData = (id: string, data: any, deepMerge: boolean = true) => {
     const cellData = this.getCellData(id);
     this.emitEvent({
       type: "data:change",
       id,
     });
 
-    if (!rec) Object.assign(cellData, data);
+    if (!deepMerge) Object.assign(cellData, data);
     else merge(cellData, data);
   };
 
@@ -521,11 +520,17 @@ export class FlowModel {
     }
 
     if (matchCell.cellType === "edge") this.clearPortEdge(matchCell.id);
+    if (matchCell.cellType === "node" && this.getNodeEdges(id).length) {
+      this.getNodeEdges(id).forEach(edgeId => {
+        this.deleCell(edgeId)
+      })
+    }
 
     this.selectCells.includes(id) && remove(this.selectCells, id);
     remove(this.canvasData.cells, matchCell);
     this.cellsMap.delete(id);
     this.cellsDataMap.delete(id);
+    this.cellsModelMap.delete(id);
 
     this.emitEvent({
       type: "data:change",
@@ -553,8 +558,8 @@ export class FlowModel {
     const result = dagreLayout.layout({
       nodes: nodesData,
       edges: edgesData.map(edgeData => ({
-        source: this.getCellInstance(edgeData.source).data.host,
-        target: this.getCellInstance(edgeData.target).data.host
+        source: this.getPortInstance(edgeData.source).data.host,
+        target: this.getPortInstance(edgeData.target).data.host
       }))
     })
 
@@ -565,7 +570,7 @@ export class FlowModel {
     const id = v4();
 
     const metaData = Object.assign(
-      (this.modelFactoriesMap.get(component) as typeof CellModel).getDefaultData(),
+      (this.modelFactoriesMap.get(component) as typeof CellModel || NodeModel).getDefaultData(),
       {
         component,
       }
@@ -586,9 +591,14 @@ export class FlowModel {
 
     if (newCellData.ports) {
       newCellData.ports.forEach((port: PortDataType) => {
-        port.host = newCellData.id;
-        port.cellType = "port";
-        if (!port.id) port.id = v4();
+        Object.assign(port, {
+          host: newCellData.id,
+          cellType: 'port',
+          id: port.id || v4(),
+          edges: port.edges || [],
+          source: undefined,
+          target: undefined
+        })
       });
     }
 
@@ -639,6 +649,8 @@ export class FlowModel {
       },
     });
     this.clearLinkBuffer();
+
+    return edgeId
   };
 
   @action setStagePosition = (x: number, y: number) => {
@@ -646,8 +658,12 @@ export class FlowModel {
     this.canvasData.y = y;
   };
 
+  /**
+   * 
+   * @description 调整某个Cell的层级
+   */
   @action
-  moveTo(id: string, index: number) {
+  moveTo = (id: string, index: number) => {
     const oldIndex = findIndex(
       this.canvasData.cells,
       this.getCellData(id)
@@ -667,7 +683,7 @@ export class FlowModel {
     return this.cellsModelMap.get(id);
   };
 
-  getCellInstance = (id: string) => {
+  getPortInstance = (id: string) => {
     return this.cellsMap.get(id);
   };
 

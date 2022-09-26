@@ -13,8 +13,6 @@ export const useEvent = (cb: Function, cellId: string) => {
     if (events) {
       events.set(id, cb);
     } else eventMap.set(cellId, new Map([[id, cb]]));
-
-    console.log("eventMap", { eventMap });
   }, [id]);
 };
 

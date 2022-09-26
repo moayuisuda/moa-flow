@@ -1,4 +1,4 @@
-import React, { useState, forwardRef, memo, useContext, Component, useLayoutEffect } from 'react';
+import React, { useState, forwardRef, memo, Component, useContext, useLayoutEffect } from 'react';
 import { observer as observer$1, Observer } from 'mobx-react';
 export { Observer, observer } from 'mobx-react';
 import { makeObservable, observable, computed, action, configure, getDependencyTree, Reaction, autorun } from 'mobx';
@@ -17292,10 +17292,11 @@ var LinkingEdge = /** @class */ (function (_super) {
             return React.createElement(React.Fragment, null);
         var RegistedEdge = this.context.componentsMap.get(this.context.linkEdge);
         var Model = this.context.modelFactoriesMap.get(this.context.linkEdge);
+        var defaultData = this.context.createCellData(this.context.linkEdge, { id: 'LINKING_EDGE' });
         return (React.createElement("g", { style: {
                 pointerEvents: "none",
             } }, React.createElement(RegistedEdge, {
-            model: new Model(data, this.context),
+            model: new Model(Object.assign(defaultData, data), this.context),
             key: data.id,
         })));
     };
@@ -17412,6 +17413,11 @@ var callIfFn = function (exp) {
     else
         return exp;
 };
+var log = function (mes0, mes1) {
+    console.log(mes0, mes1);
+};
+var a = [0, 1];
+log(a.length, a.splice(0, 1));
 
 var CellModel = /** @class */ (function () {
     function CellModel(data, context) {
@@ -17428,9 +17434,9 @@ var CellModel = /** @class */ (function () {
         this.getWrapperRef = function () {
             return _this.context.getWrapperRef(_this.data.id);
         };
-        this.setData = function (data, rec) {
-            if (rec === void 0) { rec = true; }
-            _this.context.setCellData(_this.data.id, data, rec);
+        this.setData = function (data, deepMerge) {
+            if (deepMerge === void 0) { deepMerge = true; }
+            _this.context.setCellData(_this.data.id, data, deepMerge);
         };
         this.data = data;
         this.context = context;
@@ -17449,11 +17455,15 @@ var CellModel = /** @class */ (function () {
     CellModel.getDefaultData = function () {
         var re = {};
         var curr = this;
+        var factoryList = [];
         // 合并父类metaData
         while (curr !== (CellModel)) {
-            Object.assign(re, (new curr).defaultData());
+            factoryList.push(curr);
             curr = curr.__proto__;
         }
+        factoryList.reverse().forEach(function (factory) {
+            Object.assign(re, (new factory).defaultData());
+        });
         return lodash.exports.cloneDeep(re);
     };
     __decorate([
@@ -45609,6 +45619,12 @@ observerBatching(reactDom.exports.unstable_batchedUpdates);
 
 var TEXT_HEIGHT = 16;
 var LABEL_PADDING = 4;
+var dirMap = {
+    'left': [-1, 0],
+    'right': [1, 0],
+    'top': [0, -1],
+    'bottom': [0, 1]
+};
 var EdgeModel = /** @class */ (function (_super) {
     __extends(EdgeModel, _super);
     function EdgeModel(data, context) {
@@ -45622,11 +45638,10 @@ var EdgeModel = /** @class */ (function (_super) {
             verticies: [],
             cellType: "edge",
         }); };
-        _this.bazier = false;
+        _this.bazier = true;
         _this.startHead = false;
         _this.endHead = true;
         _this.pathInstance = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        _this.isMountEvents = false;
         _this.formatVerticied = function (verticies) {
             return verticies;
         };
@@ -45669,29 +45684,36 @@ var EdgeModel = /** @class */ (function (_super) {
             var verticies = _this.data.verticies || [];
             return __spreadArray(__spreadArray([anchors.source], verticies, true), [anchors.target], false);
         };
-        _this.getLinkNodesData = function () {
+        _this.getLinkNodes = function () {
             var data = _this.data;
             var source;
             var target;
             if (!isVector2d(data.source)) {
-                var sourcePort = _this.context.cellsMap.get(data.source);
-                source = _this.context.cellsMap.get(sourcePort.host);
+                var sourcePort = _this.context.cellsDataMap.get(data.source);
+                source = sourcePort.host;
             }
             if (!isVector2d(data.target)) {
                 var targetPort = _this.context.cellsDataMap.get(data.target);
-                target = _this.context.cellsDataMap.get(targetPort.host);
+                target = targetPort.host;
             }
             return {
                 source: source,
                 target: target,
             };
         };
+        _this.vectorsToPoints = function (vectors) {
+            var re = [];
+            vectors.forEach(function (vector) {
+                re.push([vector.x, vector.y]);
+            });
+            return re;
+        };
         _this.getPointAt = function (ratio) {
             _this.pathInstance.setAttribute("d", _this.getBazierPath());
             return _this.pathInstance.getPointAtLength(ratio * _this.pathInstance.getTotalLength());
         };
         _this.labelContent = function () {
-            var _a = _this.context; _a.color; var svgContainerRef = _a.refs.svgContainerRef;
+            var svgContainerRef = _this.context.refs.svgContainerRef;
             var text = _this.label(_this.data.label);
             if (!text)
                 return React.createElement(React.Fragment, null);
@@ -45712,11 +45734,21 @@ var EdgeModel = /** @class */ (function (_super) {
         };
         _this.getBazierDir = function () {
             var _a = _this.getAnchors(), source = _a.source, target = _a.target;
-            var LENGTH = (target.x - source.x) * 0.5;
-            return {
-                source: [LENGTH, 0],
-                target: [-LENGTH, 0],
-            };
+            var sourceDir = _this.context.cellsMap.get(_this.data.source).props.dir;
+            var LENGTH = Math.abs((target.x - source.x) * 0.5);
+            if (isVector2d(_this.data.target)) {
+                return {
+                    source: [LENGTH * dirMap[sourceDir][0], LENGTH * dirMap[sourceDir][1]],
+                    target: [0, 0],
+                };
+            }
+            else {
+                var targetDir = _this.context.cellsMap.get(_this.data.target).props.dir;
+                return {
+                    source: [LENGTH * dirMap[sourceDir][0], LENGTH * dirMap[sourceDir][1]],
+                    target: [LENGTH * dirMap[targetDir][0], LENGTH * dirMap[targetDir][1]],
+                };
+            }
         };
         _this.getBazierPath = function () {
             var _a = _this.getAnchors(), source = _a.source, target = _a.target;
@@ -45731,18 +45763,21 @@ var EdgeModel = /** @class */ (function (_super) {
             }
             return str;
         };
+        _this.defaultLineProps = function () { return ({
+            strokeLinecap: "round",
+            strokeLinejoin: "round",
+            fill: "none",
+            strokeWidth: 2,
+            stroke: _this.isSelect ? _this.context.color.active : _this.context.color.deepGrey,
+        }); };
+        _this.lineProps = function () {
+            return {};
+        };
         return _this;
     }
     // 这个方法暴露出去，可自定义路由
     EdgeModel.prototype.route = function (vectors) {
         return vectors;
-    };
-    EdgeModel.prototype.vectorsToPoints = function (vectors) {
-        var re = [];
-        vectors.forEach(function (vector) {
-            re.push([vector.x, vector.y]);
-        });
-        return re;
     };
     EdgeModel.prototype.label = function (label) {
         return label;
@@ -45765,16 +45800,8 @@ var DEFAULT_ARROW_SIZE$1 = 4;
 var Edge = observer(function (_a) {
     var model = _a.model;
     var Line = observer(function () {
-        var context = useContext(FlowContext);
-        var color = context.color;
-        var d = model.d, isSelect = model.isSelect;
-        var lineProps = {
-            strokeLinecap: "round",
-            strokeLinejoin: "round",
-            fill: "none",
-            strokeWidth: 2,
-            stroke: isSelect ? color.active : color.deepGrey,
-        };
+        var d = model.d;
+        var lineProps = Object.assign(model.defaultLineProps(), model.lineProps());
         var cos = Math.cos, sin = Math.sin, PI = Math.PI;
         var arrowOffset = [
             lineProps.strokeWidth / 2 || 0,
@@ -45782,23 +45809,68 @@ var Edge = observer(function (_a) {
         ];
         return (React.createElement(React.Fragment, null,
             React.createElement("defs", null,
-                React.createElement("marker", { id: "arrow-end", markerWidth: "100", markerHeight: "100", refX: arrowOffset[0] + DEFAULT_ARROW_SIZE$1 * cos(PI / 6), refY: arrowOffset[1] + DEFAULT_ARROW_SIZE$1 * sin(PI / 6), orient: "auto" },
-                    React.createElement("path", __assign({}, lineProps, { d: "M".concat(arrowOffset[0], ",").concat(arrowOffset[1], " L").concat(arrowOffset[0], ",").concat(DEFAULT_ARROW_SIZE$1 * sin(PI / 6) * 2 + arrowOffset[1], " L").concat(DEFAULT_ARROW_SIZE$1 * cos(PI / 6) + arrowOffset[0], ",").concat(DEFAULT_ARROW_SIZE$1 * sin(PI / 6) + arrowOffset[1], " Z") })))),
-            React.createElement("path", __assign({}, lineProps, { d: d, markerEnd: "url(#arrow-end)" }))));
+                React.createElement("marker", { id: "arrow-end--".concat(model.data.id), markerWidth: "100", markerHeight: "100", refX: arrowOffset[0] + DEFAULT_ARROW_SIZE$1 * cos(PI / 6), refY: arrowOffset[1] + DEFAULT_ARROW_SIZE$1 * sin(PI / 6), orient: "auto" },
+                    React.createElement("path", { className: "moa-edge__arrow", stroke: lineProps.stroke, strokeWidth: lineProps.strokeWidth, strokeLinecap: lineProps.strokeLinecap, strokeLinejoin: lineProps.strokeLinejoin, fill: lineProps.fill, d: "M".concat(arrowOffset[0], ",").concat(arrowOffset[1], " L").concat(arrowOffset[0], ",").concat(DEFAULT_ARROW_SIZE$1 * sin(PI / 6) * 2 + arrowOffset[1], " L").concat(DEFAULT_ARROW_SIZE$1 * cos(PI / 6) + arrowOffset[0], ",").concat(DEFAULT_ARROW_SIZE$1 * sin(PI / 6) + arrowOffset[1], " Z") }))),
+            React.createElement("path", __assign({ className: "moa-edge" }, lineProps, { d: d, markerEnd: "url(#".concat("arrow-end--".concat(model.data.id), ")") }))));
     });
     var Label = observer(function () {
-        var text = model.label(model.data.label);
         var position = model.getPointAt(0.5);
-        return (React.createElement(React.Fragment, null, text && model.labelContent() && React.createElement("g", { ref: function (label) {
-                if (model.isMountEvents || !label)
-                    return;
-                model.isMountEvents = true;
-            }, transform: "translate(".concat(position.x, ", ").concat(position.y, ")") }, model.labelContent())));
+        return (React.createElement("g", { transform: "translate(".concat(position.x, ", ").concat(position.y, ")") }, model.labelContent()));
     });
     return (React.createElement(React.Fragment, null,
         React.createElement(Line, null),
         React.createElement(Label, null)));
 });
+
+var NodeModel = /** @class */ (function (_super) {
+    __extends(NodeModel, _super);
+    function NodeModel() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.defaultData = function () { return ({
+            x: 0,
+            y: 0,
+            id: "",
+            component: "",
+            cellType: "node",
+        }); };
+        _this.getLinkNodes = function () {
+            return _this.context.getLinkNodes(_this.data.id);
+        };
+        _this.getLinkPorts = function () {
+            return _this.context.getLinkPorts(_this.data.id);
+        };
+        _this.getNodeEdges = function () {
+            return _this.context.getNodeEdges(_this.data.id);
+        };
+        _this.getPosition = function () {
+            return _this.context.getNodePosition(_this.data.id);
+        };
+        _this.getChildren = function () {
+            return _this.context.canvasData.cells.filter(function (cellData) {
+                cellData.parent === _this.data.id;
+            });
+        };
+        return _this;
+    }
+    return NodeModel;
+}(CellModel));
+// @TODO
+// type BizParams = {
+//   name: string;
+//   age: number;
+// };
+// class Base<T> {
+//   param: T;
+//   constructor() {}
+// }
+// class Biz extends Base<{ name: string; age: number }> {
+//   constructor() {
+//     super();
+//   }
+// }
+// const map: Record<string, typeof Base> = {
+//   Biz: Biz,
+// };
 
 var DEFAULT_ARROW_SIZE = 16;
 var Arrow = /** @class */ (function (_super) {
@@ -45900,6 +45972,58 @@ var Port = /** @class */ (function (_super) {
     __extends(Port, _super);
     function Port(props, context) {
         var _this = _super.call(this, props, context) || this;
+        _this.anchor = function () {
+            return lodash.exports.isFunction(_this.props.anchor)
+                ? _this.props.anchor()
+                : _this.props.anchor;
+        };
+        _this.onLinkStart = function (e) {
+            e.stopPropagation();
+            e.preventDefault();
+            var link = _this.context.buffer.link;
+            _this.context.emitEvent({
+                type: "beforeLink",
+                data: {
+                    source: _this.props.data.id,
+                },
+            });
+            link.source = _this.props.data.id;
+            link.target = _this.anchor();
+        };
+        _this.onLinkEnd = function (e) {
+            e.stopPropagation();
+            var _a = _this, context = _a.context, link = _a.context.buffer.link;
+            if (!link.source)
+                return;
+            var sourceInstance = context.cellsMap.get(link.source);
+            if (link.source === _this.props.data.id) {
+                context.clearLinkBuffer();
+            }
+            else if (_this.props.link || sourceInstance.props.link) {
+                var adoptSource = true;
+                var adoptTarget = true;
+                var sourceData = context.getCellData(link.source);
+                if (sourceInstance.props.link) {
+                    if (sourceInstance.props.link(sourceData, _this.props.data))
+                        adoptSource = true;
+                    else
+                        adoptSource = false;
+                }
+                if (_this.props.link) {
+                    if (_this.props.link(sourceData, _this.props.data))
+                        adoptTarget = true;
+                    else
+                        adoptTarget = false;
+                }
+                if (adoptSource && adoptTarget)
+                    context.link(link.source, _this.props.data.id);
+                else
+                    context.clearLinkBuffer();
+            }
+            else {
+                context.link(link.source, _this.props.data.id);
+            }
+        };
         context.cellsMap.set(props.data.id, _this);
         _this.wrapperRef = context.getWrapperRef(props.data.id);
         return _this;
@@ -45911,69 +46035,14 @@ var Port = /** @class */ (function (_super) {
         enumerable: false,
         configurable: true
     });
-    Port.prototype.anchor = function () {
-        return lodash.exports.isFunction(this.props.anchor)
-            ? this.props.anchor()
-            : this.props.anchor;
-    };
-    Port.prototype.onLinkStart = function (e) {
-        e.stopPropagation();
-        var link = this.context.buffer.link;
-        this.context.emitEvent({
-            type: "beforeLink",
-            data: {
-                source: this.props.data.id,
-            },
-        });
-        link.source = this.props.data.id;
-        link.target = this.anchor();
-    };
-    Port.prototype.onLinkEnd = function (e) {
-        e.stopPropagation();
-        var _a = this, context = _a.context, link = _a.context.buffer.link;
-        var sourceInstance = context.cellsMap.get(link.source);
-        if (link.source === this.props.data.id) {
-            context.clearLinkBuffer();
-        }
-        else if (this.props.link || sourceInstance.props.link) {
-            var adoptSource = true;
-            var adoptTarget = true;
-            var sourceData = context.getCellData(link.source);
-            if (sourceInstance.props.link) {
-                if (sourceInstance.props.link(sourceData, this.props.data))
-                    adoptSource = true;
-                else
-                    adoptSource = false;
-            }
-            if (this.props.link) {
-                if (this.props.link(sourceData, this.props.data))
-                    adoptTarget = true;
-                else
-                    adoptTarget = false;
-            }
-            if (adoptSource && adoptTarget)
-                context.link(link.source, this.props.data.id);
-            else
-                context.clearLinkBuffer();
-        }
-        else {
-            context.link(link.source, this.props.data.id);
-        }
-    };
     Port.prototype.render = function () {
         var _this = this;
-        return (React.createElement("div", { ref: this.wrapperRef, style: {
+        var _a = this.props; _a.link; _a.anchor; _a.data; var others = __rest(_a, ["link", "anchor", "data"]);
+        return (React.createElement("div", __assign({ ref: this.wrapperRef, style: {
                 cursor: "crosshair",
-            }, onMouseDown: function (e) { return _this.onLinkStart(e); }, onMouseUp: function (e) { return _this.onLinkEnd(e); } }, this.props.children));
+            }, onMouseDown: function (e) { return _this.onLinkStart(e); }, onMouseUp: function (e) { return _this.onLinkEnd(e); } }, others), this.props.children));
     };
     Port.contextType = FlowContext;
-    Port.defaultData = {
-        id: "",
-        component: "Port",
-        cellType: "port",
-        source: undefined,
-        target: undefined,
-    };
     Port = __decorate([
         observer$1
     ], Port);
@@ -45989,18 +46058,19 @@ var Interactor = /** @class */ (function (_super) {
         var _this = this;
         var _a = this, context = _a.context, _b = _a.props, id = _b.id, _c = _b.topOnFocus, topOnFocus = _c === void 0 ? false : _c, _d = _b.inSvg, inSvg = _d === void 0 ? false : _d;
         var onMouseDown = function (e) {
-            e.stopPropagation();
             var _a = _this.context, selectCells = _a.selectCells, _b = _a.buffer, select = _b.select, drag = _b.drag;
-            if (!selectCells.includes(_this.props.id)) {
-                context.setSelectedCells([id]);
+            if (!select.isSelecting) {
+                if (!selectCells.includes(_this.props.id)) {
+                    context.setSelectedCells([id]);
+                }
+                // drag
+                if (topOnFocus)
+                    _this.context.moveTo(_this.props.id, _this.context.canvasData.cells.length - 1);
+                select.isSelecting = true;
+                var coord = _this.context.getCursorCoord(e);
+                drag.start.x = coord.x;
+                drag.start.y = coord.y;
             }
-            // drag
-            if (topOnFocus)
-                _this.context.moveTo(_this.props.id, _this.context.canvasData.cells.length - 1);
-            select.isSelecting = true;
-            var coord = _this.context.getCursorCoord(e);
-            drag.start.x = coord.x;
-            drag.start.y = coord.y;
         };
         return inSvg ? (React.createElement("g", { style: {
                 pointerEvents: "auto",
@@ -46123,7 +46193,7 @@ var SelectBoundsRect = /** @class */ (function (_super) {
     }
     SelectBoundsRect.prototype.render = function () {
         var _a = this.context, select = _a.buffer.select, color = _a.color, hotKey = _a.hotKey;
-        return (React.createElement(React.Fragment, null, !hotKey["Space"] && hotKey["LeftMouseDown"] && (React.createElement("rect", { x: Math.min(select.start.x, select.end.x), y: Math.min(select.start.y, select.end.y), width: Math.abs(select.start.x - select.end.x), height: Math.abs(select.start.y - select.end.y), stroke: color.primary, strokeWidth: 2, fill: "none" }))));
+        return (React.createElement(React.Fragment, null, !hotKey["Space"] && hotKey["LeftMouseDown"] && (React.createElement("rect", { className: "moa-select-rect", x: Math.min(select.start.x, select.end.x), y: Math.min(select.start.y, select.end.y), width: Math.abs(select.start.x - select.end.x), height: Math.abs(select.start.y - select.end.y), stroke: color.primary, strokeWidth: 2, fill: "none" }))));
     };
     SelectBoundsRect.contextType = FlowContext;
     SelectBoundsRect = __decorate([
@@ -46133,14 +46203,13 @@ var SelectBoundsRect = /** @class */ (function (_super) {
 }(React.Component));
 
 var color = {
-    primary: 'rgb(255, 108, 55)',
-    active: 'rgb(255, 108, 55)',
+    primary: '#1890ff',
+    active: '#1890ff',
     grey: 'rgb(242, 242, 242)',
-    blue: '#0053b8',
     deepGrey: 'rgb(162, 177, 195)',
     background: 'rgba(255,255,255,255)',
     success: '#d9f7be',
-    error: 'rgba(246,99,107,1)'
+    error: 'rgba(246,99,107,1)',
 };
 
 var getRelativeBoundingBox = function (element, container) {
@@ -46391,14 +46460,14 @@ var FlowModel = /** @class */ (function () {
         this.setCellId = function (data) {
             data.id = v4();
         };
-        this.setCellData = function (id, data, rec) {
-            if (rec === void 0) { rec = true; }
+        this.setCellData = function (id, data, deepMerge) {
+            if (deepMerge === void 0) { deepMerge = true; }
             var cellData = _this.getCellData(id);
             _this.emitEvent({
                 type: "data:change",
                 id: id,
             });
-            if (!rec)
+            if (!deepMerge)
                 Object.assign(cellData, data);
             else
                 lodash.exports.merge(cellData, data);
@@ -46481,10 +46550,16 @@ var FlowModel = /** @class */ (function () {
             }
             if (matchCell.cellType === "edge")
                 _this.clearPortEdge(matchCell.id);
+            if (matchCell.cellType === "node" && _this.getNodeEdges(id).length) {
+                _this.getNodeEdges(id).forEach(function (edgeId) {
+                    _this.deleCell(edgeId);
+                });
+            }
             _this.selectCells.includes(id) && remove(_this.selectCells, id);
             remove(_this.canvasData.cells, matchCell);
             _this.cellsMap.delete(id);
             _this.cellsDataMap.delete(id);
+            _this.cellsModelMap.delete(id);
             _this.emitEvent({
                 type: "data:change",
             });
@@ -46505,15 +46580,15 @@ var FlowModel = /** @class */ (function () {
             var result = dagreLayout.layout({
                 nodes: nodesData,
                 edges: edgesData.map(function (edgeData) { return ({
-                    source: _this.getCellInstance(edgeData.source).data.host,
-                    target: _this.getCellInstance(edgeData.target).data.host
+                    source: _this.getPortInstance(edgeData.source).data.host,
+                    target: _this.getPortInstance(edgeData.target).data.host
                 }); })
             });
             _this.canvasData.cells = (result.nodes || []).concat(edgesData);
         };
         this.createCellData = function (component, initOptions) {
             var id = v4();
-            var metaData = Object.assign(_this.modelFactoriesMap.get(component).getDefaultData(), {
+            var metaData = Object.assign((_this.modelFactoriesMap.get(component) || NodeModel).getDefaultData(), {
                 component: component,
             });
             _this.insertRuntimeState(metaData);
@@ -46523,10 +46598,14 @@ var FlowModel = /** @class */ (function () {
             var newCellData = _this.createCellData(componentName, initOptions);
             if (newCellData.ports) {
                 newCellData.ports.forEach(function (port) {
-                    port.host = newCellData.id;
-                    port.cellType = "port";
-                    if (!port.id)
-                        port.id = v4();
+                    Object.assign(port, {
+                        host: newCellData.id,
+                        cellType: 'port',
+                        id: port.id || v4(),
+                        edges: port.edges || [],
+                        source: undefined,
+                        target: undefined
+                    });
                 });
             }
             _this.canvasData.cells.push(newCellData);
@@ -46569,10 +46648,19 @@ var FlowModel = /** @class */ (function () {
                 },
             });
             _this.clearLinkBuffer();
+            return edgeId;
         };
         this.setStagePosition = function (x, y) {
             _this.canvasData.x = x;
             _this.canvasData.y = y;
+        };
+        /**
+         *
+         * @description 调整某个Cell的层级
+         */
+        this.moveTo = function (id, index) {
+            var oldIndex = findIndex(_this.canvasData.cells, _this.getCellData(id));
+            arrayMove(_this.canvasData.cells, oldIndex, index);
         };
         this.getCell = function (id) {
             return _this.cellsMap.get(id);
@@ -46583,7 +46671,7 @@ var FlowModel = /** @class */ (function () {
         this.getCellModel = function (id) {
             return _this.cellsModelMap.get(id);
         };
-        this.getCellInstance = function (id) {
+        this.getPortInstance = function (id) {
             return _this.cellsMap.get(id);
         };
         this.getCellsData = function () {
@@ -46631,10 +46719,9 @@ var FlowModel = /** @class */ (function () {
         if (cellData.cellType === 'port')
             return;
         if (!this.modelFactoriesMap.get(cellData.component)) {
-            console.error("[moa-flow] can not find model match component ".concat(cellData.component));
-            return;
+            console.warn("[moa-flow] can not find model match component ".concat(cellData.component, ", use default NodeModel"));
         }
-        var Model = this.modelFactoriesMap.get(cellData.component);
+        var Model = this.modelFactoriesMap.get(cellData.component) || NodeModel;
         var cellModel = new Model(cellData, this);
         this.cellsModelMap.set(cellData.id, cellModel);
         if (isNodeDataType(cellData)) {
@@ -46739,10 +46826,6 @@ var FlowModel = /** @class */ (function () {
         enumerable: false,
         configurable: true
     });
-    FlowModel.prototype.moveTo = function (id, index) {
-        var oldIndex = findIndex(this.canvasData.cells, this.getCellData(id));
-        arrayMove(this.canvasData.cells, oldIndex, index);
-    };
     __decorate([
         action
     ], FlowModel.prototype, "trigRender", void 0);
@@ -46850,7 +46933,7 @@ var FlowModel = /** @class */ (function () {
     ], FlowModel.prototype, "setStagePosition", void 0);
     __decorate([
         action
-    ], FlowModel.prototype, "moveTo", null);
+    ], FlowModel.prototype, "moveTo", void 0);
     return FlowModel;
 }());
 
@@ -46860,12 +46943,10 @@ var behaviorsMap = {
         onMouseDown: function (e, model) {
             if (!model.buffer.select.isSelecting && e.button === EVT_LEFTCLICK)
                 model.clearSelect();
-        },
-        onClick: function (e, model) {
             if (e.button === EVT_LEFTCLICK) {
                 model.contextMenuVisible = false;
             }
-        }
+        },
     },
     link: {
         onMouseUp: function (e, model) {
@@ -47165,10 +47246,14 @@ var Grid = /** @class */ (function (_super) {
         var grid = this.context.grid;
         var context = this.context;
         var radius = 2;
-        return (React.createElement(React.Fragment, null,
+        return (React.createElement("svg", { viewBox: getViewBox(context), style: {
+                zIndex: 0,
+                position: "absolute",
+                pointerEvents: "none",
+            }, ref: function (ref) { return (context.refs.svgContainerRef = ref); }, width: context.width, height: context.height },
             React.createElement("defs", null,
                 React.createElement("pattern", { id: "dot", x: -radius, y: -radius, width: grid, height: grid, patternUnits: "userSpaceOnUse" },
-                    React.createElement("circle", { cx: radius, cy: radius, r: radius, fill: context.color.deepGrey }))),
+                    React.createElement("circle", { className: "moa-grid__dot", cx: radius, cy: radius, r: radius, fill: context.color.deepGrey }))),
             React.createElement("rect", { x: -this.context.x, y: -this.context.y, width: "100%", height: "100%", fill: "url(#dot)" })));
     };
     Grid.contextType = FlowContext;
@@ -47203,11 +47288,10 @@ var Nodes = observer$1(function () {
 var LinesAndInterect = observer$1(function () {
     var context = useContext(FlowContext);
     return (React.createElement("svg", { viewBox: getViewBox(context), style: {
-            zIndex: 0,
+            zIndex: 2,
             position: "absolute",
             pointerEvents: "none",
         }, ref: function (ref) { return (context.refs.svgContainerRef = ref); }, width: context.width, height: context.height },
-        context.grid && React.createElement(Grid, null),
         React.createElement(Edges, null),
         React.createElement(LinkingEdge, { data: context.buffer.link }),
         React.createElement(SelectBoundsRect, null)));
@@ -47223,6 +47307,7 @@ var Flow = /** @class */ (function (_super) {
         _this.flowModel = new FlowModel(props.onEvent);
         _this.flowModel.registModels(props.models || {});
         _this.flowModel.registComponents(props.components || {});
+        _this.props.linkEdge && (_this.flowModel.linkEdge = _this.props.linkEdge);
         _this.props.canvasData &&
             _this.flowModel.setCanvasData(_this.props.canvasData);
         _this.props.grid && (_this.flowModel.grid = _this.props.grid);
@@ -47257,19 +47342,20 @@ var Flow = /** @class */ (function (_super) {
     Flow.prototype.render = function () {
         var model = this.flowModel;
         return (React.createElement(FlowContext.Provider, { value: model },
-            getContextMenu(this.props.children),
             React.createElement("div", __assign({ style: {
                     overflow: "hidden",
                     display: "inline-block",
-                    position: "absolute",
+                    position: "relative",
                     width: model.width,
                     height: model.height,
                     cursor: model.hotKey["Space"] ? "move" : "auto",
                 }, id: STAGE_ID, ref: function (ref) {
                     model.refs.stageRef = ref;
                 } }, this.getEvents()),
+                this.flowModel.grid && React.createElement(Grid, null),
                 React.createElement(Nodes, null),
-                React.createElement(LinesAndInterect, null))));
+                React.createElement(LinesAndInterect, null)),
+            getContextMenu(this.props.children)));
     };
     Flow = __decorate([
         observer$1
@@ -47293,7 +47379,6 @@ var useEvent = function (cb, cellId) {
         }
         else
             eventMap.set(cellId, new Map([[id, cb]]));
-        console.log("eventMap", { eventMap: eventMap });
     }, [id]);
 };
 
@@ -47303,55 +47388,5 @@ var Content = function (props) {
             props.wrapperRef.current = ref;
         } }, lodash.exports.isUndefined(props.data.visible) || props.data.visible ? (props.children) : (React.createElement(React.Fragment, null)))); }));
 };
-
-var NodeModel = /** @class */ (function (_super) {
-    __extends(NodeModel, _super);
-    function NodeModel() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.defaultData = function () { return ({
-            x: 0,
-            y: 0,
-            id: "",
-            component: "",
-            cellType: "node",
-        }); };
-        _this.getLinkNodes = function () {
-            return _this.context.getLinkNodes(_this.data.id);
-        };
-        _this.getLinkPorts = function () {
-            return _this.context.getLinkPorts(_this.data.id);
-        };
-        _this.getNodeEdges = function () {
-            return _this.context.getNodeEdges(_this.data.id);
-        };
-        _this.getPosition = function () {
-            return _this.context.getNodePosition(_this.data.id);
-        };
-        _this.getChildren = function () {
-            return _this.context.canvasData.cells.filter(function (cellData) {
-                cellData.parent === _this.data.id;
-            });
-        };
-        return _this;
-    }
-    return NodeModel;
-}(CellModel));
-// @TODO
-// type BizParams = {
-//   name: string;
-//   age: number;
-// };
-// class Base<T> {
-//   param: T;
-//   constructor() {}
-// }
-// class Biz extends Base<{ name: string; age: number }> {
-//   constructor() {
-//     super();
-//   }
-// }
-// const map: Record<string, typeof Base> = {
-//   Biz: Biz,
-// };
 
 export { Arrow, CellModel, ConsumerBridge, Content, ContextMenu, Edge, EdgeModel, Flow, FlowContext, Image, Interactor, LinkingEdge, NodeModel, Port, SelectBoundsRect, getContextMenu, useEvent, useModel };

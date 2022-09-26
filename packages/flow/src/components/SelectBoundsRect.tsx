@@ -5,6 +5,7 @@ import { observer } from "mobx-react";
 @observer
 export class SelectBoundsRect extends React.Component<{}, {}> {
   static contextType = FlowContext;
+
   render() {
     const {
       buffer: { select },
@@ -16,6 +17,7 @@ export class SelectBoundsRect extends React.Component<{}, {}> {
       <>
         {!hotKey["Space"] && hotKey["LeftMouseDown"] && (
           <rect
+            className="moa-select-rect"
             x={Math.min(select.start.x, select.end.x)}
             y={Math.min(select.start.y, select.end.y)}
             width={Math.abs(select.start.x - select.end.x)}

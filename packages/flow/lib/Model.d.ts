@@ -109,7 +109,6 @@ export declare class FlowModel {
         primary: string;
         active: string;
         grey: string;
-        blue: string;
         deepGrey: string;
         background: string;
         success: string;
@@ -146,7 +145,7 @@ export declare class FlowModel {
     getLocalBBox: (id: string) => import("./utils/coords").BoundingBox;
     setCanvasData: (canvasData: CanvasDataType) => void;
     setCellId: (data: CellDataType) => void;
-    setCellData: (id: string, data: any, rec?: boolean) => void;
+    setCellData: (id: string, data: any, deepMerge?: boolean) => void;
     /**
      * @description 获取某个node连接的所有edge
      */
@@ -176,13 +175,17 @@ export declare class FlowModel {
     createCellData: (component: string, initOptions?: any) => any;
     addCell: (componentName: string, initOptions?: any) => any;
     setLinkingPosition: (coord: Vector2d) => void;
-    link: (source: string, target: string) => void;
+    link: (source: string, target: string) => any;
     setStagePosition: (x: number, y: number) => void;
-    moveTo(id: string, index: number): void;
+    /**
+     *
+     * @description 调整某个Cell的层级
+     */
+    moveTo: (id: string, index: number) => void;
     getCell: (id: string) => any;
     getCellData: (id: string) => CellDataType | undefined;
     getCellModel: (id: string) => CellModel | undefined;
-    getCellInstance: (id: string) => any;
+    getPortInstance: (id: string) => any;
     getCellsData: () => any[];
     getNodePosition: (id: string) => {
         x: number;

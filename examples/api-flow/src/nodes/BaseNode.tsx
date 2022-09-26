@@ -248,6 +248,7 @@ export const NodeFrame: React.FC<
 
       {inPorts.map((portData: PortDataType) => (
         <Port
+          dir='left'
           key={portData.id}
           data={portData}
           anchor={{
@@ -263,6 +264,7 @@ export const NodeFrame: React.FC<
       ))}
       {outPorts.map((portData: PortDataType) => (
         <Port
+          dir='right'
           key={portData.id}
           data={portData}
           anchor={{

@@ -35,12 +35,11 @@ export const behaviorsMap: Record<BehaviorName, EventMaps> = {
         onMouseDown: (e, model) => {
             if (!model.buffer.select.isSelecting && e.button === EVT_LEFTCLICK)
                 model.clearSelect();
-        },
-        onClick: (e, model) => {
+
             if (e.button === EVT_LEFTCLICK) {
                 model.contextMenuVisible = false
             }
-        }
+        },
     },
     link: {
         onMouseUp: (e, model) => {

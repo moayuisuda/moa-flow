@@ -12,31 +12,25 @@ export type PortDataType = {
   [index: string]: any;
 } & CellDataType;
 
+export type PortDir = 'left' | 'right' | 'top' | 'bottom'
+
 type PortPropsType<D extends PortDataType> = {
   link?: (source: D, target: D) => boolean;
-  x?: number;
-  y?: number;
+  dir: PortDir,
   anchor: { x: number; y: number } | (() => { x: number; y: number });
   data: D;
+  children?: React.ReactNode
 };
 
 export type PortData<D> = D & PortDataType;
 
 @observer
 export class Port<D extends PortDataType> extends React.Component<
-  PortPropsType<D>
+PortPropsType<D>
 > {
   static contextType = FlowContext;
   // vscode 无法推断 this.context 的类型，需要显式声明 this.context 的类型
   declare context: React.ContextType<typeof FlowContext>;
-
-  static defaultData: PortDataType = {
-    id: "",
-    component: "Port",
-    cellType: "port",
-    source: undefined,
-    target: undefined,
-  };
 
   wrapperRef: React.RefObject<any>;
   constructor(props: PortPropsType<D>, context: FlowModel) {
@@ -49,14 +43,15 @@ export class Port<D extends PortDataType> extends React.Component<
     return this.props.data;
   }
 
-  anchor() {
+  anchor = () => {
     return isFunction(this.props.anchor)
       ? this.props.anchor()
       : this.props.anchor;
   }
 
-  onLinkStart(e: React.MouseEvent) {
+  onLinkStart = (e: React.MouseEvent) => {
     e.stopPropagation();
+    e.preventDefault()
 
     const {
       context: {
@@ -75,7 +70,7 @@ export class Port<D extends PortDataType> extends React.Component<
     link.target = this.anchor();
   }
 
-  onLinkEnd(e: React.MouseEvent) {
+  onLinkEnd = (e: React.MouseEvent) => {
     e.stopPropagation();
 
     const {
@@ -85,6 +80,7 @@ export class Port<D extends PortDataType> extends React.Component<
       },
     } = this;
 
+    if (!link.source) return
     const sourceInstance = context.cellsMap.get(link.source as string);
 
     if (link.source === this.props.data.id) {
@@ -114,6 +110,11 @@ export class Port<D extends PortDataType> extends React.Component<
   }
 
   render() {
+    const { link,
+      anchor,
+      data,
+      ...others } = this.props
+
     return (
       <div
         ref={this.wrapperRef}
@@ -122,6 +123,7 @@ export class Port<D extends PortDataType> extends React.Component<
         }}
         onMouseDown={(e) => this.onLinkStart(e)}
         onMouseUp={(e) => this.onLinkEnd(e)}
+        {...others}
       >
         {this.props.children}
       </div>

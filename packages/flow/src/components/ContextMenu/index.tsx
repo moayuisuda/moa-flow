@@ -5,8 +5,8 @@ import { FlowContext } from "../../Context";
 import { STAGE_ID } from "../../constants";
 @observer
 class ContextMenu extends React.Component<
-  {},
-  { pos: { x: number; y: number } }
+{ children?: React.ReactNode },
+{ pos: { x: number; y: number } }
 > {
   static contextType = FlowContext;
 
