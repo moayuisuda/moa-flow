@@ -15,7 +15,6 @@ import {
 } from "./typings/common";
 import { arrayMove, findIndex, isRectsInterSect, remove, isVector2d } from './utils/util';
 import { getRelativeBoundingBox } from "./utils/coords";
-import { DagreLayout } from '@antv/layout'
 
 type EventSender = (data: any) => void;
 export class FlowModel {
@@ -547,7 +546,8 @@ export class FlowModel {
     };
   };
 
-  @action setLayout = (dagreLayout: DagreLayout) => {
+  @action
+  setLayout = (layout: any) => {
     const nodesData = this.canvasData.cells.filter((cellData) => {
       return cellData.cellType !== "edge";
     });
@@ -555,11 +555,11 @@ export class FlowModel {
       (cellData: CellDataType) => cellData.cellType === "edge"
     )
 
-    const result = dagreLayout.layout({
+    const result = layout.layout({
       nodes: nodesData,
       edges: edgesData.map(edgeData => ({
-        source: this.getPortInstance(edgeData.source).data.host,
-        target: this.getPortInstance(edgeData.target).data.host
+        source: this.getCellData(edgeData.source)?.host,
+        target: this.getCellData(edgeData.target)?.host
       }))
     })
 

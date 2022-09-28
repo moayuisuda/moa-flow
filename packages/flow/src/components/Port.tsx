@@ -7,8 +7,8 @@ import { FlowModel } from "../Model";
 import { observer } from "mobx-react";
 
 export type PortDataType = {
-  edges?: string[];
-  host?: string;
+  edges: string[];
+  host: string;
   [index: string]: any;
 } & CellDataType;
 
@@ -16,7 +16,7 @@ export type PortDir = 'left' | 'right' | 'top' | 'bottom'
 
 type PortPropsType<D extends PortDataType> = {
   link?: (source: D, target: D) => boolean;
-  dir: PortDir,
+  dir?: PortDir,
   anchor: { x: number; y: number } | (() => { x: number; y: number });
   data: D;
   children?: React.ReactNode

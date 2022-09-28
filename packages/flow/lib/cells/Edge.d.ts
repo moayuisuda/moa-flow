@@ -9,18 +9,11 @@ export declare type EdgeDataType = {
     label: string;
     verticies?: Vector2d[];
 } & CellDataType;
+export declare type EdgeData<D> = D & EdgeDataType;
 declare type Head = React.ReactNode | boolean;
-export declare class EdgeModel extends CellModel {
-    defaultData: () => {
-        id: string;
-        component: string;
-        source: string;
-        target: string;
-        label: string;
-        verticies: never[];
-        cellType: string;
-    };
-    data: EdgeDataType;
+export declare class EdgeModel<D extends EdgeDataType = EdgeDataType> extends CellModel {
+    defaultData: () => any;
+    data: D;
     protected bazier: boolean | (() => boolean);
     protected startHead: Head | (() => Head);
     protected endHead: Head | (() => Head);
@@ -47,6 +40,7 @@ export declare class EdgeModel extends CellModel {
     labelContent: () => JSX.Element;
     label(label: string): string;
     isLinking: () => boolean;
+    controlPointOffset: () => number;
     getBazierDir: () => {
         source: Dir;
         target: Dir;

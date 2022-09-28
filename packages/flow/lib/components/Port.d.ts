@@ -3,14 +3,14 @@ import { CellDataType } from "../cells/Cell";
 import { FlowContext } from "../Context";
 import { FlowModel } from "../Model";
 export declare type PortDataType = {
-    edges?: string[];
-    host?: string;
+    edges: string[];
+    host: string;
     [index: string]: any;
 } & CellDataType;
 export declare type PortDir = 'left' | 'right' | 'top' | 'bottom';
 declare type PortPropsType<D extends PortDataType> = {
     link?: (source: D, target: D) => boolean;
-    dir: PortDir;
+    dir?: PortDir;
     anchor: {
         x: number;
         y: number;

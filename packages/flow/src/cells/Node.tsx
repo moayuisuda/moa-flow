@@ -9,7 +9,7 @@ export type NodeDataType = {
 // util type
 export type NodeData<D> = D & NodeDataType;
 
-export class NodeModel<D extends NodeDataType> extends CellModel {
+export class NodeModel<D extends NodeDataType = NodeDataType> extends CellModel {
   defaultData = (): any => ({
     x: 0,
     y: 0,

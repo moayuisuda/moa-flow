@@ -5,7 +5,7 @@ export declare type NodeDataType = {
     [index: string]: any;
 } & CellDataType;
 export declare type NodeData<D> = D & NodeDataType;
-export declare class NodeModel<D extends NodeDataType> extends CellModel {
+export declare class NodeModel<D extends NodeDataType = NodeDataType> extends CellModel {
     defaultData: () => any;
     data: D;
     getLinkNodes: () => string[];

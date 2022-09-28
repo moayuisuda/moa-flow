@@ -2,7 +2,6 @@ import React from "react";
 import { CellDataType, CellModel } from "./cells/Cell";
 import { Port } from "./components";
 import { AllCellDataType, CanvasDataType, Vector2d } from "./typings/common";
-import { DagreLayout } from '@antv/layout';
 declare type EventSender = (data: any) => void;
 export declare class FlowModel {
     eventMap: Map<string, Map<string, Function>>;
@@ -171,7 +170,7 @@ export declare class FlowModel {
         x: number;
         y: number;
     };
-    setLayout: (dagreLayout: DagreLayout) => void;
+    setLayout: (layout: any) => void;
     createCellData: (component: string, initOptions?: any) => any;
     addCell: (componentName: string, initOptions?: any) => any;
     setLinkingPosition: (coord: Vector2d) => void;

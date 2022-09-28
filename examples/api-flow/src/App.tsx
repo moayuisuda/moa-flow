@@ -213,7 +213,7 @@ function App() {
                   rankdir: 'LR',
                   align: 'UL',
                   begin: [0, 0],
-                  nodesep: 80,
+                  nodesep: 120,
                   ranksep: 160,
                 }))
                 // 布局参考 https://x6.antv.vision/zh/docs/tutorial/advanced/layout#%E5%B8%83%E5%B1%80%E6%B5%81%E7%A8%8B

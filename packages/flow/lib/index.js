@@ -3,7 +3,6 @@ import { observer as observer$1, Observer } from 'mobx-react';
 export { Observer, observer } from 'mobx-react';
 import { makeObservable, observable, computed, action, configure, getDependencyTree, Reaction, autorun } from 'mobx';
 export { autorun } from 'mobx';
-export { DagreLayout } from '@antv/layout';
 
 /******************************************************************************
 Copyright (c) Microsoft Corporation.
@@ -45732,10 +45731,13 @@ var EdgeModel = /** @class */ (function (_super) {
         _this.isLinking = function () {
             return _this.state.isLinking;
         };
+        _this.controlPointOffset = function () {
+            return 60;
+        };
         _this.getBazierDir = function () {
-            var _a = _this.getAnchors(), source = _a.source, target = _a.target;
+            var _a = _this.getAnchors(); _a.source; _a.target;
             var sourceDir = _this.context.cellsMap.get(_this.data.source).props.dir;
-            var LENGTH = Math.abs((target.x - source.x) * 0.5);
+            var LENGTH = _this.controlPointOffset();
             if (isVector2d(_this.data.target)) {
                 return {
                     source: [LENGTH * dirMap[sourceDir][0], LENGTH * dirMap[sourceDir][1]],
@@ -46572,17 +46574,20 @@ var FlowModel = /** @class */ (function () {
                 y: Math.round(vector.y / grid) * grid,
             };
         };
-        this.setLayout = function (dagreLayout) {
+        this.setLayout = function (layout) {
             var nodesData = _this.canvasData.cells.filter(function (cellData) {
                 return cellData.cellType !== "edge";
             });
             var edgesData = _this.canvasData.cells.filter(function (cellData) { return cellData.cellType === "edge"; });
-            var result = dagreLayout.layout({
+            var result = layout.layout({
                 nodes: nodesData,
-                edges: edgesData.map(function (edgeData) { return ({
-                    source: _this.getPortInstance(edgeData.source).data.host,
-                    target: _this.getPortInstance(edgeData.target).data.host
-                }); })
+                edges: edgesData.map(function (edgeData) {
+                    var _a, _b;
+                    return ({
+                        source: (_a = _this.getCellData(edgeData.source)) === null || _a === void 0 ? void 0 : _a.host,
+                        target: (_b = _this.getCellData(edgeData.target)) === null || _b === void 0 ? void 0 : _b.host
+                    });
+                })
             });
             _this.canvasData.cells = (result.nodes || []).concat(edgesData);
         };

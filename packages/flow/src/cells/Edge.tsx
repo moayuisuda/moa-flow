@@ -3,9 +3,7 @@ import { PortDataType, PortDir } from "../components";
 import React from "react";
 import { isVector2d } from "../utils";
 import { callIfFn } from "../utils/util";
-import { CellModel, CellDataType } from "./Cell";
-import { useContext } from "react";
-import { FlowContext } from "../Context";
+import { CellModel, CellDataType } from "./Cell";;
 import { FlowModel } from "Model";
 import { observer } from "mobx-react-lite";
 import { computed } from "mobx";
@@ -26,9 +24,13 @@ export type EdgeDataType = {
   label: string;
   verticies?: Vector2d[];
 } & CellDataType;
+
+// util type
+export type EdgeData<D> = D & EdgeDataType;
+
 type Head = React.ReactNode | boolean;
-export class EdgeModel extends CellModel {
-  defaultData = () => ({
+export class EdgeModel<D extends EdgeDataType = EdgeDataType> extends CellModel {
+  defaultData = (): any => ({
     id: "",
     component: "Edge", // 这里一般会被重置为FLowEdge这种业务类的线条
     source: "",
@@ -38,7 +40,7 @@ export class EdgeModel extends CellModel {
     cellType: "edge",
   });
 
-  data: EdgeDataType;
+  data: D;
 
   protected bazier: boolean | (() => boolean) = true;
   protected startHead: Head | (() => Head) = false;
@@ -197,12 +199,16 @@ export class EdgeModel extends CellModel {
     return this.state.isLinking;
   }
 
+  controlPointOffset = () => {
+    return 60
+  }
+
   getBazierDir = () => {
     const { source, target } = this.getAnchors();
     const { props: { dir: sourceDir } } = this.context.cellsMap.get(
       this.data.source as string
     );
-    const LENGTH = Math.abs((target.x - source.x) * 0.5);
+    const LENGTH = this.controlPointOffset();
 
     if (isVector2d(this.data.target)) {
       return {
