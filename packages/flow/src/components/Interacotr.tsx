@@ -3,12 +3,14 @@ import React from "react";
 import { Observer } from "mobx-react";
 import { FlowContext } from "../Context";
 import { Port } from "./Port";
+import { CellModel } from "cells";
 
 type InteractorType = {
   id: string;
   inSvg?: boolean;
   topOnFocus?: boolean;
   children: React.ReactNode;
+  model: CellModel
 };
 export class Interactor extends React.Component<InteractorType> {
   static contextType = FlowContext;

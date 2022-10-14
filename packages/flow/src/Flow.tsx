@@ -58,6 +58,7 @@ const CellComponent = observer(({ cellData }: { cellData: CellDataType }) => {
     key: cellData.id,
     id: cellData.id,
     inSvg: !isNode,
+    model: cellModel,
     children: React.createElement(Component, {
       model: cellModel, // 这里只是传了cellModel，最后返回了个ReactNode，但是cellModel内的属性并没有被读取，CellComponent也就没有收集Model的依赖
       key: cellData.id,

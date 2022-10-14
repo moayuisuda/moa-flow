@@ -47000,7 +47000,7 @@ var behaviorsMap = {
             if (select.isSelecting) {
                 model.selectCells.forEach(function (id) {
                     var cellData = model.getCellData(id);
-                    if (cellData.cellType === 'node') {
+                    if (cellData.cellType === 'node' && !cellData.drag === false) {
                         model.setCellData(cellData.id, {
                             x: cellData.x + movement.x,
                             y: cellData.y + movement.y,
@@ -47233,6 +47233,7 @@ var CellComponent = observer$1(function (_a) {
         key: cellData.id,
         id: cellData.id,
         inSvg: !isNode,
+        model: cellModel,
         children: React.createElement(Component, {
             model: cellModel,
             key: cellData.id,

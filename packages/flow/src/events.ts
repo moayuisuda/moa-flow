@@ -99,7 +99,7 @@ export const behaviorsMap: Record<BehaviorName, EventMaps> = {
                 model.selectCells.forEach(id => {
                     const cellData = model.getCellData(id) as NodeDataType & CellDataType
 
-                    if (cellData.cellType === 'node') {
+                    if (cellData.cellType === 'node' && !cellData.drag === false) {
                         model.setCellData(cellData.id, {
                             x: cellData.x + movement.x,
                             y: cellData.y + movement.y,
