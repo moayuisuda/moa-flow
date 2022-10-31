@@ -13,6 +13,7 @@ import { STAGE_ID } from "./constants";
 import { initEvents } from "./events";
 import { BehaviorName } from "typings/common";
 import { Interactor } from "./components/Interacotr";
+import { isNumber } from "lodash";
 
 const PositionWrapper = observer(({ cellData }: { cellData: CellDataType }) => {
   const isNode = cellData.cellType === "node";
@@ -262,7 +263,7 @@ class Flow extends React.Component<FlowProps, {}> {
           }}
           {...this.getEvents()}
         >
-          {this.flowModel.grid && <Grid />}
+          {isNumber(this.flowModel.grid) && this.flowModel.grid !== 0 && <Grid />}
           <Nodes />
           <LinesAndInterect />
         </div>

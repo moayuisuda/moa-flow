@@ -36,7 +36,7 @@ export declare class EdgeModel<D extends EdgeDataType = EdgeDataType> extends Ce
     };
     route(vectors: Vector2d[]): Vector2d[];
     private vectorsToPoints;
-    getPointAt: (ratio: number) => DOMPoint;
+    getPointAt: (ratioOrLength: number) => DOMPoint;
     labelContent: () => JSX.Element;
     label(label: string): string;
     isLinking: () => boolean;

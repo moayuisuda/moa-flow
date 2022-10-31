@@ -170,7 +170,9 @@ export declare class FlowModel {
         x: number;
         y: number;
     };
-    setLayout: (layout: any) => void;
+    setLayout: (layout: any) => never[] | undefined;
+    getNodesData: () => any[];
+    getEdgesData: () => any[];
     createCellData: (component: string, initOptions?: any) => any;
     addCell: (componentName: string, initOptions?: any) => any;
     setLinkingPosition: (coord: Vector2d) => void;

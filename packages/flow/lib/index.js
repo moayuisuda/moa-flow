@@ -45707,9 +45707,11 @@ var EdgeModel = /** @class */ (function (_super) {
             });
             return re;
         };
-        _this.getPointAt = function (ratio) {
-            _this.pathInstance.setAttribute("d", _this.getBazierPath());
-            return _this.pathInstance.getPointAtLength(ratio * _this.pathInstance.getTotalLength());
+        _this.getPointAt = function (ratioOrLength) {
+            _this.pathInstance.setAttribute("d", _this.d);
+            if (ratioOrLength > 1)
+                return _this.pathInstance.getPointAtLength(ratioOrLength);
+            return _this.pathInstance.getPointAtLength(ratioOrLength * _this.pathInstance.getTotalLength());
         };
         _this.labelContent = function () {
             var svgContainerRef = _this.context.refs.svgContainerRef;
@@ -46480,7 +46482,7 @@ var FlowModel = /** @class */ (function () {
         this.getNodeEdges = function (nodeId) {
             var re = [];
             var nodeData = _this.getCellData(nodeId);
-            if (nodeData.ports)
+            if (nodeData === null || nodeData === void 0 ? void 0 : nodeData.ports)
                 nodeData.ports.forEach(function (port) {
                     if (port.edges) {
                         port.edges.forEach(function (edgeId) {
@@ -46497,7 +46499,7 @@ var FlowModel = /** @class */ (function () {
             var _a;
             var re = [];
             var portData = _this.getCellData(portId);
-            (_a = portData.edges) === null || _a === void 0 ? void 0 : _a.forEach(function (edgeId) {
+            (_a = portData === null || portData === void 0 ? void 0 : portData.edges) === null || _a === void 0 ? void 0 : _a.forEach(function (edgeId) {
                 var edgeData = _this.getCellData(edgeId);
                 var sourcePort = _this.getCellData(edgeData.source);
                 var targetPort = _this.getCellData(edgeData.target);
@@ -46512,7 +46514,7 @@ var FlowModel = /** @class */ (function () {
             var _a;
             var re = [];
             var portData = _this.getCellData(portId);
-            (_a = portData.edges) === null || _a === void 0 ? void 0 : _a.forEach(function (edgeId) {
+            (_a = portData === null || portData === void 0 ? void 0 : portData.edges) === null || _a === void 0 ? void 0 : _a.forEach(function (edgeId) {
                 var edgeData = _this.getCellData(edgeId);
                 var sourcePort = _this.getCellData(edgeData.source);
                 var targetPort = _this.getCellData(edgeData.target);
@@ -46526,7 +46528,7 @@ var FlowModel = /** @class */ (function () {
         this.getLinkPorts = function (nodeId) {
             var re = [];
             var nodeData = _this.getCellData(nodeId);
-            if (nodeData.ports)
+            if (nodeData === null || nodeData === void 0 ? void 0 : nodeData.ports)
                 nodeData.ports.forEach(function (portData) {
                     re.push.apply(re, _this.getPortLinkPorts(portData.id));
                 });
@@ -46538,7 +46540,7 @@ var FlowModel = /** @class */ (function () {
         this.getLinkNodes = function (nodeId) {
             var re = [];
             var nodeData = _this.getCellData(nodeId);
-            if (nodeData.ports)
+            if (nodeData === null || nodeData === void 0 ? void 0 : nodeData.ports)
                 nodeData.ports.forEach(function (portData) {
                     re.push.apply(re, _this.getPortLinkNodes(portData.id));
                 });
@@ -46582,14 +46584,25 @@ var FlowModel = /** @class */ (function () {
             var result = layout.layout({
                 nodes: nodesData,
                 edges: edgesData.map(function (edgeData) {
-                    var _a, _b;
-                    return ({
-                        source: (_a = _this.getCellData(edgeData.source)) === null || _a === void 0 ? void 0 : _a.host,
-                        target: (_b = _this.getCellData(edgeData.target)) === null || _b === void 0 ? void 0 : _b.host
-                    });
+                    var _a, _b, _c, _d;
+                    console.log(edgeData, (_a = _this.getCellData(edgeData.source)) === null || _a === void 0 ? void 0 : _a.host, (_b = _this.getCellData(edgeData.target)) === null || _b === void 0 ? void 0 : _b.host);
+                    return {
+                        source: (_c = _this.getCellData(edgeData.source)) === null || _c === void 0 ? void 0 : _c.host,
+                        target: (_d = _this.getCellData(edgeData.target)) === null || _d === void 0 ? void 0 : _d.host
+                    };
                 })
             });
+            if (!result) {
+                console.warn('[moa-flow] setlayout failed');
+                return [];
+            }
             _this.canvasData.cells = (result.nodes || []).concat(edgesData);
+        };
+        this.getNodesData = function () {
+            return _this.canvasData.cells.filter(function (cell) { return cell.cellType === 'node'; });
+        };
+        this.getEdgesData = function () {
+            return _this.canvasData.cells.filter(function (cell) { return cell.cellType === 'edge'; });
         };
         this.createCellData = function (component, initOptions) {
             var id = v4();
@@ -46718,6 +46731,8 @@ var FlowModel = /** @class */ (function () {
     FlowModel.prototype.setCellDataMap = function (cellData) {
         var _this = this;
         this.cellsDataMap.set(cellData.id, cellData);
+        if (!cellData.id)
+            this.setCellId(cellData);
         function isNodeDataType(t) {
             return t.cellType === "node";
         }
@@ -47000,7 +47015,7 @@ var behaviorsMap = {
             if (select.isSelecting) {
                 model.selectCells.forEach(function (id) {
                     var cellData = model.getCellData(id);
-                    if (cellData.cellType === 'node' && !cellData.drag === false) {
+                    if (cellData.cellType === 'node' && !(cellData.drag === false)) {
                         model.setCellData(cellData.id, {
                             x: cellData.x + movement.x,
                             y: cellData.y + movement.y,
@@ -47014,7 +47029,7 @@ var behaviorsMap = {
             if (select.isSelecting) {
                 model.selectCells.forEach(function (id) {
                     var cellData = model.getCellData(id);
-                    if (cellData.cellType === 'node') {
+                    if (cellData.cellType === 'node' && !(cellData.drag === false)) {
                         if (model.grid)
                             model.setCellData(cellData.id, model.snap({
                                 x: cellData.x,
@@ -47358,7 +47373,7 @@ var Flow = /** @class */ (function (_super) {
                 }, id: STAGE_ID, ref: function (ref) {
                     model.refs.stageRef = ref;
                 } }, this.getEvents()),
-                this.flowModel.grid && React.createElement(Grid, null),
+                lodash.exports.isNumber(this.flowModel.grid) && this.flowModel.grid !== 0 && React.createElement(Grid, null),
                 React.createElement(Nodes, null),
                 React.createElement(LinesAndInterect, null)),
             getContextMenu(this.props.children)));

@@ -36,6 +36,7 @@ export class FlowModel {
 
   setCellDataMap(cellData: AllCellDataType) {
     this.cellsDataMap.set(cellData.id, cellData);
+    if (!cellData.id) this.setCellId(cellData)
 
     function isNodeDataType(t: AllCellDataType): t is NodeDataType {
       return t.cellType === "node";
@@ -417,7 +418,7 @@ export class FlowModel {
   getNodeEdges = (nodeId: string) => {
     const re: string[] = [];
     const nodeData = this.getCellData(nodeId) as NodeDataType;
-    if (nodeData.ports)
+    if (nodeData?.ports)
       nodeData.ports.forEach((port: PortDataType) => {
         if (port.edges) {
           port.edges.forEach((edgeId) => {
@@ -436,7 +437,7 @@ export class FlowModel {
     const re: string[] = [];
 
     const portData = this.getCellData(portId) as PortDataType;
-    portData.edges?.forEach((edgeId) => {
+    portData?.edges?.forEach((edgeId) => {
       const edgeData = this.getCellData(edgeId) as EdgeDataType;
       const sourcePort = this.getCellData(
         edgeData.source as string
@@ -463,7 +464,7 @@ export class FlowModel {
     const re: string[] = [];
 
     const portData = this.getCellData(portId) as PortDataType;
-    portData.edges?.forEach((edgeId) => {
+    portData?.edges?.forEach((edgeId) => {
       const edgeData = this.getCellData(edgeId) as EdgeDataType;
       const sourcePort = this.getCellData(
         edgeData.source as string
@@ -489,7 +490,7 @@ export class FlowModel {
   getLinkPorts = (nodeId: string) => {
     const re: string[] = [];
     const nodeData = this.getCellData(nodeId) as NodeDataType;
-    if (nodeData.ports)
+    if (nodeData?.ports)
       nodeData.ports.forEach((portData: PortDataType) => {
         re.push(...this.getPortLinkPorts(portData.id));
       });
@@ -503,7 +504,7 @@ export class FlowModel {
   getLinkNodes = (nodeId: string) => {
     const re: string[] = [];
     const nodeData = this.getCellData(nodeId) as NodeDataType;
-    if (nodeData.ports)
+    if (nodeData?.ports)
       nodeData.ports.forEach((portData: PortDataType) => {
         re.push(...this.getPortLinkNodes(portData.id));
       });
@@ -557,14 +558,31 @@ export class FlowModel {
 
     const result = layout.layout({
       nodes: nodesData,
-      edges: edgesData.map(edgeData => ({
-        source: this.getCellData(edgeData.source)?.host,
-        target: this.getCellData(edgeData.target)?.host
-      }))
+      edges: edgesData.map(edgeData => {
+        console.log(edgeData, this.getCellData(edgeData.source)?.host, this.getCellData(edgeData.target)?.host)
+
+        return {
+          source: this.getCellData(edgeData.source)?.host,
+          target: this.getCellData(edgeData.target)?.host
+        }
+      }
+      )
     })
 
+    if (!result) {
+      console.warn('[moa-flow] setlayout failed')
+      return []
+    }
     this.canvasData.cells = (result.nodes || []).concat(edgesData)
   };
+
+  getNodesData = () => {
+    return this.canvasData.cells.filter(cell => cell.cellType === 'node')
+  }
+
+  getEdgesData = () => {
+    return this.canvasData.cells.filter(cell => cell.cellType === 'edge')
+  }
 
   createCellData = (component: string, initOptions?: any) => {
     const id = v4();

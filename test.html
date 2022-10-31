@@ -23,4 +23,23 @@
       </div>
     </div>
   </body>
+  <script>
+    const sleep = () => {
+      return new Promise((res) => {
+        setTimeout(() => {
+          res();
+        }, 2000);
+      });
+    };
+
+    const fn = async () => {
+      for (let i = 0; i < 4; i++) {
+        const fn = await sleep();
+      }
+
+      console.log("hello");
+    };
+
+    fn();
+  </script>
 </html>

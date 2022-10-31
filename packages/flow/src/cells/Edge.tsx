@@ -146,10 +146,11 @@ export class EdgeModel<D extends EdgeDataType = EdgeDataType> extends CellModel 
     return re;
   }
 
-  getPointAt = (ratio: number) => {
-    this.pathInstance.setAttribute("d", this.getBazierPath());
+  getPointAt = (ratioOrLength: number) => {
+    this.pathInstance.setAttribute("d", this.d);
+    if (ratioOrLength > 1) return this.pathInstance.getPointAtLength(ratioOrLength)
     return this.pathInstance.getPointAtLength(
-      ratio * this.pathInstance.getTotalLength()
+      ratioOrLength * this.pathInstance.getTotalLength()
     );
   }
 
