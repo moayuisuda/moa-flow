@@ -7,7 +7,7 @@
 ```
 // G的api文档：https://g-next.antv.vision/en/docs/api/basic/display-object，G的整体api是和svg一样的
 
-import { Flow } from '@ali/moa-flow';
+import { Flow } from '@alipay/moa-flow';
 
 // 引用
 <Flow

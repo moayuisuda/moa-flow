@@ -212,6 +212,7 @@ class Flow extends React.Component<FlowProps, {}> {
     this.props.canvasData &&
       this.flowModel.setCanvasData(this.props.canvasData);
     this.props.grid && (this.flowModel.grid = this.props.grid);
+    this.flowModel.multiSelect = props.multiSelect || false
 
     if (this.props.width && this.props.height) {
       this.flowModel.size = {

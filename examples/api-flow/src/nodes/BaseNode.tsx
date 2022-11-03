@@ -6,7 +6,7 @@ import {
   PortDataType,
   Port,
   observer,
-} from "@ali/moa-flow";
+} from "@alipay/moa-flow";
 import { Card, CardProps, message } from "antd";
 import { HANG_FLAG } from "../constants";
 

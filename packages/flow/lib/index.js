@@ -46254,6 +46254,7 @@ var FlowModel = /** @class */ (function () {
         };
         this.extra = {};
         this.isInitEvents = false;
+        this.multiSelect = false;
         this.pendingRender = true;
         this.trigRender = function () {
             _this.pendingRender = false;
@@ -46446,12 +46447,41 @@ var FlowModel = /** @class */ (function () {
                 };
             }
         };
+        this.fit = function (nodeWidth, nodeHeight) {
+            var _a = _this, canvasData = _a.canvasData, width = _a.width, height = _a.height;
+            var _b = canvasData.cells, first = _b[0], others = _b.slice(1);
+            var LT = { x: first.x, y: first.y };
+            var RB = { x: first.x + nodeWidth, y: first.y + nodeHeight };
+            others.forEach(function (cellData) {
+                var x = cellData.x, y = cellData.y;
+                if (x <= LT.x)
+                    LT.x = x;
+                if (y <= LT.y)
+                    LT.y = y;
+                if (x + nodeWidth >= RB.x)
+                    RB.x = x + nodeWidth;
+                if (y + nodeHeight >= RB.y)
+                    RB.y = y + nodeHeight;
+            });
+            var boundingRect = { x: LT.x, y: LT.y, width: (RB.x - LT.x), height: (RB.y - LT.y) };
+            var scaleX = width / _this.scale / boundingRect.width;
+            var scaleY = height / _this.scale / boundingRect.height;
+            // 取缩小程度更小的值保证包含
+            var newScale = Math.min(scaleX, scaleY);
+            _this.scale = (newScale) * _this.scale;
+            // 缩小数值更小的维度，会有剩余空间
+            var spareDir = scaleX < scaleY ? 'y' : 'x';
+            var spareX = spareDir === 'x' ? (width / _this.scale - boundingRect.width) / 2 : 0;
+            var spareY = spareDir === 'y' ? (height / _this.scale - boundingRect.height) / 2 : 0;
+            _this.setStagePosition(-boundingRect.x + spareX, -boundingRect.y + spareY);
+        };
         this.getLocalBBox = function (id) {
             var _a;
             var dom = (_a = _this.wrapperRefsMap.get(id)) === null || _a === void 0 ? void 0 : _a.current;
             return getRelativeBoundingBox(dom, _this.refs.divContainerRef);
         };
         this.setCanvasData = function (canvasData) {
+            canvasData = Object.assign(_this.canvasData, canvasData);
             canvasData.cells.forEach(function (cellData) {
                 _this.insertRuntimeState(cellData);
             });
@@ -47009,7 +47039,9 @@ var behaviorsMap = {
                 y: e.movementY / model.scale
             };
             // 移动整个stage
-            if (model.hotKey["Space"] && model.hotKey['LeftMouseDown']) {
+            var multiSelectCanDrag = model.multiSelect && model.hotKey["Space"] && model.hotKey['LeftMouseDown'];
+            var singleSelectCanDrag = !model.multiSelect && model.hotKey["LeftMouseDown"];
+            if ((multiSelectCanDrag || singleSelectCanDrag) && !model.selectCells.length) {
                 model.setStagePosition(model.x + movement.x, model.y + movement.y);
             }
             if (select.isSelecting) {
@@ -47332,6 +47364,7 @@ var Flow = /** @class */ (function (_super) {
         _this.props.canvasData &&
             _this.flowModel.setCanvasData(_this.props.canvasData);
         _this.props.grid && (_this.flowModel.grid = _this.props.grid);
+        _this.flowModel.multiSelect = props.multiSelect || false;
         if (_this.props.width && _this.props.height) {
             _this.flowModel.size = {
                 width: _this.props.width,

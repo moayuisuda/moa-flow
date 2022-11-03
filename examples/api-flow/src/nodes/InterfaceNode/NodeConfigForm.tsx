@@ -1,4 +1,4 @@
-import { useModel } from "@ali/moa-flow";
+import { useModel } from "@alipay/moa-flow";
 import {
   ProFormCascader,
   ProFormGroup,

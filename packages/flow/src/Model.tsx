@@ -65,6 +65,7 @@ export class FlowModel {
 
   extra: any = {};
   isInitEvents = false;
+  multiSelect = false;
 
   pendingRender: boolean = true;
   @action
@@ -376,6 +377,37 @@ export class FlowModel {
     }
   };
 
+  fit = (nodeWidth: number, nodeHeight: number) => {
+    const { canvasData, width, height } = this
+    const [first, ...others] = canvasData.cells
+
+    const LT = { x: first.x, y: first.y }
+    const RB = { x: first.x + nodeWidth, y: first.y + nodeHeight }
+
+    others.forEach(cellData => {
+      const { x, y } = cellData
+      if (x <= LT.x) LT.x = x
+      if (y <= LT.y) LT.y = y
+      if (x + nodeWidth >= RB.x) RB.x = x + nodeWidth
+      if (y + nodeHeight >= RB.y) RB.y = y + nodeHeight
+    })
+
+    const boundingRect = { x: LT.x, y: LT.y, width: (RB.x - LT.x), height: (RB.y - LT.y) }
+    const scaleX = width / this.scale / boundingRect.width
+    const scaleY = height / this.scale / boundingRect.height
+
+    // 取缩小程度更小的值保证包含
+    const newScale = Math.min(scaleX, scaleY)
+    this.scale = (newScale) * this.scale
+
+    // 缩小数值更小的维度，会有剩余空间
+    const spareDir = scaleX < scaleY ? 'y' : 'x'
+    const spareX = spareDir === 'x' ? (width / this.scale - boundingRect.width) / 2 : 0
+    const spareY = spareDir === 'y' ? (height / this.scale - boundingRect.height) / 2 : 0
+
+    this.setStagePosition(-boundingRect.x + spareX, -boundingRect.y + spareY)
+  }
+
   getLocalBBox = (id: string) => {
     const dom = this.wrapperRefsMap.get(id)?.current as HTMLDivElement;
 
@@ -386,6 +418,8 @@ export class FlowModel {
   };
 
   @action setCanvasData = (canvasData: CanvasDataType) => {
+    canvasData = Object.assign(this.canvasData, canvasData)
+
     canvasData.cells.forEach((cellData) => {
       this.insertRuntimeState(cellData);
     });

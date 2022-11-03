@@ -11,6 +11,7 @@ export declare class FlowModel {
     setCellDataMap(cellData: AllCellDataType): void;
     extra: any;
     isInitEvents: boolean;
+    multiSelect: boolean;
     pendingRender: boolean;
     trigRender: () => void;
     pendRender: () => void;
@@ -141,6 +142,7 @@ export declare class FlowModel {
         x: number;
         y: number;
     };
+    fit: (nodeWidth: number, nodeHeight: number) => void;
     getLocalBBox: (id: string) => import("./utils/coords").BoundingBox;
     setCanvasData: (canvasData: CanvasDataType) => void;
     setCellId: (data: CellDataType) => void;

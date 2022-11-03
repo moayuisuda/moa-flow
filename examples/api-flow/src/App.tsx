@@ -2,8 +2,9 @@ import { Button, Divider, message, Space, Upload, Dropdown, Menu } from "antd";
 import { PageContainer } from "@alipay/tech-ui";
 import "antd/dist/antd.css";
 import { useEffect, useRef, useState } from "react";
-import type { FlowModel } from "@ali/moa-flow";
-import { Flow, ContextMenu, DagreLayout } from "@ali/moa-flow";
+import type { FlowModel } from "@alipay/moa-flow";
+import { Flow, ContextMenu } from "@alipay/moa-flow";
+import { DagreLayout } from '@antv/layout'
 
 import { ProcessNode, ProcessNodeModel } from "./nodes/ProcessNode";
 // import FlowEdge from "./FlowEdge";
@@ -218,6 +219,10 @@ function App() {
                 }))
                 // 布局参考 https://x6.antv.vision/zh/docs/tutorial/advanced/layout#%E5%B8%83%E5%B1%80%E6%B5%81%E7%A8%8B
               }}>自动布局</Button>
+              <Button onClick={() => {
+                flowModelRef.current?.fit(400, 200)
+                // 布局参考 https://x6.antv.vision/zh/docs/tutorial/advanced/layout#%E5%B8%83%E5%B1%80%E6%B5%81%E7%A8%8B
+              }}>适应画布</Button>
               <Dropdown.Button
                 type="primary"
                 overlay={
@@ -279,7 +284,6 @@ function App() {
             }}
             width={window.innerWidth}
             height={window.innerHeight}
-            multiSelect
             flowModelRef={flowModelRef}
             grid={40}
             canvasData={testData}

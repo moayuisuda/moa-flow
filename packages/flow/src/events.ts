@@ -88,7 +88,9 @@ export const behaviorsMap: Record<BehaviorName, EventMaps> = {
             }
 
             // 移动整个stage
-            if (model.hotKey["Space"] && model.hotKey['LeftMouseDown']) {
+            const multiSelectCanDrag = model.multiSelect && model.hotKey["Space"] && model.hotKey['LeftMouseDown']
+            const singleSelectCanDrag = !model.multiSelect && model.hotKey["LeftMouseDown"]
+            if ((multiSelectCanDrag || singleSelectCanDrag) && !model.selectCells.length) {
                 model.setStagePosition(
                     model.x + movement.x,
                     model.y + movement.y
@@ -98,7 +100,6 @@ export const behaviorsMap: Record<BehaviorName, EventMaps> = {
             if (select.isSelecting) {
                 model.selectCells.forEach(id => {
                     const cellData = model.getCellData(id) as NodeDataType & CellDataType
-
                     if (cellData.cellType === 'node' && !(cellData.drag === false)) {
                         model.setCellData(cellData.id, {
                             x: cellData.x + movement.x,

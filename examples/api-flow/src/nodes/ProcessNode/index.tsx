@@ -8,7 +8,7 @@ import { HANG_FLAG } from "../../constants";
 import { Input, Modal } from "antd";
 import { useRef, useState } from "react";
 import NodeConfigForm from "./ProcessConfigForm";
-import { observer } from "@ali/moa-flow";
+import { observer } from "@alipay/moa-flow";
 import { EditOutlined } from "@ant-design/icons";
 
 export type ProcessNodeDataType = {
