@@ -214,6 +214,7 @@ export class FlowModel {
     },
     isWheeling: false,
     select: {
+      selectingDom: undefined,
       isSelecting: false, // 鼠标按下还没有松开的状态
       start: { x: 0, y: 0 },
       end: { x: 0, y: 0 },
@@ -232,6 +233,13 @@ export class FlowModel {
       },
     },
   };
+
+  isSelecting(e: any) {
+    const selectingDom = this.buffer.select.selectingDom as any
+    if (!selectingDom) return false
+    if (selectingDom.contains(e.target)) return true
+    else return false
+  }
 
   @action setMultiSelect = (
     select: {

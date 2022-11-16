@@ -33,8 +33,8 @@ export type Vector2d = {
 
 export type Dir = [number, number]
 
-export type StageEventName = 'onMouseDown' | 'onMouseUp' | 'onMouseMove' | 'onWheel' | 'onClick'
-export type WindowEventName = 'onKeyDown' | 'onKeyUp'
+export type StageEventName = 'onMouseDown' | 'onMouseMove' | 'onWheel' | 'onClick'
+export type WindowEventName = 'onKeyDown' | 'onKeyUp' | 'onMouseUp'
 export type EventName = StageEventName | WindowEventName | 'init'
 export type BehaviorName = 'clearState' | 'link' | 'select' | 'drag' | 'scale' | 'multiSelect' | 'hotkeys'
 

@@ -33,7 +33,7 @@ type EventMaps = Partial<{
 export const behaviorsMap: Record<BehaviorName, EventMaps> = {
     clearState: {
         onMouseDown: (e, model) => {
-            if (!model.buffer.select.isSelecting && e.button === EVT_LEFTCLICK)
+            if (!model.isSelecting(e) && e.button === EVT_LEFTCLICK)
                 model.clearSelect();
 
             if (e.button === EVT_LEFTCLICK) {
@@ -125,6 +125,7 @@ export const behaviorsMap: Record<BehaviorName, EventMaps> = {
                 })
 
                 select.isSelecting = false
+                select.selectingDom = undefined
             }
         }
     },
@@ -171,7 +172,7 @@ export const behaviorsMap: Record<BehaviorName, EventMaps> = {
     multiSelect: {
         onMouseDown: (e, model) => {
             // if (model.hotKey['Space']) return
-            if (model.buffer.select.isSelecting) return
+            if (model.isSelecting(e)) return
             if (!model.hotKey["Space"] && e.button === EVT_LEFTCLICK) {
                 const pos = model.getCursorCoord(e);
                 model.setMultiSelect({
@@ -221,6 +222,7 @@ export const behaviorsMap: Record<BehaviorName, EventMaps> = {
             }
         },
         onMouseUp: (e, model) => {
+            // @ts-ignore
             switch (e.button) {
                 case EVT_LEFTCLICK: model.setHotKey('LeftMouseDown', false)
             }
@@ -247,9 +249,9 @@ export const behaviorsMap: Record<BehaviorName, EventMaps> = {
 
 const PASSIVE_EVENTS = ['onWheel']
 
-export const initEvents = (behaviors: BehaviorName[], model: Model) => {
+export const mountEvents = (behaviors: BehaviorName[], model: Model) => {
     const events: Record<StageEventName, React.MouseEventHandler<HTMLDivElement> | undefined> = {
-        'onMouseMove': undefined, 'onMouseDown': undefined, 'onMouseUp': undefined, 'onClick': undefined, 'onWheel': undefined
+        'onMouseMove': undefined, 'onMouseDown': undefined, 'onClick': undefined, 'onWheel': undefined
     }
 
     if (!model.isInitEvents) {
@@ -303,5 +305,6 @@ export const initEvents = (behaviors: BehaviorName[], model: Model) => {
     }
 
     model.isInitEvents = true
-    return events;
+
+    return events
 }

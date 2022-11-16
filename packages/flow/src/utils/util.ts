@@ -37,9 +37,3 @@ export const callIfFn = (exp: any) => {
     if (isFunction(exp)) return exp();
     else return exp;
 }
-
-const log = (mes0, mes1) => {
-    console.log(mes0, mes1)
-}
-const a = [0, 1]
-log(a.length, a.splice(0, 1))

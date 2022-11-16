@@ -76,6 +76,7 @@ export declare class FlowModel {
         };
         isWheeling: boolean;
         select: {
+            selectingDom: undefined;
             isSelecting: boolean;
             start: {
                 x: number;
@@ -99,6 +100,7 @@ export declare class FlowModel {
             };
         };
     };
+    isSelecting(e: any): boolean;
     setMultiSelect: (select: {
         isSelecting?: boolean;
         start?: Vector2d;

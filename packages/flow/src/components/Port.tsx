@@ -72,7 +72,6 @@ PortPropsType<D>
 
   onLinkEnd = (e: React.MouseEvent) => {
     e.stopPropagation();
-
     const {
       context,
       context: {

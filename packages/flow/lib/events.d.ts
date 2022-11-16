@@ -19,5 +19,5 @@ declare type EventMaps = Partial<{
     'init': InitFn;
 }>;
 export declare const behaviorsMap: Record<BehaviorName, EventMaps>;
-export declare const initEvents: (behaviors: BehaviorName[], model: Model) => Record<StageEventName, import("react").MouseEventHandler<HTMLDivElement> | undefined>;
+export declare const mountEvents: (behaviors: BehaviorName[], model: Model) => Record<StageEventName, import("react").MouseEventHandler<HTMLDivElement> | undefined>;
 export {};

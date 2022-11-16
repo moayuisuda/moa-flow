@@ -17412,11 +17412,6 @@ var callIfFn = function (exp) {
     else
         return exp;
 };
-var log = function (mes0, mes1) {
-    console.log(mes0, mes1);
-};
-var a = [0, 1];
-log(a.length, a.splice(0, 1));
 
 var CellModel = /** @class */ (function () {
     function CellModel(data, context) {
@@ -46062,7 +46057,8 @@ var Interactor = /** @class */ (function (_super) {
         var _this = this;
         var _a = this, context = _a.context, _b = _a.props, id = _b.id, _c = _b.topOnFocus, topOnFocus = _c === void 0 ? false : _c, _d = _b.inSvg, inSvg = _d === void 0 ? false : _d;
         var onMouseDown = function (e) {
-            var _a = _this.context, selectCells = _a.selectCells, _b = _a.buffer, select = _b.select, drag = _b.drag;
+            var _a;
+            var _b = _this.context, selectCells = _b.selectCells, _c = _b.buffer, select = _c.select, drag = _c.drag;
             if (!select.isSelecting) {
                 if (!selectCells.includes(_this.props.id)) {
                     context.setSelectedCells([id]);
@@ -46071,6 +46067,7 @@ var Interactor = /** @class */ (function (_super) {
                 if (topOnFocus)
                     _this.context.moveTo(_this.props.id, _this.context.canvasData.cells.length - 1);
                 select.isSelecting = true;
+                select.selectingDom = (_a = context.wrapperRefsMap.get(id)) === null || _a === void 0 ? void 0 : _a.current;
                 var coord = _this.context.getCursorCoord(e);
                 drag.start.x = coord.x;
                 drag.start.y = coord.y;
@@ -46133,8 +46130,8 @@ __spreadArray(__spreadArray([], COMMON_RESERVED_WORDS, true), [
 __spreadArray(__spreadArray([], COMMON_RESERVED_WORDS, true), [
     'component', "source", "target", 'visible',
 ], false);
-var STAGE_EVENT_NAMES = ['onMouseDown', 'onMouseUp', 'onMouseMove', 'onWheel', 'onClick'];
-var WINDOW_EVENT_NAMES = ['onKeyDown', 'onKeyUp'];
+var STAGE_EVENT_NAMES = ['onMouseDown', 'onMouseMove', 'onWheel', 'onClick'];
+var WINDOW_EVENT_NAMES = ['onKeyDown', 'onKeyUp', 'onMouseUp'];
 __spreadArray(__spreadArray(__spreadArray([], STAGE_EVENT_NAMES, true), WINDOW_EVENT_NAMES, true), ['init'], false);
 
 var ContextMenu = /** @class */ (function (_super) {
@@ -46310,6 +46307,7 @@ var FlowModel = /** @class */ (function () {
             },
             isWheeling: false,
             select: {
+                selectingDom: undefined,
                 isSelecting: false,
                 start: { x: 0, y: 0 },
                 end: { x: 0, y: 0 },
@@ -46876,6 +46874,15 @@ var FlowModel = /** @class */ (function () {
         enumerable: false,
         configurable: true
     });
+    FlowModel.prototype.isSelecting = function (e) {
+        var selectingDom = this.buffer.select.selectingDom;
+        if (!selectingDom)
+            return false;
+        if (selectingDom.contains(e.target))
+            return true;
+        else
+            return false;
+    };
     __decorate([
         action
     ], FlowModel.prototype, "trigRender", void 0);
@@ -46991,7 +46998,7 @@ var INPUT_NODELIST = ['TEXTAREA', 'INPUT'];
 var behaviorsMap = {
     clearState: {
         onMouseDown: function (e, model) {
-            if (!model.buffer.select.isSelecting && e.button === EVT_LEFTCLICK)
+            if (!model.isSelecting(e) && e.button === EVT_LEFTCLICK)
                 model.clearSelect();
             if (e.button === EVT_LEFTCLICK) {
                 model.contextMenuVisible = false;
@@ -47070,6 +47077,7 @@ var behaviorsMap = {
                     }
                 });
                 select.isSelecting = false;
+                select.selectingDom = undefined;
             }
         }
     },
@@ -47109,7 +47117,7 @@ var behaviorsMap = {
     multiSelect: {
         onMouseDown: function (e, model) {
             // if (model.hotKey['Space']) return
-            if (model.buffer.select.isSelecting)
+            if (model.isSelecting(e))
                 return;
             if (!model.hotKey["Space"] && e.button === EVT_LEFTCLICK) {
                 var pos = model.getCursorCoord(e);
@@ -47164,6 +47172,7 @@ var behaviorsMap = {
             }
         },
         onMouseUp: function (e, model) {
+            // @ts-ignore
             switch (e.button) {
                 case EVT_LEFTCLICK: model.setHotKey('LeftMouseDown', false);
             }
@@ -47189,9 +47198,9 @@ var behaviorsMap = {
     },
 };
 var PASSIVE_EVENTS = ['onWheel'];
-var initEvents = function (behaviors, model) {
+var mountEvents = function (behaviors, model) {
     var events = {
-        'onMouseMove': undefined, 'onMouseDown': undefined, 'onMouseUp': undefined, 'onClick': undefined, 'onWheel': undefined
+        'onMouseMove': undefined, 'onMouseDown': undefined, 'onClick': undefined, 'onWheel': undefined
     };
     if (!model.isInitEvents) {
         for (var behavior in behaviorsMap) {
@@ -47375,7 +47384,7 @@ var Flow = /** @class */ (function (_super) {
         props.flowModelRef && (props.flowModelRef.current = _this.flowModel);
         return _this;
     }
-    Flow.prototype.getEvents = function () {
+    Flow.prototype.generateEvents = function () {
         var _this = this;
         var extraEvents = ["scale", "multiSelect"];
         var defaultEvents = [
@@ -47391,7 +47400,7 @@ var Flow = /** @class */ (function (_super) {
             if (_this.props[event])
                 events.push(event);
         });
-        return initEvents(events, this.flowModel);
+        return mountEvents(events, this.flowModel);
     };
     Flow.prototype.render = function () {
         var model = this.flowModel;
@@ -47405,7 +47414,7 @@ var Flow = /** @class */ (function (_super) {
                     cursor: model.hotKey["Space"] ? "move" : "auto",
                 }, id: STAGE_ID, ref: function (ref) {
                     model.refs.stageRef = ref;
-                } }, this.getEvents()),
+                } }, this.generateEvents()),
                 lodash.exports.isNumber(this.flowModel.grid) && this.flowModel.grid !== 0 && React.createElement(Grid, null),
                 React.createElement(Nodes, null),
                 React.createElement(LinesAndInterect, null)),

@@ -10,7 +10,7 @@ import { getContextMenu, SelectBoundsRect } from "./components";
 import { useContext, useEffect } from "react";
 import { CellDataType, CellModel } from "./cells/Cell";
 import { STAGE_ID } from "./constants";
-import { initEvents } from "./events";
+import { mountEvents } from './events';
 import { BehaviorName } from "typings/common";
 import { Interactor } from "./components/Interacotr";
 import { isNumber } from "lodash";
@@ -225,7 +225,7 @@ class Flow extends React.Component<FlowProps, {}> {
     props.flowModelRef && (props.flowModelRef.current = this.flowModel);
   }
 
-  getEvents() {
+  generateEvents() {
     const extraEvents: BehaviorName[] = ["scale", "multiSelect"];
     const defaultEvents: BehaviorName[] = [
       "clearState",
@@ -241,7 +241,7 @@ class Flow extends React.Component<FlowProps, {}> {
       if (this.props[event as keyof FlowProps]) events.push(event);
     });
 
-    return initEvents(events, this.flowModel);
+    return mountEvents(events, this.flowModel);
   }
 
   render() {
@@ -262,7 +262,7 @@ class Flow extends React.Component<FlowProps, {}> {
           ref={(ref) => {
             model.refs.stageRef = ref;
           }}
-          {...this.getEvents()}
+          {...this.generateEvents()}
         >
           {isNumber(this.flowModel.grid) && this.flowModel.grid !== 0 && <Grid />}
           <Nodes />

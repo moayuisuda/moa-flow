@@ -22,7 +22,7 @@ declare type FlowProps = {
 declare class Flow extends React.Component<FlowProps, {}> {
     flowModel: FlowModel;
     constructor(props?: FlowProps);
-    getEvents(): Record<import("typings/common").StageEventName, React.MouseEventHandler<HTMLDivElement> | undefined>;
+    generateEvents(): Record<import("typings/common").StageEventName, React.MouseEventHandler<HTMLDivElement> | undefined>;
     render(): JSX.Element;
 }
 export default Flow;

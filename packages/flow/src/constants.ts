@@ -21,6 +21,6 @@ export const EDGE_RESERVED_WORDS = [
     ...COMMON_RESERVED_WORDS, 'component', "source", "target", 'visible',
 ]
 
-export const STAGE_EVENT_NAMES: StageEventName[] = ['onMouseDown', 'onMouseUp', 'onMouseMove', 'onWheel', 'onClick']
-export const WINDOW_EVENT_NAMES: WindowEventName[] = ['onKeyDown', 'onKeyUp']
+export const STAGE_EVENT_NAMES: StageEventName[] = ['onMouseDown', 'onMouseMove', 'onWheel', 'onClick']
+export const WINDOW_EVENT_NAMES: WindowEventName[] = ['onKeyDown', 'onKeyUp', 'onMouseUp']
 export const EVENT_NAMES = [...STAGE_EVENT_NAMES, ...WINDOW_EVENT_NAMES, 'init']
