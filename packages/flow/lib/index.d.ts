@@ -6,7 +6,7 @@ import { Vector2d, FlowInfraEventType } from "./typings/common";
 import { FlowContext } from './Context';
 declare type FlowModel = Model;
 export * from './hooks';
-export { Flow, autorun, FlowContext, Observer, observer };
+export { Flow, autorun, FlowContext, Observer, observer, };
 export type { FlowModel, FlowInfraEventType, Vector2d, };
 export * from './components';
 export * from './cells';

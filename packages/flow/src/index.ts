@@ -16,7 +16,7 @@ export {
   autorun,
   FlowContext,
   Observer,
-  observer
+  observer,
 };
 
 export type {

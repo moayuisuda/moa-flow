@@ -37,3 +37,15 @@ export const callIfFn = (exp: any) => {
     if (isFunction(exp)) return exp();
     else return exp;
 }
+
+export const stopPortalEvents = {
+    onMouseMove: (e: any) => {
+        e.stopPropagation()
+    },
+    onMouseDown: (e: any) => {
+        e.stopPropagation()
+    },
+    onMouseUp: (e: any) => {
+        e.stopPropagation()
+    }
+}

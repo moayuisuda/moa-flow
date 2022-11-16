@@ -17412,6 +17412,17 @@ var callIfFn = function (exp) {
     else
         return exp;
 };
+var stopPortalEvents = {
+    onMouseMove: function (e) {
+        e.stopPropagation();
+    },
+    onMouseDown: function (e) {
+        e.stopPropagation();
+    },
+    onMouseUp: function (e) {
+        e.stopPropagation();
+    }
+};
 
 var CellModel = /** @class */ (function () {
     function CellModel(data, context) {
@@ -46130,8 +46141,8 @@ __spreadArray(__spreadArray([], COMMON_RESERVED_WORDS, true), [
 __spreadArray(__spreadArray([], COMMON_RESERVED_WORDS, true), [
     'component', "source", "target", 'visible',
 ], false);
-var STAGE_EVENT_NAMES = ['onMouseDown', 'onMouseMove', 'onWheel', 'onClick'];
-var WINDOW_EVENT_NAMES = ['onKeyDown', 'onKeyUp', 'onMouseUp'];
+var STAGE_EVENT_NAMES = ['onMouseDown', 'onMouseMove', 'onWheel', 'onClick', 'onMouseUp'];
+var WINDOW_EVENT_NAMES = ['onKeyDown', 'onKeyUp'];
 __spreadArray(__spreadArray(__spreadArray([], STAGE_EVENT_NAMES, true), WINDOW_EVENT_NAMES, true), ['init'], false);
 
 var ContextMenu = /** @class */ (function (_super) {
@@ -46202,6 +46213,10 @@ var SelectBoundsRect = /** @class */ (function (_super) {
     ], SelectBoundsRect);
     return SelectBoundsRect;
 }(React.Component));
+
+var PortalWrapper = function (props) {
+    return React.createElement("div", __assign({}, stopPortalEvents), props.children);
+};
 
 var color = {
     primary: '#1890ff',
@@ -47452,4 +47467,4 @@ var Content = function (props) {
         } }, lodash.exports.isUndefined(props.data.visible) || props.data.visible ? (props.children) : (React.createElement(React.Fragment, null)))); }));
 };
 
-export { Arrow, CellModel, ConsumerBridge, Content, ContextMenu, Edge, EdgeModel, Flow, FlowContext, Image, Interactor, LinkingEdge, NodeModel, Port, SelectBoundsRect, getContextMenu, useEvent, useModel };
+export { Arrow, CellModel, ConsumerBridge, Content, ContextMenu, Edge, EdgeModel, Flow, FlowContext, Image, Interactor, LinkingEdge, NodeModel, Port, PortalWrapper, SelectBoundsRect, getContextMenu, useEvent, useModel };

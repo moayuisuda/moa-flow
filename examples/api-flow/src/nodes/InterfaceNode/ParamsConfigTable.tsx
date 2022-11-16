@@ -135,7 +135,6 @@ const ParamsConfigTable = ({
               label: `${nodeData.title}`,
             }
           });
-          console.log('moa-flow', linkNodes, options);
           return <Cascader options={options} onChange={(e) => handleValueChange('value', path, e)} />
         }
       },

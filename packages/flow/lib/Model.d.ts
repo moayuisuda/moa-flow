@@ -123,7 +123,7 @@ export declare class FlowModel {
     cellsMap: Map<string, any>;
     cellsModelMap: Map<string, CellModel>;
     cellsDataMap: Map<string, CellDataType>;
-    componentsMap: Map<string, typeof Port | React.FC<{}>>;
+    componentsMap: Map<string, React.FC<{}> | typeof Port>;
     modelFactoriesMap: Map<string, typeof CellModel>;
     regist: (name: string, component: any) => void;
     eventBus: {
