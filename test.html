@@ -8,6 +8,7 @@
     <style>
       .wrapper {
         position: relative;
+        height: 20vh;
       }
       .port {
         position: absolute;
@@ -27,7 +28,9 @@
     const sleep = () => {
       return new Promise((res) => {
         setTimeout(() => {
-          res();
+          const el = document.querySelector(".wrapper");
+          const style = getComputedStyle(el);
+          console.log(parseFloat(style.width), parseFloat(style.height));
         }, 2000);
       });
     };

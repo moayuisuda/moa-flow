@@ -46126,64 +46126,18 @@ var css_248z = ".style_toolbar__RwWyM {\n  position: fixed;\n  z-index: 2;\n  pa
 var styles = {"toolbar":"style_toolbar__RwWyM","toolbar__item":"style_toolbar__item__QH44f","toolbar__button":"style_toolbar__button__4VbUk"};
 styleInject(css_248z);
 
-var STAGE_ID = 'flow-stage';
-var EVT_LEFTCLICK = 0;
-var EVT_RIGHTCLICK = 2;
-var COMMON_RESERVED_WORDS = [
-    'id', 'cellType'
-];
-__spreadArray(__spreadArray([], COMMON_RESERVED_WORDS, true), [
-    'component', 'parent', 'x', 'y', 'visible', 'ports'
-], false);
-__spreadArray(__spreadArray([], COMMON_RESERVED_WORDS, true), [
-    'host'
-], false);
-__spreadArray(__spreadArray([], COMMON_RESERVED_WORDS, true), [
-    'component', "source", "target", 'visible',
-], false);
-var STAGE_EVENT_NAMES = ['onMouseDown', 'onMouseMove', 'onWheel', 'onClick', 'onMouseUp'];
-var WINDOW_EVENT_NAMES = ['onKeyDown', 'onKeyUp'];
-__spreadArray(__spreadArray(__spreadArray([], STAGE_EVENT_NAMES, true), WINDOW_EVENT_NAMES, true), ['init'], false);
-
 var ContextMenu = /** @class */ (function (_super) {
     __extends(ContextMenu, _super);
     function ContextMenu(props) {
-        var _this = _super.call(this, props) || this;
-        _this.initStageEvent = function () {
-            var _a;
-            (_a = document
-                .querySelector("#" + STAGE_ID)) === null || _a === void 0 ? void 0 : _a.addEventListener("contextmenu", function (e) {
-                e.preventDefault();
-                _this.context.contextMenuVisible = true;
-                _this.setState({
-                    pos: {
-                        x: e.clientX,
-                        y: e.clientY,
-                    },
-                });
-            });
-        };
-        _this.state = {
-            pos: {
-                x: 0,
-                y: 0,
-            },
-        };
-        return _this;
+        return _super.call(this, props) || this;
     }
-    ContextMenu.prototype.componentDidMount = function () {
-        var _this = this;
-        // 子组件会在commit阶段先挂载触发didMount
-        Promise.resolve().then(function () {
-            _this.initStageEvent();
-        });
-    };
     ContextMenu.prototype.render = function () {
         if (!this.context.contextMenuVisible)
             return React.createElement(React.Fragment, null);
+        var _a = this.context.buffer.contextMenu, x = _a.x, y = _a.y;
         return (React.createElement("div", { style: {
-                top: this.state.pos.y,
-                left: this.state.pos.x,
+                left: x,
+                top: y,
             }, className: styles["toolbar"] }, this.props.children));
     };
     ContextMenu.contextType = FlowContext;
@@ -46278,6 +46232,10 @@ var FlowModel = /** @class */ (function () {
         this._height = 600;
         this._grid = 0;
         this._linkEdge = "Edge";
+        this.setContextMenuPos = function (pos) {
+            _this.buffer.contextMenu.x = pos.x;
+            _this.buffer.contextMenu.y = pos.y;
+        };
         this.refs = {
             stageRef: null,
             svgContainerRef: null,
@@ -46309,6 +46267,8 @@ var FlowModel = /** @class */ (function () {
             },
             contextMenu: {
                 visible: false,
+                x: 0,
+                y: 0
             },
             drag: {
                 movement: {
@@ -46767,6 +46727,22 @@ var FlowModel = /** @class */ (function () {
                 _this.regist(key, components[key]);
             }
         };
+        this.fitParentSize = function () {
+            var parentSize;
+            var dom = _this.refs.stageRef;
+            if (dom) {
+                var container = dom.parentNode;
+                if (container) {
+                    var style = getComputedStyle(container);
+                    parentSize = {
+                        width: parseFloat(style.width),
+                        height: parseFloat(style.height)
+                    };
+                }
+            }
+            if (parentSize)
+                _this.size = parentSize;
+        };
         makeObservable(this);
         if (eventSender)
             this.eventBus.sender = eventSender;
@@ -46941,6 +46917,9 @@ var FlowModel = /** @class */ (function () {
         computed
     ], FlowModel.prototype, "contextMenuVisible", null);
     __decorate([
+        action
+    ], FlowModel.prototype, "setContextMenuPos", void 0);
+    __decorate([
         observable
     ], FlowModel.prototype, "hotKey", void 0);
     __decorate([
@@ -47006,8 +46985,30 @@ var FlowModel = /** @class */ (function () {
     __decorate([
         action
     ], FlowModel.prototype, "moveTo", void 0);
+    __decorate([
+        action
+    ], FlowModel.prototype, "fitParentSize", void 0);
     return FlowModel;
 }());
+
+var STAGE_ID = 'flow-stage';
+var EVT_LEFTCLICK = 0;
+var EVT_RIGHTCLICK = 2;
+var COMMON_RESERVED_WORDS = [
+    'id', 'cellType'
+];
+__spreadArray(__spreadArray([], COMMON_RESERVED_WORDS, true), [
+    'component', 'parent', 'x', 'y', 'visible', 'ports'
+], false);
+__spreadArray(__spreadArray([], COMMON_RESERVED_WORDS, true), [
+    'host'
+], false);
+__spreadArray(__spreadArray([], COMMON_RESERVED_WORDS, true), [
+    'component', "source", "target", 'visible',
+], false);
+var STAGE_EVENT_NAMES = ['onMouseDown', 'onMouseMove', 'onWheel', 'onClick', 'onMouseUp'];
+var WINDOW_EVENT_NAMES = ['onKeyDown', 'onKeyUp'];
+__spreadArray(__spreadArray(__spreadArray([], STAGE_EVENT_NAMES, true), WINDOW_EVENT_NAMES, true), ['init'], false);
 
 var INPUT_NODELIST = ['TEXTAREA', 'INPUT'];
 var behaviorsMap = {
@@ -47381,6 +47382,18 @@ var Flow = /** @class */ (function (_super) {
             multiSelect: false,
         }; }
         var _this = _super.call(this, props) || this;
+        _this.initStageEvent = function () {
+            var _a;
+            (_a = document
+                .querySelector("#" + STAGE_ID)) === null || _a === void 0 ? void 0 : _a.addEventListener("contextmenu", function (e) {
+                e.preventDefault();
+                _this.flowModel.contextMenuVisible = true;
+                _this.flowModel.setContextMenuPos({
+                    x: e.clientX,
+                    y: e.clientY,
+                });
+            });
+        };
         _this.flowModel = new FlowModel(props.onEvent);
         _this.flowModel.registModels(props.models || {});
         _this.flowModel.registComponents(props.components || {});
@@ -47399,6 +47412,10 @@ var Flow = /** @class */ (function (_super) {
         props.flowModelRef && (props.flowModelRef.current = _this.flowModel);
         return _this;
     }
+    Flow.prototype.componentDidMount = function () {
+        if (getContextMenu(this.props.children))
+            this.initStageEvent();
+    };
     Flow.prototype.generateEvents = function () {
         var _this = this;
         var extraEvents = ["scale", "multiSelect"];

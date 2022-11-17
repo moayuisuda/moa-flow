@@ -2,55 +2,24 @@ import { observer } from "mobx-react";
 import styles from "./style.less";
 import React from "react";
 import { FlowContext } from "../../Context";
-import { STAGE_ID } from "../../constants";
 @observer
 class ContextMenu extends React.Component<
-{ children?: React.ReactNode },
-{ pos: { x: number; y: number } }
+{ children?: React.ReactNode }
 > {
   static contextType = FlowContext;
 
-  initStageEvent = () => {
-    document
-      .querySelector("#" + STAGE_ID)
-      ?.addEventListener("contextmenu", (e) => {
-        e.preventDefault();
-        this.context.contextMenuVisible = true;
-
-        this.setState({
-          pos: {
-            x: e.clientX,
-            y: e.clientY,
-          },
-        });
-      });
-  };
-
-  componentDidMount(): void {
-    // 子组件会在commit阶段先挂载触发didMount
-    Promise.resolve().then(() => {
-      this.initStageEvent();
-    });
-  }
-
   constructor(props: any) {
     super(props);
-
-    this.state = {
-      pos: {
-        x: 0,
-        y: 0,
-      },
-    };
   }
 
   render() {
     if (!this.context.contextMenuVisible) return <></>;
+    const { x, y } = this.context.buffer.contextMenu
     return (
       <div
         style={{
-          top: this.state.pos.y,
-          left: this.state.pos.x,
+          left: x,
+          top: y,
         }}
         className={styles["toolbar"]}
       >

@@ -43,6 +43,7 @@ function App() {
 
   useEffect(() => {
     const model = flowModelRef.current as FlowModel;
+    model.fitParentSize()
 
     model.extra = {
       taskPool: {},
@@ -270,103 +271,108 @@ function App() {
             onSubmit={getInterfaceSchema}
             defaultData={globalSetting}
           />
-          <Flow
-            // view
-            components={{
-              InterfaceNode: InterfaceNode,
-              ProcessNode: ProcessNode,
-            }}
-            // model
-            models={{
-              InterfaceNode: InterfaceNodeModel,
-              ProcessNode: ProcessNodeModel,
-              Edge: FlowEdgeModel,
-            }}
-            width={window.innerWidth}
-            height={window.innerHeight}
-            flowModelRef={flowModelRef}
-            grid={40}
-            canvasData={testData}
-          >
-            <ContextMenu>
-              <Space direction="vertical">
-                <Button
-                  onClick={() => {
-                    const { deleCell, selectCells } =
-                      flowModelRef.current as FlowModel;
-                    deleCell(selectCells[0]);
-                  }}
-                >
-                  删除
-                </Button>
-                <Button
-                  onClick={() => {
-                    const { getCellModel, selectCells } =
-                      flowModelRef.current as FlowModel;
-                    const nodeModel = getCellModel(selectCells[0]);
+          <div style={{
+            width: 300,
+            height: 300
+          }}>
+            <Flow
+              // view
+              components={{
+                InterfaceNode: InterfaceNode,
+                ProcessNode: ProcessNode,
+              }}
+              // model
+              models={{
+                InterfaceNode: InterfaceNodeModel,
+                ProcessNode: ProcessNodeModel,
+                Edge: FlowEdgeModel,
+              }}
+              width={window.innerWidth}
+              height={window.innerHeight}
+              flowModelRef={flowModelRef}
+              grid={40}
+              canvasData={testData}
+            >
+              <ContextMenu>
+                <Space direction="vertical">
+                  <Button
+                    onClick={() => {
+                      const { deleCell, selectCells } =
+                        flowModelRef.current as FlowModel;
+                      deleCell(selectCells[0]);
+                    }}
+                  >
+                    删除
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      const { getCellModel, selectCells } =
+                        flowModelRef.current as FlowModel;
+                      const nodeModel = getCellModel(selectCells[0]);
 
-                    if (
-                      !(
-                        nodeModel &&
-                        nodeList
-                          .map(([nodeName]) => nodeName)
-                          .includes(nodeModel.data.component)
+                      if (
+                        !(
+                          nodeModel &&
+                          nodeList
+                            .map(([nodeName]) => nodeName)
+                            .includes(nodeModel.data.component)
+                        )
                       )
-                    )
-                      message.info("请选择接口节点");
-                    else {
-                      message.info(`${nodeModel.data.title}开始执行`);
-                      process(nodeModel.data.id);
-                    }
-                  }}
-                >
-                  执行此节点及后续节点
-                </Button>
-                <Button
-                  onClick={() => {
-                    const { getCellModel, selectCells } =
-                      flowModelRef.current as FlowModel;
-                    const nodeModel = getCellModel(selectCells[0]);
+                        message.info("请选择接口节点");
+                      else {
+                        message.info(`${nodeModel.data.title}开始执行`);
+                        process(nodeModel.data.id);
+                      }
+                    }}
+                  >
+                    执行此节点及后续节点
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      const { getCellModel, selectCells } =
+                        flowModelRef.current as FlowModel;
+                      const nodeModel = getCellModel(selectCells[0]);
 
-                    if (
-                      !(
-                        nodeModel &&
-                        nodeList
-                          .map(([nodeName]) => nodeName)
-                          .includes(nodeModel.data.component)
+                      if (
+                        !(
+                          nodeModel &&
+                          nodeList
+                            .map(([nodeName]) => nodeName)
+                            .includes(nodeModel.data.component)
+                        )
                       )
-                    )
-                      message.info("请选择接口节点");
-                    else {
-                      (nodeModel as InterfaceNodeModel).process();
-                      message.info(`开始执行到${nodeModel.data.title}`);
-                    }
-                  }}
-                >
-                  以此节点为终点执行
-                </Button>
-                <Divider />
-                {nodeList.map(([name]) => {
-                  return (
-                    <Button
-                      key={name}
-                      onClick={() => {
-                        const model = flowModelRef.current as FlowModel;
-                        (flowModelRef.current as FlowModel).addCell(name, {
-                          title: name,
-                          x: -model.x + model.width / 2,
-                          y: -model.y + model.height / 2,
-                        });
-                        model.contextMenuVisible = false;
-                      }}
-                    >
-                      {`增添${name}节点`}
-                    </Button>
-                  );
-                })}
-              </Space>
-            </ContextMenu>
-          </Flow>
+                        message.info("请选择接口节点");
+                      else {
+                        (nodeModel as InterfaceNodeModel).process();
+                        message.info(`开始执行到${nodeModel.data.title}`);
+                      }
+                    }}
+                  >
+                    以此节点为终点执行
+                  </Button>
+                  <Divider />
+                  {nodeList.map(([name]) => {
+                    return (
+                      <Button
+                        key={name}
+                        onClick={() => {
+                          const model = flowModelRef.current as FlowModel;
+                          (flowModelRef.current as FlowModel).addCell(name, {
+                            title: name,
+                            x: -model.x + model.width / 2,
+                            y: -model.y + model.height / 2,
+                          });
+                          model.contextMenuVisible = false;
+                        }}
+                      >
+                        {`增添${name}节点`}
+                      </Button>
+                    );
+                  })}
+                </Space>
+              </ContextMenu>
+            </Flow>
+          </div>
         </Context.Provider>
       </PageContainer>
     </div>

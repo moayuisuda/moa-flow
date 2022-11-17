@@ -1,15 +1,8 @@
 import React from "react";
 declare class ContextMenu extends React.Component<{
     children?: React.ReactNode;
-}, {
-    pos: {
-        x: number;
-        y: number;
-    };
 }> {
     static contextType: React.Context<import("../../Model").FlowModel>;
-    initStageEvent: () => void;
-    componentDidMount(): void;
     constructor(props: any);
     render(): JSX.Element;
 }

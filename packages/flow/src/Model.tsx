@@ -157,6 +157,12 @@ export class FlowModel {
     this.buffer.contextMenu.visible = visible;
   }
 
+  @action
+  setContextMenuPos = (pos: Vector2d) => {
+    this.buffer.contextMenu.x = pos.x;
+    this.buffer.contextMenu.y = pos.y;
+  }
+
   refs = {
     stageRef: null as HTMLDivElement | null,
     svgContainerRef: null as SVGElement | null,
@@ -201,6 +207,8 @@ export class FlowModel {
     },
     contextMenu: {
       visible: false,
+      x: 0,
+      y: 0
     },
     drag: {
       movement: {
@@ -786,21 +794,24 @@ export class FlowModel {
       this.regist(key, components[key]);
     }
   };
+
+  @action
+  fitParentSize = () => {
+    let parentSize;
+    const dom = this.refs.stageRef
+    if (dom) {
+      const container = dom.parentNode
+      if (container) {
+        const style = getComputedStyle(container as any)
+        parentSize = {
+          width: parseFloat(style.width),
+          height: parseFloat(style.height)
+        }
+      }
+    }
+
+    if (parentSize) this.size = parentSize
+  }
 }
 
 export default FlowModel;
-
-type A = {
-  id: number;
-} & {
-  type: "node";
-};
-
-type C<T> = Override<A, T>;
-
-const c: C<{
-  id: string;
-}> = {
-  id: "asd",
-  type: "node",
-};

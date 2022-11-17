@@ -43,6 +43,7 @@ export declare class FlowModel {
     set y(y: number);
     get contextMenuVisible(): boolean;
     set contextMenuVisible(visible: boolean);
+    setContextMenuPos: (pos: Vector2d) => void;
     refs: {
         stageRef: HTMLDivElement | null;
         svgContainerRef: SVGElement | null;
@@ -63,6 +64,8 @@ export declare class FlowModel {
         };
         contextMenu: {
             visible: boolean;
+            x: number;
+            y: number;
         };
         drag: {
             movement: {
@@ -123,7 +126,7 @@ export declare class FlowModel {
     cellsMap: Map<string, any>;
     cellsModelMap: Map<string, CellModel>;
     cellsDataMap: Map<string, CellDataType>;
-    componentsMap: Map<string, React.FC<{}> | typeof Port>;
+    componentsMap: Map<string, typeof Port | React.FC<{}>>;
     modelFactoriesMap: Map<string, typeof CellModel>;
     regist: (name: string, component: any) => void;
     eventBus: {
@@ -199,5 +202,6 @@ export declare class FlowModel {
     sendEvent: (cellId: string, params?: any) => void;
     registModels: (models: Record<string, typeof CellModel>) => void;
     registComponents: (components: Record<string, React.FC>) => void;
+    fitParentSize: () => void;
 }
 export default FlowModel;

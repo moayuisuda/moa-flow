@@ -225,6 +225,24 @@ class Flow extends React.Component<FlowProps, {}> {
     props.flowModelRef && (props.flowModelRef.current = this.flowModel);
   }
 
+  componentDidMount() {
+    if (getContextMenu(this.props.children)) this.initStageEvent();
+  }
+
+  initStageEvent = () => {
+    document
+      .querySelector("#" + STAGE_ID)
+      ?.addEventListener("contextmenu", (e) => {
+        e.preventDefault();
+        this.flowModel.contextMenuVisible = true;
+
+        this.flowModel.setContextMenuPos({
+          x: e.clientX,
+          y: e.clientY,
+        });
+      });
+  };
+
   generateEvents() {
     const extraEvents: BehaviorName[] = ["scale", "multiSelect"];
     const defaultEvents: BehaviorName[] = [
