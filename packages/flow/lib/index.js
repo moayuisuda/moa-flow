@@ -1,4 +1,4 @@
-import React, { useState, forwardRef, memo, Component, useContext, useLayoutEffect } from 'react';
+import React, { useState, forwardRef, memo, Component, createRef, useContext, useLayoutEffect } from 'react';
 import { observer as observer$1, Observer } from 'mobx-react';
 export { Observer, observer } from 'mobx-react';
 import { makeObservable, observable, computed, action, configure, getDependencyTree, Reaction, autorun } from 'mobx';
@@ -46129,8 +46129,46 @@ styleInject(css_248z);
 var ContextMenu = /** @class */ (function (_super) {
     __extends(ContextMenu, _super);
     function ContextMenu(props) {
-        return _super.call(this, props) || this;
+        var _this = _super.call(this, props) || this;
+        _this.wrapperRef = createRef();
+        return _this;
     }
+    ContextMenu.prototype.isOutClient = function () {
+        var re = {
+            x: false,
+            y: false
+        };
+        var _a = this.context.buffer.contextMenu, x = _a.x, y = _a.y;
+        var containerDom = this.wrapperRef.current;
+        var style = getComputedStyle(containerDom);
+        if (parseFloat(style.height) + y > window.innerHeight) {
+            re.y = true;
+        }
+        if (parseFloat(style.width) + x > window.innerWidth) {
+            re.x = true;
+        }
+        return re;
+    };
+    ContextMenu.prototype.setTransform = function () {
+        var isOutClient = this.isOutClient();
+        var containerDom = this.wrapperRef.current;
+        var transformStr = '';
+        if (isOutClient.x) {
+            transformStr += 'translateX(-100%)';
+        }
+        if (isOutClient.y) {
+            transformStr += ' translateY(-100%)';
+        }
+        containerDom.style.transform = transformStr;
+    };
+    ContextMenu.prototype.componentDidMount = function () {
+        if (this.wrapperRef.current)
+            this.setTransform();
+    };
+    ContextMenu.prototype.componentDidUpdate = function () {
+        if (this.wrapperRef.current)
+            this.setTransform();
+    };
     ContextMenu.prototype.render = function () {
         if (!this.context.contextMenuVisible)
             return React.createElement(React.Fragment, null);
@@ -46138,7 +46176,7 @@ var ContextMenu = /** @class */ (function (_super) {
         return (React.createElement("div", { style: {
                 left: x,
                 top: y,
-            }, className: styles["toolbar"] }, this.props.children));
+            }, ref: this.wrapperRef, className: styles["toolbar"] }, this.props.children));
     };
     ContextMenu.contextType = FlowContext;
     ContextMenu = __decorate([
@@ -46865,6 +46903,19 @@ var FlowModel = /** @class */ (function () {
         enumerable: false,
         configurable: true
     });
+    Object.defineProperty(FlowModel.prototype, "contextMenuPos", {
+        get: function () {
+            var _a;
+            var _b = this.buffer.contextMenu, x = _b.x, y = _b.y;
+            var refBounding = (_a = this.refs.stageRef) === null || _a === void 0 ? void 0 : _a.getBoundingClientRect();
+            return {
+                x: (x - refBounding.x) / this.scale - this.x,
+                y: (y - refBounding.y) / this.scale - this.y
+            };
+        },
+        enumerable: false,
+        configurable: true
+    });
     FlowModel.prototype.isSelecting = function (e) {
         var selectingDom = this.buffer.select.selectingDom;
         if (!selectingDom)
@@ -46919,6 +46970,9 @@ var FlowModel = /** @class */ (function () {
     __decorate([
         action
     ], FlowModel.prototype, "setContextMenuPos", void 0);
+    __decorate([
+        computed
+    ], FlowModel.prototype, "contextMenuPos", null);
     __decorate([
         observable
     ], FlowModel.prototype, "hotKey", void 0);

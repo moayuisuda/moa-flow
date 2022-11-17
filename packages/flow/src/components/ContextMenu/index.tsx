@@ -1,15 +1,61 @@
 import { observer } from "mobx-react";
 import styles from "./style.less";
-import React from "react";
+import React, { createRef } from "react";
 import { FlowContext } from "../../Context";
 @observer
 class ContextMenu extends React.Component<
 { children?: React.ReactNode }
 > {
   static contextType = FlowContext;
+  wrapperRef = createRef<HTMLDivElement>()
 
   constructor(props: any) {
     super(props);
+  }
+
+  isOutClient() {
+    const re = {
+      x: false,
+      y: false
+    }
+
+    const { x, y } = this.context.buffer.contextMenu
+
+    const containerDom = this.wrapperRef.current as HTMLDivElement
+    const style = getComputedStyle(containerDom)
+
+    if (parseFloat(style.height) + y > window.innerHeight) {
+      re.y = true
+    }
+
+    if (parseFloat(style.width) + x > window.innerWidth) {
+      re.x = true
+    }
+
+    return re
+  }
+
+  setTransform() {
+    const isOutClient = this.isOutClient()
+    const containerDom = this.wrapperRef.current as HTMLDivElement
+    let transformStr = ''
+
+    if (isOutClient.x) {
+      transformStr += 'translateX(-100%)'
+    }
+    if (isOutClient.y) {
+      transformStr += ' translateY(-100%)'
+    }
+
+    containerDom.style.transform = transformStr
+  }
+
+  componentDidMount() {
+    if (this.wrapperRef.current) this.setTransform()
+  }
+
+  componentDidUpdate() {
+    if (this.wrapperRef.current) this.setTransform()
   }
 
   render() {
@@ -21,6 +67,7 @@ class ContextMenu extends React.Component<
           left: x,
           top: y,
         }}
+        ref={this.wrapperRef}
         className={styles["toolbar"]}
       >
         {this.props.children}

@@ -163,6 +163,17 @@ export class FlowModel {
     this.buffer.contextMenu.y = pos.y;
   }
 
+  @computed
+  get contextMenuPos() {
+    const { x, y } = this.buffer.contextMenu
+
+    const refBounding = this.refs.stageRef?.getBoundingClientRect() as { x: number, y: number }
+    return {
+      x: (x - refBounding.x) / this.scale - this.x,
+      y: (y - refBounding.y) / this.scale - this.y
+    }
+  }
+
   refs = {
     stageRef: null as HTMLDivElement | null,
     svgContainerRef: null as SVGElement | null,

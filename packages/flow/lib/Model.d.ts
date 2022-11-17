@@ -44,6 +44,10 @@ export declare class FlowModel {
     get contextMenuVisible(): boolean;
     set contextMenuVisible(visible: boolean);
     setContextMenuPos: (pos: Vector2d) => void;
+    get contextMenuPos(): {
+        x: number;
+        y: number;
+    };
     refs: {
         stageRef: HTMLDivElement | null;
         svgContainerRef: SVGElement | null;

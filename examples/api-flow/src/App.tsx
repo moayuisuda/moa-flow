@@ -272,8 +272,8 @@ function App() {
             defaultData={globalSetting}
           />
           <div style={{
-            width: 300,
-            height: 300
+            width: 1000,
+            height: 1000
           }}>
             <Flow
               // view
@@ -357,11 +357,12 @@ function App() {
                         key={name}
                         onClick={() => {
                           const model = flowModelRef.current as FlowModel;
-                          (flowModelRef.current as FlowModel).addCell(name, {
-                            title: name,
-                            x: -model.x + model.width / 2,
-                            y: -model.y + model.height / 2,
-                          });
+                          const { contextMenuPos } =
+                            (flowModelRef.current as FlowModel).addCell(name, {
+                              title: name,
+                              x: model.contextMenuPos.x,
+                              y: model.contextMenuPos.y,
+                            });
                           model.contextMenuVisible = false;
                         }}
                       >
