@@ -25,24 +25,13 @@
     </div>
   </body>
   <script>
-    const sleep = () => {
-      return new Promise((res) => {
-        setTimeout(() => {
-          const el = document.querySelector(".wrapper");
-          const style = getComputedStyle(el);
-          console.log(parseFloat(style.width), parseFloat(style.height));
-        }, 2000);
-      });
+    const varReg = /\{\{(.+?)\}\}/g;
+
+    const getBodyObj = (bodyStr) => {
+      return bodyStr.replace(varReg, "\"$1\"");
     };
 
-    const fn = async () => {
-      for (let i = 0; i < 4; i++) {
-        const fn = await sleep();
-      }
 
-      console.log("hello");
-    };
-
-    fn();
+    console.log(getBodyObj(`{{asdasdasdas}} {{wwwewewew}}`));
   </script>
 </html>

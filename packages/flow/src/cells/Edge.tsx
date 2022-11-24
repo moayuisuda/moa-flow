@@ -307,11 +307,20 @@ export const Edge: React.FC<{ model: EdgeModel }> = observer(({ model }) => {
             />
           </marker>
         </defs>
+
         <path
           className="moa-edge"
           {...lineProps}
           d={d}
           markerEnd={`url(#${`arrow-end--${model.data.id}`})`}
+        />
+        <path
+          className="moa-edge--interaction"
+          {...lineProps}
+          d={d}
+          strokeWidth={10}
+          fill="none"
+          stroke='transparent'
         />
       </>
     );

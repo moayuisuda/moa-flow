@@ -66,6 +66,7 @@ export class FlowModel {
   extra: any = {};
   isInitEvents = false;
   multiSelect = false;
+  scaleBy = 1.01;
 
   pendingRender: boolean = true;
   @action
@@ -444,6 +445,10 @@ export class FlowModel {
     );
   };
 
+  isCellExist = (id: string) => {
+    return this.canvasData.cells.find(cell => cell.id === id)
+  }
+
   @action setCanvasData = (canvasData: CanvasDataType) => {
     canvasData = Object.assign(this.canvasData, canvasData)
 
@@ -620,8 +625,6 @@ export class FlowModel {
     const result = layout.layout({
       nodes: nodesData,
       edges: edgesData.map(edgeData => {
-        console.log(edgeData, this.getCellData(edgeData.source)?.host, this.getCellData(edgeData.target)?.host)
-
         return {
           source: this.getCellData(edgeData.source)?.host,
           target: this.getCellData(edgeData.target)?.host
@@ -634,7 +637,12 @@ export class FlowModel {
       console.warn('[moa-flow] setlayout failed')
       return []
     }
-    this.canvasData.cells = (result.nodes || []).concat(edgesData)
+    this.canvasData.cells = (result.nodes || []).map((nodeData: NodeDataType) => {
+      return this.grid ? Object.assign(nodeData, this.snap({
+        x: nodeData.x,
+        y: nodeData.y
+      })) : nodeData
+    }).concat(edgesData)
   };
 
   getNodesData = () => {

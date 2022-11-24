@@ -12,6 +12,7 @@ export declare class FlowModel {
     extra: any;
     isInitEvents: boolean;
     multiSelect: boolean;
+    scaleBy: number;
     pendingRender: boolean;
     trigRender: () => void;
     pendRender: () => void;
@@ -153,6 +154,7 @@ export declare class FlowModel {
     };
     fit: (nodeWidth: number, nodeHeight: number) => void;
     getLocalBBox: (id: string) => import("./utils/coords").BoundingBox;
+    isCellExist: (id: string) => any;
     setCanvasData: (canvasData: CanvasDataType) => void;
     setCellId: (data: CellDataType) => void;
     setCellData: (id: string, data: any, deepMerge?: boolean) => void;

@@ -45821,7 +45821,8 @@ var Edge = observer(function (_a) {
             React.createElement("defs", null,
                 React.createElement("marker", { id: "arrow-end--".concat(model.data.id), markerWidth: "100", markerHeight: "100", refX: arrowOffset[0] + DEFAULT_ARROW_SIZE$1 * cos(PI / 6), refY: arrowOffset[1] + DEFAULT_ARROW_SIZE$1 * sin(PI / 6), orient: "auto" },
                     React.createElement("path", { className: "moa-edge__arrow", stroke: lineProps.stroke, strokeWidth: lineProps.strokeWidth, strokeLinecap: lineProps.strokeLinecap, strokeLinejoin: lineProps.strokeLinejoin, fill: lineProps.fill, d: "M".concat(arrowOffset[0], ",").concat(arrowOffset[1], " L").concat(arrowOffset[0], ",").concat(DEFAULT_ARROW_SIZE$1 * sin(PI / 6) * 2 + arrowOffset[1], " L").concat(DEFAULT_ARROW_SIZE$1 * cos(PI / 6) + arrowOffset[0], ",").concat(DEFAULT_ARROW_SIZE$1 * sin(PI / 6) + arrowOffset[1], " Z") }))),
-            React.createElement("path", __assign({ className: "moa-edge" }, lineProps, { d: d, markerEnd: "url(#".concat("arrow-end--".concat(model.data.id), ")") }))));
+            React.createElement("path", __assign({ className: "moa-edge" }, lineProps, { d: d, markerEnd: "url(#".concat("arrow-end--".concat(model.data.id), ")") })),
+            React.createElement("path", __assign({ className: "moa-edge--interaction" }, lineProps, { d: d, strokeWidth: 10, fill: "none", stroke: 'transparent' }))));
     });
     var Label = observer(function () {
         var position = model.getPointAt(0.5);
@@ -46259,6 +46260,7 @@ var FlowModel = /** @class */ (function () {
         this.extra = {};
         this.isInitEvents = false;
         this.multiSelect = false;
+        this.scaleBy = 1.01;
         this.pendingRender = true;
         this.trigRender = function () {
             _this.pendingRender = false;
@@ -46491,6 +46493,9 @@ var FlowModel = /** @class */ (function () {
             var dom = (_a = _this.wrapperRefsMap.get(id)) === null || _a === void 0 ? void 0 : _a.current;
             return getRelativeBoundingBox(dom, _this.refs.divContainerRef);
         };
+        this.isCellExist = function (id) {
+            return _this.canvasData.cells.find(function (cell) { return cell.id === id; });
+        };
         this.setCanvasData = function (canvasData) {
             canvasData = Object.assign(_this.canvasData, canvasData);
             canvasData.cells.forEach(function (cellData) {
@@ -46625,11 +46630,10 @@ var FlowModel = /** @class */ (function () {
             var result = layout.layout({
                 nodes: nodesData,
                 edges: edgesData.map(function (edgeData) {
-                    var _a, _b, _c, _d;
-                    console.log(edgeData, (_a = _this.getCellData(edgeData.source)) === null || _a === void 0 ? void 0 : _a.host, (_b = _this.getCellData(edgeData.target)) === null || _b === void 0 ? void 0 : _b.host);
+                    var _a, _b;
                     return {
-                        source: (_c = _this.getCellData(edgeData.source)) === null || _c === void 0 ? void 0 : _c.host,
-                        target: (_d = _this.getCellData(edgeData.target)) === null || _d === void 0 ? void 0 : _d.host
+                        source: (_a = _this.getCellData(edgeData.source)) === null || _a === void 0 ? void 0 : _a.host,
+                        target: (_b = _this.getCellData(edgeData.target)) === null || _b === void 0 ? void 0 : _b.host
                     };
                 })
             });
@@ -46637,7 +46641,12 @@ var FlowModel = /** @class */ (function () {
                 console.warn('[moa-flow] setlayout failed');
                 return [];
             }
-            _this.canvasData.cells = (result.nodes || []).concat(edgesData);
+            _this.canvasData.cells = (result.nodes || []).map(function (nodeData) {
+                return _this.grid ? Object.assign(nodeData, _this.snap({
+                    x: nodeData.x,
+                    y: nodeData.y
+                })) : nodeData;
+            }).concat(edgesData);
         };
         this.getNodesData = function () {
             return _this.canvasData.cells.filter(function (cell) { return cell.cellType === 'node'; });
@@ -47158,7 +47167,7 @@ var behaviorsMap = {
              * 获取鼠标当前位置在scale后的坐标 p1
              * p1与p0的差
              */
-            var scaleBy = 1.01;
+            var scaleBy = model.scaleBy;
             e.preventDefault();
             e.stopPropagation();
             var oldScale = model.scale;
@@ -47451,6 +47460,7 @@ var Flow = /** @class */ (function (_super) {
         _this.flowModel = new FlowModel(props.onEvent);
         _this.flowModel.registModels(props.models || {});
         _this.flowModel.registComponents(props.components || {});
+        !lodash.exports.isUndefined(_this.flowModel.scaleBy) && (_this.flowModel.scaleBy = _this.props.scaleBy || 1.01);
         _this.props.linkEdge && (_this.flowModel.linkEdge = _this.props.linkEdge);
         _this.props.canvasData &&
             _this.flowModel.setCanvasData(_this.props.canvasData);

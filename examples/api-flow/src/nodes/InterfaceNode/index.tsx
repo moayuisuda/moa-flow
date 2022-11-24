@@ -120,11 +120,11 @@ export const InterfaceNode: React.FC<{
             setModalVisible(false);
           }}
         >
-          {/* <NodeConfigForm
+          <NodeConfigForm
           ref={formRef}
           id={data.id}
           interfaceSchema={InterfaceContext.interfaceSchema}
-        /> */}
+        />
         </Modal>
       </PortalWrapper>
     </NodeFrame>

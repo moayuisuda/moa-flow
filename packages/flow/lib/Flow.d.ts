@@ -11,6 +11,7 @@ declare type FlowProps = {
     scale?: boolean;
     flowModelRef?: any;
     width?: number;
+    scaleBy?: number;
     height?: number;
     grid?: number;
     multiSelect?: boolean;

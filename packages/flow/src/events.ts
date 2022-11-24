@@ -136,7 +136,7 @@ export const behaviorsMap: Record<BehaviorName, EventMaps> = {
              * 获取鼠标当前位置在scale后的坐标 p1
              * p1与p0的差
              */
-            let scaleBy = 1.01
+            let scaleBy = model.scaleBy
             e.preventDefault()
             e.stopPropagation()
 

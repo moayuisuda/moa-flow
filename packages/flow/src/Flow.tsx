@@ -13,7 +13,7 @@ import { STAGE_ID } from "./constants";
 import { mountEvents } from './events';
 import { BehaviorName } from "typings/common";
 import { Interactor } from "./components/Interacotr";
-import { isNumber } from "lodash";
+import { isNumber, isUndefined } from 'lodash';
 
 const PositionWrapper = observer(({ cellData }: { cellData: CellDataType }) => {
   const isNode = cellData.cellType === "node";
@@ -185,6 +185,7 @@ type FlowProps = {
   scale?: boolean;
   flowModelRef?: any;
   width?: number;
+  scaleBy?: number;
   height?: number;
   grid?: number;
   multiSelect?: boolean;
@@ -208,6 +209,7 @@ class Flow extends React.Component<FlowProps, {}> {
     this.flowModel = new FlowModel(props.onEvent);
     this.flowModel.registModels(props.models || {});
     this.flowModel.registComponents(props.components || {});
+    !isUndefined(this.flowModel.scaleBy) && (this.flowModel.scaleBy = this.props.scaleBy || 1.01)
     this.props.linkEdge && (this.flowModel.linkEdge = this.props.linkEdge);
     this.props.canvasData &&
       this.flowModel.setCanvasData(this.props.canvasData);
