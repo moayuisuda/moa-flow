@@ -25,7 +25,7 @@ declare class Flow extends React.Component<FlowProps, {}> {
     constructor(props?: FlowProps);
     componentDidMount(): void;
     initStageEvent: () => void;
-    generateEvents(): Record<import("typings/common").StageEventName, React.MouseEventHandler<HTMLDivElement> | undefined>;
+    generateEvents(): any;
     render(): JSX.Element;
 }
 export default Flow;

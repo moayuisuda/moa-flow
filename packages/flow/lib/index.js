@@ -47076,129 +47076,170 @@ __spreadArray(__spreadArray(__spreadArray([], STAGE_EVENT_NAMES, true), WINDOW_E
 var INPUT_NODELIST = ['TEXTAREA', 'INPUT'];
 var behaviorsMap = {
     clearState: {
-        onMouseDown: function (e, model) {
-            if (!model.isSelecting(e) && e.button === EVT_LEFTCLICK)
-                model.clearSelect();
-            if (e.button === EVT_LEFTCLICK) {
-                model.contextMenuVisible = false;
-            }
+        onMouseDown: {
+            handler: function (e, model) {
+                if (!model.isSelecting(e) && e.button === EVT_LEFTCLICK)
+                    model.clearSelect();
+                if (e.button === EVT_LEFTCLICK) {
+                    model.contextMenuVisible = false;
+                }
+            },
+            mountTarget: 'stage'
         },
     },
     link: {
-        onMouseUp: function (e, model) {
-            model.clearLinkBuffer();
+        onMouseUp: {
+            handler: function (e, model) {
+                model.clearLinkBuffer();
+            },
+            mountTarget: 'stage'
         },
-        onMouseMove: function (e, model) {
-            var link = model.buffer.link;
-            if (!link.source)
-                return;
-            model.setLinkingPosition(model.getCursorCoord(e));
+        onMouseMove: {
+            handler: function (e, model) {
+                var link = model.buffer.link;
+                if (!link.source)
+                    return;
+                model.setLinkingPosition(model.getCursorCoord(e));
+            },
+            mountTarget: 'stage'
         }
     },
     select: {
-        init: function (model) {
-            // 非受控设置select的节点
-            var prevSelectCells = [];
-            autorun(function () {
-                // 上次存在这次不存在的就是需要设置为false的
-                var toFalseCells = lodash.exports.without.apply(void 0, __spreadArray([prevSelectCells], model.selectCells, false));
-                // 这次存在上次不存在的就是需要设置为true的
-                var toTrueCells = lodash.exports.without.apply(void 0, __spreadArray([model.selectCells], prevSelectCells, false));
-                toFalseCells.forEach(function (cellId) {
-                    var cellModel = model.getCellModel(cellId);
-                    cellModel && (cellModel.isSelect = false);
+        init: {
+            handler: function (model) {
+                // 非受控设置select的节点
+                var prevSelectCells = [];
+                autorun(function () {
+                    // 上次存在这次不存在的就是需要设置为false的
+                    var toFalseCells = lodash.exports.without.apply(void 0, __spreadArray([prevSelectCells], model.selectCells, false));
+                    // 这次存在上次不存在的就是需要设置为true的
+                    var toTrueCells = lodash.exports.without.apply(void 0, __spreadArray([model.selectCells], prevSelectCells, false));
+                    toFalseCells.forEach(function (cellId) {
+                        var cellModel = model.getCellModel(cellId);
+                        cellModel && (cellModel.isSelect = false);
+                    });
+                    toTrueCells.forEach(function (cellId) {
+                        var cellModel = model.getCellModel(cellId);
+                        cellModel && (cellModel.isSelect = true);
+                    });
+                    prevSelectCells = model.selectCells.slice();
                 });
-                toTrueCells.forEach(function (cellId) {
-                    var cellModel = model.getCellModel(cellId);
-                    cellModel && (cellModel.isSelect = true);
-                });
-                prevSelectCells = model.selectCells.slice();
-            });
+            }
         }
     },
     drag: {
-        onMouseMove: function (e, model) {
-            var select = model.buffer.select;
-            // 这里是 e.movementX 不是 movement.x，如果用movement.x，那每一次移动，上次的dragStart实际已经不适用于新的坐标系了，而e.movement就不会，只记录从鼠标开始到结束
-            var movement = {
-                x: e.movementX / model.scale,
-                y: e.movementY / model.scale
-            };
-            // 移动整个stage
-            var multiSelectCanDrag = model.multiSelect && model.hotKey["Space"] && model.hotKey['LeftMouseDown'];
-            var singleSelectCanDrag = !model.multiSelect && model.hotKey["LeftMouseDown"];
-            if ((multiSelectCanDrag || singleSelectCanDrag) && !model.selectCells.length) {
-                model.setStagePosition(model.x + movement.x, model.y + movement.y);
-            }
-            if (select.isSelecting) {
-                model.selectCells.forEach(function (id) {
-                    var cellData = model.getCellData(id);
-                    if (cellData.cellType === 'node' && !(cellData.drag === false)) {
-                        model.setCellData(cellData.id, {
-                            x: cellData.x + movement.x,
-                            y: cellData.y + movement.y,
-                        });
-                    }
-                });
-            }
+        onMouseMove: {
+            handler: function (e, model) {
+                var select = model.buffer.select;
+                // 这里是 e.movementX 不是 movement.x，如果用movement.x，那每一次移动，上次的dragStart实际已经不适用于新的坐标系了，而e.movement就不会，只记录从鼠标开始到结束
+                var movement = {
+                    x: e.movementX / model.scale,
+                    y: e.movementY / model.scale
+                };
+                // 移动整个stage
+                var multiSelectCanDrag = model.multiSelect && model.hotKey["Space"] && model.hotKey['LeftMouseDown'];
+                var singleSelectCanDrag = !model.multiSelect && model.hotKey["LeftMouseDown"];
+                if ((multiSelectCanDrag || singleSelectCanDrag) && !model.selectCells.length) {
+                    model.setStagePosition(model.x + movement.x, model.y + movement.y);
+                }
+                if (select.isSelecting) {
+                    model.selectCells.forEach(function (id) {
+                        var cellData = model.getCellData(id);
+                        if (cellData.cellType === 'node' && !(cellData.drag === false)) {
+                            model.setCellData(cellData.id, {
+                                x: cellData.x + movement.x,
+                                y: cellData.y + movement.y,
+                            });
+                        }
+                    });
+                }
+            },
+            mountTarget: 'stage'
         },
-        onMouseUp: function (e, model) {
-            var select = model.buffer.select;
-            if (select.isSelecting) {
-                model.selectCells.forEach(function (id) {
-                    var cellData = model.getCellData(id);
-                    if (cellData.cellType === 'node' && !(cellData.drag === false)) {
-                        if (model.grid)
-                            model.setCellData(cellData.id, model.snap({
-                                x: cellData.x,
-                                y: cellData.y
-                            }));
-                    }
-                });
-                select.isSelecting = false;
-                select.selectingDom = undefined;
-            }
-        }
+        onMouseUp: {
+            handler: function (e, model) {
+                var select = model.buffer.select;
+                if (select.isSelecting) {
+                    model.selectCells.forEach(function (id) {
+                        var cellData = model.getCellData(id);
+                        if (cellData.cellType === 'node' && !(cellData.drag === false)) {
+                            if (model.grid)
+                                model.setCellData(cellData.id, model.snap({
+                                    x: cellData.x,
+                                    y: cellData.y
+                                }));
+                        }
+                    });
+                    select.isSelecting = false;
+                    select.selectingDom = undefined;
+                }
+            },
+            mountTarget: 'stage'
+        },
     },
     scale: {
-        onWheel: function (e, model) {
-            /**
-             * 获取当前坐标 p0
-             * 获取鼠标当前位置在scale后的坐标 p1
-             * p1与p0的差
-             */
-            var scaleBy = model.scaleBy;
-            e.preventDefault();
-            e.stopPropagation();
-            var oldScale = model.scale;
-            var oldPointer = model.getCursorCoord(e);
-            // how to scale? Zoom in? Or zoom out?
-            var direction = e.deltaY > 0 ? 1 : -1;
-            // in that case lets revert direction
-            if (e.ctrlKey) {
-                direction = -direction;
-            }
-            var newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy;
-            var scaleTo = direction > 0 ? scaleBy : (1 / scaleBy);
-            model.setStageScale(newScale);
-            var preCursorNowPointer = {
-                x: (oldPointer.x + model.x) / scaleTo - model.x,
-                y: (oldPointer.y + model.y) / scaleTo - model.y,
-            };
-            // 用原本的pointer的坐标减去之前鼠标相同位置的现在pointer画布坐标
-            var moveBack = {
-                x: oldPointer.x - preCursorNowPointer.x,
-                y: oldPointer.y - preCursorNowPointer.y
-            };
-            model.setStagePosition(model.x - moveBack.x, model.y - moveBack.y);
+        onWheel: {
+            handler: function (e, model) {
+                /**
+                 * 获取当前坐标 p0
+                 * 获取鼠标当前位置在scale后的坐标 p1
+                 * p1与p0的差
+                 */
+                var scaleBy = model.scaleBy;
+                e.preventDefault();
+                e.stopPropagation();
+                var oldScale = model.scale;
+                var oldPointer = model.getCursorCoord(e);
+                // how to scale? Zoom in? Or zoom out?
+                var direction = e.deltaY > 0 ? 1 : -1;
+                // in that case lets revert direction
+                if (e.ctrlKey) {
+                    direction = -direction;
+                }
+                var newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy;
+                var scaleTo = direction > 0 ? scaleBy : (1 / scaleBy);
+                model.setStageScale(newScale);
+                var preCursorNowPointer = {
+                    x: (oldPointer.x + model.x) / scaleTo - model.x,
+                    y: (oldPointer.y + model.y) / scaleTo - model.y,
+                };
+                // 用原本的pointer的坐标减去之前鼠标相同位置的现在pointer画布坐标
+                var moveBack = {
+                    x: oldPointer.x - preCursorNowPointer.x,
+                    y: oldPointer.y - preCursorNowPointer.y
+                };
+                model.setStagePosition(model.x - moveBack.x, model.y - moveBack.y);
+            },
+            mountTarget: 'stage',
+            passive: true
         }
     },
     multiSelect: {
-        onMouseDown: function (e, model) {
-            // if (model.hotKey['Space']) return
-            if (model.isSelecting(e))
-                return;
-            if (!model.hotKey["Space"] && e.button === EVT_LEFTCLICK) {
+        onMouseDown: {
+            handler: function (e, model) {
+                // if (model.hotKey['Space']) return
+                if (model.isSelecting(e))
+                    return;
+                if (!model.hotKey["Space"] && e.button === EVT_LEFTCLICK) {
+                    var pos = model.getCursorCoord(e);
+                    model.setMultiSelect({
+                        start: {
+                            x: pos.x,
+                            y: pos.y,
+                        },
+                        end: {
+                            x: pos.x,
+                            y: pos.y,
+                        },
+                    });
+                }
+            },
+            mountTarget: 'stage'
+        },
+        onMouseUp: {
+            handler: function (e, model) {
+                if (model.buffer.select.isSelecting)
+                    return;
                 var pos = model.getCursorCoord(e);
                 model.setMultiSelect({
                     start: {
@@ -47209,128 +47250,128 @@ var behaviorsMap = {
                         x: pos.x,
                         y: pos.y,
                     },
-                });
-            }
+                }, true);
+            },
+            mountTarget: 'stage'
         },
-        onMouseUp: function (e, model) {
-            if (model.buffer.select.isSelecting)
-                return;
-            var pos = model.getCursorCoord(e);
-            model.setMultiSelect({
-                start: {
-                    x: pos.x,
-                    y: pos.y,
-                },
-                end: {
-                    x: pos.x,
-                    y: pos.y,
-                },
-            }, true);
-        },
-        onMouseMove: function (e, model) {
-            if (model.buffer.select.isSelecting)
-                return;
-            if (!model.hotKey["Space"] && model.hotKey["LeftMouseDown"]) {
-                var pos = model.getCursorCoord(e);
-                model.setMultiSelect({
-                    end: {
-                        x: pos.x,
-                        y: pos.y,
-                    },
-                });
-            }
+        onMouseMove: {
+            handler: function (e, model) {
+                if (model.buffer.select.isSelecting)
+                    return;
+                if (!model.hotKey["Space"] && model.hotKey["LeftMouseDown"]) {
+                    var pos = model.getCursorCoord(e);
+                    model.setMultiSelect({
+                        end: {
+                            x: pos.x,
+                            y: pos.y,
+                        },
+                    });
+                }
+            },
+            mountTarget: 'stage'
         }
     },
     hotkeys: {
-        onMouseDown: function (e, model) {
-            switch (e.button) {
-                case EVT_LEFTCLICK:
-                    model.setHotKey('LeftMouseDown', true);
-                    break;
-                case EVT_RIGHTCLICK: model.setHotKey('RightMouseDown', true);
-            }
+        onMouseDown: {
+            handler: function (e, model) {
+                switch (e.button) {
+                    case EVT_LEFTCLICK:
+                        model.setHotKey('LeftMouseDown', true);
+                        break;
+                    case EVT_RIGHTCLICK: model.setHotKey('RightMouseDown', true);
+                }
+            },
+            mountTarget: 'stage'
         },
-        onMouseUp: function (e, model) {
-            // @ts-ignore
-            switch (e.button) {
-                case EVT_LEFTCLICK: model.setHotKey('LeftMouseDown', false);
-            }
+        onMouseUp: {
+            handler: function (e, model) {
+                // @ts-ignore
+                switch (e.button) {
+                    case EVT_LEFTCLICK: model.setHotKey('LeftMouseDown', false);
+                }
+            },
+            mountTarget: 'stage'
         },
-        onKeyDown: function (e, model) {
-            switch (e.code) {
-                case 'Space':
-                    if (INPUT_NODELIST.includes(e.target.nodeName))
-                        return;
-                    e.preventDefault();
-                    model.setHotKey(e.code, true);
-            }
+        onKeyDown: {
+            handler: function (e, model) {
+                switch (e.code) {
+                    case 'Space':
+                        if (INPUT_NODELIST.includes(e.target.nodeName))
+                            return;
+                        e.preventDefault();
+                        model.setHotKey(e.code, true);
+                }
+            },
+            mountTarget: 'window'
         },
-        onKeyUp: function (e, model) {
-            switch (e.code) {
-                case 'Space':
-                    if (INPUT_NODELIST.includes(e.target.nodeName))
-                        return;
-                    e.preventDefault();
-                    model.setHotKey(e.code, false);
-            }
+        onKeyUp: {
+            handler: function (e, model) {
+                switch (e.code) {
+                    case 'Space':
+                        if (INPUT_NODELIST.includes(e.target.nodeName))
+                            return;
+                        e.preventDefault();
+                        model.setHotKey(e.code, false);
+                }
+            },
+            mountTarget: 'window'
         }
     },
 };
-var PASSIVE_EVENTS = ['onWheel'];
 var mountEvents = function (behaviors, model) {
-    var events = {
-        'onMouseMove': undefined, 'onMouseDown': undefined, 'onClick': undefined, 'onWheel': undefined
+    var stageEvents = {
+        onMouseDown: [],
+        onMouseUp: [],
+        onMouseMove: [],
+        onWheel: [],
+        onClick: []
     };
-    if (!model.isInitEvents) {
-        for (var behavior in behaviorsMap) {
-            var initFn = void 0;
-            if (initFn = behaviorsMap[behavior]['init']) {
-                initFn(model);
+    var _loop_1 = function (behaviorName) {
+        var behaviorConfig = behaviorsMap[behaviorName];
+        Object.keys(behaviorConfig).forEach(function (eventName) {
+            if (eventName === 'init' && !model.isInitEvents) {
+                behaviorConfig[eventName].handler(model);
             }
-        }
-        var _loop_1 = function (eventKey) {
-            behaviors.forEach(function (behavior) {
-                var cb = behaviorsMap[behavior][eventKey];
-                if (cb) {
-                    window.addEventListener(eventKey.toLocaleLowerCase().replace('on', ''), function (e) { return cb(e, model); });
-                }
-            });
-        };
-        for (var _i = 0, WINDOW_EVENT_NAMES_1 = WINDOW_EVENT_NAMES; _i < WINDOW_EVENT_NAMES_1.length; _i++) {
-            var eventKey = WINDOW_EVENT_NAMES_1[_i];
-            _loop_1(eventKey);
-        }
-    }
-    var _loop_2 = function (eventKey) {
-        if (PASSIVE_EVENTS.includes(eventKey)) {
-            if (!model.isInitEvents) {
-                behaviors.forEach(function (behavior) {
-                    var cb = behaviorsMap[behavior][eventKey];
-                    if (cb) {
+            var eventConfig = behaviorConfig[eventName];
+            var handler = eventConfig.handler, mountTarget = eventConfig.mountTarget, passive = eventConfig.passive;
+            switch (mountTarget) {
+                case 'stage': {
+                    if (passive && !model.isInitEvents) {
                         Promise.resolve().then(function () {
                             var _a;
-                            (_a = model.refs.stageRef) === null || _a === void 0 ? void 0 : _a.addEventListener(eventKey.replace('on', '').toLocaleLowerCase(), function (e) { return cb(e, model); });
+                            (_a = model.refs.stageRef) === null || _a === void 0 ? void 0 : _a.addEventListener(eventName.replace('on', '').toLocaleLowerCase(), function (e) { return handler(e, model); });
                         });
                     }
-                });
+                    if (stageEvents[eventName]) {
+                        stageEvents[eventName].push(handler);
+                    }
+                    else
+                        stageEvents[eventName] = [handler];
+                    break;
+                }
+                case 'window': {
+                    if (!model.isInitEvents) {
+                        window.addEventListener(eventName.toLocaleLowerCase().replace('on', ''), function (e) { return handler(e, model); });
+                    }
+                }
             }
-        }
-        else {
-            events[eventKey] = function (e) {
-                behaviors.forEach(function (behavior) {
-                    var cb = behaviorsMap[behavior][eventKey];
-                    if (cb)
-                        cb(e, model);
-                });
-            };
-        }
+        });
     };
-    for (var _a = 0, STAGE_EVENT_NAMES_1 = STAGE_EVENT_NAMES; _a < STAGE_EVENT_NAMES_1.length; _a++) {
-        var eventKey = STAGE_EVENT_NAMES_1[_a];
-        _loop_2(eventKey);
+    for (var _i = 0, behaviors_1 = behaviors; _i < behaviors_1.length; _i++) {
+        var behaviorName = behaviors_1[_i];
+        _loop_1(behaviorName);
     }
+    var stageEventsHandler = {};
+    Object.keys(stageEvents).forEach(function (eventName) {
+        stageEventsHandler[eventName] = function (e) {
+            stageEvents[eventName].forEach(function (callback) {
+                callback(e, model);
+            });
+        };
+    });
+    console.log({ stageEventsHandler: stageEventsHandler, stageEvents: stageEvents });
     model.isInitEvents = true;
-    return events;
+    return stageEventsHandler;
 };
 
 var PositionWrapper = observer$1(function (_a) {

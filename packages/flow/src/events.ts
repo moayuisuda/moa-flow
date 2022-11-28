@@ -1,9 +1,9 @@
-import Model from "./Model";
+import Model, { FlowModel } from "./Model";
 import { autorun } from "mobx"
 import { without } from 'lodash';
 import { NodeDataType } from "./cells/Node";
 import { CellDataType, CellModel } from './cells/Cell';
-import { EVT_LEFTCLICK, EVT_RIGHTCLICK, STAGE_EVENT_NAMES, WINDOW_EVENT_NAMES } from './constants';
+import { EVT_LEFTCLICK, EVT_RIGHTCLICK, STAGE_EVENT_NAMES, WINDOW_EVENT_NAMES, EVENT_NAMES } from './constants';
 import { BehaviorName, StageEventName, Vector2d, WindowEventName } from "./typings/common";
 
 type StageEventType = React.WheelEvent | React.MouseEvent
@@ -20,161 +20,203 @@ interface InitFn {
     (model: Model): any
 }
 
+type MountTarget = 'stage' | 'window'
+
 const INPUT_NODELIST = ['TEXTAREA', 'INPUT']
 
-type EventMaps = Partial<{
-    [key in StageEventName]: StageEventFn
-} | {
-        [key in WindowEventName]: WindowEventFn
-    } | {
-        'init': InitFn
-    }>
+type EventMaps = Record<BehaviorName, {
+    [index: string]: {
+        handler: (e: any, model: FlowModel) => void | ((model: FlowModel) => void),
+        mountTarget?: MountTarget,
+        passive?: boolean
+    }
+}>
 
-export const behaviorsMap: Record<BehaviorName, EventMaps> = {
+export const behaviorsMap: EventMaps = {
     clearState: {
-        onMouseDown: (e, model) => {
-            if (!model.isSelecting(e) && e.button === EVT_LEFTCLICK)
-                model.clearSelect();
+        onMouseDown: {
+            handler: (e, model) => {
+                if (!model.isSelecting(e) && e.button === EVT_LEFTCLICK)
+                    model.clearSelect();
 
-            if (e.button === EVT_LEFTCLICK) {
-                model.contextMenuVisible = false
-            }
+                if (e.button === EVT_LEFTCLICK) {
+                    model.contextMenuVisible = false
+                }
+            },
+            mountTarget: 'stage'
         },
     },
     link: {
-        onMouseUp: (e, model) => {
-            model.clearLinkBuffer();
+        onMouseUp: {
+            handler: (e, model) => {
+                model.clearLinkBuffer();
+            },
+            mountTarget: 'stage'
         },
-        onMouseMove: (e: React.MouseEvent, model) => {
-            const {
-                buffer: { link },
-            } = model;
+        onMouseMove: {
+            handler: (e: React.MouseEvent, model) => {
+                const {
+                    buffer: { link },
+                } = model;
 
-            if (!link.source) return;
-            model.setLinkingPosition(model.getCursorCoord(e));
+                if (!link.source) return;
+                model.setLinkingPosition(model.getCursorCoord(e));
+            },
+            mountTarget: 'stage'
         }
     },
     select: {
-        init: (model) => {
-            // 非受控设置select的节点
-            let prevSelectCells: string[] = []
-            autorun(() => {
-                // 上次存在这次不存在的就是需要设置为false的
-                const toFalseCells = without(prevSelectCells, ...model.selectCells)
-                // 这次存在上次不存在的就是需要设置为true的
-                const toTrueCells = without(model.selectCells, ...prevSelectCells)
+        init: {
+            handler: (model) => {
+                // 非受控设置select的节点
+                let prevSelectCells: string[] = []
+                autorun(() => {
+                    // 上次存在这次不存在的就是需要设置为false的
+                    const toFalseCells = without(prevSelectCells, ...model.selectCells)
+                    // 这次存在上次不存在的就是需要设置为true的
+                    const toTrueCells = without(model.selectCells, ...prevSelectCells)
 
-                toFalseCells.forEach(cellId => {
-                    const cellModel = model.getCellModel(cellId) as CellModel
-                    cellModel && (cellModel.isSelect = false)
+                    toFalseCells.forEach(cellId => {
+                        const cellModel = model.getCellModel(cellId) as CellModel
+                        cellModel && (cellModel.isSelect = false)
+                    })
+
+                    toTrueCells.forEach(cellId => {
+                        const cellModel = model.getCellModel(cellId) as CellModel
+                        cellModel && (cellModel.isSelect = true)
+                    })
+
+                    prevSelectCells = model.selectCells.slice();
                 })
-
-                toTrueCells.forEach(cellId => {
-                    const cellModel = model.getCellModel(cellId) as CellModel
-                    cellModel && (cellModel.isSelect = true)
-                })
-
-                prevSelectCells = model.selectCells.slice();
-            })
+            }
         }
     },
     drag: {
-        onMouseMove: (e, model) => {
-            const { select } = model.buffer
-            // 这里是 e.movementX 不是 movement.x，如果用movement.x，那每一次移动，上次的dragStart实际已经不适用于新的坐标系了，而e.movement就不会，只记录从鼠标开始到结束
-            const movement = {
-                x: e.movementX / model.scale,
-                y: e.movementY / model.scale
-            }
+        onMouseMove: {
+            handler: (e, model) => {
+                const { select } = model.buffer
+                // 这里是 e.movementX 不是 movement.x，如果用movement.x，那每一次移动，上次的dragStart实际已经不适用于新的坐标系了，而e.movement就不会，只记录从鼠标开始到结束
+                const movement = {
+                    x: e.movementX / model.scale,
+                    y: e.movementY / model.scale
+                }
 
-            // 移动整个stage
-            const multiSelectCanDrag = model.multiSelect && model.hotKey["Space"] && model.hotKey['LeftMouseDown']
-            const singleSelectCanDrag = !model.multiSelect && model.hotKey["LeftMouseDown"]
-            if ((multiSelectCanDrag || singleSelectCanDrag) && !model.selectCells.length) {
-                model.setStagePosition(
-                    model.x + movement.x,
-                    model.y + movement.y
-                );
-            }
+                // 移动整个stage
+                const multiSelectCanDrag = model.multiSelect && model.hotKey["Space"] && model.hotKey['LeftMouseDown']
+                const singleSelectCanDrag = !model.multiSelect && model.hotKey["LeftMouseDown"]
+                if ((multiSelectCanDrag || singleSelectCanDrag) && !model.selectCells.length) {
+                    model.setStagePosition(
+                        model.x + movement.x,
+                        model.y + movement.y
+                    );
+                }
 
-            if (select.isSelecting) {
-                model.selectCells.forEach(id => {
-                    const cellData = model.getCellData(id) as NodeDataType & CellDataType
-                    if (cellData.cellType === 'node' && !(cellData.drag === false)) {
-                        model.setCellData(cellData.id, {
-                            x: cellData.x + movement.x,
-                            y: cellData.y + movement.y,
-                        });
-                    }
-                })
-            }
+                if (select.isSelecting) {
+                    model.selectCells.forEach(id => {
+                        const cellData = model.getCellData(id) as NodeDataType & CellDataType
+                        if (cellData.cellType === 'node' && !(cellData.drag === false)) {
+                            model.setCellData(cellData.id, {
+                                x: cellData.x + movement.x,
+                                y: cellData.y + movement.y,
+                            });
+                        }
+                    })
+                }
+            },
+            mountTarget: 'stage'
         },
-        onMouseUp: (e, model) => {
-            const { select } = model.buffer
-            if (select.isSelecting) {
-                model.selectCells.forEach(id => {
-                    const cellData = model.getCellData(id) as NodeDataType & CellDataType
+        onMouseUp: {
+            handler: (e, model) => {
+                const { select } = model.buffer
+                if (select.isSelecting) {
+                    model.selectCells.forEach(id => {
+                        const cellData = model.getCellData(id) as NodeDataType & CellDataType
 
-                    if (cellData.cellType === 'node' && !(cellData.drag === false)) {
-                        if (model.grid)
-                            model.setCellData(cellData.id, model.snap({
-                                x: cellData.x,
-                                y: cellData.y
-                            }));
-                    }
-                })
+                        if (cellData.cellType === 'node' && !(cellData.drag === false)) {
+                            if (model.grid)
+                                model.setCellData(cellData.id, model.snap({
+                                    x: cellData.x,
+                                    y: cellData.y
+                                }));
+                        }
+                    })
 
-                select.isSelecting = false
-                select.selectingDom = undefined
-            }
-        }
+                    select.isSelecting = false
+                    select.selectingDom = undefined
+                }
+            },
+            mountTarget: 'stage'
+        },
     },
     scale: {
-        onWheel: (e: React.WheelEvent, model) => {
-            /**
-             * 获取当前坐标 p0
-             * 获取鼠标当前位置在scale后的坐标 p1
-             * p1与p0的差
-             */
-            let scaleBy = model.scaleBy
-            e.preventDefault()
-            e.stopPropagation()
+        onWheel: {
+            handler: (e: React.WheelEvent, model) => {
+                /**
+                 * 获取当前坐标 p0
+                 * 获取鼠标当前位置在scale后的坐标 p1
+                 * p1与p0的差
+                 */
+                let scaleBy = model.scaleBy
+                e.preventDefault()
+                e.stopPropagation()
 
-            const oldScale = model.scale;
-            const oldPointer = model.getCursorCoord(e) as Vector2d;
+                const oldScale = model.scale;
+                const oldPointer = model.getCursorCoord(e) as Vector2d;
 
-            // how to scale? Zoom in? Or zoom out?
-            let direction = e.deltaY > 0 ? 1 : -1;
+                // how to scale? Zoom in? Or zoom out?
+                let direction = e.deltaY > 0 ? 1 : -1;
 
-            // in that case lets revert direction
-            if (e.ctrlKey) {
-                direction = -direction;
-            }
+                // in that case lets revert direction
+                if (e.ctrlKey) {
+                    direction = -direction;
+                }
 
-            const newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy;
-            const scaleTo = direction > 0 ? scaleBy : (1 / scaleBy)
+                const newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy;
+                const scaleTo = direction > 0 ? scaleBy : (1 / scaleBy)
 
-            model.setStageScale(newScale);
+                model.setStageScale(newScale);
 
-            const preCursorNowPointer = {
-                x: (oldPointer.x + model.x) / scaleTo - model.x,
-                y: (oldPointer.y + model.y) / scaleTo - model.y,
-            }
-            // 用原本的pointer的坐标减去之前鼠标相同位置的现在pointer画布坐标
-            const moveBack = {
-                x: oldPointer.x - preCursorNowPointer.x,
-                y: oldPointer.y - preCursorNowPointer.y
-            }
+                const preCursorNowPointer = {
+                    x: (oldPointer.x + model.x) / scaleTo - model.x,
+                    y: (oldPointer.y + model.y) / scaleTo - model.y,
+                }
+                // 用原本的pointer的坐标减去之前鼠标相同位置的现在pointer画布坐标
+                const moveBack = {
+                    x: oldPointer.x - preCursorNowPointer.x,
+                    y: oldPointer.y - preCursorNowPointer.y
+                }
 
-            model.setStagePosition(model.x - moveBack.x, model.y - moveBack.y);
+                model.setStagePosition(model.x - moveBack.x, model.y - moveBack.y);
+            },
+            mountTarget: 'stage',
+            passive: true
         }
     },
     multiSelect: {
-        onMouseDown: (e, model) => {
-            // if (model.hotKey['Space']) return
-            if (model.isSelecting(e)) return
-            if (!model.hotKey["Space"] && e.button === EVT_LEFTCLICK) {
-                const pos = model.getCursorCoord(e);
+        onMouseDown: {
+            handler: (e, model) => {
+                // if (model.hotKey['Space']) return
+                if (model.isSelecting(e)) return
+                if (!model.hotKey["Space"] && e.button === EVT_LEFTCLICK) {
+                    const pos = model.getCursorCoord(e);
+                    model.setMultiSelect({
+                        start: {
+                            x: pos.x,
+                            y: pos.y,
+                        },
+                        end: {
+                            x: pos.x,
+                            y: pos.y,
+                        },
+                    });
+                }
+            },
+            mountTarget: 'stage'
+        },
+        onMouseUp: {
+            handler: (e, model) => {
+                if (model.buffer.select.isSelecting) return
+                const pos = model.getCursorCoord(e)
                 model.setMultiSelect({
                     start: {
                         x: pos.x,
@@ -184,127 +226,121 @@ export const behaviorsMap: Record<BehaviorName, EventMaps> = {
                         x: pos.x,
                         y: pos.y,
                     },
-                });
-            }
+                }, true);
+            },
+            mountTarget: 'stage'
         },
-        onMouseUp: (e, model) => {
-            if (model.buffer.select.isSelecting) return
-            const pos = model.getCursorCoord(e)
-            model.setMultiSelect({
-                start: {
-                    x: pos.x,
-                    y: pos.y,
-                },
-                end: {
-                    x: pos.x,
-                    y: pos.y,
-                },
-            }, true);
-        },
-        onMouseMove: (e, model) => {
-            if (model.buffer.select.isSelecting) return
-            if (!model.hotKey["Space"] && model.hotKey["LeftMouseDown"]) {
-                const pos = model.getCursorCoord(e);
-                model.setMultiSelect({
-                    end: {
-                        x: pos.x,
-                        y: pos.y,
-                    },
-                });
-            }
+        onMouseMove: {
+            handler: (e, model) => {
+                if (model.buffer.select.isSelecting) return
+                if (!model.hotKey["Space"] && model.hotKey["LeftMouseDown"]) {
+                    const pos = model.getCursorCoord(e);
+                    model.setMultiSelect({
+                        end: {
+                            x: pos.x,
+                            y: pos.y,
+                        },
+                    });
+                }
+            },
+            mountTarget: 'stage'
         }
     },
     hotkeys: {
-        onMouseDown: (e, model) => {
-            switch (e.button) {
-                case EVT_LEFTCLICK: model.setHotKey('LeftMouseDown', true); break;
-                case EVT_RIGHTCLICK: model.setHotKey('RightMouseDown', true)
-            }
+        onMouseDown: {
+            handler: (e, model) => {
+                switch (e.button) {
+                    case EVT_LEFTCLICK: model.setHotKey('LeftMouseDown', true); break;
+                    case EVT_RIGHTCLICK: model.setHotKey('RightMouseDown', true)
+                }
+            },
+            mountTarget: 'stage'
         },
-        onMouseUp: (e, model) => {
-            // @ts-ignore
-            switch (e.button) {
-                case EVT_LEFTCLICK: model.setHotKey('LeftMouseDown', false)
-            }
+        onMouseUp: {
+            handler: (e, model) => {
+                // @ts-ignore
+                switch (e.button) {
+                    case EVT_LEFTCLICK: model.setHotKey('LeftMouseDown', false)
+                }
+            },
+            mountTarget: 'stage'
         },
-        onKeyDown: (e, model) => {
-            switch (e.code) {
-                case 'Space':
-                    if (INPUT_NODELIST.includes((e.target as HTMLElement).nodeName)) return
-                    e.preventDefault()
-                    model.setHotKey(e.code, true)
-            }
+        onKeyDown: {
+            handler: (e, model) => {
+                switch (e.code) {
+                    case 'Space':
+                        if (INPUT_NODELIST.includes((e.target as HTMLElement).nodeName)) return
+                        e.preventDefault()
+                        model.setHotKey(e.code, true)
+                }
+            },
+            mountTarget: 'window'
         },
-        onKeyUp: (e, model) => {
-            switch (e.code) {
-                case 'Space':
-                    if (INPUT_NODELIST.includes(((e.target as HTMLElement)).nodeName)) return
-                    e.preventDefault()
-                    model.setHotKey(e.code, false)
-            }
+        onKeyUp: {
+            handler: (e, model) => {
+                switch (e.code) {
+                    case 'Space':
+                        if (INPUT_NODELIST.includes(((e.target as HTMLElement)).nodeName)) return
+                        e.preventDefault()
+                        model.setHotKey(e.code, false)
+                }
+            },
+            mountTarget: 'window'
         }
     },
 }
 
-
-const PASSIVE_EVENTS = ['onWheel']
-
 export const mountEvents = (behaviors: BehaviorName[], model: Model) => {
-    const events: Record<StageEventName, React.MouseEventHandler<HTMLDivElement> | undefined> = {
-        'onMouseMove': undefined, 'onMouseDown': undefined, 'onClick': undefined, 'onWheel': undefined
+    const stageEvents: Record<string, Function[]> = {
+        onMouseDown: [],
+        onMouseUp: [],
+        onMouseMove: [],
+        onWheel: [],
+        onClick: []
     }
 
-    if (!model.isInitEvents) {
-        for (let behavior in behaviorsMap) {
-            let initFn;
-            if (initFn = (behaviorsMap[behavior as BehaviorName] as {
-                'init': InitFn
-            })['init']) {
-                initFn(model)
+    for (let behaviorName of behaviors) {
+        const behaviorConfig = behaviorsMap[behaviorName]
+        Object.keys(behaviorConfig).forEach(eventName => {
+            if (eventName === 'init' && !model.isInitEvents) {
+                (behaviorConfig[eventName].handler as ((model: FlowModel) => void))(model)
             }
-        }
 
-        for (let eventKey of WINDOW_EVENT_NAMES) {
-            behaviors.forEach(behavior => {
-                const cb = (behaviorsMap[behavior as BehaviorName] as {
-                    [key in WindowEventName]: WindowEventFn
-                })[eventKey as WindowEventName] as WindowEventFn
-                if (cb) {
-                    window.addEventListener(eventKey.toLocaleLowerCase().replace('on', ''), e => cb(e as KeyboardEvent, model)
-                    )
-                }
-            })
-        }
-    }
-
-    for (let eventKey of STAGE_EVENT_NAMES) {
-        if (PASSIVE_EVENTS.includes(eventKey)) {
-            if (!model.isInitEvents) {
-                behaviors.forEach(behavior => {
-                    const cb = (behaviorsMap[behavior as BehaviorName] as {
-                        [key in StageEventName]: StageEventFn
-                    })[eventKey as StageEventName] as StageEventFn
-
-                    if (cb) {
+            const eventConfig = behaviorConfig[eventName]
+            const { handler, mountTarget, passive } = eventConfig
+            switch (mountTarget) {
+                case 'stage': {
+                    if (passive && !model.isInitEvents) {
                         Promise.resolve().then(() => {
-                            model.refs.stageRef?.addEventListener(eventKey.replace('on', '').toLocaleLowerCase(), e => cb(e as any, model))
+                            model.refs.stageRef?.addEventListener(eventName.replace('on', '').toLocaleLowerCase(), e => handler(e as any, model))
                         })
                     }
-                })
+                    if (stageEvents[eventName]) {
+                        stageEvents[eventName].push(handler)
+                    } else stageEvents[eventName] = [handler]
+                    break;
+                }
+
+                case 'window': {
+                    if (!model.isInitEvents) {
+                        window.addEventListener(eventName.toLocaleLowerCase().replace('on', ''), e => handler(e as KeyboardEvent, model))
+                    }
+                }
             }
-        } else {
-            events[eventKey as StageEventName] = (e: StageEventType) => {
-                behaviors.forEach(behavior => {
-                    const cb = (behaviorsMap[behavior as BehaviorName] as {
-                        [key in StageEventName]: StageEventFn
-                    })[eventKey as StageEventName] as StageEventFn
-                    if (cb) cb(e, model)
-                })
-            }
-        }
+        })
     }
 
-    model.isInitEvents = true
+    const stageEventsHandler: any = {}
+    Object.keys(stageEvents).forEach(eventName => {
+        stageEventsHandler[eventName] = (e: any) => {
+            stageEvents[eventName as keyof typeof stageEvents].forEach(callback => {
+                callback(e, model)
+            })
+        }
+    })
 
-    return events
+    console.log({ stageEventsHandler, stageEvents })
+    model.isInitEvents = true
+    
+    return stageEventsHandler
 }
