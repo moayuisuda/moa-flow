@@ -1,3 +1,4 @@
+/// <reference types="lodash" />
 import React from "react";
 import { CellDataType, CellModel } from "./cells/Cell";
 import { Port } from "./components";
@@ -58,8 +59,10 @@ export declare class FlowModel {
         RightMouseDown: boolean;
         LeftMouseDown: boolean;
         Space: boolean;
+        MetaLeft: boolean;
+        ControlLeft: boolean;
     };
-    setHotKey: (key: "RightMouseDown" | "LeftMouseDown" | "Space", value: boolean) => void;
+    setHotKey: (key: "RightMouseDown" | "LeftMouseDown" | "Space" | "MetaLeft" | "ControlLeft", value: boolean) => void;
     getLinkingPort: () => string | undefined;
     clearPortEdge: (edgeId: string) => void;
     buffer: {
@@ -209,5 +212,10 @@ export declare class FlowModel {
     registModels: (models: Record<string, typeof CellModel>) => void;
     registComponents: (components: Record<string, React.FC>) => void;
     fitParentSize: () => void;
+    private undoList;
+    private redoList;
+    addStep: import("lodash").DebouncedFunc<() => void>;
+    undo: () => void;
+    redo: () => void;
 }
 export default FlowModel;
