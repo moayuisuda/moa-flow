@@ -1,10 +1,10 @@
-import { cloneDeep, merge, union, without } from "lodash";
+import { cloneDeep, debounce, merge, union, without } from "lodash";
 import { action, makeObservable, observable, computed } from "mobx";
 import React from "react";
 import { v4 } from "uuid";
 import { CellDataType, CellModel } from "./cells/Cell";
 import { Edge, EdgeDataType, EdgeModel } from "./cells/Edge";
-import { NodeDataType, NodeModel, NodeData } from './cells/Node';
+import { NodeDataType, NodeModel, NodeData } from "./cells/Node";
 import { Port, PortDataType } from "./components";
 import { color } from "./theme/style";
 import {
@@ -13,7 +13,13 @@ import {
   Override,
   Vector2d,
 } from "./typings/common";
-import { arrayMove, findIndex, isRectsInterSect, remove, isVector2d } from './utils/util';
+import {
+  arrayMove,
+  findIndex,
+  isRectsInterSect,
+  remove,
+  isVector2d,
+} from "./utils/util";
 import { getRelativeBoundingBox } from "./utils/coords";
 
 type EventSender = (data: any) => void;
@@ -23,6 +29,7 @@ export class FlowModel {
   constructor(eventSender?: EventSender) {
     makeObservable(this);
     if (eventSender) this.eventBus.sender = eventSender;
+    this.addStep();
   }
   setEventSender = (eventSender: EventSender) => {
     this.eventBus.sender = eventSender;
@@ -36,21 +43,23 @@ export class FlowModel {
 
   setCellDataMap(cellData: AllCellDataType) {
     this.cellsDataMap.set(cellData.id, cellData);
-    if (!cellData.id) this.setCellId(cellData)
+    if (!cellData.id) this.setCellId(cellData);
 
     function isNodeDataType(t: AllCellDataType): t is NodeDataType {
       return t.cellType === "node";
     }
 
-    if (cellData.cellType === 'port') return
+    if (cellData.cellType === "port") return;
 
     if (!this.modelFactoriesMap.get(cellData.component)) {
-      console.warn(`[moa-flow] can not find model match component ${cellData.component}, use default NodeModel`)
+      console.warn(
+        `[moa-flow] can not find model match component ${cellData.component}, use default NodeModel`
+      );
     }
 
-    const Model = this.modelFactoriesMap.get(
-      cellData.component
-    ) as typeof CellModel || NodeModel;
+    const Model =
+      (this.modelFactoriesMap.get(cellData.component) as typeof CellModel) ||
+      NodeModel;
     const cellModel = new Model(cellData, this);
     this.cellsModelMap.set(cellData.id, cellModel);
 
@@ -72,11 +81,11 @@ export class FlowModel {
   @action
   trigRender = () => {
     this.pendingRender = false;
-  }
+  };
   @action
   pendRender = () => {
     this.pendingRender = true;
-  }
+  };
 
   @observable private _width: number = 1000;
   @computed
@@ -162,17 +171,20 @@ export class FlowModel {
   setContextMenuPos = (pos: Vector2d) => {
     this.buffer.contextMenu.x = pos.x;
     this.buffer.contextMenu.y = pos.y;
-  }
+  };
 
   @computed
   get contextMenuPos() {
-    const { x, y } = this.buffer.contextMenu
+    const { x, y } = this.buffer.contextMenu;
 
-    const refBounding = this.refs.stageRef?.getBoundingClientRect() as { x: number, y: number }
+    const refBounding = this.refs.stageRef?.getBoundingClientRect() as {
+      x: number;
+      y: number;
+    };
     return {
       x: (x - refBounding.x) / this.scale - this.x,
-      y: (y - refBounding.y) / this.scale - this.y
-    }
+      y: (y - refBounding.y) / this.scale - this.y,
+    };
   }
 
   refs = {
@@ -186,9 +198,16 @@ export class FlowModel {
     RightMouseDown: false,
     LeftMouseDown: false,
     Space: false,
+    MetaLeft: false,
+    ControlLeft: false,
   };
   @action setHotKey = (
-    key: "RightMouseDown" | "LeftMouseDown" | "Space",
+    key:
+      | "RightMouseDown"
+      | "LeftMouseDown"
+      | "Space"
+      | "MetaLeft"
+      | "ControlLeft",
     value: boolean
   ) => {
     this.hotKey[key] = value;
@@ -215,12 +234,12 @@ export class FlowModel {
   buffer = {
     debug: {
       x: 0,
-      y: 0
+      y: 0,
     },
     contextMenu: {
       visible: false,
       x: 0,
-      y: 0
+      y: 0,
     },
     drag: {
       movement: {
@@ -255,10 +274,10 @@ export class FlowModel {
   };
 
   isSelecting(e: any) {
-    const selectingDom = this.buffer.select.selectingDom as any
-    if (!selectingDom) return false
-    if (selectingDom.contains(e.target)) return true
-    else return false
+    const selectingDom = this.buffer.select.selectingDom as any;
+    if (!selectingDom) return false;
+    if (selectingDom.contains(e.target)) return true;
+    else return false;
   }
 
   @action setMultiSelect = (
@@ -373,6 +392,7 @@ export class FlowModel {
 
   emitEvent = (data: any) => {
     this.eventBus.sender?.(data);
+    this.addStep();
   };
 
   @action setStageScale = (scale: number) => {
@@ -394,8 +414,8 @@ export class FlowModel {
 
     if (isCanvasCoord) {
       return {
-        x: ((e.clientX - stageBounds.x) / this.scale - this.x),
-        y: ((e.clientY - stageBounds.y) / this.scale - this.y),
+        x: (e.clientX - stageBounds.x) / this.scale - this.x,
+        y: (e.clientY - stageBounds.y) / this.scale - this.y,
       };
     } else {
       return {
@@ -406,35 +426,42 @@ export class FlowModel {
   };
 
   fit = (nodeWidth: number, nodeHeight: number) => {
-    const { canvasData, width, height } = this
-    const [first, ...others] = canvasData.cells
+    const { canvasData, width, height } = this;
+    const [first, ...others] = canvasData.cells;
 
-    const LT = { x: first.x, y: first.y }
-    const RB = { x: first.x + nodeWidth, y: first.y + nodeHeight }
+    const LT = { x: first.x, y: first.y };
+    const RB = { x: first.x + nodeWidth, y: first.y + nodeHeight };
 
-    others.forEach(cellData => {
-      const { x, y } = cellData
-      if (x <= LT.x) LT.x = x
-      if (y <= LT.y) LT.y = y
-      if (x + nodeWidth >= RB.x) RB.x = x + nodeWidth
-      if (y + nodeHeight >= RB.y) RB.y = y + nodeHeight
-    })
+    others.forEach((cellData) => {
+      const { x, y } = cellData;
+      if (x <= LT.x) LT.x = x;
+      if (y <= LT.y) LT.y = y;
+      if (x + nodeWidth >= RB.x) RB.x = x + nodeWidth;
+      if (y + nodeHeight >= RB.y) RB.y = y + nodeHeight;
+    });
 
-    const boundingRect = { x: LT.x, y: LT.y, width: (RB.x - LT.x), height: (RB.y - LT.y) }
-    const scaleX = width / this.scale / boundingRect.width
-    const scaleY = height / this.scale / boundingRect.height
+    const boundingRect = {
+      x: LT.x,
+      y: LT.y,
+      width: RB.x - LT.x,
+      height: RB.y - LT.y,
+    };
+    const scaleX = width / this.scale / boundingRect.width;
+    const scaleY = height / this.scale / boundingRect.height;
 
     // 取缩小程度更小的值保证包含
-    const newScale = Math.min(scaleX, scaleY)
-    this.scale = (newScale) * this.scale
+    const newScale = Math.min(scaleX, scaleY);
+    this.scale = newScale * this.scale;
 
     // 缩小数值更小的维度，会有剩余空间
-    const spareDir = scaleX < scaleY ? 'y' : 'x'
-    const spareX = spareDir === 'x' ? (width / this.scale - boundingRect.width) / 2 : 0
-    const spareY = spareDir === 'y' ? (height / this.scale - boundingRect.height) / 2 : 0
+    const spareDir = scaleX < scaleY ? "y" : "x";
+    const spareX =
+      spareDir === "x" ? (width / this.scale - boundingRect.width) / 2 : 0;
+    const spareY =
+      spareDir === "y" ? (height / this.scale - boundingRect.height) / 2 : 0;
 
-    this.setStagePosition(-boundingRect.x + spareX, -boundingRect.y + spareY)
-  }
+    this.setStagePosition(-boundingRect.x + spareX, -boundingRect.y + spareY);
+  };
 
   getLocalBBox = (id: string) => {
     const dom = this.wrapperRefsMap.get(id)?.current as HTMLDivElement;
@@ -446,11 +473,11 @@ export class FlowModel {
   };
 
   isCellExist = (id: string) => {
-    return this.canvasData.cells.find(cell => cell.id === id)
-  }
+    return this.canvasData.cells.find((cell) => cell.id === id);
+  };
 
   @action setCanvasData = (canvasData: CanvasDataType) => {
-    canvasData = Object.assign(this.canvasData, canvasData)
+    canvasData = Object.assign(this.canvasData, canvasData);
 
     canvasData.cells.forEach((cellData) => {
       this.insertRuntimeState(cellData);
@@ -587,9 +614,9 @@ export class FlowModel {
 
     if (matchCell.cellType === "edge") this.clearPortEdge(matchCell.id);
     if (matchCell.cellType === "node" && this.getNodeEdges(id).length) {
-      this.getNodeEdges(id).forEach(edgeId => {
-        this.deleCell(edgeId)
-      })
+      this.getNodeEdges(id).forEach((edgeId) => {
+        this.deleCell(edgeId);
+      });
     }
 
     this.selectCells.includes(id) && remove(this.selectCells, id);
@@ -620,44 +647,56 @@ export class FlowModel {
     });
     const edgesData = this.canvasData.cells.filter(
       (cellData: CellDataType) => cellData.cellType === "edge"
-    )
+    );
 
     const result = layout.layout({
       nodes: nodesData,
-      edges: edgesData.map(edgeData => {
+      edges: edgesData.map((edgeData) => {
         return {
           source: this.getCellData(edgeData.source)?.host,
-          target: this.getCellData(edgeData.target)?.host
-        }
-      }
-      )
-    })
+          target: this.getCellData(edgeData.target)?.host,
+        };
+      }),
+    });
 
     if (!result) {
-      console.warn('[moa-flow] setlayout failed')
-      return []
+      console.warn("[moa-flow] setlayout failed");
+      return [];
     }
-    this.canvasData.cells = (result.nodes || []).map((nodeData: NodeDataType) => {
-      return this.grid ? Object.assign(nodeData, this.snap({
-        x: nodeData.x,
-        y: nodeData.y
-      })) : nodeData
-    }).concat(edgesData)
+    this.canvasData.cells = (result.nodes || [])
+      .map((nodeData: NodeDataType) => {
+        return this.grid
+          ? Object.assign(
+              nodeData,
+              this.snap({
+                x: nodeData.x,
+                y: nodeData.y,
+              })
+            )
+          : nodeData;
+      })
+      .concat(edgesData);
+
+    this.emitEvent({
+      type: "data:change",
+    });
   };
 
   getNodesData = () => {
-    return this.canvasData.cells.filter(cell => cell.cellType === 'node')
-  }
+    return this.canvasData.cells.filter((cell) => cell.cellType === "node");
+  };
 
   getEdgesData = () => {
-    return this.canvasData.cells.filter(cell => cell.cellType === 'edge')
-  }
+    return this.canvasData.cells.filter((cell) => cell.cellType === "edge");
+  };
 
   createCellData = (component: string, initOptions?: any) => {
     const id = v4();
 
     const metaData = Object.assign(
-      (this.modelFactoriesMap.get(component) as typeof CellModel || NodeModel).getDefaultData(),
+      (
+        (this.modelFactoriesMap.get(component) as typeof CellModel) || NodeModel
+      ).getDefaultData(),
       {
         component,
       }
@@ -669,8 +708,7 @@ export class FlowModel {
       id,
       visible: true,
       ...initOptions,
-    })
-
+    });
   };
 
   @action addCell = (componentName: string, initOptions?: any) => {
@@ -680,12 +718,12 @@ export class FlowModel {
       newCellData.ports.forEach((port: PortDataType) => {
         Object.assign(port, {
           host: newCellData.id,
-          cellType: 'port',
+          cellType: "port",
           id: port.id || v4(),
           edges: port.edges || [],
           source: undefined,
-          target: undefined
-        })
+          target: undefined,
+        });
       });
     }
 
@@ -737,7 +775,7 @@ export class FlowModel {
     });
     this.clearLinkBuffer();
 
-    return edgeId
+    return edgeId;
   };
 
   @action setStagePosition = (x: number, y: number) => {
@@ -746,7 +784,7 @@ export class FlowModel {
   };
 
   /**
-   * 
+   *
    * @description 调整某个Cell的层级
    */
   @action
@@ -756,7 +794,7 @@ export class FlowModel {
       this.getCellData(id)
     ) as number;
     arrayMove(this.canvasData.cells, oldIndex, index);
-  }
+  };
 
   getCell = (id: string) => {
     return this.cellsMap.get(id);
@@ -817,20 +855,45 @@ export class FlowModel {
   @action
   fitParentSize = () => {
     let parentSize;
-    const dom = this.refs.stageRef
+    const dom = this.refs.stageRef;
     if (dom) {
-      const container = dom.parentNode
+      const container = dom.parentNode;
       if (container) {
-        const style = getComputedStyle(container as any)
+        const style = getComputedStyle(container as any);
         parentSize = {
           width: parseFloat(style.width),
-          height: parseFloat(style.height)
-        }
+          height: parseFloat(style.height),
+        };
       }
     }
 
-    if (parentSize) this.size = parentSize
-  }
+    if (parentSize) this.size = parentSize;
+  };
+
+  private undoList: CanvasDataType[] = [];
+  private redoList: CanvasDataType[] = [];
+
+  addStep = debounce(() => {
+    const cpoiedCanvasData = cloneDeep(this.canvasData);
+    this.undoList = [...this.undoList, cpoiedCanvasData];
+    this.redoList = [];
+  }, 100);
+
+  undo = () => {
+    if (this.undoList.length >= 2) {
+      const current = this.undoList.pop() as CanvasDataType;
+      const lastUndo = this.undoList[this.undoList.length - 1];
+      this.setCanvasData(lastUndo);
+      this.redoList.push(current);
+    }
+  };
+  redo = () => {
+    if (this.redoList.length > 0) {
+      const lastRedo = this.redoList.pop() as CanvasDataType;
+      this.undoList.push(lastRedo);
+      this.setCanvasData(lastRedo);
+    }
+  };
 }
 
 export default FlowModel;

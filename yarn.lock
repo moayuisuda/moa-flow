@@ -364,6 +364,18 @@
     dagre-compound "^0.0.11"
     ml-matrix "^6.5.0"
 
+"@antv/layout@^0.3.2":
+  version "0.3.7"
+  resolved "https://registry.yarnpkg.com/@antv/layout/-/layout-0.3.7.tgz#dcf13188ffb33ee1ce0112a6f21b8d9e5af59055"
+  integrity sha512-bw1EVRLsQOXhQusNjNr/bEbu6k3OCi8jrJiGq4GUR0j+0vmSS6O6q8dAQEpCJ41djM4lixcAuKQnQAvOw/fQzw==
+  dependencies:
+    "@antv/g-webgpu" "0.5.5"
+    "@antv/graphlib" "^1.0.0"
+    d3-force "^2.1.1"
+    d3-quadtree "^2.0.0"
+    dagre-compound "^0.0.11"
+    ml-matrix "^6.5.0"
+
 "@apideck/better-ajv-errors@^0.3.1":
   version "0.3.6"
   resolved "https://registry.npm.alibaba-inc.com/@apideck/better-ajv-errors/download/@apideck/better-ajv-errors-0.3.6.tgz#957d4c28e886a64a8141f7522783be65733ff097"
@@ -5463,7 +5475,7 @@ csstype@^3.0.2:
   resolved "https://registry.npm.alibaba-inc.com/d3-dispatch/download/d3-dispatch-2.0.0.tgz#8a18e16f76dd3fcaef42163c97b926aa9b55e7cf"
   integrity sha1-ihjhb3bdP8rvQhY8l7kmqptV588=
 
-d3-force@^2.0.1:
+d3-force@^2.0.1, d3-force@^2.1.1:
   version "2.1.1"
   resolved "https://registry.npm.alibaba-inc.com/d3-force/download/d3-force-2.1.1.tgz#f20ccbf1e6c9e80add1926f09b51f686a8bc0937"
   integrity sha1-8gzL8ebJ6ArdGSbwm1H2hqi8CTc=
@@ -5472,7 +5484,7 @@ d3-force@^2.0.1:
     d3-quadtree "1 - 2"
     d3-timer "1 - 2"
 
-"d3-quadtree@1 - 2":
+"d3-quadtree@1 - 2", d3-quadtree@^2.0.0:
   version "2.0.0"
   resolved "https://registry.npm.alibaba-inc.com/d3-quadtree/download/d3-quadtree-2.0.0.tgz#edbad045cef88701f6fee3aee8e93fb332d30f9d"
   integrity sha1-7brQRc74hwH2/uOu6Ok/szLTD50=

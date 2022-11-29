@@ -46285,6 +46285,8 @@ var FlowModel = /** @class */ (function () {
             RightMouseDown: false,
             LeftMouseDown: false,
             Space: false,
+            MetaLeft: false,
+            ControlLeft: false,
         };
         this.setHotKey = function (key, value) {
             _this.hotKey[key] = value;
@@ -46303,12 +46305,12 @@ var FlowModel = /** @class */ (function () {
         this.buffer = {
             debug: {
                 x: 0,
-                y: 0
+                y: 0,
             },
             contextMenu: {
                 visible: false,
                 x: 0,
-                y: 0
+                y: 0,
             },
             drag: {
                 movement: {
@@ -46430,6 +46432,7 @@ var FlowModel = /** @class */ (function () {
         this.emitEvent = function (data) {
             var _a, _b;
             (_b = (_a = _this.eventBus).sender) === null || _b === void 0 ? void 0 : _b.call(_a, data);
+            _this.addStep();
         };
         this.setStageScale = function (scale) {
             _this.canvasData.scale = scale;
@@ -46449,8 +46452,8 @@ var FlowModel = /** @class */ (function () {
             var stageBounds = (_a = _this.refs.stageRef) === null || _a === void 0 ? void 0 : _a.getBoundingClientRect();
             if (isCanvasCoord) {
                 return {
-                    x: ((e.clientX - stageBounds.x) / _this.scale - _this.x),
-                    y: ((e.clientY - stageBounds.y) / _this.scale - _this.y),
+                    x: (e.clientX - stageBounds.x) / _this.scale - _this.x,
+                    y: (e.clientY - stageBounds.y) / _this.scale - _this.y,
                 };
             }
             else {
@@ -46476,16 +46479,21 @@ var FlowModel = /** @class */ (function () {
                 if (y + nodeHeight >= RB.y)
                     RB.y = y + nodeHeight;
             });
-            var boundingRect = { x: LT.x, y: LT.y, width: (RB.x - LT.x), height: (RB.y - LT.y) };
+            var boundingRect = {
+                x: LT.x,
+                y: LT.y,
+                width: RB.x - LT.x,
+                height: RB.y - LT.y,
+            };
             var scaleX = width / _this.scale / boundingRect.width;
             var scaleY = height / _this.scale / boundingRect.height;
             // 取缩小程度更小的值保证包含
             var newScale = Math.min(scaleX, scaleY);
-            _this.scale = (newScale) * _this.scale;
+            _this.scale = newScale * _this.scale;
             // 缩小数值更小的维度，会有剩余空间
-            var spareDir = scaleX < scaleY ? 'y' : 'x';
-            var spareX = spareDir === 'x' ? (width / _this.scale - boundingRect.width) / 2 : 0;
-            var spareY = spareDir === 'y' ? (height / _this.scale - boundingRect.height) / 2 : 0;
+            var spareDir = scaleX < scaleY ? "y" : "x";
+            var spareX = spareDir === "x" ? (width / _this.scale - boundingRect.width) / 2 : 0;
+            var spareY = spareDir === "y" ? (height / _this.scale - boundingRect.height) / 2 : 0;
             _this.setStagePosition(-boundingRect.x + spareX, -boundingRect.y + spareY);
         };
         this.getLocalBBox = function (id) {
@@ -46633,26 +46641,33 @@ var FlowModel = /** @class */ (function () {
                     var _a, _b;
                     return {
                         source: (_a = _this.getCellData(edgeData.source)) === null || _a === void 0 ? void 0 : _a.host,
-                        target: (_b = _this.getCellData(edgeData.target)) === null || _b === void 0 ? void 0 : _b.host
+                        target: (_b = _this.getCellData(edgeData.target)) === null || _b === void 0 ? void 0 : _b.host,
                     };
-                })
+                }),
             });
             if (!result) {
-                console.warn('[moa-flow] setlayout failed');
+                console.warn("[moa-flow] setlayout failed");
                 return [];
             }
-            _this.canvasData.cells = (result.nodes || []).map(function (nodeData) {
-                return _this.grid ? Object.assign(nodeData, _this.snap({
-                    x: nodeData.x,
-                    y: nodeData.y
-                })) : nodeData;
-            }).concat(edgesData);
+            _this.canvasData.cells = (result.nodes || [])
+                .map(function (nodeData) {
+                return _this.grid
+                    ? Object.assign(nodeData, _this.snap({
+                        x: nodeData.x,
+                        y: nodeData.y,
+                    }))
+                    : nodeData;
+            })
+                .concat(edgesData);
+            _this.emitEvent({
+                type: "data:change",
+            });
         };
         this.getNodesData = function () {
-            return _this.canvasData.cells.filter(function (cell) { return cell.cellType === 'node'; });
+            return _this.canvasData.cells.filter(function (cell) { return cell.cellType === "node"; });
         };
         this.getEdgesData = function () {
-            return _this.canvasData.cells.filter(function (cell) { return cell.cellType === 'edge'; });
+            return _this.canvasData.cells.filter(function (cell) { return cell.cellType === "edge"; });
         };
         this.createCellData = function (component, initOptions) {
             var id = v4();
@@ -46668,11 +46683,11 @@ var FlowModel = /** @class */ (function () {
                 newCellData.ports.forEach(function (port) {
                     Object.assign(port, {
                         host: newCellData.id,
-                        cellType: 'port',
+                        cellType: "port",
                         id: port.id || v4(),
                         edges: port.edges || [],
                         source: undefined,
-                        target: undefined
+                        target: undefined,
                     });
                 });
             }
@@ -46783,16 +46798,39 @@ var FlowModel = /** @class */ (function () {
                     var style = getComputedStyle(container);
                     parentSize = {
                         width: parseFloat(style.width),
-                        height: parseFloat(style.height)
+                        height: parseFloat(style.height),
                     };
                 }
             }
             if (parentSize)
                 _this.size = parentSize;
         };
+        this.undoList = [];
+        this.redoList = [];
+        this.addStep = lodash.exports.debounce(function () {
+            var cpoiedCanvasData = lodash.exports.cloneDeep(_this.canvasData);
+            _this.undoList = __spreadArray(__spreadArray([], _this.undoList, true), [cpoiedCanvasData], false);
+            _this.redoList = [];
+        }, 100);
+        this.undo = function () {
+            if (_this.undoList.length >= 2) {
+                var current = _this.undoList.pop();
+                var lastUndo = _this.undoList[_this.undoList.length - 1];
+                _this.setCanvasData(lastUndo);
+                _this.redoList.push(current);
+            }
+        };
+        this.redo = function () {
+            if (_this.redoList.length > 0) {
+                var lastRedo = _this.redoList.pop();
+                _this.undoList.push(lastRedo);
+                _this.setCanvasData(lastRedo);
+            }
+        };
         makeObservable(this);
         if (eventSender)
             this.eventBus.sender = eventSender;
+        this.addStep();
     }
     FlowModel.prototype.setCellDataMap = function (cellData) {
         var _this = this;
@@ -46802,12 +46840,13 @@ var FlowModel = /** @class */ (function () {
         function isNodeDataType(t) {
             return t.cellType === "node";
         }
-        if (cellData.cellType === 'port')
+        if (cellData.cellType === "port")
             return;
         if (!this.modelFactoriesMap.get(cellData.component)) {
             console.warn("[moa-flow] can not find model match component ".concat(cellData.component, ", use default NodeModel"));
         }
-        var Model = this.modelFactoriesMap.get(cellData.component) || NodeModel;
+        var Model = this.modelFactoriesMap.get(cellData.component) ||
+            NodeModel;
         var cellModel = new Model(cellData, this);
         this.cellsModelMap.set(cellData.id, cellModel);
         if (isNodeDataType(cellData)) {
@@ -46919,7 +46958,7 @@ var FlowModel = /** @class */ (function () {
             var refBounding = (_a = this.refs.stageRef) === null || _a === void 0 ? void 0 : _a.getBoundingClientRect();
             return {
                 x: (x - refBounding.x) / this.scale - this.x,
-                y: (y - refBounding.y) / this.scale - this.y
+                y: (y - refBounding.y) / this.scale - this.y,
             };
         },
         enumerable: false,
@@ -47073,7 +47112,7 @@ var STAGE_EVENT_NAMES = ['onMouseDown', 'onMouseMove', 'onWheel', 'onClick', 'on
 var WINDOW_EVENT_NAMES = ['onKeyDown', 'onKeyUp'];
 __spreadArray(__spreadArray(__spreadArray([], STAGE_EVENT_NAMES, true), WINDOW_EVENT_NAMES, true), ['init'], false);
 
-var INPUT_NODELIST = ['TEXTAREA', 'INPUT'];
+var INPUT_NODELIST = ["TEXTAREA", "INPUT"];
 var behaviorsMap = {
     clearState: {
         onMouseDown: {
@@ -47084,7 +47123,7 @@ var behaviorsMap = {
                     model.contextMenuVisible = false;
                 }
             },
-            mountTarget: 'stage'
+            mountTarget: "stage",
         },
     },
     link: {
@@ -47092,7 +47131,7 @@ var behaviorsMap = {
             handler: function (e, model) {
                 model.clearLinkBuffer();
             },
-            mountTarget: 'stage'
+            mountTarget: "stage",
         },
         onMouseMove: {
             handler: function (e, model) {
@@ -47101,8 +47140,8 @@ var behaviorsMap = {
                     return;
                 model.setLinkingPosition(model.getCursorCoord(e));
             },
-            mountTarget: 'stage'
-        }
+            mountTarget: "stage",
+        },
     },
     select: {
         init: {
@@ -47124,8 +47163,8 @@ var behaviorsMap = {
                     });
                     prevSelectCells = model.selectCells.slice();
                 });
-            }
-        }
+            },
+        },
     },
     drag: {
         onMouseMove: {
@@ -47134,18 +47173,21 @@ var behaviorsMap = {
                 // 这里是 e.movementX 不是 movement.x，如果用movement.x，那每一次移动，上次的dragStart实际已经不适用于新的坐标系了，而e.movement就不会，只记录从鼠标开始到结束
                 var movement = {
                     x: e.movementX / model.scale,
-                    y: e.movementY / model.scale
+                    y: e.movementY / model.scale,
                 };
                 // 移动整个stage
-                var multiSelectCanDrag = model.multiSelect && model.hotKey["Space"] && model.hotKey['LeftMouseDown'];
+                var multiSelectCanDrag = model.multiSelect &&
+                    model.hotKey["Space"] &&
+                    model.hotKey["LeftMouseDown"];
                 var singleSelectCanDrag = !model.multiSelect && model.hotKey["LeftMouseDown"];
-                if ((multiSelectCanDrag || singleSelectCanDrag) && !model.selectCells.length) {
+                if ((multiSelectCanDrag || singleSelectCanDrag) &&
+                    !model.selectCells.length) {
                     model.setStagePosition(model.x + movement.x, model.y + movement.y);
                 }
                 if (select.isSelecting) {
                     model.selectCells.forEach(function (id) {
                         var cellData = model.getCellData(id);
-                        if (cellData.cellType === 'node' && !(cellData.drag === false)) {
+                        if (cellData.cellType === "node" && !(cellData.drag === false)) {
                             model.setCellData(cellData.id, {
                                 x: cellData.x + movement.x,
                                 y: cellData.y + movement.y,
@@ -47154,7 +47196,7 @@ var behaviorsMap = {
                     });
                 }
             },
-            mountTarget: 'stage'
+            mountTarget: "stage",
         },
         onMouseUp: {
             handler: function (e, model) {
@@ -47162,11 +47204,11 @@ var behaviorsMap = {
                 if (select.isSelecting) {
                     model.selectCells.forEach(function (id) {
                         var cellData = model.getCellData(id);
-                        if (cellData.cellType === 'node' && !(cellData.drag === false)) {
+                        if (cellData.cellType === "node" && !(cellData.drag === false)) {
                             if (model.grid)
                                 model.setCellData(cellData.id, model.snap({
                                     x: cellData.x,
-                                    y: cellData.y
+                                    y: cellData.y,
                                 }));
                         }
                     });
@@ -47174,7 +47216,7 @@ var behaviorsMap = {
                     select.selectingDom = undefined;
                 }
             },
-            mountTarget: 'stage'
+            mountTarget: "stage",
         },
     },
     scale: {
@@ -47197,7 +47239,7 @@ var behaviorsMap = {
                     direction = -direction;
                 }
                 var newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy;
-                var scaleTo = direction > 0 ? scaleBy : (1 / scaleBy);
+                var scaleTo = direction > 0 ? scaleBy : 1 / scaleBy;
                 model.setStageScale(newScale);
                 var preCursorNowPointer = {
                     x: (oldPointer.x + model.x) / scaleTo - model.x,
@@ -47206,13 +47248,13 @@ var behaviorsMap = {
                 // 用原本的pointer的坐标减去之前鼠标相同位置的现在pointer画布坐标
                 var moveBack = {
                     x: oldPointer.x - preCursorNowPointer.x,
-                    y: oldPointer.y - preCursorNowPointer.y
+                    y: oldPointer.y - preCursorNowPointer.y,
                 };
                 model.setStagePosition(model.x - moveBack.x, model.y - moveBack.y);
             },
-            mountTarget: 'stage',
-            passive: true
-        }
+            mountTarget: "stage",
+            passive: true,
+        },
     },
     multiSelect: {
         onMouseDown: {
@@ -47234,7 +47276,7 @@ var behaviorsMap = {
                     });
                 }
             },
-            mountTarget: 'stage'
+            mountTarget: "stage",
         },
         onMouseUp: {
             handler: function (e, model) {
@@ -47252,7 +47294,7 @@ var behaviorsMap = {
                     },
                 }, true);
             },
-            mountTarget: 'stage'
+            mountTarget: "stage",
         },
         onMouseMove: {
             handler: function (e, model) {
@@ -47268,54 +47310,77 @@ var behaviorsMap = {
                     });
                 }
             },
-            mountTarget: 'stage'
-        }
+            mountTarget: "stage",
+        },
     },
     hotkeys: {
         onMouseDown: {
             handler: function (e, model) {
                 switch (e.button) {
                     case EVT_LEFTCLICK:
-                        model.setHotKey('LeftMouseDown', true);
+                        model.setHotKey("LeftMouseDown", true);
                         break;
-                    case EVT_RIGHTCLICK: model.setHotKey('RightMouseDown', true);
+                    case EVT_RIGHTCLICK:
+                        model.setHotKey("RightMouseDown", true);
                 }
             },
-            mountTarget: 'stage'
+            mountTarget: "stage",
         },
         onMouseUp: {
             handler: function (e, model) {
                 // @ts-ignore
                 switch (e.button) {
-                    case EVT_LEFTCLICK: model.setHotKey('LeftMouseDown', false);
+                    case EVT_LEFTCLICK:
+                        model.setHotKey("LeftMouseDown", false);
                 }
             },
-            mountTarget: 'stage'
+            mountTarget: "stage",
         },
         onKeyDown: {
             handler: function (e, model) {
                 switch (e.code) {
-                    case 'Space':
+                    case "Space":
                         if (INPUT_NODELIST.includes(e.target.nodeName))
                             return;
                         e.preventDefault();
                         model.setHotKey(e.code, true);
+                    case "KeyZ": //新加撤销事件
+                        if (!e.shiftKey && model.hotKey["MetaLeft"])
+                            return model.undo();
+                        if (e.shiftKey && model.hotKey["MetaLeft"])
+                            return model.redo();
+                        if (!e.shiftKey && model.hotKey["ControlLeft"])
+                            return model.undo();
+                        if (e.shiftKey && model.hotKey["ControlLeft"])
+                            return model.redo();
+                    case "MetaLeft": //添加热键
+                        e.preventDefault();
+                        model.setHotKey(e.code, true);
+                    case "ControlLeft": //添加热键
+                        e.preventDefault();
+                        model.setHotKey(e.code, true);
                 }
             },
-            mountTarget: 'window'
+            mountTarget: "window",
         },
         onKeyUp: {
             handler: function (e, model) {
                 switch (e.code) {
-                    case 'Space':
+                    case "Space":
                         if (INPUT_NODELIST.includes(e.target.nodeName))
                             return;
                         e.preventDefault();
                         model.setHotKey(e.code, false);
+                    case "MetaLeft": //添加热键
+                        e.preventDefault();
+                        model.setHotKey(e.code, false);
+                    case "ControlLeft": //添加热键
+                        e.preventDefault();
+                        model.setHotKey(e.code, false);
                 }
             },
-            mountTarget: 'window'
-        }
+            mountTarget: "window",
+        },
     },
 };
 var mountEvents = function (behaviors, model) {
@@ -47324,22 +47389,22 @@ var mountEvents = function (behaviors, model) {
         onMouseUp: [],
         onMouseMove: [],
         onWheel: [],
-        onClick: []
+        onClick: [],
     };
     var _loop_1 = function (behaviorName) {
         var behaviorConfig = behaviorsMap[behaviorName];
         Object.keys(behaviorConfig).forEach(function (eventName) {
-            if (eventName === 'init' && !model.isInitEvents) {
+            if (eventName === "init" && !model.isInitEvents) {
                 behaviorConfig[eventName].handler(model);
             }
             var eventConfig = behaviorConfig[eventName];
             var handler = eventConfig.handler, mountTarget = eventConfig.mountTarget, passive = eventConfig.passive;
             switch (mountTarget) {
-                case 'stage': {
+                case "stage": {
                     if (passive && !model.isInitEvents) {
                         Promise.resolve().then(function () {
                             var _a;
-                            (_a = model.refs.stageRef) === null || _a === void 0 ? void 0 : _a.addEventListener(eventName.replace('on', '').toLocaleLowerCase(), function (e) { return handler(e, model); });
+                            (_a = model.refs.stageRef) === null || _a === void 0 ? void 0 : _a.addEventListener(eventName.replace("on", "").toLocaleLowerCase(), function (e) { return handler(e, model); });
                         });
                     }
                     if (stageEvents[eventName]) {
@@ -47349,9 +47414,9 @@ var mountEvents = function (behaviors, model) {
                         stageEvents[eventName] = [handler];
                     break;
                 }
-                case 'window': {
+                case "window": {
                     if (!model.isInitEvents) {
-                        window.addEventListener(eventName.toLocaleLowerCase().replace('on', ''), function (e) { return handler(e, model); });
+                        window.addEventListener(eventName.toLocaleLowerCase().replace("on", ""), function (e) { return handler(e, model); });
                     }
                 }
             }
