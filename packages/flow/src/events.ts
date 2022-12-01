@@ -45,6 +45,7 @@ type EventMaps = Record<
       ) => void | ((model: FlowModel) => void);
       mountTarget?: MountTarget;
       passive?: boolean;
+      addStep?: boolean;
     };
   }
 >;
@@ -80,6 +81,7 @@ export const behaviorsMap: EventMaps = {
         model.setLinkingPosition(model.getCursorCoord(e));
       },
       mountTarget: "stage",
+      addStep: true,
     },
   },
   select: {
@@ -146,7 +148,9 @@ export const behaviorsMap: EventMaps = {
         }
       },
       mountTarget: "stage",
+      addStep: true,
     },
+
     onMouseUp: {
       handler: (e, model) => {
         const { select } = model.buffer;
@@ -172,6 +176,7 @@ export const behaviorsMap: EventMaps = {
         }
       },
       mountTarget: "stage",
+      addStep: true,
     },
   },
   scale: {
@@ -217,6 +222,7 @@ export const behaviorsMap: EventMaps = {
       },
       mountTarget: "stage",
       passive: true,
+      addStep: true,
     },
   },
   multiSelect: {
@@ -307,13 +313,6 @@ export const behaviorsMap: EventMaps = {
               return;
             e.preventDefault();
             model.setHotKey(e.code, true);
-
-          case "KeyZ": //新加撤销事件
-            if (!e.shiftKey && model.hotKey["MetaLeft"]) return model.undo();
-            if (e.shiftKey && model.hotKey["MetaLeft"]) return model.redo();
-
-            if (!e.shiftKey && model.hotKey["ControlLeft"]) return model.undo();
-            if (e.shiftKey && model.hotKey["ControlLeft"]) return model.redo();
           case "MetaLeft": //添加热键
             e.preventDefault();
             model.setHotKey(e.code, true);
@@ -333,7 +332,6 @@ export const behaviorsMap: EventMaps = {
               return;
             e.preventDefault();
             model.setHotKey(e.code, false);
-
           case "MetaLeft": //添加热键
             e.preventDefault();
             model.setHotKey(e.code, false);
@@ -344,6 +342,27 @@ export const behaviorsMap: EventMaps = {
         }
       },
       mountTarget: "window",
+    },
+  },
+  undoRedo: {
+    init: {
+      handler: (model) => {
+        autorun(() => {
+          window.addEventListener("keydown", (e) => {
+            switch (e.code) {
+              case "KeyZ": //新加撤销事件
+                if (!e.shiftKey && model.hotKey["MetaLeft"]) {
+                  return model.undo();
+                }
+                if (e.shiftKey && model.hotKey["MetaLeft"]) return model.redo();
+                if (!e.shiftKey && model.hotKey["ControlLeft"])
+                  return model.undo();
+                if (e.shiftKey && model.hotKey["ControlLeft"])
+                  return model.redo();
+            }
+          });
+        });
+      },
     },
   },
 };
@@ -367,14 +386,17 @@ export const mountEvents = (behaviors: BehaviorName[], model: Model) => {
       }
 
       const eventConfig = behaviorConfig[eventName];
-      const { handler, mountTarget, passive } = eventConfig;
+      const { handler, mountTarget, passive, addStep } = eventConfig;
       switch (mountTarget) {
         case "stage": {
           if (passive && !model.isInitEvents) {
             Promise.resolve().then(() => {
               model.refs.stageRef?.addEventListener(
                 eventName.replace("on", "").toLocaleLowerCase(),
-                (e) => handler(e as any, model)
+                (e) => {
+                  handler(e as any, model);
+                  if (addStep) model.addStep();
+                }
               );
             });
           }
@@ -388,7 +410,10 @@ export const mountEvents = (behaviors: BehaviorName[], model: Model) => {
           if (!model.isInitEvents) {
             window.addEventListener(
               eventName.toLocaleLowerCase().replace("on", ""),
-              (e) => handler(e as KeyboardEvent, model)
+              (e) => {
+                handler(e as KeyboardEvent, model);
+                if (addStep) model.addStep();
+              }
             );
           }
         }

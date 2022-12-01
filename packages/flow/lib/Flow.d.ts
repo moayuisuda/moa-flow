@@ -19,6 +19,7 @@ declare type FlowProps = {
     models?: Record<string, typeof CellModel>;
     linkEdge?: string;
     children?: React.ReactNode;
+    undoRedo?: boolean;
 };
 declare class Flow extends React.Component<FlowProps, {}> {
     flowModel: FlowModel;
