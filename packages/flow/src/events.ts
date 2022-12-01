@@ -79,7 +79,6 @@ export const behaviorsMap: EventMaps = {
 
         if (!link.source) return;
         model.setLinkingPosition(model.getCursorCoord(e));
-        model.addStep(); //连线添加redo记录
       },
       mountTarget: "stage",
       addStep: true,
@@ -173,7 +172,6 @@ export const behaviorsMap: EventMaps = {
 
           select.isSelecting = false;
           select.selectingDom = undefined;
-          model.addStep();
         }
       },
       mountTarget: "stage",
@@ -220,7 +218,6 @@ export const behaviorsMap: EventMaps = {
         };
 
         model.setStagePosition(model.x - moveBack.x, model.y - moveBack.y);
-        model.addStep();
       },
       mountTarget: "stage",
       passive: true,
