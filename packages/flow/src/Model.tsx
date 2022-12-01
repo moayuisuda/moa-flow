@@ -392,7 +392,6 @@ export class FlowModel {
 
   emitEvent = (data: any) => {
     this.eventBus.sender?.(data);
-    this.addStep();
   };
 
   @action setStageScale = (scale: number) => {
@@ -503,6 +502,7 @@ export class FlowModel {
 
     if (!deepMerge) Object.assign(cellData, data);
     else merge(cellData, data);
+    this.addStep();
   };
 
   /**
@@ -629,6 +629,7 @@ export class FlowModel {
       type: "data:change",
     });
 
+    this.addStep(); //删除cell时添加redo记录
     return matchCell.id;
   };
 
@@ -680,6 +681,7 @@ export class FlowModel {
     this.emitEvent({
       type: "data:change",
     });
+    this.addStep();
   };
 
   getNodesData = () => {
@@ -741,6 +743,8 @@ export class FlowModel {
       type: "data:change",
     });
 
+    this.addStep();
+
     return newCellData.id;
   };
 
@@ -774,7 +778,6 @@ export class FlowModel {
       },
     });
     this.clearLinkBuffer();
-
     return edgeId;
   };
 
@@ -885,6 +888,11 @@ export class FlowModel {
       const lastUndo = this.undoList[this.undoList.length - 1];
       this.setCanvasData(lastUndo);
       this.redoList.push(current);
+
+      //可以考虑添加最大可撤回次数props配置
+      if (this.undoList.length >= 100) {
+        this.undoList.shift();
+      }
     }
   };
   redo = () => {

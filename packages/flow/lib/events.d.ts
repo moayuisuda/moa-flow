@@ -6,6 +6,7 @@ declare type EventMaps = Record<BehaviorName, {
         handler: (e: any, model: FlowModel) => void | ((model: FlowModel) => void);
         mountTarget?: MountTarget;
         passive?: boolean;
+        addStep?: boolean;
     };
 }>;
 export declare const behaviorsMap: EventMaps;

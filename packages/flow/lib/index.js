@@ -46432,7 +46432,6 @@ var FlowModel = /** @class */ (function () {
         this.emitEvent = function (data) {
             var _a, _b;
             (_b = (_a = _this.eventBus).sender) === null || _b === void 0 ? void 0 : _b.call(_a, data);
-            _this.addStep();
         };
         this.setStageScale = function (scale) {
             _this.canvasData.scale = scale;
@@ -46529,6 +46528,7 @@ var FlowModel = /** @class */ (function () {
                 Object.assign(cellData, data);
             else
                 lodash.exports.merge(cellData, data);
+            _this.addStep();
         };
         /**
          * @description 获取某个node连接的所有edge
@@ -46621,6 +46621,7 @@ var FlowModel = /** @class */ (function () {
             _this.emitEvent({
                 type: "data:change",
             });
+            _this.addStep(); //删除cell时添加redo记录
             return matchCell.id;
         };
         this.snap = function (vector) {
@@ -46662,6 +46663,7 @@ var FlowModel = /** @class */ (function () {
             _this.emitEvent({
                 type: "data:change",
             });
+            _this.addStep();
         };
         this.getNodesData = function () {
             return _this.canvasData.cells.filter(function (cell) { return cell.cellType === "node"; });
@@ -46700,6 +46702,7 @@ var FlowModel = /** @class */ (function () {
             _this.emitEvent({
                 type: "data:change",
             });
+            _this.addStep();
             return newCellData.id;
         };
         this.setLinkingPosition = function (coord) {
@@ -46818,6 +46821,10 @@ var FlowModel = /** @class */ (function () {
                 var lastUndo = _this.undoList[_this.undoList.length - 1];
                 _this.setCanvasData(lastUndo);
                 _this.redoList.push(current);
+                //可以考虑添加最大可撤回次数props配置
+                if (_this.undoList.length >= 100) {
+                    _this.undoList.shift();
+                }
             }
         };
         this.redo = function () {
@@ -47139,8 +47146,10 @@ var behaviorsMap = {
                 if (!link.source)
                     return;
                 model.setLinkingPosition(model.getCursorCoord(e));
+                model.addStep(); //连线添加redo记录
             },
             mountTarget: "stage",
+            addStep: true,
         },
     },
     select: {
@@ -47214,9 +47223,11 @@ var behaviorsMap = {
                     });
                     select.isSelecting = false;
                     select.selectingDom = undefined;
+                    model.addStep();
                 }
             },
             mountTarget: "stage",
+            addStep: true,
         },
     },
     scale: {
@@ -47251,9 +47262,11 @@ var behaviorsMap = {
                     y: oldPointer.y - preCursorNowPointer.y,
                 };
                 model.setStagePosition(model.x - moveBack.x, model.y - moveBack.y);
+                model.addStep();
             },
             mountTarget: "stage",
             passive: true,
+            addStep: true,
         },
     },
     multiSelect: {
@@ -47344,15 +47357,6 @@ var behaviorsMap = {
                             return;
                         e.preventDefault();
                         model.setHotKey(e.code, true);
-                    case "KeyZ": //新加撤销事件
-                        if (!e.shiftKey && model.hotKey["MetaLeft"])
-                            return model.undo();
-                        if (e.shiftKey && model.hotKey["MetaLeft"])
-                            return model.redo();
-                        if (!e.shiftKey && model.hotKey["ControlLeft"])
-                            return model.undo();
-                        if (e.shiftKey && model.hotKey["ControlLeft"])
-                            return model.redo();
                     case "MetaLeft": //添加热键
                         e.preventDefault();
                         model.setHotKey(e.code, true);
@@ -47382,6 +47386,28 @@ var behaviorsMap = {
             mountTarget: "window",
         },
     },
+    undoRedo: {
+        init: {
+            handler: function (model) {
+                autorun(function () {
+                    window.addEventListener("keydown", function (e) {
+                        switch (e.code) {
+                            case "KeyZ": //新加撤销事件
+                                if (!e.shiftKey && model.hotKey["MetaLeft"]) {
+                                    return model.undo();
+                                }
+                                if (e.shiftKey && model.hotKey["MetaLeft"])
+                                    return model.redo();
+                                if (!e.shiftKey && model.hotKey["ControlLeft"])
+                                    return model.undo();
+                                if (e.shiftKey && model.hotKey["ControlLeft"])
+                                    return model.redo();
+                        }
+                    });
+                });
+            },
+        },
+    },
 };
 var mountEvents = function (behaviors, model) {
     var stageEvents = {
@@ -47398,13 +47424,17 @@ var mountEvents = function (behaviors, model) {
                 behaviorConfig[eventName].handler(model);
             }
             var eventConfig = behaviorConfig[eventName];
-            var handler = eventConfig.handler, mountTarget = eventConfig.mountTarget, passive = eventConfig.passive;
+            var handler = eventConfig.handler, mountTarget = eventConfig.mountTarget, passive = eventConfig.passive, addStep = eventConfig.addStep;
             switch (mountTarget) {
                 case "stage": {
                     if (passive && !model.isInitEvents) {
                         Promise.resolve().then(function () {
                             var _a;
-                            (_a = model.refs.stageRef) === null || _a === void 0 ? void 0 : _a.addEventListener(eventName.replace("on", "").toLocaleLowerCase(), function (e) { return handler(e, model); });
+                            (_a = model.refs.stageRef) === null || _a === void 0 ? void 0 : _a.addEventListener(eventName.replace("on", "").toLocaleLowerCase(), function (e) {
+                                handler(e, model);
+                                if (addStep)
+                                    model.addStep();
+                            });
                         });
                     }
                     if (stageEvents[eventName]) {
@@ -47416,7 +47446,11 @@ var mountEvents = function (behaviors, model) {
                 }
                 case "window": {
                     if (!model.isInitEvents) {
-                        window.addEventListener(eventName.toLocaleLowerCase().replace("on", ""), function (e) { return handler(e, model); });
+                        window.addEventListener(eventName.toLocaleLowerCase().replace("on", ""), function (e) {
+                            handler(e, model);
+                            if (addStep)
+                                model.addStep();
+                        });
                     }
                 }
             }
@@ -47549,6 +47583,7 @@ var Flow = /** @class */ (function (_super) {
         if (props === void 0) { props = {
             scale: true,
             multiSelect: false,
+            undoRedo: true,
         }; }
         var _this = _super.call(this, props) || this;
         _this.initStageEvent = function () {
@@ -47566,7 +47601,8 @@ var Flow = /** @class */ (function (_super) {
         _this.flowModel = new FlowModel(props.onEvent);
         _this.flowModel.registModels(props.models || {});
         _this.flowModel.registComponents(props.components || {});
-        !lodash.exports.isUndefined(_this.flowModel.scaleBy) && (_this.flowModel.scaleBy = _this.props.scaleBy || 1.01);
+        !lodash.exports.isUndefined(_this.flowModel.scaleBy) &&
+            (_this.flowModel.scaleBy = _this.props.scaleBy || 1.01);
         _this.props.linkEdge && (_this.flowModel.linkEdge = _this.props.linkEdge);
         _this.props.canvasData &&
             _this.flowModel.setCanvasData(_this.props.canvasData);
@@ -47596,6 +47632,7 @@ var Flow = /** @class */ (function (_super) {
             "select",
             "hotkeys",
             "scale",
+            "undoRedo",
         ];
         var events = __spreadArray([], defaultEvents, true);
         extraEvents.forEach(function (event) {
@@ -47617,7 +47654,7 @@ var Flow = /** @class */ (function (_super) {
                 }, id: STAGE_ID, ref: function (ref) {
                     model.refs.stageRef = ref;
                 } }, this.generateEvents()),
-                lodash.exports.isNumber(this.flowModel.grid) && this.flowModel.grid !== 0 && React.createElement(Grid, null),
+                lodash.exports.isNumber(this.flowModel.grid) && this.flowModel.grid !== 0 && (React.createElement(Grid, null)),
                 React.createElement(Nodes, null),
                 React.createElement(LinesAndInterect, null)),
             getContextMenu(this.props.children)));

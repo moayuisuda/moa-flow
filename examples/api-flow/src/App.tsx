@@ -4,7 +4,7 @@ import "antd/dist/antd.css";
 import { useEffect, useRef, useState } from "react";
 import type { FlowModel } from "@alipay/moa-flow";
 import { Flow, ContextMenu } from "@alipay/moa-flow";
-import { DagreLayout } from '@antv/layout'
+import { DagreLayout } from "@antv/layout";
 
 import { ProcessNode, ProcessNodeModel } from "./nodes/ProcessNode";
 // import FlowEdge from "./FlowEdge";
@@ -43,7 +43,7 @@ function App() {
 
   useEffect(() => {
     const model = flowModelRef.current as FlowModel;
-    model.fitParentSize()
+    model.fitParentSize();
 
     model.extra = {
       taskPool: {},
@@ -168,9 +168,10 @@ function App() {
         appId,
         tagName,
         domain,
-      }
+      };
       setInterfaceSchema(interfaceSchema);
-      (flowModelRef.current as FlowModel).extra.interfaceSchema = interfaceSchema;
+      (flowModelRef.current as FlowModel).extra.interfaceSchema =
+        interfaceSchema;
     }
   };
 
@@ -195,9 +196,9 @@ function App() {
     const leaveNodes = getLeaveNodes(id);
     return Promise.all([
       leaveNodes.map((leaveNodeId) =>
-        (flowModelRef.current?.getCellModel(leaveNodeId) as BaseNodeModel).process(
-          id
-        )
+        (
+          flowModelRef.current?.getCellModel(leaveNodeId) as BaseNodeModel
+        ).process(id)
       ),
     ]);
   };
@@ -209,26 +210,36 @@ function App() {
         extra={
           <div>
             <Space>
-              <Button onClick={() => {
-                flowModelRef.current?.setLayout(new DagreLayout({
-                  type: 'dagre',
-                  rankdir: 'LR',
-                  align: 'UL',
-                  begin: [0, 0],
-                  nodesep: 120,
-                  ranksep: 160,
-                }))
-                // 布局参考 https://x6.antv.vision/zh/docs/tutorial/advanced/layout#%E5%B8%83%E5%B1%80%E6%B5%81%E7%A8%8B
-              }}>自动布局</Button>
-              <Button onClick={() => {
-                flowModelRef.current?.fit(400, 200)
-                // 布局参考 https://x6.antv.vision/zh/docs/tutorial/advanced/layout#%E5%B8%83%E5%B1%80%E6%B5%81%E7%A8%8B
-              }}>适应画布</Button>
+              <Button
+                onClick={() => {
+                  flowModelRef.current?.setLayout(
+                    new DagreLayout({
+                      type: "dagre",
+                      rankdir: "LR",
+                      align: "UL",
+                      begin: [0, 0],
+                      nodesep: 120,
+                      ranksep: 160,
+                    })
+                  );
+                  // 布局参考 https://x6.antv.vision/zh/docs/tutorial/advanced/layout#%E5%B8%83%E5%B1%80%E6%B5%81%E7%A8%8B
+                }}
+              >
+                自动布局
+              </Button>
+              <Button
+                onClick={() => {
+                  flowModelRef.current?.fit(400, 200);
+                  // 布局参考 https://x6.antv.vision/zh/docs/tutorial/advanced/layout#%E5%B8%83%E5%B1%80%E6%B5%81%E7%A8%8B
+                }}
+              >
+                适应画布
+              </Button>
               <Dropdown.Button
                 type="primary"
                 overlay={
                   <Menu>
-                    <Menu.Item key={'import'}>
+                    <Menu.Item key={"import"}>
                       <Upload
                         customRequest={handleImport}
                         fileList={[]}
@@ -247,7 +258,9 @@ function App() {
                 type="primary"
                 overlay={
                   <Menu>
-                    <Menu.Item onClick={handleExport} key={'export'}>导出文件</Menu.Item>
+                    <Menu.Item onClick={handleExport} key={"export"}>
+                      导出文件
+                    </Menu.Item>
                   </Menu>
                 }
                 onClick={handleSave}
@@ -271,11 +284,16 @@ function App() {
             onSubmit={getInterfaceSchema}
             defaultData={globalSetting}
           />
-          <div style={{
-            width: 1000,
-            height: 1000
-          }}>
+          <div
+            style={{
+              width: 1000,
+              height: 1000,
+            }}
+          >
             <Flow
+              // scale={false}
+              multiSelect
+              // undoRedo
               // view
               components={{
                 InterfaceNode: InterfaceNode,
@@ -357,12 +375,13 @@ function App() {
                         key={name}
                         onClick={() => {
                           const model = flowModelRef.current as FlowModel;
-                          const { contextMenuPos } =
-                            (flowModelRef.current as FlowModel).addCell(name, {
-                              title: name,
-                              x: model.contextMenuPos.x,
-                              y: model.contextMenuPos.y,
-                            });
+                          const { contextMenuPos } = (
+                            flowModelRef.current as FlowModel
+                          ).addCell(name, {
+                            title: name,
+                            x: model.contextMenuPos.x,
+                            y: model.contextMenuPos.y,
+                          });
                           model.contextMenuVisible = false;
                         }}
                       >
