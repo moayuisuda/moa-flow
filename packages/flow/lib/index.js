@@ -46820,8 +46820,8 @@ var FlowModel = /** @class */ (function () {
                 var current = _this.undoList.pop();
                 var lastUndo = _this.undoList[_this.undoList.length - 1];
                 _this.setCanvasData(lastUndo);
-                _this.redoList.push(current);
-                //可以考虑添加最大可撤回次数props配置
+                _this.redoList.push(current); // undo时将当前画布数据推入redoList中
+                // 最大深度100，大于一百时将redoList第一项抛出 可以考虑添加最大可撤回次数props配置
                 if (_this.undoList.length >= 100) {
                     _this.undoList.shift();
                 }
@@ -46830,7 +46830,7 @@ var FlowModel = /** @class */ (function () {
         this.redo = function () {
             if (_this.redoList.length > 0) {
                 var lastRedo = _this.redoList.pop();
-                _this.undoList.push(lastRedo);
+                _this.undoList.push(lastRedo); // redo时将redoList 最后一项推入 undoList中
                 _this.setCanvasData(lastRedo);
             }
         };
@@ -47146,7 +47146,6 @@ var behaviorsMap = {
                 if (!link.source)
                     return;
                 model.setLinkingPosition(model.getCursorCoord(e));
-                model.addStep(); //连线添加redo记录
             },
             mountTarget: "stage",
             addStep: true,
@@ -47206,6 +47205,7 @@ var behaviorsMap = {
                 }
             },
             mountTarget: "stage",
+            addStep: true,
         },
         onMouseUp: {
             handler: function (e, model) {
@@ -47223,7 +47223,6 @@ var behaviorsMap = {
                     });
                     select.isSelecting = false;
                     select.selectingDom = undefined;
-                    model.addStep();
                 }
             },
             mountTarget: "stage",
@@ -47262,7 +47261,6 @@ var behaviorsMap = {
                     y: oldPointer.y - preCursorNowPointer.y,
                 };
                 model.setStagePosition(model.x - moveBack.x, model.y - moveBack.y);
-                model.addStep();
             },
             mountTarget: "stage",
             passive: true,

@@ -148,6 +148,7 @@ export const behaviorsMap: EventMaps = {
         }
       },
       mountTarget: "stage",
+      addStep: true,
     },
 
     onMouseUp: {

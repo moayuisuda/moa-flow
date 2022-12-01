@@ -1,3 +1,4 @@
+/// <reference types="react" />
 import { FlowModel } from "../Model";
 export declare type CellDataType = {
     id: string;
