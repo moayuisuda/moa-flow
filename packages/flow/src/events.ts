@@ -1,20 +1,15 @@
 import Model, { FlowModel } from "./Model";
 import { autorun } from "mobx";
 import { without } from "lodash";
-import { NodeDataType } from "./cells/Node";
+import { NodeDataType, NodeModel } from './cells/Node';
 import { CellDataType, CellModel } from "./cells/Cell";
 import {
   EVT_LEFTCLICK,
   EVT_RIGHTCLICK,
-  STAGE_EVENT_NAMES,
-  WINDOW_EVENT_NAMES,
-  EVENT_NAMES,
 } from "./constants";
 import {
   BehaviorName,
-  StageEventName,
   Vector2d,
-  WindowEventName,
 } from "./typings/common";
 
 type StageEventType = React.WheelEvent | React.MouseEvent;
@@ -141,6 +136,17 @@ export const behaviorsMap: EventMaps = {
                 x: cellData.x + movement.x,
                 y: cellData.y + movement.y,
               });
+
+              // 如果节点有children，则一起移动children
+              const children = (model.getCellModel(cellData.id) as NodeModel).getChildren()
+              if (children.length) {
+                children.forEach(childId => {
+                  model.setCellData(childId, {
+                    x: cellData.x + movement.x,
+                    y: cellData.y + movement.y,
+                  });
+                })
+              }
             }
           });
         }
@@ -405,8 +411,6 @@ export const mountEvents = (behaviors: BehaviorName[], model: Model) => {
     };
   });
 
-  console.log({ stageEventsHandler, stageEvents });
   model.isInitEvents = true;
-
   return stageEventsHandler;
 };

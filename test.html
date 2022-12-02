@@ -25,13 +25,13 @@
     </div>
   </body>
   <script>
-    const varReg = /\{\{(.+?)\}\}/g;
+    const varReg = /\<.+?\>/g;
+    const HTML = "<html><p>aaa</p>b</html>";
 
     const getBodyObj = (bodyStr) => {
-      return bodyStr.replace(varReg, "\"$1\"");
+      return HTML.replace(varReg, '');
     };
 
-
-    console.log(getBodyObj(`{{asdasdasdas}} {{wwwewewew}}`));
+    console.log(getBodyObj());
   </script>
 </html>

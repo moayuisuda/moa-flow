@@ -45853,9 +45853,6 @@ var NodeModel = /** @class */ (function (_super) {
         _this.getNodeEdges = function () {
             return _this.context.getNodeEdges(_this.data.id);
         };
-        _this.getPosition = function () {
-            return _this.context.getNodePosition(_this.data.id);
-        };
         _this.getChildren = function () {
             return _this.context.canvasData.cells.filter(function (cellData) {
                 cellData.parent === _this.data.id;
@@ -47192,6 +47189,16 @@ var behaviorsMap = {
                                 x: cellData.x + movement.x,
                                 y: cellData.y + movement.y,
                             });
+                            // 如果节点有children，则一起移动children
+                            var children = model.getCellModel(cellData.id).getChildren();
+                            if (children.length) {
+                                children.forEach(function (childId) {
+                                    model.setCellData(childId, {
+                                        x: cellData.x + movement.x,
+                                        y: cellData.y + movement.y,
+                                    });
+                                });
+                            }
                         }
                     });
                 }
@@ -47434,7 +47441,6 @@ var mountEvents = function (behaviors, model) {
             });
         };
     });
-    console.log({ stageEventsHandler: stageEventsHandler, stageEvents: stageEvents });
     model.isInitEvents = true;
     return stageEventsHandler;
 };

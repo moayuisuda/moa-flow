@@ -32,10 +32,6 @@ export class NodeModel<D extends NodeDataType = NodeDataType> extends CellModel 
     return this.context.getNodeEdges(this.data.id);
   }
 
-  getPosition = () => {
-    return this.context.getNodePosition(this.data.id);
-  }
-
   getChildren = () => {
     return this.context.canvasData.cells.filter((cellData) => {
       cellData.parent === this.data.id;
