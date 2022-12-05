@@ -218,6 +218,7 @@ type FlowProps = {
 @observer
 class Flow extends React.Component<FlowProps, {}> {
   flowModel: FlowModel;
+  static defaultProps: {};
 
   constructor(
     props: FlowProps = {
@@ -245,7 +246,6 @@ class Flow extends React.Component<FlowProps, {}> {
       };
     }
     this.props.onLoad && this.props.onLoad(this.flowModel);
-
     props.flowModelRef && (props.flowModelRef.current = this.flowModel);
   }
 
@@ -268,15 +268,13 @@ class Flow extends React.Component<FlowProps, {}> {
   };
 
   generateEvents() {
-    const extraEvents: BehaviorName[] = ["scale", "multiSelect"];
+    const extraEvents: BehaviorName[] = ["scale", "multiSelect", "undoRedo"];
     const defaultEvents: BehaviorName[] = [
       "clearState",
       "link",
       "drag",
       "select",
       "hotkeys",
-      "scale",
-      "undoRedo",
     ];
 
     const events: BehaviorName[] = [...defaultEvents];
@@ -317,5 +315,11 @@ class Flow extends React.Component<FlowProps, {}> {
     );
   }
 }
+
+Flow.defaultProps = {
+  undoredo: false,
+  scale: true,
+  mutiSelect: false,
+};
 
 export default Flow;

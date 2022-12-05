@@ -23,6 +23,7 @@ declare type FlowProps = {
 };
 declare class Flow extends React.Component<FlowProps, {}> {
     flowModel: FlowModel;
+    static defaultProps: {};
     constructor(props?: FlowProps);
     componentDidMount(): void;
     initStageEvent: () => void;

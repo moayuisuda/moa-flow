@@ -291,10 +291,9 @@ function App() {
             }}
           >
             <Flow
-              // scale={false}
+              scale={false}
               multiSelect
-              // undoRedo
-              // view
+              undoRedo={true}
               components={{
                 InterfaceNode: InterfaceNode,
                 ProcessNode: ProcessNode,

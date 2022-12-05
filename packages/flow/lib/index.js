@@ -47622,15 +47622,13 @@ var Flow = /** @class */ (function (_super) {
     };
     Flow.prototype.generateEvents = function () {
         var _this = this;
-        var extraEvents = ["scale", "multiSelect"];
+        var extraEvents = ["scale", "multiSelect", "undoRedo"];
         var defaultEvents = [
             "clearState",
             "link",
             "drag",
             "select",
             "hotkeys",
-            "scale",
-            "undoRedo",
         ];
         var events = __spreadArray([], defaultEvents, true);
         extraEvents.forEach(function (event) {
@@ -47662,6 +47660,11 @@ var Flow = /** @class */ (function (_super) {
     ], Flow);
     return Flow;
 }(React.Component));
+Flow.defaultProps = {
+    undoredo: false,
+    scale: true,
+    mutiSelect: false,
+};
 
 var useModel = function () {
     return useContext(FlowContext);
