@@ -220,13 +220,7 @@ class Flow extends React.Component<FlowProps, {}> {
   flowModel: FlowModel;
   static defaultProps: {};
 
-  constructor(
-    props: FlowProps = {
-      scale: true,
-      multiSelect: false,
-      undoRedo: true,
-    }
-  ) {
+  constructor(props: FlowProps) {
     super(props);
     this.flowModel = new FlowModel(props.onEvent);
     this.flowModel.registModels(props.models || {});
