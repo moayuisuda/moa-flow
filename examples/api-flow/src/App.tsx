@@ -291,9 +291,10 @@ function App() {
             }}
           >
             <Flow
-              scale={false}
+              // scale={true} .  //不传。两项配置均没有默认开启
+              // undoRedo={true}  //不传。两项配置均没有默认开启
+
               multiSelect
-              undoRedo={true}
               components={{
                 InterfaceNode: InterfaceNode,
                 ProcessNode: ProcessNode,

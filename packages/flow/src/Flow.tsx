@@ -268,6 +268,7 @@ class Flow extends React.Component<FlowProps, {}> {
   };
 
   generateEvents() {
+    // 将scale和undoredo放在extraEvent里
     const extraEvents: BehaviorName[] = ["scale", "multiSelect", "undoRedo"];
     const defaultEvents: BehaviorName[] = [
       "clearState",
@@ -317,7 +318,7 @@ class Flow extends React.Component<FlowProps, {}> {
 }
 
 Flow.defaultProps = {
-  undoredo: false,
+  undoRedo: true,
   scale: true,
   mutiSelect: false,
 };

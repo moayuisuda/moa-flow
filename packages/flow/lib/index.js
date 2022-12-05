@@ -47622,6 +47622,7 @@ var Flow = /** @class */ (function (_super) {
     };
     Flow.prototype.generateEvents = function () {
         var _this = this;
+        // 将scale和undoredo放在extraEvent里
         var extraEvents = ["scale", "multiSelect", "undoRedo"];
         var defaultEvents = [
             "clearState",
@@ -47661,7 +47662,7 @@ var Flow = /** @class */ (function (_super) {
     return Flow;
 }(React.Component));
 Flow.defaultProps = {
-    undoredo: false,
+    undoRedo: true,
     scale: true,
     mutiSelect: false,
 };
