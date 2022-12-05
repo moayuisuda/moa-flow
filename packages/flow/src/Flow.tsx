@@ -218,14 +218,9 @@ type FlowProps = {
 @observer
 class Flow extends React.Component<FlowProps, {}> {
   flowModel: FlowModel;
+  static defaultProps: {};
 
-  constructor(
-    props: FlowProps = {
-      scale: true,
-      multiSelect: false,
-      undoRedo: true,
-    }
-  ) {
+  constructor(props: FlowProps) {
     super(props);
     this.flowModel = new FlowModel(props.onEvent);
     this.flowModel.registModels(props.models || {});
@@ -245,7 +240,6 @@ class Flow extends React.Component<FlowProps, {}> {
       };
     }
     this.props.onLoad && this.props.onLoad(this.flowModel);
-
     props.flowModelRef && (props.flowModelRef.current = this.flowModel);
   }
 
@@ -268,15 +262,14 @@ class Flow extends React.Component<FlowProps, {}> {
   };
 
   generateEvents() {
-    const extraEvents: BehaviorName[] = ["scale", "multiSelect"];
+    // 将scale和undoredo放在extraEvent里
+    const extraEvents: BehaviorName[] = ["scale", "multiSelect", "undoRedo"];
     const defaultEvents: BehaviorName[] = [
       "clearState",
       "link",
       "drag",
       "select",
       "hotkeys",
-      "scale",
-      "undoRedo",
     ];
 
     const events: BehaviorName[] = [...defaultEvents];
@@ -317,5 +310,11 @@ class Flow extends React.Component<FlowProps, {}> {
     );
   }
 }
+
+Flow.defaultProps = {
+  undoRedo: true,
+  scale: true,
+  mutiSelect: false,
+};
 
 export default Flow;

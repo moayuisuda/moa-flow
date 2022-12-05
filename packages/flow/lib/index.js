@@ -47578,11 +47578,6 @@ var LinesAndInterect = observer$1(function () {
 var Flow = /** @class */ (function (_super) {
     __extends(Flow, _super);
     function Flow(props) {
-        if (props === void 0) { props = {
-            scale: true,
-            multiSelect: false,
-            undoRedo: true,
-        }; }
         var _this = _super.call(this, props) || this;
         _this.initStageEvent = function () {
             var _a;
@@ -47622,15 +47617,14 @@ var Flow = /** @class */ (function (_super) {
     };
     Flow.prototype.generateEvents = function () {
         var _this = this;
-        var extraEvents = ["scale", "multiSelect"];
+        // 将scale和undoredo放在extraEvent里
+        var extraEvents = ["scale", "multiSelect", "undoRedo"];
         var defaultEvents = [
             "clearState",
             "link",
             "drag",
             "select",
             "hotkeys",
-            "scale",
-            "undoRedo",
         ];
         var events = __spreadArray([], defaultEvents, true);
         extraEvents.forEach(function (event) {
@@ -47662,6 +47656,11 @@ var Flow = /** @class */ (function (_super) {
     ], Flow);
     return Flow;
 }(React.Component));
+Flow.defaultProps = {
+    undoRedo: true,
+    scale: true,
+    mutiSelect: false,
+};
 
 var useModel = function () {
     return useContext(FlowContext);
