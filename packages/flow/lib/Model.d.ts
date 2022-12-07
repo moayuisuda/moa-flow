@@ -207,7 +207,7 @@ export declare class FlowModel {
     getNodePosition: (id: string) => {
         x: any;
         y: any;
-    } | undefined;
+    };
     moveNodesRecursively: (nodeId: string, movement: Vector2d) => void;
     sendEvent: (cellId: string, params?: any) => void;
     registModels: (models: Record<string, typeof CellModel>) => void;

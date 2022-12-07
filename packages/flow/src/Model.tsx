@@ -392,7 +392,6 @@ export class FlowModel {
 
   emitEvent = (data: any) => {
     this.eventBus.sender?.(data);
-    this.addStep();
   };
 
   @action setStageScale = (scale: number) => {
@@ -503,6 +502,7 @@ export class FlowModel {
 
     if (!deepMerge) Object.assign(cellData, data);
     else merge(cellData, data);
+    this.addStep();
   };
 
   /**
@@ -629,6 +629,7 @@ export class FlowModel {
       type: "data:change",
     });
 
+    this.addStep(); //删除cell时添加redo记录
     return matchCell.id;
   };
 
@@ -680,6 +681,7 @@ export class FlowModel {
     this.emitEvent({
       type: "data:change",
     });
+    this.addStep();
   };
 
   getNodesData = () => {
@@ -741,6 +743,8 @@ export class FlowModel {
       type: "data:change",
     });
 
+    this.addStep();
+
     return newCellData.id;
   };
 
@@ -774,7 +778,6 @@ export class FlowModel {
       },
     });
     this.clearLinkBuffer();
-
     return edgeId;
   };
 
@@ -819,7 +822,7 @@ export class FlowModel {
   getNodePosition = (id: string) => {
     // const re = { x: 0, y: 0 };
 
-    let curr: CellDataType | undefined = this.getCellData(id);
+    let curr: CellDataType | undefined = this.getCellData(id) as NodeDataType;
 
     // while (curr) {
     //   re.x += curr.x;
@@ -831,7 +834,6 @@ export class FlowModel {
 
     // return re;
 
-    if (!curr) return;
     return {
       x: curr.x,
       y: curr.y,
@@ -908,13 +910,18 @@ export class FlowModel {
       const current = this.undoList.pop() as CanvasDataType;
       const lastUndo = this.undoList[this.undoList.length - 1];
       this.setCanvasData(lastUndo);
-      this.redoList.push(current);
+      this.redoList.push(current); // undo时将当前画布数据推入redoList中
+
+      // 最大深度100，大于一百时将redoList第一项抛出 可以考虑添加最大可撤回次数props配置
+      if (this.undoList.length >= 100) {
+        this.undoList.shift();
+      }
     }
   };
   redo = () => {
     if (this.redoList.length > 0) {
       const lastRedo = this.redoList.pop() as CanvasDataType;
-      this.undoList.push(lastRedo);
+      this.undoList.push(lastRedo); // redo时将redoList 最后一项推入 undoList中
       this.setCanvasData(lastRedo);
     }
   };

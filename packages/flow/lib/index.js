@@ -46429,7 +46429,6 @@ var FlowModel = /** @class */ (function () {
         this.emitEvent = function (data) {
             var _a, _b;
             (_b = (_a = _this.eventBus).sender) === null || _b === void 0 ? void 0 : _b.call(_a, data);
-            _this.addStep();
         };
         this.setStageScale = function (scale) {
             _this.canvasData.scale = scale;
@@ -46526,6 +46525,7 @@ var FlowModel = /** @class */ (function () {
                 Object.assign(cellData, data);
             else
                 lodash.exports.merge(cellData, data);
+            _this.addStep();
         };
         /**
          * @description 获取某个node连接的所有edge
@@ -46618,6 +46618,7 @@ var FlowModel = /** @class */ (function () {
             _this.emitEvent({
                 type: "data:change",
             });
+            _this.addStep(); //删除cell时添加redo记录
             return matchCell.id;
         };
         this.snap = function (vector) {
@@ -46659,6 +46660,7 @@ var FlowModel = /** @class */ (function () {
             _this.emitEvent({
                 type: "data:change",
             });
+            _this.addStep();
         };
         this.getNodesData = function () {
             return _this.canvasData.cells.filter(function (cell) { return cell.cellType === "node"; });
@@ -46697,6 +46699,7 @@ var FlowModel = /** @class */ (function () {
             _this.emitEvent({
                 type: "data:change",
             });
+            _this.addStep();
             return newCellData.id;
         };
         this.setLinkingPosition = function (coord) {
@@ -46768,8 +46771,6 @@ var FlowModel = /** @class */ (function () {
             //     : undefined;
             // }
             // return re;
-            if (!curr)
-                return;
             return {
                 x: curr.x,
                 y: curr.y,
@@ -46834,13 +46835,17 @@ var FlowModel = /** @class */ (function () {
                 var current = _this.undoList.pop();
                 var lastUndo = _this.undoList[_this.undoList.length - 1];
                 _this.setCanvasData(lastUndo);
-                _this.redoList.push(current);
+                _this.redoList.push(current); // undo时将当前画布数据推入redoList中
+                // 最大深度100，大于一百时将redoList第一项抛出 可以考虑添加最大可撤回次数props配置
+                if (_this.undoList.length >= 100) {
+                    _this.undoList.shift();
+                }
             }
         };
         this.redo = function () {
             if (_this.redoList.length > 0) {
                 var lastRedo = _this.redoList.pop();
-                _this.undoList.push(lastRedo);
+                _this.undoList.push(lastRedo); // redo时将redoList 最后一项推入 undoList中
                 _this.setCanvasData(lastRedo);
             }
         };
@@ -47158,6 +47163,7 @@ var behaviorsMap = {
                 model.setLinkingPosition(model.getCursorCoord(e));
             },
             mountTarget: "stage",
+            addStep: true,
         },
     },
     select: {
@@ -47211,6 +47217,7 @@ var behaviorsMap = {
                 }
             },
             mountTarget: "stage",
+            addStep: true,
         },
         onMouseUp: {
             handler: function (e, model) {
@@ -47231,6 +47238,7 @@ var behaviorsMap = {
                 }
             },
             mountTarget: "stage",
+            addStep: true,
         },
     },
     scale: {
@@ -47268,6 +47276,7 @@ var behaviorsMap = {
             },
             mountTarget: "stage",
             passive: true,
+            addStep: true,
         },
     },
     multiSelect: {
@@ -47358,15 +47367,6 @@ var behaviorsMap = {
                             return;
                         e.preventDefault();
                         model.setHotKey(e.code, true);
-                    case "KeyZ": //新加撤销事件
-                        if (!e.shiftKey && model.hotKey["MetaLeft"])
-                            return model.undo();
-                        if (e.shiftKey && model.hotKey["MetaLeft"])
-                            return model.redo();
-                        if (!e.shiftKey && model.hotKey["ControlLeft"])
-                            return model.undo();
-                        if (e.shiftKey && model.hotKey["ControlLeft"])
-                            return model.redo();
                     case "MetaLeft": //添加热键
                         e.preventDefault();
                         model.setHotKey(e.code, true);
@@ -47396,6 +47396,28 @@ var behaviorsMap = {
             mountTarget: "window",
         },
     },
+    undoRedo: {
+        init: {
+            handler: function (model) {
+                autorun(function () {
+                    window.addEventListener("keydown", function (e) {
+                        switch (e.code) {
+                            case "KeyZ": //新加撤销事件
+                                if (!e.shiftKey && model.hotKey["MetaLeft"]) {
+                                    return model.undo();
+                                }
+                                if (e.shiftKey && model.hotKey["MetaLeft"])
+                                    return model.redo();
+                                if (!e.shiftKey && model.hotKey["ControlLeft"])
+                                    return model.undo();
+                                if (e.shiftKey && model.hotKey["ControlLeft"])
+                                    return model.redo();
+                        }
+                    });
+                });
+            },
+        },
+    },
 };
 var mountEvents = function (behaviors, model) {
     var stageEvents = {
@@ -47412,13 +47434,17 @@ var mountEvents = function (behaviors, model) {
                 behaviorConfig[eventName].handler(model);
             }
             var eventConfig = behaviorConfig[eventName];
-            var handler = eventConfig.handler, mountTarget = eventConfig.mountTarget, passive = eventConfig.passive;
+            var handler = eventConfig.handler, mountTarget = eventConfig.mountTarget, passive = eventConfig.passive, addStep = eventConfig.addStep;
             switch (mountTarget) {
                 case "stage": {
                     if (passive && !model.isInitEvents) {
                         Promise.resolve().then(function () {
                             var _a;
-                            (_a = model.refs.stageRef) === null || _a === void 0 ? void 0 : _a.addEventListener(eventName.replace("on", "").toLocaleLowerCase(), function (e) { return handler(e, model); });
+                            (_a = model.refs.stageRef) === null || _a === void 0 ? void 0 : _a.addEventListener(eventName.replace("on", "").toLocaleLowerCase(), function (e) {
+                                handler(e, model);
+                                if (addStep)
+                                    model.addStep();
+                            });
                         });
                     }
                     if (stageEvents[eventName]) {
@@ -47430,7 +47456,11 @@ var mountEvents = function (behaviors, model) {
                 }
                 case "window": {
                     if (!model.isInitEvents) {
-                        window.addEventListener(eventName.toLocaleLowerCase().replace("on", ""), function (e) { return handler(e, model); });
+                        window.addEventListener(eventName.toLocaleLowerCase().replace("on", ""), function (e) {
+                            handler(e, model);
+                            if (addStep)
+                                model.addStep();
+                        });
                     }
                 }
             }
@@ -47559,10 +47589,6 @@ var LinesAndInterect = observer$1(function () {
 var Flow = /** @class */ (function (_super) {
     __extends(Flow, _super);
     function Flow(props) {
-        if (props === void 0) { props = {
-            scale: true,
-            multiSelect: false,
-        }; }
         var _this = _super.call(this, props) || this;
         _this.initStageEvent = function () {
             var _a;
@@ -47602,7 +47628,8 @@ var Flow = /** @class */ (function (_super) {
     };
     Flow.prototype.generateEvents = function () {
         var _this = this;
-        var extraEvents = ["scale", "multiSelect"];
+        // 将scale和undoredo放在extraEvent里
+        var extraEvents = ["scale", "multiSelect", "undoRedo"];
         var defaultEvents = [
             "clearState",
             "link",
@@ -47640,6 +47667,11 @@ var Flow = /** @class */ (function (_super) {
     ], Flow);
     return Flow;
 }(React.Component));
+Flow.defaultProps = {
+    undoRedo: true,
+    scale: true,
+    mutiSelect: false,
+};
 
 var useModel = function () {
     return useContext(FlowContext);
