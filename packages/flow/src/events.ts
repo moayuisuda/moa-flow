@@ -132,21 +132,7 @@ export const behaviorsMap: EventMaps = {
             const cellData = model.getCellData(id) as NodeDataType &
               CellDataType;
             if (cellData.cellType === "node" && !(cellData.drag === false)) {
-              model.setCellData(cellData.id, {
-                x: cellData.x + movement.x,
-                y: cellData.y + movement.y,
-              });
-
-              // 如果节点有children，则一起移动children
-              const children = (model.getCellModel(cellData.id) as NodeModel).getChildren()
-              if (children.length) {
-                children.forEach(childId => {
-                  model.setCellData(childId, {
-                    x: cellData.x + movement.x,
-                    y: cellData.y + movement.y,
-                  });
-                })
-              }
+              model.moveNodesRecursively(cellData.id, movement)
             }
           });
         }

@@ -9,7 +9,9 @@ export type NodeDataType = {
 // util type
 export type NodeData<D> = D & NodeDataType;
 
-export class NodeModel<D extends NodeDataType = NodeDataType> extends CellModel {
+export class NodeModel<
+  D extends NodeDataType = NodeDataType
+> extends CellModel {
   defaultData = (): any => ({
     x: 0,
     y: 0,
@@ -22,21 +24,21 @@ export class NodeModel<D extends NodeDataType = NodeDataType> extends CellModel 
 
   getLinkNodes = () => {
     return this.context.getLinkNodes(this.data.id);
-  }
+  };
 
   getLinkPorts = () => {
     return this.context.getLinkPorts(this.data.id);
-  }
+  };
 
   getNodeEdges = () => {
     return this.context.getNodeEdges(this.data.id);
-  }
+  };
 
   getChildren = () => {
-    return this.context.canvasData.cells.filter((cellData) => {
-      cellData.parent === this.data.id;
-    });
-  }
+    return this.context.canvasData.cells
+      .filter((cellData) => cellData.parent === this.data.id)
+      .map((cellData) => cellData.id);
+  };
 }
 
 // @TODO

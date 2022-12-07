@@ -10,10 +10,10 @@ import { getContextMenu, SelectBoundsRect } from "./components";
 import { useContext, useEffect } from "react";
 import { CellDataType, CellModel } from "./cells/Cell";
 import { STAGE_ID } from "./constants";
-import { mountEvents } from './events';
+import { mountEvents } from "./events";
 import { BehaviorName } from "typings/common";
 import { Interactor } from "./components/Interacotr";
-import { isNumber, isUndefined } from 'lodash';
+import { isNumber, isUndefined } from "lodash";
 
 const PositionWrapper = observer(({ cellData }: { cellData: CellDataType }) => {
   const isNode = cellData.cellType === "node";
@@ -21,7 +21,6 @@ const PositionWrapper = observer(({ cellData }: { cellData: CellDataType }) => {
   const absolutePosition = isNode
     ? context.getNodePosition(cellData.id)
     : { x: 0, y: 0 };
-
   const Component = context.componentsMap.get(cellData.component) as React.FC<{
     model: CellModel;
   }>;
@@ -33,10 +32,10 @@ const PositionWrapper = observer(({ cellData }: { cellData: CellDataType }) => {
     ref: context.getWrapperRef(cellData.id),
     style: isNode
       ? {
-        position: "absolute",
-        left: absolutePosition.x,
-        top: absolutePosition.y,
-      }
+          position: "absolute",
+          left: absolutePosition.x,
+          top: absolutePosition.y,
+        }
       : {},
     // 这里cellData没变符合pure，且在CellComponent中没有引用x，y，所以变化位置时不会重渲染
     children: <CellComponent cellData={cellData} />,
@@ -68,8 +67,9 @@ const CellComponent = observer(({ cellData }: { cellData: CellDataType }) => {
 });
 
 const getViewBox = (context: FlowModel) => {
-  return `${-context.x} ${-context.y} ${context.width / context.scale
-    } ${context.height / context.scale}`;
+  return `${-context.x} ${-context.y} ${context.width / context.scale} ${
+    context.height / context.scale
+  }`;
 };
 
 @observer
@@ -84,8 +84,8 @@ class Grid extends React.Component<{}> {
 
   render() {
     const grid = this.context.grid as number;
-    const { context } = this
-    const radius = 2
+    const { context } = this;
+    const radius = 2;
 
     return (
       <svg
@@ -100,11 +100,30 @@ class Grid extends React.Component<{}> {
         height={context.height}
       >
         <defs>
-          <pattern id="dot" x={-radius} y={-radius} width={grid} height={grid} patternUnits="userSpaceOnUse">
-            <circle className="moa-grid__dot" cx={radius} cy={radius} r={radius} fill={context.color.deepGrey} />
+          <pattern
+            id="dot"
+            x={-radius}
+            y={-radius}
+            width={grid}
+            height={grid}
+            patternUnits="userSpaceOnUse"
+          >
+            <circle
+              className="moa-grid__dot"
+              cx={radius}
+              cy={radius}
+              r={radius}
+              fill={context.color.deepGrey}
+            />
           </pattern>
         </defs>
-        <rect x={-this.context.x} y={-this.context.y} width="100%" height="100%" fill="url(#dot)" />
+        <rect
+          x={-this.context.x}
+          y={-this.context.y}
+          width="100%"
+          height="100%"
+          fill="url(#dot)"
+        />
       </svg>
     );
   }
@@ -192,7 +211,7 @@ type FlowProps = {
   components?: Record<string, React.FC<any>>;
   models?: Record<string, typeof CellModel>;
   linkEdge?: string;
-  children?: React.ReactNode
+  children?: React.ReactNode;
 };
 @observer
 class Flow extends React.Component<FlowProps, {}> {
@@ -209,12 +228,13 @@ class Flow extends React.Component<FlowProps, {}> {
     this.flowModel = new FlowModel(props.onEvent);
     this.flowModel.registModels(props.models || {});
     this.flowModel.registComponents(props.components || {});
-    !isUndefined(this.flowModel.scaleBy) && (this.flowModel.scaleBy = this.props.scaleBy || 1.01)
+    !isUndefined(this.flowModel.scaleBy) &&
+      (this.flowModel.scaleBy = this.props.scaleBy || 1.01);
     this.props.linkEdge && (this.flowModel.linkEdge = this.props.linkEdge);
     this.props.canvasData &&
       this.flowModel.setCanvasData(this.props.canvasData);
     this.props.grid && (this.flowModel.grid = this.props.grid);
-    this.flowModel.multiSelect = props.multiSelect || false
+    this.flowModel.multiSelect = props.multiSelect || false;
 
     if (this.props.width && this.props.height) {
       this.flowModel.size = {
@@ -253,7 +273,6 @@ class Flow extends React.Component<FlowProps, {}> {
       "drag",
       "select",
       "hotkeys",
-      "scale",
     ];
 
     const events: BehaviorName[] = [...defaultEvents];
@@ -284,7 +303,9 @@ class Flow extends React.Component<FlowProps, {}> {
           }}
           {...this.generateEvents()}
         >
-          {isNumber(this.flowModel.grid) && this.flowModel.grid !== 0 && <Grid />}
+          {isNumber(this.flowModel.grid) && this.flowModel.grid !== 0 && (
+            <Grid />
+          )}
           <Nodes />
           <LinesAndInterect />
         </div>

@@ -45854,9 +45854,9 @@ var NodeModel = /** @class */ (function (_super) {
             return _this.context.getNodeEdges(_this.data.id);
         };
         _this.getChildren = function () {
-            return _this.context.canvasData.cells.filter(function (cellData) {
-                cellData.parent === _this.data.id;
-            });
+            return _this.context.canvasData.cells
+                .filter(function (cellData) { return cellData.parent === _this.data.id; })
+                .map(function (cellData) { return cellData.id; });
         };
         return _this;
     }
@@ -46758,16 +46758,36 @@ var FlowModel = /** @class */ (function () {
             return _this.canvasData.cells;
         };
         this.getNodePosition = function (id) {
-            var re = { x: 0, y: 0 };
+            // const re = { x: 0, y: 0 };
             var curr = _this.getCellData(id);
-            while (curr) {
-                re.x += curr.x;
-                re.y += curr.y;
-                curr = curr.parent
-                    ? _this.getCellData(curr.parent)
-                    : undefined;
+            // while (curr) {
+            //   re.x += curr.x;
+            //   re.y += curr.y;
+            //   curr = curr.parent
+            //     ? (this.getCellData(curr.parent) as CellDataType)
+            //     : undefined;
+            // }
+            // return re;
+            if (!curr)
+                return;
+            return {
+                x: curr.x,
+                y: curr.y,
+            };
+        };
+        this.moveNodesRecursively = function (nodeId, movement) {
+            var cellData = _this.getCellData(nodeId);
+            _this.setCellData(cellData.id, {
+                x: cellData.x + movement.x,
+                y: cellData.y + movement.y,
+            });
+            // 如果节点有children，则一起移动children
+            var children = _this.getCellModel(cellData.id).getChildren();
+            if (children.length) {
+                children.forEach(function (childId) {
+                    _this.moveNodesRecursively(childId, movement);
+                });
             }
-            return re;
         };
         this.sendEvent = function (cellId, params) {
             var events = _this.eventMap.get(cellId);
@@ -47185,20 +47205,7 @@ var behaviorsMap = {
                     model.selectCells.forEach(function (id) {
                         var cellData = model.getCellData(id);
                         if (cellData.cellType === "node" && !(cellData.drag === false)) {
-                            model.setCellData(cellData.id, {
-                                x: cellData.x + movement.x,
-                                y: cellData.y + movement.y,
-                            });
-                            // 如果节点有children，则一起移动children
-                            var children = model.getCellModel(cellData.id).getChildren();
-                            if (children.length) {
-                                children.forEach(function (childId) {
-                                    model.setCellData(childId, {
-                                        x: cellData.x + movement.x,
-                                        y: cellData.y + movement.y,
-                                    });
-                                });
-                            }
+                            model.moveNodesRecursively(cellData.id, movement);
                         }
                     });
                 }
@@ -47572,7 +47579,8 @@ var Flow = /** @class */ (function (_super) {
         _this.flowModel = new FlowModel(props.onEvent);
         _this.flowModel.registModels(props.models || {});
         _this.flowModel.registComponents(props.components || {});
-        !lodash.exports.isUndefined(_this.flowModel.scaleBy) && (_this.flowModel.scaleBy = _this.props.scaleBy || 1.01);
+        !lodash.exports.isUndefined(_this.flowModel.scaleBy) &&
+            (_this.flowModel.scaleBy = _this.props.scaleBy || 1.01);
         _this.props.linkEdge && (_this.flowModel.linkEdge = _this.props.linkEdge);
         _this.props.canvasData &&
             _this.flowModel.setCanvasData(_this.props.canvasData);
@@ -47601,7 +47609,6 @@ var Flow = /** @class */ (function (_super) {
             "drag",
             "select",
             "hotkeys",
-            "scale",
         ];
         var events = __spreadArray([], defaultEvents, true);
         extraEvents.forEach(function (event) {
@@ -47623,7 +47630,7 @@ var Flow = /** @class */ (function (_super) {
                 }, id: STAGE_ID, ref: function (ref) {
                     model.refs.stageRef = ref;
                 } }, this.generateEvents()),
-                lodash.exports.isNumber(this.flowModel.grid) && this.flowModel.grid !== 0 && React.createElement(Grid, null),
+                lodash.exports.isNumber(this.flowModel.grid) && this.flowModel.grid !== 0 && (React.createElement(Grid, null)),
                 React.createElement(Nodes, null),
                 React.createElement(LinesAndInterect, null)),
             getContextMenu(this.props.children)));
