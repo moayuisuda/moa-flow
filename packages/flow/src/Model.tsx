@@ -707,7 +707,7 @@ export class FlowModel {
     this.insertRuntimeState(metaData);
 
     return Object.assign(metaData, {
-      id,
+      id: metaData.id || id,
       visible: true,
       ...initOptions,
     });

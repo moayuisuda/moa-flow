@@ -10,7 +10,7 @@ import { getInterfaceByName } from "@alipay/connect-util";
 import { BaseNodeModel, STATUS_ENUM, NodeFrame } from "../BaseNode";
 import { useState, useRef, useContext, Fragment } from "react";
 import { EllipsisOutlined, SettingOutlined } from "@ant-design/icons";
-import { PortalWrapper } from '@alipay/moa-flow'
+import { PortalWrapper } from "@alipay/moa-flow";
 
 export class InterfaceNodeModel extends BaseNodeModel<InterfaceNodeDataType> {
   defaultData = () => ({
@@ -121,10 +121,10 @@ export const InterfaceNode: React.FC<{
           }}
         >
           <NodeConfigForm
-          ref={formRef}
-          id={data.id}
-          interfaceSchema={InterfaceContext.interfaceSchema}
-        />
+            ref={formRef}
+            id={data.id}
+            interfaceSchema={InterfaceContext.interfaceSchema}
+          />
         </Modal>
       </PortalWrapper>
     </NodeFrame>
