@@ -46677,7 +46677,7 @@ var FlowModel = /** @class */ (function () {
                 component: component,
             });
             _this.insertRuntimeState(metaData);
-            return Object.assign(metaData, __assign({ id: id, visible: true }, initOptions));
+            return Object.assign(metaData, __assign({ id: metaData.id || id, visible: true }, initOptions));
         };
         this.addCell = function (componentName, initOptions) {
             var newCellData = _this.createCellData(componentName, initOptions);
