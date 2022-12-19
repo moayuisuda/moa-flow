@@ -11,9 +11,5 @@ export declare class NodeModel<D extends NodeDataType = NodeDataType> extends Ce
     getLinkNodes: () => string[];
     getLinkPorts: () => string[];
     getNodeEdges: () => string[];
-    getPosition: () => {
-        x: number;
-        y: number;
-    };
     getChildren: () => any[];
 }

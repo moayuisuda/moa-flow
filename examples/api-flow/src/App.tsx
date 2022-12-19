@@ -394,6 +394,26 @@ function App() {
                   >
                     以此节点为终点执行
                   </Button>
+                  <Button
+                    onClick={() => {
+                      const { selectCells } = flowModelRef.current as FlowModel;
+
+                      const id = (flowModelRef.current as FlowModel).addCell(
+                        "InterfaceNode",
+                        {
+                          title: "Parent",
+                          x: 100,
+                          y: 100,
+                        }
+                      );
+
+                      flowModelRef.current?.setCellData(selectCells[0], {
+                        parent: id,
+                      });
+                    }}
+                  >
+                    增添父节点
+                  </Button>
                   <Divider />
                   {nodeList.map(([name]) => {
                     return (

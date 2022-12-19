@@ -1,20 +1,15 @@
 import Model, { FlowModel } from "./Model";
 import { autorun } from "mobx";
 import { without } from "lodash";
-import { NodeDataType } from "./cells/Node";
+import { NodeDataType, NodeModel } from './cells/Node';
 import { CellDataType, CellModel } from "./cells/Cell";
 import {
   EVT_LEFTCLICK,
   EVT_RIGHTCLICK,
-  STAGE_EVENT_NAMES,
-  WINDOW_EVENT_NAMES,
-  EVENT_NAMES,
 } from "./constants";
 import {
   BehaviorName,
-  StageEventName,
   Vector2d,
-  WindowEventName,
 } from "./typings/common";
 
 type StageEventType = React.WheelEvent | React.MouseEvent;
@@ -147,10 +142,7 @@ export const behaviorsMap: EventMaps = {
             if (selectedParentMap[cellData.parent]) return;
 
             if (cellData.cellType === "node" && !(cellData.drag === false)) {
-              model.setCellData(cellData.id, {
-                x: cellData.x + movement.x,
-                y: cellData.y + movement.y,
-              });
+              model.moveNodesRecursively(cellData.id, movement)
             }
           });
         }
@@ -438,8 +430,6 @@ export const mountEvents = (behaviors: BehaviorName[], model: Model) => {
     };
   });
 
-  console.log({ stageEventsHandler, stageEvents });
   model.isInitEvents = true;
-
   return stageEventsHandler;
 };

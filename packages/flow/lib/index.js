@@ -45853,13 +45853,10 @@ var NodeModel = /** @class */ (function (_super) {
         _this.getNodeEdges = function () {
             return _this.context.getNodeEdges(_this.data.id);
         };
-        _this.getPosition = function () {
-            return _this.context.getNodePosition(_this.data.id);
-        };
         _this.getChildren = function () {
-            return _this.context.canvasData.cells.filter(function (cellData) {
-                cellData.parent === _this.data.id;
-            });
+            return _this.context.canvasData.cells
+                .filter(function (cellData) { return cellData.parent === _this.data.id; })
+                .map(function (cellData) { return cellData.id; });
         };
         return _this;
     }
@@ -46764,16 +46761,34 @@ var FlowModel = /** @class */ (function () {
             return _this.canvasData.cells;
         };
         this.getNodePosition = function (id) {
-            var re = { x: 0, y: 0 };
+            // const re = { x: 0, y: 0 };
             var curr = _this.getCellData(id);
-            while (curr) {
-                re.x += curr.x;
-                re.y += curr.y;
-                curr = curr.parent
-                    ? _this.getCellData(curr.parent)
-                    : undefined;
+            // while (curr) {
+            //   re.x += curr.x;
+            //   re.y += curr.y;
+            //   curr = curr.parent
+            //     ? (this.getCellData(curr.parent) as CellDataType)
+            //     : undefined;
+            // }
+            // return re;
+            return {
+                x: curr.x,
+                y: curr.y,
+            };
+        };
+        this.moveNodesRecursively = function (nodeId, movement) {
+            var cellData = _this.getCellData(nodeId);
+            _this.setCellData(cellData.id, {
+                x: cellData.x + movement.x,
+                y: cellData.y + movement.y,
+            });
+            // 如果节点有children，则一起移动children
+            var children = _this.getCellModel(cellData.id).getChildren();
+            if (children.length) {
+                children.forEach(function (childId) {
+                    _this.moveNodesRecursively(childId, movement);
+                });
             }
-            return re;
         };
         this.sendEvent = function (cellId, params) {
             var events = _this.eventMap.get(cellId);
@@ -47203,10 +47218,7 @@ var behaviorsMap = {
                         if (selectedParentMap[cellData.parent])
                             return;
                         if (cellData.cellType === "node" && !(cellData.drag === false)) {
-                            model.setCellData(cellData.id, {
-                                x: cellData.x + movement.x,
-                                y: cellData.y + movement.y,
-                            });
+                            model.moveNodesRecursively(cellData.id, movement);
                         }
                     });
                 }
@@ -47473,7 +47485,6 @@ var mountEvents = function (behaviors, model) {
             });
         };
     });
-    console.log({ stageEventsHandler: stageEventsHandler, stageEvents: stageEvents });
     model.isInitEvents = true;
     return stageEventsHandler;
 };

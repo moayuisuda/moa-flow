@@ -205,9 +205,10 @@ export declare class FlowModel {
     getPortInstance: (id: string) => any;
     getCellsData: () => any[];
     getNodePosition: (id: string) => {
-        x: number;
-        y: number;
+        x: any;
+        y: any;
     };
+    moveNodesRecursively: (nodeId: string, movement: Vector2d) => void;
     sendEvent: (cellId: string, params?: any) => void;
     registModels: (models: Record<string, typeof CellModel>) => void;
     registComponents: (components: Record<string, React.FC>) => void;

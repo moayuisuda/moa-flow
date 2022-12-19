@@ -7,7 +7,7 @@ import { FlowContext } from "./Context";
 
 import { getContextMenu, SelectBoundsRect } from "./components";
 
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import { CellDataType, CellModel } from "./cells/Cell";
 import { STAGE_ID } from "./constants";
 import { mountEvents } from "./events";
@@ -21,7 +21,6 @@ const PositionWrapper = observer(({ cellData }: { cellData: CellDataType }) => {
   const absolutePosition = isNode
     ? context.getNodePosition(cellData.id)
     : { x: 0, y: 0 };
-
   const Component = context.componentsMap.get(cellData.component) as React.FC<{
     model: CellModel;
   }>;

@@ -820,19 +820,42 @@ export class FlowModel {
   };
 
   getNodePosition = (id: string) => {
-    const re = { x: 0, y: 0 };
+    // const re = { x: 0, y: 0 };
 
-    let curr: CellDataType | undefined = this.getCellData(id);
+    let curr: CellDataType | undefined = this.getCellData(id) as NodeDataType;
 
-    while (curr) {
-      re.x += curr.x;
-      re.y += curr.y;
-      curr = curr.parent
-        ? (this.getCellData(curr.parent) as CellDataType)
-        : undefined;
+    // while (curr) {
+    //   re.x += curr.x;
+    //   re.y += curr.y;
+    //   curr = curr.parent
+    //     ? (this.getCellData(curr.parent) as CellDataType)
+    //     : undefined;
+    // }
+
+    // return re;
+
+    return {
+      x: curr.x,
+      y: curr.y,
+    };
+  };
+
+  moveNodesRecursively = (nodeId: string, movement: Vector2d) => {
+    const cellData = this.getCellData(nodeId) as NodeDataType;
+    this.setCellData(cellData.id, {
+      x: cellData.x + movement.x,
+      y: cellData.y + movement.y,
+    });
+
+    // 如果节点有children，则一起移动children
+    const children = (
+      this.getCellModel(cellData.id) as NodeModel
+    ).getChildren();
+    if (children.length) {
+      children.forEach((childId) => {
+        this.moveNodesRecursively(childId, movement);
+      });
     }
-
-    return re;
   };
 
   sendEvent = (cellId: string, params?: any) => {
