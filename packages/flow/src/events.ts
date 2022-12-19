@@ -136,7 +136,7 @@ export const behaviorsMap: EventMaps = {
             if (
               cellData.cellType === "node" &&
               !(cellData.drag === false) &&
-              !selectedParentMap[cellData.parent]
+              !selectedMap[cellData.parent]
             ) {
               model.moveNodesRecursively(cellData.id, movement);
             }
