@@ -47215,9 +47215,9 @@ var behaviorsMap = {
                 if (select.isSelecting) {
                     model.selectCells.forEach(function (id) {
                         var cellData = model.getCellData(id);
-                        if (selectedParentMap[cellData.parent])
-                            return;
-                        if (cellData.cellType === "node" && !(cellData.drag === false)) {
+                        if (cellData.cellType === "node" &&
+                            !(cellData.drag === false) &&
+                            !selectedParentMap[cellData.parent]) {
                             model.moveNodesRecursively(cellData.id, movement);
                         }
                     });
