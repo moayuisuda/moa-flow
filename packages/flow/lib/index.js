@@ -47177,7 +47177,12 @@ var behaviorsMap = {
     drag: {
         onMouseMove: {
             handler: function (e, model) {
+                var _a;
                 var select = model.buffer.select;
+                var selectedParentMap = {};
+                (_a = model.selectCells) === null || _a === void 0 ? void 0 : _a.forEach(function (id) {
+                    selectedParentMap[id] = id;
+                });
                 // 这里是 e.movementX 不是 movement.x，如果用movement.x，那每一次移动，上次的dragStart实际已经不适用于新的坐标系了，而e.movement就不会，只记录从鼠标开始到结束
                 var movement = {
                     x: e.movementX / model.scale,
@@ -47195,6 +47200,8 @@ var behaviorsMap = {
                 if (select.isSelecting) {
                     model.selectCells.forEach(function (id) {
                         var cellData = model.getCellData(id);
+                        if (selectedParentMap[cellData.parent])
+                            return;
                         if (cellData.cellType === "node" && !(cellData.drag === false)) {
                             model.setCellData(cellData.id, {
                                 x: cellData.x + movement.x,

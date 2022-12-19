@@ -212,6 +212,32 @@ function App() {
             <Space>
               <Button
                 onClick={() => {
+                  const { selectCells } = flowModelRef.current as FlowModel;
+                  const id = flowModelRef.current?.addCell("InterfaceNode", {
+                    width: 1000,
+                    height: 600,
+                  });
+                  selectCells?.forEach((item) => {
+                    const cellData = flowModelRef.current?.getCellData(item);
+                    if (
+                      !(
+                        cellData?.parent &&
+                        flowModelRef.current?.isCellExist(cellData?.parent)
+                      )
+                    ) {
+                      flowModelRef.current?.setCellData(item, {
+                        parent: id,
+                      });
+                    }
+                    moveTo(id, 0);
+                  });
+                  // 布局参考 https://x6.antv.vision/zh/docs/tutorial/advanced/layout#%E5%B8%83%E5%B1%80%E6%B5%81%E7%A8%8B
+                }}
+              >
+                添加父节点
+              </Button>
+              <Button
+                onClick={() => {
                   flowModelRef.current?.setLayout(
                     new DagreLayout({
                       type: "dagre",
