@@ -1,16 +1,10 @@
 import Model, { FlowModel } from "./Model";
 import { autorun } from "mobx";
 import { without } from "lodash";
-import { NodeDataType, NodeModel } from './cells/Node';
+import { NodeDataType, NodeModel } from "./cells/Node";
 import { CellDataType, CellModel } from "./cells/Cell";
-import {
-  EVT_LEFTCLICK,
-  EVT_RIGHTCLICK,
-} from "./constants";
-import {
-  BehaviorName,
-  Vector2d,
-} from "./typings/common";
+import { EVT_LEFTCLICK, EVT_RIGHTCLICK } from "./constants";
+import { BehaviorName, Vector2d } from "./typings/common";
 
 type StageEventType = React.WheelEvent | React.MouseEvent;
 interface StageEventFn {
@@ -109,6 +103,7 @@ export const behaviorsMap: EventMaps = {
     onMouseMove: {
       handler: (e, model) => {
         const { select } = model.buffer;
+
         // 这里是 e.movementX 不是 movement.x，如果用movement.x，那每一次移动，上次的dragStart实际已经不适用于新的坐标系了，而e.movement就不会，只记录从鼠标开始到结束
         const movement = {
           x: e.movementX / model.scale,
@@ -133,8 +128,12 @@ export const behaviorsMap: EventMaps = {
           model.selectCells.forEach((id) => {
             const cellData = model.getCellData(id) as NodeDataType &
               CellDataType;
-            if (cellData.cellType === "node" && !(cellData.drag === false)) {
-              model.moveNodesRecursively(cellData.id, movement)
+            if (
+              cellData.cellType === "node" &&
+              !(cellData.drag === false) &&
+              !model.selectCells.includes(cellData.parent)
+            ) {
+              model.moveNodesRecursively(cellData.id, movement);
             }
           });
         }

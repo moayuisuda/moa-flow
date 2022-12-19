@@ -47210,7 +47210,9 @@ var behaviorsMap = {
                 if (select.isSelecting) {
                     model.selectCells.forEach(function (id) {
                         var cellData = model.getCellData(id);
-                        if (cellData.cellType === "node" && !(cellData.drag === false)) {
+                        if (cellData.cellType === "node" &&
+                            !(cellData.drag === false) &&
+                            !model.selectCells.includes(cellData.parent)) {
                             model.moveNodesRecursively(cellData.id, movement);
                         }
                     });
