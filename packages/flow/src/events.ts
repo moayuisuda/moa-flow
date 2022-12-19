@@ -104,11 +104,6 @@ export const behaviorsMap: EventMaps = {
       handler: (e, model) => {
         const { select } = model.buffer;
 
-        const selectedMap: Record<string, any> = {};
-        model.selectCells?.forEach((id) => {
-          selectedMap[id] = id;
-        });
-
         // 这里是 e.movementX 不是 movement.x，如果用movement.x，那每一次移动，上次的dragStart实际已经不适用于新的坐标系了，而e.movement就不会，只记录从鼠标开始到结束
         const movement = {
           x: e.movementX / model.scale,
@@ -136,7 +131,7 @@ export const behaviorsMap: EventMaps = {
             if (
               cellData.cellType === "node" &&
               !(cellData.drag === false) &&
-              !selectedMap[cellData.parent]
+              !model.selectCells.includes(cellData.parent)
             ) {
               model.moveNodesRecursively(cellData.id, movement);
             }
