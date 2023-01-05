@@ -47662,6 +47662,16 @@ var Flow = /** @class */ (function (_super) {
                 lodash.exports.isNumber(this.flowModel.grid) && this.flowModel.grid !== 0 && (React.createElement(Grid, null)),
                 React.createElement(Nodes, null),
                 React.createElement(LinesAndInterect, null)),
+            React.createElement("div", { style: {
+                    position: "absolute",
+                    width: "400px",
+                    height: "200px",
+                    right: "20px",
+                    bottom: "20px",
+                    transform: "scale(0.3)",
+                } },
+                React.createElement(Nodes, null),
+                React.createElement(LinesAndInterect, null)),
             getContextMenu(this.props.children)));
     };
     Flow = __decorate([

@@ -304,6 +304,19 @@ class Flow extends React.Component<FlowProps, {}> {
           <Nodes />
           <LinesAndInterect />
         </div>
+        <div
+          style={{
+            position: "absolute",
+            width: "400px",
+            height: "200px",
+            right: "20px",
+            bottom: "20px",
+            transform: "scale(0.3)",
+          }}
+        >
+          <Nodes />
+          <LinesAndInterect />
+        </div>
         {getContextMenu(this.props.children)}
       </FlowContext.Provider>
     );
