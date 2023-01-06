@@ -9,9 +9,8 @@ exports.onCreateWebpackConfig = (args) => {
             modules: [path.resolve(__dirname, '../src'), 'node_modules'],
             alias: {
                 '@components': path.resolve(__dirname, './src/gatsby-theme-docz/components'),
-                '@styles': path.resolve(__dirname, './src/gatsby-theme-docz/styles'),
-                '@fonts': path.resolve(__dirname, './src/gatsby-theme-docz/fonts'),
-                '@images': path.resolve(__dirname, './src/gatsby-theme-docz/images'),
+                '@customComponents': path.resolve(__dirname, './src/gatsby-theme-docz/customComponents'),
+                "@": path.resolve(__dirname, './src/gatsby-theme-docz'),
             },
             plugins: [
                 new TsconfigPaths({

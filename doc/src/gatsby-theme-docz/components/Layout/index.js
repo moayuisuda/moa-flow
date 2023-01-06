@@ -13,8 +13,6 @@ export const Layout = ({ children, doc }) => {
   const [open, setOpen] = useState(false)
   const nav = useRef()
   const fullPage = doc.value.fullPage
-  console.log(fullPage);
-  console.log(doc);
   return (
     <BaseLayout sx={{ '& > div': { flex: '1 1 auto' } }} data-testid="layout">
       <Global styles={global} />

@@ -1,32 +1,30 @@
 // src/gatsby-theme-docz/index.js
-import React from 'react'
-import { theme, useConfig, ComponentsProvider } from 'docz'
-import { ThemeProvider } from 'theme-ui'
-import baseComponents from 'gatsby-theme-docz/src/components'
+import React from "react";
+import { theme, useConfig, ComponentsProvider } from "docz";
+import { ThemeProvider } from "theme-ui";
+import baseComponents from "gatsby-theme-docz/src/components";
 const componentsMap = {
-  ...baseComponents,
+  ...baseComponents
   /* your custom components */
-}
+};
 const Theme = ({ children }) => {
-  console.log('进来了');
-  const config = useConfig()
+  const config = useConfig();
   return (
     <ThemeProvider theme={config}>
-        <ComponentsProvider components={componentsMap}>
+      <ComponentsProvider components={componentsMap}>
         {children}
-        </ComponentsProvider>
+      </ComponentsProvider>
     </ThemeProvider>
-  )
-}
-
+  );
+};
 const themeConfig = {
   colors: {
-    primary: 'tomato',
-    secondary: 'khaki',
-    gray: 'lightslategray',
-  },
-}
-
+    primary: "tomato",
+    secondary: "khaki",
+    gray: "lightslategray",
+    showDarkModeSwitch: true
+  }
+};
 
 // @ts-ignore
-export default theme(themeConfig)(Theme)
+export default theme(themeConfig)(Theme);

@@ -142,6 +142,33 @@ function _defineProperty(obj, key, value) {
 
 /***/ }),
 
+/***/ "../node_modules/@babel/runtime/helpers/esm/extends.js":
+/*!*************************************************************!*\
+  !*** ../node_modules/@babel/runtime/helpers/esm/extends.js ***!
+  \*************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return _extends; });
+function _extends() {
+  _extends = Object.assign ? Object.assign.bind() : function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  };
+  return _extends.apply(this, arguments);
+}
+
+/***/ }),
+
 /***/ "../node_modules/@babel/runtime/helpers/esm/inheritsLoose.js":
 /*!*******************************************************************!*\
   !*** ../node_modules/@babel/runtime/helpers/esm/inheritsLoose.js ***!
@@ -158,6 +185,61 @@ function _inheritsLoose(subClass, superClass) {
   subClass.prototype = Object.create(superClass.prototype);
   subClass.prototype.constructor = subClass;
   Object(_setPrototypeOf_js__WEBPACK_IMPORTED_MODULE_0__["default"])(subClass, superClass);
+}
+
+/***/ }),
+
+/***/ "../node_modules/@babel/runtime/helpers/esm/objectWithoutProperties.js":
+/*!*****************************************************************************!*\
+  !*** ../node_modules/@babel/runtime/helpers/esm/objectWithoutProperties.js ***!
+  \*****************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return _objectWithoutProperties; });
+/* harmony import */ var _objectWithoutPropertiesLoose_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./objectWithoutPropertiesLoose.js */ "../node_modules/@babel/runtime/helpers/esm/objectWithoutPropertiesLoose.js");
+
+function _objectWithoutProperties(source, excluded) {
+  if (source == null) return {};
+  var target = Object(_objectWithoutPropertiesLoose_js__WEBPACK_IMPORTED_MODULE_0__["default"])(source, excluded);
+  var key, i;
+  if (Object.getOwnPropertySymbols) {
+    var sourceSymbolKeys = Object.getOwnPropertySymbols(source);
+    for (i = 0; i < sourceSymbolKeys.length; i++) {
+      key = sourceSymbolKeys[i];
+      if (excluded.indexOf(key) >= 0) continue;
+      if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue;
+      target[key] = source[key];
+    }
+  }
+  return target;
+}
+
+/***/ }),
+
+/***/ "../node_modules/@babel/runtime/helpers/esm/objectWithoutPropertiesLoose.js":
+/*!**********************************************************************************!*\
+  !*** ../node_modules/@babel/runtime/helpers/esm/objectWithoutPropertiesLoose.js ***!
+  \**********************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return _objectWithoutPropertiesLoose; });
+function _objectWithoutPropertiesLoose(source, excluded) {
+  if (source == null) return {};
+  var target = {};
+  var sourceKeys = Object.keys(source);
+  var key, i;
+  for (i = 0; i < sourceKeys.length; i++) {
+    key = sourceKeys[i];
+    if (excluded.indexOf(key) >= 0) continue;
+    target[key] = source[key];
+  }
+  return target;
 }
 
 /***/ }),
@@ -5122,9 +5204,10 @@ module.exports = {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-var scope_0 = __webpack_require__(/*! ./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/4b2990ea09948bfefc901ac49b9061a6.js */ "./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/4b2990ea09948bfefc901ac49b9061a6.js").default;
-var scope_1 = __webpack_require__(/*! ./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/e92f8988d65cf25c087d226e6c0ef06f.js */ "./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/e92f8988d65cf25c087d226e6c0ef06f.js").default;
-const __DOCZ_DUMMY_EXPORT_DEFAULT = Object.assign({}, scope_0, scope_1);
+var scope_0 = __webpack_require__(/*! ./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/a56f40bdecda5098d0ce5a225589c478.js */ "./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/a56f40bdecda5098d0ce5a225589c478.js").default;
+var scope_1 = __webpack_require__(/*! ./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/d2396c7ced676a3b518bd3b8075068e4.js */ "./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/d2396c7ced676a3b518bd3b8075068e4.js").default;
+var scope_2 = __webpack_require__(/*! ./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/e92f8988d65cf25c087d226e6c0ef06f.js */ "./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/e92f8988d65cf25c087d226e6c0ef06f.js").default;
+const __DOCZ_DUMMY_EXPORT_DEFAULT = Object.assign({}, scope_0, scope_1, scope_2);
 /* harmony default export */ __webpack_exports__["default"] = (__DOCZ_DUMMY_EXPORT_DEFAULT);
 if (typeof __DOCZ_DUMMY_EXPORT_DEFAULT !== 'undefined' && __DOCZ_DUMMY_EXPORT_DEFAULT && __DOCZ_DUMMY_EXPORT_DEFAULT === Object(__DOCZ_DUMMY_EXPORT_DEFAULT) && Object.isExtensible(__DOCZ_DUMMY_EXPORT_DEFAULT) && !Object.prototype.hasOwnProperty.call(__DOCZ_DUMMY_EXPORT_DEFAULT, '__filemeta')) {
   Object.defineProperty(__DOCZ_DUMMY_EXPORT_DEFAULT, '__filemeta', {
@@ -37918,9 +38001,34 @@ exports.wrapRootElement = true;
 
 /***/ }),
 
-/***/ "./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/4b2990ea09948bfefc901ac49b9061a6.js":
+/***/ "./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/a56f40bdecda5098d0ce5a225589c478.js":
 /*!********************************************************************************************!*\
-  !*** ./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/4b2990ea09948bfefc901ac49b9061a6.js ***!
+  !*** ./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/a56f40bdecda5098d0ce5a225589c478.js ***!
+  \********************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var docz__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! docz */ "../node_modules/docz/dist/index.esm.js");
+/* harmony import */ var _customComponents_Alert__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @customComponents/Alert */ "./src/gatsby-theme-docz/customComponents/Alert.jsx");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_2__);
+
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  Playground: docz__WEBPACK_IMPORTED_MODULE_0__["Playground"],
+  Props: docz__WEBPACK_IMPORTED_MODULE_0__["Props"],
+  Alert: _customComponents_Alert__WEBPACK_IMPORTED_MODULE_1__["Alert"],
+  React: react__WEBPACK_IMPORTED_MODULE_2__
+});
+
+/***/ }),
+
+/***/ "./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/d2396c7ced676a3b518bd3b8075068e4.js":
+/*!********************************************************************************************!*\
+  !*** ./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/d2396c7ced676a3b518bd3b8075068e4.js ***!
   \********************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
@@ -37933,8 +38041,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
-  Playground: docz__WEBPACK_IMPORTED_MODULE_0__["Playground"],
-  Props: docz__WEBPACK_IMPORTED_MODULE_0__["Props"],
+  Link: docz__WEBPACK_IMPORTED_MODULE_0__["Link"],
   React: react__WEBPACK_IMPORTED_MODULE_1__
 });
 
@@ -39086,6 +39193,51 @@ function stripPrefix(str, prefix = ``) {
   }
   return str;
 }
+
+/***/ }),
+
+/***/ "./src/gatsby-theme-docz/customComponents/Alert.jsx":
+/*!**********************************************************!*\
+  !*** ./src/gatsby-theme-docz/customComponents/Alert.jsx ***!
+  \**********************************************************/
+/*! exports provided: Alert */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Alert", function() { return Alert; });
+/* harmony import */ var _babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/esm/extends */ "../node_modules/@babel/runtime/helpers/esm/extends.js");
+/* harmony import */ var _babel_runtime_helpers_esm_objectWithoutProperties__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/helpers/esm/objectWithoutProperties */ "../node_modules/@babel/runtime/helpers/esm/objectWithoutProperties.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _emotion_core__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @emotion/core */ "../node_modules/@emotion/core/dist/core.esm.js");
+
+
+const _excluded = ["children", "kind"];
+
+
+const kinds = {
+  info: '#5352ED',
+  positive: '#2ED573',
+  negative: '#FF4757',
+  warning: '#FFA502'
+};
+const Alert = _ref => {
+  let {
+      children,
+      kind
+    } = _ref,
+    rest = Object(_babel_runtime_helpers_esm_objectWithoutProperties__WEBPACK_IMPORTED_MODULE_1__["default"])(_ref, _excluded);
+  return Object(_emotion_core__WEBPACK_IMPORTED_MODULE_3__["jsx"])("div", Object(_babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__["default"])({
+    style: {
+      padding: 20,
+      background: 'white',
+      borderRadius: 3,
+      color: 'white',
+      background: kinds[kind]
+    }
+  }, rest), children);
+};
 
 /***/ }),
 

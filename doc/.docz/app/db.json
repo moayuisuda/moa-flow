@@ -30,7 +30,13 @@
         "link": "",
         "slug": "index",
         "menu": "",
-        "headings": []
+        "headings": [
+          {
+            "slug": "hello-world",
+            "depth": 1,
+            "value": "Hello world"
+          }
+        ]
       }
     },
     {
@@ -72,6 +78,36 @@
             "slug": "basic-usage",
             "depth": 2,
             "value": "Basic usage"
+          },
+          {
+            "slug": "properties",
+            "depth": 2,
+            "value": "Properties"
+          },
+          {
+            "slug": "basic-usage-1",
+            "depth": 2,
+            "value": "Basic usage"
+          },
+          {
+            "slug": "using-different-kinds",
+            "depth": 2,
+            "value": "Using different kinds"
+          },
+          {
+            "slug": "using-different-kinds2",
+            "depth": 2,
+            "value": "Using different kinds2"
+          },
+          {
+            "slug": "using-different-kinds3",
+            "depth": 2,
+            "value": "Using different kinds3"
+          },
+          {
+            "slug": "using-different-kinds4",
+            "depth": 2,
+            "value": "Using different kinds4"
           }
         ]
       }
@@ -87,6 +123,17 @@
       "value": []
     },
     {
+      "key": "src/gatsby-theme-docz/customComponents/Alert.jsx",
+      "value": [
+        {
+          "description": "",
+          "displayName": "Alert",
+          "methods": [],
+          "actualName": "Alert"
+        }
+      ]
+    },
+    {
       "key": "src/gatsby-theme-docz/components/Code/index.js",
       "value": [
         {
@@ -94,6 +141,17 @@
           "displayName": "Code",
           "methods": [],
           "actualName": "Code"
+        }
+      ]
+    },
+    {
+      "key": "src/gatsby-theme-docz/components/Layout/index.js",
+      "value": [
+        {
+          "description": "",
+          "displayName": "Layout",
+          "methods": [],
+          "actualName": "Layout"
         }
       ]
     },
@@ -127,17 +185,6 @@
           "displayName": "NavGroup",
           "methods": [],
           "actualName": "NavGroup"
-        }
-      ]
-    },
-    {
-      "key": "src/gatsby-theme-docz/components/Layout/index.js",
-      "value": [
-        {
-          "description": "",
-          "displayName": "Layout",
-          "methods": [],
-          "actualName": "Layout"
         }
       ]
     },

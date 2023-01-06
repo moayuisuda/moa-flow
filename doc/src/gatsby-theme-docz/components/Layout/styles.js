@@ -7,12 +7,13 @@ export const main = {
 }
 
 export const wrapper = {
+  margin: '0 auto',
   maxWidth: '1240px',
   py: 0,
   flex: 1,
   display: 'grid',
   gridTemplateColumns: '250px minmax(0, 1fr)',
-  minHeight: '100vh',
+  minHeight: 'calc(100vh - 70px)',
   [media.tablet]: {
     display: 'block',
   },

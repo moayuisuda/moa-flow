@@ -22,7 +22,10 @@ export const innerContainer = {
   flex: "1",
   position: 'relative',
   justifyContent: 'space-between',
-  height: 80,
+  height: 60,
+  maxWidth: '1040px',
+  width: '100vw',
+  margin: '0 auto',
 }
 
 export const menuIcon = {
@@ -78,7 +81,7 @@ export const nav = {
 
 
 export const link = {
-  color: 'rgb(90, 90, 90)',
+  color: '#62636f',
   fontFamily: 'FaktSoft, Helvetica, sans-serif',
   textDecoration: 'none',
   ':hover': {
