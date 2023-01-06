@@ -45625,10 +45625,10 @@ observerBatching(reactDom.exports.unstable_batchedUpdates);
 var TEXT_HEIGHT = 16;
 var LABEL_PADDING = 4;
 var dirMap = {
-    'left': [-1, 0],
-    'right': [1, 0],
-    'top': [0, -1],
-    'bottom': [0, 1]
+    left: [-1, 0],
+    right: [1, 0],
+    top: [0, -1],
+    bottom: [0, 1],
 };
 var EdgeModel = /** @class */ (function (_super) {
     __extends(EdgeModel, _super);
@@ -45681,7 +45681,10 @@ var EdgeModel = /** @class */ (function (_super) {
             };
         };
         _this.getPoints = function () {
-            var routeResult = _this.route(_this.getVectors());
+            var routeResult = _this.route({
+                anchors: _this.getAnchors(),
+                vectors: _this.getVectors(),
+            });
             return _this.vectorsToPoints(routeResult);
         };
         _this.getVectors = function () {
@@ -45748,15 +45751,24 @@ var EdgeModel = /** @class */ (function (_super) {
             var LENGTH = _this.controlPointOffset();
             if (isVector2d(_this.data.target)) {
                 return {
-                    source: [LENGTH * dirMap[sourceDir][0], LENGTH * dirMap[sourceDir][1]],
+                    source: [
+                        LENGTH * dirMap[sourceDir][0],
+                        LENGTH * dirMap[sourceDir][1],
+                    ],
                     target: [0, 0],
                 };
             }
             else {
                 var targetDir = _this.context.cellsMap.get(_this.data.target).props.dir;
                 return {
-                    source: [LENGTH * dirMap[sourceDir][0], LENGTH * dirMap[sourceDir][1]],
-                    target: [LENGTH * dirMap[targetDir][0], LENGTH * dirMap[targetDir][1]],
+                    source: [
+                        LENGTH * dirMap[sourceDir][0],
+                        LENGTH * dirMap[sourceDir][1],
+                    ],
+                    target: [
+                        LENGTH * dirMap[targetDir][0],
+                        LENGTH * dirMap[targetDir][1],
+                    ],
                 };
             }
         };
@@ -45778,7 +45790,9 @@ var EdgeModel = /** @class */ (function (_super) {
             strokeLinejoin: "round",
             fill: "none",
             strokeWidth: 2,
-            stroke: _this.isSelect ? _this.context.color.active : _this.context.color.deepGrey,
+            stroke: _this.isSelect
+                ? _this.context.color.active
+                : _this.context.color.deepGrey,
         }); };
         _this.lineProps = function () {
             return {};
@@ -45786,7 +45800,8 @@ var EdgeModel = /** @class */ (function (_super) {
         return _this;
     }
     // 这个方法暴露出去，可自定义路由
-    EdgeModel.prototype.route = function (vectors) {
+    EdgeModel.prototype.route = function (_a) {
+        _a.anchors; var vectors = _a.vectors;
         return vectors;
     };
     EdgeModel.prototype.label = function (label) {
@@ -45822,7 +45837,7 @@ var Edge = observer(function (_a) {
                 React.createElement("marker", { id: "arrow-end--".concat(model.data.id), markerWidth: "100", markerHeight: "100", refX: arrowOffset[0] + DEFAULT_ARROW_SIZE$1 * cos(PI / 6), refY: arrowOffset[1] + DEFAULT_ARROW_SIZE$1 * sin(PI / 6), orient: "auto" },
                     React.createElement("path", { className: "moa-edge__arrow", stroke: lineProps.stroke, strokeWidth: lineProps.strokeWidth, strokeLinecap: lineProps.strokeLinecap, strokeLinejoin: lineProps.strokeLinejoin, fill: lineProps.fill, d: "M".concat(arrowOffset[0], ",").concat(arrowOffset[1], " L").concat(arrowOffset[0], ",").concat(DEFAULT_ARROW_SIZE$1 * sin(PI / 6) * 2 + arrowOffset[1], " L").concat(DEFAULT_ARROW_SIZE$1 * cos(PI / 6) + arrowOffset[0], ",").concat(DEFAULT_ARROW_SIZE$1 * sin(PI / 6) + arrowOffset[1], " Z") }))),
             React.createElement("path", __assign({ className: "moa-edge" }, lineProps, { d: d, markerEnd: "url(#".concat("arrow-end--".concat(model.data.id), ")") })),
-            React.createElement("path", __assign({ className: "moa-edge--interaction" }, lineProps, { d: d, strokeWidth: 10, fill: "none", stroke: 'transparent' }))));
+            React.createElement("path", __assign({ className: "moa-edge--interaction" }, lineProps, { d: d, strokeWidth: 10, fill: "none", stroke: "transparent" }))));
     });
     var Label = observer(function () {
         var position = model.getPointAt(0.5);

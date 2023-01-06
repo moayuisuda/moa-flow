@@ -21,8 +21,8 @@ export declare class EdgeModel<D extends EdgeDataType = EdgeDataType> extends Ce
     constructor(data: any, context: FlowModel);
     protected formatVerticied: (verticies: Vector2d[]) => Vector2d[];
     getLinkPortsData: () => {
-        source: PortDataType | Vector2d;
-        target: PortDataType | Vector2d;
+        source: Vector2d | PortDataType;
+        target: Vector2d | PortDataType;
     };
     getAnchors: () => {
         source: any;
@@ -34,7 +34,13 @@ export declare class EdgeModel<D extends EdgeDataType = EdgeDataType> extends Ce
         source: string | undefined;
         target: string | undefined;
     };
-    route(vectors: Vector2d[]): Vector2d[];
+    route({ anchors, vectors, }: {
+        anchors: {
+            source: string;
+            target: string;
+        };
+        vectors: Vector2d[];
+    }): Vector2d[];
     private vectorsToPoints;
     getPointAt: (ratioOrLength: number) => DOMPoint;
     labelContent: () => JSX.Element;

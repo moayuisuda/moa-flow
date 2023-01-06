@@ -3,7 +3,7 @@ import { PortDataType, PortDir } from "../components";
 import React from "react";
 import { isVector2d } from "../utils";
 import { callIfFn } from "../utils/util";
-import { CellModel, CellDataType } from "./Cell";;
+import { CellModel, CellDataType } from "./Cell";
 import { FlowModel } from "Model";
 import { observer } from "mobx-react-lite";
 import { computed } from "mobx";
@@ -12,11 +12,11 @@ const TEXT_HEIGHT = 16;
 const LABEL_PADDING = 4;
 
 const dirMap = {
-  'left': [-1, 0],
-  'right': [1, 0],
-  'top': [0, -1],
-  'bottom': [0, 1]
-}
+  left: [-1, 0],
+  right: [1, 0],
+  top: [0, -1],
+  bottom: [0, 1],
+};
 
 export type EdgeDataType = {
   source: string | Vector2d;
@@ -29,7 +29,9 @@ export type EdgeDataType = {
 export type EdgeData<D> = D & EdgeDataType;
 
 type Head = React.ReactNode | boolean;
-export class EdgeModel<D extends EdgeDataType = EdgeDataType> extends CellModel {
+export class EdgeModel<
+  D extends EdgeDataType = EdgeDataType
+> extends CellModel {
   defaultData = (): any => ({
     id: "",
     component: "Edge", // 这里一般会被重置为FLowEdge这种业务类的线条
@@ -61,13 +63,13 @@ export class EdgeModel<D extends EdgeDataType = EdgeDataType> extends CellModel 
       source: isVector2d(this.data.source)
         ? (this.data.source as Vector2d)
         : (this.context.cellsDataMap.get(
-          this.data.source as string
-        ) as PortDataType),
+            this.data.source as string
+          ) as PortDataType),
       target: isVector2d(this.data.target)
         ? (this.data.target as Vector2d)
         : (this.context.cellsDataMap.get(
-          this.data.target as string
-        ) as PortDataType),
+            this.data.target as string
+          ) as PortDataType),
     };
   };
 
@@ -97,17 +99,20 @@ export class EdgeModel<D extends EdgeDataType = EdgeDataType> extends CellModel 
   };
 
   private getPoints = () => {
-    const routeResult = this.route(this.getVectors());
+    const routeResult = this.route({
+      anchors: this.getAnchors(),
+      vectors: this.getVectors(),
+    });
 
     return this.vectorsToPoints(routeResult);
-  }
+  };
 
   getVectors = () => {
     const anchors = this.getAnchors();
     const verticies = this.data.verticies || [];
 
     return [anchors.source, ...verticies, anchors.target];
-  }
+  };
 
   getLinkNodes = () => {
     const { data } = this;
@@ -115,7 +120,9 @@ export class EdgeModel<D extends EdgeDataType = EdgeDataType> extends CellModel 
     let target;
 
     if (!isVector2d(data.source)) {
-      const sourcePort = this.context.cellsDataMap.get(data.source as string) as PortDataType;
+      const sourcePort = this.context.cellsDataMap.get(
+        data.source as string
+      ) as PortDataType;
       source = sourcePort.host;
     }
 
@@ -130,10 +137,16 @@ export class EdgeModel<D extends EdgeDataType = EdgeDataType> extends CellModel 
       source,
       target,
     };
-  }
+  };
 
   // 这个方法暴露出去，可自定义路由
-  route(vectors: Vector2d[]) {
+  route({
+    anchors,
+    vectors,
+  }: {
+    anchors: { source: string; target: string };
+    vectors: Vector2d[];
+  }) {
     return vectors;
   }
 
@@ -144,15 +157,16 @@ export class EdgeModel<D extends EdgeDataType = EdgeDataType> extends CellModel 
     });
 
     return re;
-  }
+  };
 
   getPointAt = (ratioOrLength: number) => {
     this.pathInstance.setAttribute("d", this.d);
-    if (ratioOrLength > 1) return this.pathInstance.getPointAtLength(ratioOrLength)
+    if (ratioOrLength > 1)
+      return this.pathInstance.getPointAtLength(ratioOrLength);
     return this.pathInstance.getPointAtLength(
       ratioOrLength * this.pathInstance.getTotalLength()
     );
-  }
+  };
 
   labelContent = () => {
     const {
@@ -177,8 +191,9 @@ export class EdgeModel<D extends EdgeDataType = EdgeDataType> extends CellModel 
 
     return (
       <g
-        transform={`translate(${-(textBounds.width + LABEL_PADDING) / 2}, ${-(TEXT_HEIGHT + LABEL_PADDING) / 2
-          })`}
+        transform={`translate(${-(textBounds.width + LABEL_PADDING) / 2}, ${
+          -(TEXT_HEIGHT + LABEL_PADDING) / 2
+        })`}
       >
         <rect
           width={textBounds.width + LABEL_PADDING * 2}
@@ -190,7 +205,7 @@ export class EdgeModel<D extends EdgeDataType = EdgeDataType> extends CellModel 
         </text>
       </g>
     );
-  }
+  };
 
   label(label: string) {
     return label;
@@ -198,45 +213,55 @@ export class EdgeModel<D extends EdgeDataType = EdgeDataType> extends CellModel 
 
   isLinking = () => {
     return this.state.isLinking;
-  }
+  };
 
   controlPointOffset = () => {
-    return 60
-  }
+    return 60;
+  };
 
   getBazierDir = () => {
     const { source, target } = this.getAnchors();
-    const { props: { dir: sourceDir } } = this.context.cellsMap.get(
-      this.data.source as string
-    );
+    const {
+      props: { dir: sourceDir },
+    } = this.context.cellsMap.get(this.data.source as string);
     const LENGTH = this.controlPointOffset();
 
     if (isVector2d(this.data.target)) {
       return {
-        source: [LENGTH * dirMap[sourceDir as PortDir][0], LENGTH * dirMap[sourceDir as PortDir][1]],
+        source: [
+          LENGTH * dirMap[sourceDir as PortDir][0],
+          LENGTH * dirMap[sourceDir as PortDir][1],
+        ],
         target: [0, 0],
       } as { source: Dir; target: Dir };
     } else {
-      const { props: { dir: targetDir } } = this.context.cellsMap.get(
-        this.data.target as string
-      );
+      const {
+        props: { dir: targetDir },
+      } = this.context.cellsMap.get(this.data.target as string);
 
       return {
-        source: [LENGTH * dirMap[sourceDir as PortDir][0], LENGTH * dirMap[sourceDir as PortDir][1]],
-        target: [LENGTH * dirMap[targetDir as PortDir][0], LENGTH * dirMap[targetDir as PortDir][1]],
+        source: [
+          LENGTH * dirMap[sourceDir as PortDir][0],
+          LENGTH * dirMap[sourceDir as PortDir][1],
+        ],
+        target: [
+          LENGTH * dirMap[targetDir as PortDir][0],
+          LENGTH * dirMap[targetDir as PortDir][1],
+        ],
       } as { source: Dir; target: Dir };
     }
-  }
+  };
 
   getBazierPath = () => {
     const { source, target } = this.getAnchors();
     const dir = this.getBazierDir();
 
     return `M${source.x},${source.y} 
-    C${source.x + dir.source[0]},${source.y + dir.source[1]} ${target.x + dir.target[0]
-      },${target.y + dir.target[1]} 
+    C${source.x + dir.source[0]},${source.y + dir.source[1]} ${
+      target.x + dir.target[0]
+    },${target.y + dir.target[1]} 
     ${target.x},${target.y}`;
-  }
+  };
 
   getPolylinePath = () => {
     const points = this.getPoints();
@@ -247,7 +272,7 @@ export class EdgeModel<D extends EdgeDataType = EdgeDataType> extends CellModel 
     }
 
     return str;
-  }
+  };
 
   @computed
   get d() {
@@ -261,12 +286,14 @@ export class EdgeModel<D extends EdgeDataType = EdgeDataType> extends CellModel 
     strokeLinejoin: "round",
     fill: "none",
     strokeWidth: 2,
-    stroke: this.isSelect ? this.context.color.active : this.context.color.deepGrey,
+    stroke: this.isSelect
+      ? this.context.color.active
+      : this.context.color.deepGrey,
   });
 
   lineProps = () => {
-    return {}
-  }
+    return {};
+  };
 }
 
 const DEFAULT_ARROW_SIZE = 4;
@@ -275,7 +302,10 @@ export const Edge: React.FC<{ model: EdgeModel }> = observer(({ model }) => {
   const Line = observer(() => {
     const { d } = model;
 
-    const lineProps = Object.assign(model.defaultLineProps(), model.lineProps()) as any
+    const lineProps = Object.assign(
+      model.defaultLineProps(),
+      model.lineProps()
+    ) as any;
 
     const { cos, sin, PI } = Math;
     const arrowOffset = [
@@ -301,9 +331,11 @@ export const Edge: React.FC<{ model: EdgeModel }> = observer(({ model }) => {
               strokeLinecap={lineProps.strokeLinecap}
               strokeLinejoin={lineProps.strokeLinejoin}
               fill={lineProps.fill}
-              d={`M${arrowOffset[0]},${arrowOffset[1]} L${arrowOffset[0]},${DEFAULT_ARROW_SIZE * sin(PI / 6) * 2 + arrowOffset[1]
-                } L${DEFAULT_ARROW_SIZE * cos(PI / 6) + arrowOffset[0]},${DEFAULT_ARROW_SIZE * sin(PI / 6) + arrowOffset[1]
-                } Z`}
+              d={`M${arrowOffset[0]},${arrowOffset[1]} L${arrowOffset[0]},${
+                DEFAULT_ARROW_SIZE * sin(PI / 6) * 2 + arrowOffset[1]
+              } L${DEFAULT_ARROW_SIZE * cos(PI / 6) + arrowOffset[0]},${
+                DEFAULT_ARROW_SIZE * sin(PI / 6) + arrowOffset[1]
+              } Z`}
             />
           </marker>
         </defs>
@@ -320,7 +352,7 @@ export const Edge: React.FC<{ model: EdgeModel }> = observer(({ model }) => {
           d={d}
           strokeWidth={10}
           fill="none"
-          stroke='transparent'
+          stroke="transparent"
         />
       </>
     );
@@ -330,9 +362,7 @@ export const Edge: React.FC<{ model: EdgeModel }> = observer(({ model }) => {
     const position = model.getPointAt(0.5);
 
     return (
-      <g
-        transform={`translate(${position.x}, ${position.y})`}
-      >
+      <g transform={`translate(${position.x}, ${position.y})`}>
         {model.labelContent()}
       </g>
     );
