@@ -21,12 +21,12 @@ export const Header = props => {
 
   const menuList = [
     {
-      name: 'home',
+      name: 'Home',
       path: '/'
     },
     {
-      name: 'documention',
-      path: '/docs/Alert.mdx'
+      name: 'Document',
+      path: '/document/Api.mdx'
     }
   ]
 

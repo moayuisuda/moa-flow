@@ -10,7 +10,6 @@ exports.onCreateWebpackConfig = (args) => {
             alias: {
                 '@components': path.resolve(__dirname, './src/gatsby-theme-docz/components'),
                 '@customComponents': path.resolve(__dirname, './src/gatsby-theme-docz/customComponents'),
-                "@": path.resolve(__dirname, './src/gatsby-theme-docz'),
             },
             plugins: [
                 new TsconfigPaths({

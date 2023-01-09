@@ -2,7 +2,7 @@ import * as mixins from '~utils/mixins'
 
 export const editor = theme => ({
   p: 2,
-  background: theme.plain.backgroundColor,
+  backgroundColor: theme?.plain.backgroundColor,
   borderTop: 0,
   fontFamily: 'monospace',
   fontSize: 18,
@@ -41,7 +41,7 @@ export const wrapperBorder = (content, showingCode) => {
   }
 
   return {
-    border: t => `1px solid ${t.colors.playground.border}`,
+    border: t => `1px solid ${t?.colors?.playground?.border}`,
     borderTop: content === 'editor' ? 0 : undefined,
     borderRadius,
   }

@@ -1,6 +1,6 @@
 {
   "config": {
-    "title": "Doc Test3",
+    "title": "Moa Flow Doc",
     "description": "My awesome app using docz",
     "menu": [],
     "version": "1.0.0",
@@ -14,7 +14,17 @@
         "resolve": "gatsby-theme-docz",
         "options": {}
       }
-    ]
+    ],
+    "base": "/pages/",
+    "src": "./",
+    "files": "**/*.{md,markdown,mdx}",
+    "ignore": [
+      "README.md"
+    ],
+    "dest": "/build",
+    "public": "/public",
+    "editBranch": "main",
+    "port": 3000
   },
   "entries": [
     {
@@ -56,58 +66,52 @@
       }
     },
     {
-      "key": "pages/docs/Alert.mdx",
+      "key": "pages/document/Api.mdx",
       "value": {
-        "name": "alert",
-        "route": "/docs/Alert.mdx",
-        "fullPage": false,
-        "id": "12cd55cfc489e040589d688e86367669",
-        "filepath": "pages/docs/Alert.mdx",
-        "fullpath": "/Users/admin/code/moa-flow/moa-fow-version-dom/moa-flow/doc/pages/docs/Alert.mdx",
+        "name": "API",
+        "route": "/document/Api.mdx",
+        "id": "88e23336f28c3a425b26327ebb829f7a",
+        "filepath": "pages/document/Api.mdx",
+        "fullpath": "/Users/admin/code/moa-flow/moa-fow-version-dom/moa-flow/doc/pages/document/Api.mdx",
         "link": "",
         "hidden": false,
-        "slug": "pages-docs-alert",
+        "slug": "pages-document-api",
         "menu": "",
         "headings": [
           {
-            "slug": "alert",
+            "slug": "api",
             "depth": 1,
-            "value": "Alert"
+            "value": "API"
           },
           {
-            "slug": "basic-usage",
+            "slug": "flow组件-props",
             "depth": 2,
-            "value": "Basic usage"
+            "value": "Flow组件 props"
           },
           {
-            "slug": "properties",
+            "slug": "port组件-props",
             "depth": 2,
-            "value": "Properties"
+            "value": "Port组件 props"
           },
           {
-            "slug": "basic-usage-1",
+            "slug": "flowmodel-属性",
             "depth": 2,
-            "value": "Basic usage"
+            "value": "FlowModel 属性"
           },
           {
-            "slug": "using-different-kinds",
+            "slug": "cellmodel-属性",
             "depth": 2,
-            "value": "Using different kinds"
+            "value": "CellModel 属性"
           },
           {
-            "slug": "using-different-kinds2",
+            "slug": "nodemodel-属性",
             "depth": 2,
-            "value": "Using different kinds2"
+            "value": "NodeModel 属性"
           },
           {
-            "slug": "using-different-kinds3",
+            "slug": "edgemodel-属性",
             "depth": 2,
-            "value": "Using different kinds3"
-          },
-          {
-            "slug": "using-different-kinds4",
-            "depth": 2,
-            "value": "Using different kinds4"
+            "value": "EdgeModel 属性"
           }
         ]
       }
@@ -115,23 +119,8 @@
   ],
   "props": [
     {
-      "key": "src/index.tsx",
-      "value": []
-    },
-    {
       "key": "src/gatsby-theme-docz/index.tsx",
       "value": []
-    },
-    {
-      "key": "src/gatsby-theme-docz/customComponents/Alert.jsx",
-      "value": [
-        {
-          "description": "",
-          "displayName": "Alert",
-          "methods": [],
-          "actualName": "Alert"
-        }
-      ]
     },
     {
       "key": "src/gatsby-theme-docz/components/Code/index.js",

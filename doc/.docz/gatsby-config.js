@@ -16,10 +16,10 @@ if (hasGatsbyConfig) {
 }
 
 const config = {
-  pathPrefix: '/',
+  pathPrefix: '/pages/',
 
   siteMetadata: {
-    title: 'Doc Test3',
+    title: 'Moa Flow Doc',
     description: 'My awesome app using docz',
   },
   plugins: [
@@ -42,7 +42,7 @@ const config = {
         menu: [],
         mdPlugins: [],
         hastPlugins: [],
-        ignore: [],
+        ignore: ['README.md'],
         typescript: true,
         ts: false,
         propsParser: true,
@@ -55,18 +55,18 @@ const config = {
         'open-browser': null,
         root:
           '/Users/admin/code/moa-flow/moa-fow-version-dom/moa-flow/doc/.docz',
-        base: '/',
+        base: '/pages/',
         source: './',
         'gatsby-root': null,
         files: '**/*.{md,markdown,mdx}',
         public: '/public',
-        dest: '.docz/dist',
+        dest: '/build',
         d: '.docz/dist',
-        editBranch: 'master',
+        editBranch: 'main',
         eb: 'master',
         'edit-branch': 'master',
         config: '',
-        title: 'Doc Test3',
+        title: 'Moa Flow Doc',
         description: 'My awesome app using docz',
         host: 'localhost',
         port: 3000,

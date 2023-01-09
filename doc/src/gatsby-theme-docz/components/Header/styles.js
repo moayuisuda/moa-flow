@@ -11,7 +11,6 @@ export const wrapper = {
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
-  padding: '0 32px',
   fontFamily: 'FaktSoft, Helvetica, sans-serif',
   backgroundImage: 'linear-gradient(to right, rgb(146, 254, 157) 0%, rgb(0, 201, 255) 100%)',
 }
@@ -23,9 +22,10 @@ export const innerContainer = {
   position: 'relative',
   justifyContent: 'space-between',
   height: 60,
-  maxWidth: '1040px',
+  maxWidth: '1200px',
   width: '100vw',
   margin: '0 auto',
+  padding: '0 32px 0 32px',
 }
 
 export const menuIcon = {

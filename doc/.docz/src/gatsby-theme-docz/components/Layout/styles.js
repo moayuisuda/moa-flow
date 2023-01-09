@@ -1,4 +1,4 @@
-import { media } from '~theme/breakpoints'
+import { media, breakpoints } from '~theme/breakpoints'
 
 export const main = {
   display: 'flex',
@@ -16,5 +16,8 @@ export const wrapper = {
   minHeight: 'calc(100vh - 70px)',
   [media.tablet]: {
     display: 'block',
+  },
+  [`@media (max-width: ${breakpoints.tablet}px)`]: {
+    width: '100%'
   },
 }

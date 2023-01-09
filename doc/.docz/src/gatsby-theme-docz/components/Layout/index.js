@@ -16,8 +16,6 @@ export const Layout = ({ children, doc }) => {
   return (
     <BaseLayout sx={{ '& > div': { flex: '1 1 auto' } }} data-testid="layout">
       <Global styles={global} />
-
-      { }
       <Main sx={styles.main}>
         <Header onOpen={() => setOpen(s => !s)} />
         {

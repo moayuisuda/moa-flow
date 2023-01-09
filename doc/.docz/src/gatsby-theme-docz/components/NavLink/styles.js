@@ -1,13 +1,11 @@
-export const sideBarToLink = '#8492A6'
-export const sideBarToLinkActive = '#4263F7'
 export const link = {
   my: 2,
   display: 'block',
-  color: sideBarToLink,
+  color: 'sidebar.navGroup',
   textDecoration: 'none',
   fontSize: 2,
   '&.active': {
-    color: sideBarToLinkActive,
+    color: 'sidebar.navLinkActive',
   },
 }
 
@@ -16,11 +14,10 @@ export const smallLink = {
   ml: 3,
   fontSize: 1,
   position: 'relative',
-  color: sideBarToLink,
+  color: 'sidebar.tocLink',
   '&.active': {
-    color: sideBarToLinkActive,
+    color: 'sidebar.tocLinkActive',
   },
-
   '&.active::before': {
     content: '""',
     position: 'absolute',
