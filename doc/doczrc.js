@@ -1,4 +1,5 @@
 export default {
     typescript: true,
-    include: ['pages', 'src', 'public', 'index.mdx', 'plugin'],
+    include: ['pages', 'src', 'public', 'intl', "src/intl"],
+    files: '**/*.{md,markdown,mdx}'
 }

@@ -3,13 +3,14 @@
 /** @jsx jsx */
 import { jsx, Box, Flex, useColorMode } from 'theme-ui'
 import { useConfig, useCurrentDoc } from 'docz'
-import { Link } from "docz"
 import * as styles from './styles'
 import { Edit, Menu, Sun, Github } from '../Icons'
 import Language from '../Language'
-
+import { Link } from 'gatsby-plugin-intl'
+import { useIntl } from "gatsby-plugin-intl";
 
 export const Header = props => {
+
   const { onOpen } = props
   const {
     repository,
@@ -17,18 +18,18 @@ export const Header = props => {
   } = useConfig()
   const { edit = true, ...doc } = useCurrentDoc()
   const [colorMode, setColorMode] = useColorMode()
-
+  const intl = useIntl();
   const toggleColorMode = () => {
     setColorMode(colorMode === 'light' ? 'dark' : 'light')
   }
 
   const menuList = [
     {
-      name: 'Home',
+      name: intl.formatMessage({ id: 'getStarted' }),
       path: '/'
     },
     {
-      name: 'Document',
+      name: intl.formatMessage({ id: 'Documention' }),
       path: '/document/Api.mdx'
     }
   ]
@@ -79,7 +80,7 @@ export const Header = props => {
         <div sx={styles.nav} >
           {
             menuList?.map(item => {
-              return <Link sx={styles.link} to={item.path} key={item.path}>{item.name}</Link>
+              return <Link style={{ margin: '10px' }} sx={styles.link} to={item.path} key={item.path}>{item.name}</Link>
             })
           }
           <Language />

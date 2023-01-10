@@ -17,7 +17,7 @@ exports.onCreateWebpackConfig = (args) => {
             ],
         },
         watchOptions: {
-            ignored: ['node_modules', 'dist', '.cache', 'coverage', '.docz'],
+            ignored: ['node_modules', 'dist', '.cache', 'coverage'],
         },
     });
 };

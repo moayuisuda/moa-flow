@@ -72,11 +72,11 @@ export const editButton = {
 
 
 export const nav = {
-  width: ' 350px',
   display: 'flex',
   justifyContent: ' space-between',
   alignItems: 'center',
   flexFlow: 'row nowrap',
+  gut: '10px',
 }
 
 

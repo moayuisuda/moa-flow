@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { Fragment, forwardRef } from 'react'
 import { jsx } from 'theme-ui'
-import { Link } from 'gatsby'
+import { Link } from 'gatsby-plugin-intl'
 import { useDocs, useCurrentDoc } from 'docz'
 import { get } from 'lodash/fp'
 
@@ -30,10 +30,10 @@ export const NavLink = forwardRef(function NavLink({ item, ...props }, ref) {
 
   const to = item.route
   const headings = docs && getHeadings(to, docs)
-  console.log({ headings });
   const isCurrent = item.route === current.route
   const showHeadings = isCurrent && headings && headings.length > 0
   const currentHash = getCurrentHash()
+
   return (
     <Fragment>
       <Link
@@ -44,16 +44,19 @@ export const NavLink = forwardRef(function NavLink({ item, ...props }, ref) {
         ref={ref}
       />
       {showHeadings &&
-        headings.map(heading => (
-          <Link
-            key={heading.slug}
-            to={`${to}#${heading.slug}`}
-            sx={styles.smallLink}
-            className={currentHash === `#${heading.slug}` ? 'active' : ''}
-          >
-            {heading.value}
-          </Link>
-        ))}
+        headings.map(heading => {
+          console.log(heading.slug);
+          return (
+            <Link
+              key={heading.slug}
+              to={`${to}#${heading.slug}`}
+              sx={styles.smallLink}
+              className={currentHash === `#${heading.slug}` ? 'active' : ''}
+            >
+              {heading.value}
+            </Link>
+          )
+        })}
     </Fragment>
   )
 })

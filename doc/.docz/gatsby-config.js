@@ -105,7 +105,7 @@ const config = {
           db:
             '/Users/admin/code/moa-flow/moa-fow-version-dom/moa-flow/doc/.docz/app/db.json',
         },
-        include: ['pages', 'src', 'public', 'index.mdx', 'plugin'],
+        include: ['pages', 'src', 'public', 'intl', 'src/intl'],
       },
     },
   ],

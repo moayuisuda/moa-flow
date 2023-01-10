@@ -13,9 +13,10 @@
       "pages",
       "src",
       "public",
-      "index.mdx",
-      "plugin"
-    ]
+      "intl",
+      "src/intl"
+    ],
+    "files": "**/*.{md,markdown,mdx}"
   },
   "entries": [
     {
@@ -103,27 +104,6 @@
             "slug": "edgemodel-属性",
             "depth": 2,
             "value": "EdgeModel 属性"
-          }
-        ]
-      }
-    },
-    {
-      "key": "pages/test/i18n.mdx",
-      "value": {
-        "name": "i18n",
-        "route": "/test/i18n.mdx",
-        "id": "e79391ef8040263013bf97827185c3fe",
-        "filepath": "pages/test/i18n.mdx",
-        "fullpath": "/Users/admin/code/moa-flow/moa-fow-version-dom/moa-flow/doc/pages/test/i18n.mdx",
-        "link": "",
-        "hidden": false,
-        "slug": "pages-test-i18n",
-        "menu": "",
-        "headings": [
-          {
-            "slug": "formattedmessage-idtitle-",
-            "depth": 2,
-            "value": "<FormattedMessage id=\"title\" />"
           }
         ]
       }

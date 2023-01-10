@@ -4,16 +4,8 @@
         "matchPath": "/en/document/Api.mdx"
     },
     {
-        "path": "/en/test/i18n.mdx",
-        "matchPath": "/en/test/i18n.mdx"
-    },
-    {
         "path": "/zh/document/Api.mdx",
         "matchPath": "/zh/document/Api.mdx"
-    },
-    {
-        "path": "/zh/test/i18n.mdx",
-        "matchPath": "/zh/test/i18n.mdx"
     },
     {
         "path": "/en/dev-404-page/",
