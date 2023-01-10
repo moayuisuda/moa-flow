@@ -30,6 +30,7 @@ export const NavLink = forwardRef(function NavLink({ item, ...props }, ref) {
 
   const to = item.route
   const headings = docs && getHeadings(to, docs)
+  console.log({ headings });
   const isCurrent = item.route === current.route
   const showHeadings = isCurrent && headings && headings.length > 0
   const currentHash = getCurrentHash()

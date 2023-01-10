@@ -9,9 +9,7 @@ export const Code = ({ children, className: outerClassName }) => {
   const [language] = outerClassName
     ? outerClassName.replace(/language-/, '').split(' ')
     : ['text']
-  console.log({ language });
   const theme = usePrismTheme()
-  console.log(theme);
   return (
     <Highlight
       {...defaultProps}

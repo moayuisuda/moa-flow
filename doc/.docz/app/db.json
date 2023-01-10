@@ -9,22 +9,13 @@
     "themeConfig": {},
     "separator": "-",
     "typescript": true,
-    "plugins": [
-      {
-        "resolve": "gatsby-theme-docz",
-        "options": {}
-      }
-    ],
-    "base": "/pages/",
-    "src": "./",
-    "files": "**/*.{md,markdown,mdx}",
-    "ignore": [
-      "README.md"
-    ],
-    "dest": "/build",
-    "public": "/public",
-    "editBranch": "main",
-    "port": 3000
+    "include": [
+      "pages",
+      "src",
+      "public",
+      "index.mdx",
+      "plugin"
+    ]
   },
   "entries": [
     {
@@ -115,11 +106,65 @@
           }
         ]
       }
+    },
+    {
+      "key": "pages/test/i18n.mdx",
+      "value": {
+        "name": "i18n",
+        "route": "/test/i18n.mdx",
+        "id": "e79391ef8040263013bf97827185c3fe",
+        "filepath": "pages/test/i18n.mdx",
+        "fullpath": "/Users/admin/code/moa-flow/moa-fow-version-dom/moa-flow/doc/pages/test/i18n.mdx",
+        "link": "",
+        "hidden": false,
+        "slug": "pages-test-i18n",
+        "menu": "",
+        "headings": [
+          {
+            "slug": "formattedmessage-idtitle-",
+            "depth": 2,
+            "value": "<FormattedMessage id=\"title\" />"
+          }
+        ]
+      }
     }
   ],
   "props": [
     {
       "key": "src/gatsby-theme-docz/index.tsx",
+      "value": []
+    },
+    {
+      "key": "src/gatsby-theme-docz/components/FormattedMessage/index.tsx",
+      "value": [
+        {
+          "tags": {},
+          "filePath": "src/gatsby-theme-docz/components/FormattedMessage/index.tsx",
+          "description": "",
+          "displayName": "FormattedMessage",
+          "methods": [],
+          "props": {
+            "id": {
+              "defaultValue": null,
+              "description": "",
+              "name": "id",
+              "declarations": [
+                {
+                  "fileName": "src/gatsby-theme-docz/components/FormattedMessage/index.tsx",
+                  "name": "TypeLiteral"
+                }
+              ],
+              "required": true,
+              "type": {
+                "name": "string"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "key": "src/gatsby-theme-docz/components/Language/index.tsx",
       "value": []
     },
     {

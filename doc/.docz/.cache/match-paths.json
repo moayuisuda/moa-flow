@@ -1,1 +1,50 @@
-[]
+[
+    {
+        "path": "/en/document/Api.mdx",
+        "matchPath": "/en/document/Api.mdx"
+    },
+    {
+        "path": "/en/test/i18n.mdx",
+        "matchPath": "/en/test/i18n.mdx"
+    },
+    {
+        "path": "/zh/document/Api.mdx",
+        "matchPath": "/zh/document/Api.mdx"
+    },
+    {
+        "path": "/zh/test/i18n.mdx",
+        "matchPath": "/zh/test/i18n.mdx"
+    },
+    {
+        "path": "/en/dev-404-page/",
+        "matchPath": "/en/dev-404-page/"
+    },
+    {
+        "path": "/en/readme",
+        "matchPath": "/en/readme"
+    },
+    {
+        "path": "/zh/dev-404-page/",
+        "matchPath": "/zh/dev-404-page/"
+    },
+    {
+        "path": "/zh/readme",
+        "matchPath": "/zh/readme"
+    },
+    {
+        "path": "/en/",
+        "matchPath": "/en/"
+    },
+    {
+        "path": "/zh/",
+        "matchPath": "/zh/"
+    },
+    {
+        "path": "/en/404/",
+        "matchPath": "/en/*"
+    },
+    {
+        "path": "/zh/404/",
+        "matchPath": "/zh/*"
+    }
+]

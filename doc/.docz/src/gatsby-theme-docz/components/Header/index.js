@@ -6,6 +6,9 @@ import { useConfig, useCurrentDoc } from 'docz'
 import { Link } from "docz"
 import * as styles from './styles'
 import { Edit, Menu, Sun, Github } from '../Icons'
+import Language from '../Language'
+
+
 export const Header = props => {
   const { onOpen } = props
   const {
@@ -79,6 +82,7 @@ export const Header = props => {
               return <Link sx={styles.link} to={item.path} key={item.path}>{item.name}</Link>
             })
           }
+          <Language />
         </div>
       </div>
 
