@@ -8,5 +8,6 @@
   "cellModelProps": "CellModel 属性",
   "nodeModelProps": "NodeModel 属性",
   "edgeModelProps": "EdgeModel 属性",
-  "API": "moa-flow 具有完善的 ts 支持，可以直接在代码中看到对应的标注，此文档暂仅作参考"
+  "API": "moa-flow 具有完善的 ts 支持，可以直接在代码中看到对应的标注，此文档暂仅作参考",
+  "typeEnterToSearch": "按回车搜索"
 }

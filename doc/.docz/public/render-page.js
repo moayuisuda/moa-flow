@@ -19711,9 +19711,8 @@ module.exports = {
 __webpack_require__.r(__webpack_exports__);
 var scope_0 = __webpack_require__(/*! ./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/a69a3c581c1915c9e0886e99dfd37141.js */ "./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/a69a3c581c1915c9e0886e99dfd37141.js").default;
 var scope_1 = __webpack_require__(/*! ./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/d2396c7ced676a3b518bd3b8075068e4.js */ "./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/d2396c7ced676a3b518bd3b8075068e4.js").default;
-var scope_2 = __webpack_require__(/*! ./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/e20b759de69f9d09885c5bbeba579619.js */ "./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/e20b759de69f9d09885c5bbeba579619.js").default;
-var scope_3 = __webpack_require__(/*! ./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/e92f8988d65cf25c087d226e6c0ef06f.js */ "./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/e92f8988d65cf25c087d226e6c0ef06f.js").default;
-const __DOCZ_DUMMY_EXPORT_DEFAULT = Object.assign({}, scope_0, scope_1, scope_2, scope_3);
+var scope_2 = __webpack_require__(/*! ./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/e92f8988d65cf25c087d226e6c0ef06f.js */ "./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/e92f8988d65cf25c087d226e6c0ef06f.js").default;
+const __DOCZ_DUMMY_EXPORT_DEFAULT = Object.assign({}, scope_0, scope_1, scope_2);
 /* harmony default export */ __webpack_exports__["default"] = (__DOCZ_DUMMY_EXPORT_DEFAULT);
 if (typeof __DOCZ_DUMMY_EXPORT_DEFAULT !== 'undefined' && __DOCZ_DUMMY_EXPORT_DEFAULT && __DOCZ_DUMMY_EXPORT_DEFAULT === Object(__DOCZ_DUMMY_EXPORT_DEFAULT) && Object.isExtensible(__DOCZ_DUMMY_EXPORT_DEFAULT) && !Object.prototype.hasOwnProperty.call(__DOCZ_DUMMY_EXPORT_DEFAULT, '__filemeta')) {
   Object.defineProperty(__DOCZ_DUMMY_EXPORT_DEFAULT, '__filemeta', {
@@ -81509,30 +81508,6 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ "./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/e20b759de69f9d09885c5bbeba579619.js":
-/*!********************************************************************************************!*\
-  !*** ./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/e20b759de69f9d09885c5bbeba579619.js ***!
-  \********************************************************************************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var docz__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! docz */ "../node_modules/docz/dist/index.esm.js");
-/* harmony import */ var _components_FormattedMessage__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @components/FormattedMessage */ "./src/gatsby-theme-docz/components/FormattedMessage/index.tsx");
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react */ "react");
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_2__);
-
-
-
-/* harmony default export */ __webpack_exports__["default"] = ({
-  Playground: docz__WEBPACK_IMPORTED_MODULE_0__["Playground"],
-  FormattedMessage: _components_FormattedMessage__WEBPACK_IMPORTED_MODULE_1__["FormattedMessage"],
-  React: react__WEBPACK_IMPORTED_MODULE_2__
-});
-
-/***/ }),
-
 /***/ "./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/e92f8988d65cf25c087d226e6c0ef06f.js":
 /*!********************************************************************************************!*\
   !*** ./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/e92f8988d65cf25c087d226e6c0ef06f.js ***!
@@ -82937,7 +82912,9 @@ const Playground = ({
       showLivePreview
     }
   } = Object(docz__WEBPACK_IMPORTED_MODULE_3__["useConfig"])();
-
+  console.log({
+    code
+  });
   // Makes sure scope is only given on mount to avoid infinite re-render on hot reloads
   const {
     0: scopeOnMount

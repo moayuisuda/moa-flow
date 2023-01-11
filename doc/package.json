@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "docz dev",
-    "build": "docz build",
-    "serve": "docz build && docz serve"
+    "dev": "rm -rf ./.docz --force && docz dev",
+    "build": "rm -rf ./.docz --force && docz build",
+    "serve": "rm -rf ./.docz --force && docz build && docz serve"
   },
   "keywords": [],
   "author": "",

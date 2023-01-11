@@ -76,7 +76,7 @@ export const nav = {
   justifyContent: ' space-between',
   alignItems: 'center',
   flexFlow: 'row nowrap',
-  gut: '10px',
+  lineHeight: "100%",
 }
 
 
