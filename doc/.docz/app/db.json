@@ -111,6 +111,10 @@
   ],
   "props": [
     {
+      "key": "src/index.tsx",
+      "value": []
+    },
+    {
       "key": "src/gatsby-theme-docz/index.tsx",
       "value": []
     },
@@ -140,6 +144,17 @@
               }
             }
           }
+        }
+      ]
+    },
+    {
+      "key": "src/gatsby-theme-docz/components/Code/index.js",
+      "value": [
+        {
+          "description": "",
+          "displayName": "Code",
+          "methods": [],
+          "actualName": "Code"
         }
       ]
     },
@@ -285,28 +300,6 @@
           "description": "",
           "displayName": "Sidebar",
           "methods": []
-        }
-      ]
-    },
-    {
-      "key": "src/gatsby-theme-docz/components/Code/index.js",
-      "value": [
-        {
-          "description": "",
-          "displayName": "Code",
-          "methods": [],
-          "actualName": "Code"
-        }
-      ]
-    },
-    {
-      "key": ".docz/src/gatsby-theme-docz/components/Code/index.js",
-      "value": [
-        {
-          "description": "",
-          "displayName": "Code",
-          "methods": [],
-          "actualName": "Code"
         }
       ]
     }
