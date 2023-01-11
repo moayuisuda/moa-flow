@@ -4,7 +4,7 @@ import { jsx } from 'theme-ui'
 import { Link } from 'gatsby-plugin-intl'
 import { useDocs, useCurrentDoc } from 'docz'
 import { get } from 'lodash/fp'
-
+import { FormattedMessage } from '../FormattedMessage'
 import * as styles from './styles'
 
 const getHeadings = (route, docs) => {
@@ -45,7 +45,6 @@ export const NavLink = forwardRef(function NavLink({ item, ...props }, ref) {
       />
       {showHeadings &&
         headings.map(heading => {
-          console.log(heading.slug);
           return (
             <Link
               key={heading.slug}
@@ -53,7 +52,7 @@ export const NavLink = forwardRef(function NavLink({ item, ...props }, ref) {
               sx={styles.smallLink}
               className={currentHash === `#${heading.slug}` ? 'active' : ''}
             >
-              {heading.value}
+              <FormattedMessage id={heading.value} />
             </Link>
           )
         })}

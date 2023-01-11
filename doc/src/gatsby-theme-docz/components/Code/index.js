@@ -23,16 +23,18 @@ export const Code = ({ children, className: outerClassName }) => {
           style={{ ...style, overflowX: 'auto' }}
           data-testid="code"
         >
-          {tokens.map((line, i) => (
-            <div {...getLineProps({ line, key: i })} style={{ fontSize: '16px' }}>
-              {line.map((token, key) => (
-                <span
-                  {...getTokenProps({ token, key })}
-                  sx={{ display: 'inline-block' }}
-                />
-              ))}
-            </div>
-          ))}
+          {tokens.map((line, i) => {
+            console.log(line);
+            return (
+              <div {...getLineProps({ line, key: i })} style={{ fontSize: '16px' }}>
+                {line.map((token, key) => (
+                  <span
+                    {...getTokenProps({ token, key })}
+                    sx={{ display: 'inline-block' }} />
+                ))}
+              </div>
+            )
+          })}
         </Styled.pre>
       )
       }

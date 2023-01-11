@@ -6672,6 +6672,56 @@ exports.wrapPageElement = wrapPageElement;
 
 /***/ }),
 
+/***/ "../node_modules/gatsby-plugin-intl/index.js":
+/*!***************************************************!*\
+  !*** ../node_modules/gatsby-plugin-intl/index.js ***!
+  \***************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "../node_modules/@babel/runtime/helpers/interopRequireDefault.js");
+
+var _interopRequireWildcard = __webpack_require__(/*! @babel/runtime/helpers/interopRequireWildcard */ "../node_modules/@babel/runtime/helpers/interopRequireWildcard.js");
+
+exports.__esModule = true;
+var _exportNames = {
+  Link: true,
+  withIntl: true,
+  navigate: true,
+  changeLocale: true,
+  IntlContextProvider: true,
+  IntlContextConsumer: true
+};
+exports.IntlContextConsumer = exports.IntlContextProvider = exports.changeLocale = exports.navigate = exports.withIntl = exports.Link = void 0;
+
+var _reactIntl = __webpack_require__(/*! react-intl */ "../node_modules/react-intl/lib/index.js");
+
+Object.keys(_reactIntl).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  exports[key] = _reactIntl[key];
+});
+
+var _link = _interopRequireWildcard(__webpack_require__(/*! ./link */ "../node_modules/gatsby-plugin-intl/link.js"));
+
+exports.Link = _link.default;
+exports.navigate = _link.navigate;
+exports.changeLocale = _link.changeLocale;
+
+var _withIntl = _interopRequireDefault(__webpack_require__(/*! ./with-intl */ "../node_modules/gatsby-plugin-intl/with-intl.js"));
+
+exports.withIntl = _withIntl.default;
+
+var _intlContext = __webpack_require__(/*! ./intl-context */ "../node_modules/gatsby-plugin-intl/intl-context.js");
+
+exports.IntlContextProvider = _intlContext.IntlContextProvider;
+exports.IntlContextConsumer = _intlContext.IntlContextConsumer;
+
+/***/ }),
+
 /***/ "../node_modules/gatsby-plugin-intl/intl-context.js":
 /*!**********************************************************!*\
   !*** ../node_modules/gatsby-plugin-intl/intl-context.js ***!
@@ -6695,6 +6745,152 @@ var IntlContextProvider = IntlContext.Provider;
 exports.IntlContextProvider = IntlContextProvider;
 var IntlContextConsumer = IntlContext.Consumer;
 exports.IntlContextConsumer = IntlContextConsumer;
+
+/***/ }),
+
+/***/ "../node_modules/gatsby-plugin-intl/link.js":
+/*!**************************************************!*\
+  !*** ../node_modules/gatsby-plugin-intl/link.js ***!
+  \**************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "../node_modules/@babel/runtime/helpers/interopRequireDefault.js");
+
+exports.__esModule = true;
+exports.changeLocale = exports.navigate = exports.default = void 0;
+
+var _extends2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/extends */ "../node_modules/@babel/runtime/helpers/extends.js"));
+
+var _objectWithoutPropertiesLoose2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/objectWithoutPropertiesLoose */ "../node_modules/@babel/runtime/helpers/objectWithoutPropertiesLoose.js"));
+
+var _react = _interopRequireDefault(__webpack_require__(/*! react */ "react"));
+
+var _propTypes = _interopRequireDefault(__webpack_require__(/*! prop-types */ "../node_modules/prop-types/index.js"));
+
+var _gatsby = __webpack_require__(/*! gatsby */ "./.cache/gatsby-browser-entry.js");
+
+var _intlContext = __webpack_require__(/*! ./intl-context */ "../node_modules/gatsby-plugin-intl/intl-context.js");
+
+var Link = function Link(_ref) {
+  var to = _ref.to,
+      language = _ref.language,
+      children = _ref.children,
+      onClick = _ref.onClick,
+      rest = (0, _objectWithoutPropertiesLoose2.default)(_ref, ["to", "language", "children", "onClick"]);
+  return _react.default.createElement(_intlContext.IntlContextConsumer, null, function (intl) {
+    var languageLink = language || intl.language;
+    var link = intl.routed || language ? "/" + languageLink + to : "" + to;
+
+    var handleClick = function handleClick(e) {
+      if (language) {
+        localStorage.setItem("gatsby-intl-language", language);
+      }
+
+      if (onClick) {
+        onClick(e);
+      }
+    };
+
+    return _react.default.createElement(_gatsby.Link, (0, _extends2.default)({}, rest, {
+      to: link,
+      onClick: handleClick
+    }), children);
+  });
+};
+
+Link.propTypes = {
+  children: _propTypes.default.node.isRequired,
+  to: _propTypes.default.string,
+  language: _propTypes.default.string
+};
+Link.defaultProps = {
+  to: ""
+};
+var _default = Link;
+exports.default = _default;
+
+var navigate = function navigate(to, options) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  var _window$___gatsbyIntl = window.___gatsbyIntl,
+      language = _window$___gatsbyIntl.language,
+      routed = _window$___gatsbyIntl.routed;
+  var link = routed ? "/" + language + to : "" + to;
+  (0, _gatsby.navigate)(link, options);
+};
+
+exports.navigate = navigate;
+
+var changeLocale = function changeLocale(language, to) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  var routed = window.___gatsbyIntl.routed;
+
+  var removePrefix = function removePrefix(pathname) {
+    var base =  true ? "" : undefined;
+
+    if (base && pathname.indexOf(base) === 0) {
+      pathname = pathname.slice(base.length);
+    }
+
+    return pathname;
+  };
+
+  var removeLocalePart = function removeLocalePart(pathname) {
+    if (!routed) {
+      return pathname;
+    }
+
+    var i = pathname.indexOf("/", 1);
+    return pathname.substring(i);
+  };
+
+  var pathname = to || removeLocalePart(removePrefix(window.location.pathname)); // TODO: check slash
+
+  var link = "/" + language + pathname + window.location.search;
+  localStorage.setItem("gatsby-intl-language", language);
+  (0, _gatsby.navigate)(link);
+};
+
+exports.changeLocale = changeLocale;
+
+/***/ }),
+
+/***/ "../node_modules/gatsby-plugin-intl/with-intl.js":
+/*!*******************************************************!*\
+  !*** ../node_modules/gatsby-plugin-intl/with-intl.js ***!
+  \*******************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "../node_modules/@babel/runtime/helpers/interopRequireDefault.js");
+
+exports.__esModule = true;
+exports.default = void 0;
+
+var _react = _interopRequireDefault(__webpack_require__(/*! react */ "react"));
+
+var _reactIntl = __webpack_require__(/*! react-intl */ "../node_modules/react-intl/lib/index.js");
+
+var _default = function _default(Component) {
+  return function (props) {
+    console.warn("withIntl is deprecated. Please use injectIntl instead.");
+    return _react.default.createElement((0, _reactIntl.injectIntl)(Component), props);
+  };
+};
+
+exports.default = _default;
 
 /***/ }),
 
@@ -6907,10 +7103,11 @@ module.exports = {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-var scope_0 = __webpack_require__(/*! ./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/d2396c7ced676a3b518bd3b8075068e4.js */ "./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/d2396c7ced676a3b518bd3b8075068e4.js").default;
-var scope_1 = __webpack_require__(/*! ./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/e361301cdb0fafa5bf4a1bd83cb49801.js */ "./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/e361301cdb0fafa5bf4a1bd83cb49801.js").default;
-var scope_2 = __webpack_require__(/*! ./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/e92f8988d65cf25c087d226e6c0ef06f.js */ "./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/e92f8988d65cf25c087d226e6c0ef06f.js").default;
-const __DOCZ_DUMMY_EXPORT_DEFAULT = Object.assign({}, scope_0, scope_1, scope_2);
+var scope_0 = __webpack_require__(/*! ./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/048e1eaab7c83c5b8efddf031e74132b.js */ "./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/048e1eaab7c83c5b8efddf031e74132b.js").default;
+var scope_1 = __webpack_require__(/*! ./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/d2396c7ced676a3b518bd3b8075068e4.js */ "./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/d2396c7ced676a3b518bd3b8075068e4.js").default;
+var scope_2 = __webpack_require__(/*! ./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/e20b759de69f9d09885c5bbeba579619.js */ "./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/e20b759de69f9d09885c5bbeba579619.js").default;
+var scope_3 = __webpack_require__(/*! ./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/e92f8988d65cf25c087d226e6c0ef06f.js */ "./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/e92f8988d65cf25c087d226e6c0ef06f.js").default;
+const __DOCZ_DUMMY_EXPORT_DEFAULT = Object.assign({}, scope_0, scope_1, scope_2, scope_3);
 /* harmony default export */ __webpack_exports__["default"] = (__DOCZ_DUMMY_EXPORT_DEFAULT);
 if (typeof __DOCZ_DUMMY_EXPORT_DEFAULT !== 'undefined' && __DOCZ_DUMMY_EXPORT_DEFAULT && __DOCZ_DUMMY_EXPORT_DEFAULT === Object(__DOCZ_DUMMY_EXPORT_DEFAULT) && Object.isExtensible(__DOCZ_DUMMY_EXPORT_DEFAULT) && !Object.prototype.hasOwnProperty.call(__DOCZ_DUMMY_EXPORT_DEFAULT, '__filemeta')) {
   Object.defineProperty(__DOCZ_DUMMY_EXPORT_DEFAULT, '__filemeta', {
@@ -44526,6 +44723,27 @@ exports.wrapRootElement = true;
 
 /***/ }),
 
+/***/ "./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/048e1eaab7c83c5b8efddf031e74132b.js":
+/*!********************************************************************************************!*\
+  !*** ./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/048e1eaab7c83c5b8efddf031e74132b.js ***!
+  \********************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var docz__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! docz */ "../node_modules/docz/dist/index.esm.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_1__);
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  Playground: docz__WEBPACK_IMPORTED_MODULE_0__["Playground"],
+  React: react__WEBPACK_IMPORTED_MODULE_1__
+});
+
+/***/ }),
+
 /***/ "./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/d2396c7ced676a3b518bd3b8075068e4.js":
 /*!********************************************************************************************!*\
   !*** ./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/d2396c7ced676a3b518bd3b8075068e4.js ***!
@@ -44547,9 +44765,9 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ "./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/e361301cdb0fafa5bf4a1bd83cb49801.js":
+/***/ "./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/e20b759de69f9d09885c5bbeba579619.js":
 /*!********************************************************************************************!*\
-  !*** ./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/e361301cdb0fafa5bf4a1bd83cb49801.js ***!
+  !*** ./.cache/caches/gatsby-plugin-mdx/mdx-scopes-dir/e20b759de69f9d09885c5bbeba579619.js ***!
   \********************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
@@ -44557,13 +44775,16 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var docz__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! docz */ "../node_modules/docz/dist/index.esm.js");
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react */ "react");
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _components_FormattedMessage__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @components/FormattedMessage */ "./src/gatsby-theme-docz/components/FormattedMessage/index.tsx");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_2__);
+
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   Playground: docz__WEBPACK_IMPORTED_MODULE_0__["Playground"],
-  React: react__WEBPACK_IMPORTED_MODULE_1__
+  FormattedMessage: _components_FormattedMessage__WEBPACK_IMPORTED_MODULE_1__["FormattedMessage"],
+  React: react__WEBPACK_IMPORTED_MODULE_2__
 });
 
 /***/ }),
@@ -45714,6 +45935,36 @@ function stripPrefix(str, prefix = ``) {
   }
   return str;
 }
+
+/***/ }),
+
+/***/ "./src/gatsby-theme-docz/components/FormattedMessage/index.tsx":
+/*!*********************************************************************!*\
+  !*** ./src/gatsby-theme-docz/components/FormattedMessage/index.tsx ***!
+  \*********************************************************************/
+/*! exports provided: FormattedMessage */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "FormattedMessage", function() { return FormattedMessage; });
+/* harmony import */ var gatsby_plugin_intl__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! gatsby-plugin-intl */ "../node_modules/gatsby-plugin-intl/index.js");
+/* harmony import */ var gatsby_plugin_intl__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(gatsby_plugin_intl__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _emotion_core__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @emotion/core */ "../node_modules/@emotion/core/dist/core.esm.js");
+
+
+
+const FormattedMessage = props => {
+  const {
+    id
+  } = props;
+  const intl = Object(gatsby_plugin_intl__WEBPACK_IMPORTED_MODULE_0__["useIntl"])();
+  return Object(_emotion_core__WEBPACK_IMPORTED_MODULE_2__["jsx"])("div", null, intl.formatMessage({
+    id
+  }));
+};
 
 /***/ }),
 
