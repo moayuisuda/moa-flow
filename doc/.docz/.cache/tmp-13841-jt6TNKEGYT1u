@@ -1,0 +1,5 @@
+
+    const cmd = require("/Users/admin/code/moa-flow/moa-fow-version-dom/moa-flow/doc/node_modules/gatsby/dist/commands/develop-process.js");
+    const args = {"_":["develop"],"host":"localhost","H":"localhost","port":55403,"p":"3000","verbose":false,"no-color":false,"no-colors":false,"noColors":false,"noColor":false,"json":false,"c":"","cert-file":"","certFile":"","k":"","key-file":"","keyFile":"","ca-file":"","caFile":"","graphql-tracing":false,"graphqlTracing":false,"$0":"gatsby","directory":"/Users/admin/code/moa-flow/moa-fow-version-dom/moa-flow/doc/.docz","browserslist":[">0.25%","not dead"],"sitePackageJson":{"name":"docz-app","license":"MIT","dependencies":{"gatsby":"just-to-fool-cli-never-installed"},"scripts":{"dev":"gatsby develop","build":"gatsby build","serve":"gatsby serve"}},"report":{"errorMap":{}},"useYarn":false,"proxyPort":3000,"ssl":null,"debugInfo":null};
+    cmd(args);
+  

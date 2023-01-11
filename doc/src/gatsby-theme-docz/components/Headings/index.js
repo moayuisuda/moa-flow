@@ -4,7 +4,6 @@ import { FormattedMessage } from '../FormattedMessage';
 
 const heading = Tag => {
   const Component = props => {
-    console.log('props.id', props.id, props.children);
     return !!props.id ? (
       <Tag {...props}>
         <a

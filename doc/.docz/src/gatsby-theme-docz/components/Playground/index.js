@@ -46,7 +46,7 @@ export const Playground = ({ code, scope, language, useScoping = false }) => {
   const {
     themeConfig: { showPlaygroundEditor, showLiveError, showLivePreview },
   } = useConfig()
-
+  console.log({ code });
   // Makes sure scope is only given on mount to avoid infinite re-render on hot reloads
   const [scopeOnMount] = useState(scope)
   const theme = usePrismTheme()

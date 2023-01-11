@@ -24,7 +24,6 @@ export const Code = ({ children, className: outerClassName }) => {
           data-testid="code"
         >
           {tokens.map((line, i) => {
-            console.log(line);
             return (
               <div {...getLineProps({ line, key: i })} style={{ fontSize: '16px' }}>
                 {line.map((token, key) => (

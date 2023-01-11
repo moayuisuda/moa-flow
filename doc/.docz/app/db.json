@@ -111,10 +111,6 @@
   ],
   "props": [
     {
-      "key": "src/index.tsx",
-      "value": []
-    },
-    {
       "key": "src/gatsby-theme-docz/index.tsx",
       "value": []
     },
@@ -144,17 +140,6 @@
               }
             }
           }
-        }
-      ]
-    },
-    {
-      "key": "src/gatsby-theme-docz/components/Code/index.js",
-      "value": [
-        {
-          "description": "",
-          "displayName": "Code",
-          "methods": [],
-          "actualName": "Code"
         }
       ]
     },
@@ -246,26 +231,6 @@
       ]
     },
     {
-      "key": "src/gatsby-theme-docz/components/Playground/index.js",
-      "value": [
-        {
-          "description": "",
-          "displayName": "Playground",
-          "methods": [],
-          "actualName": "Playground",
-          "props": {
-            "useScoping": {
-              "defaultValue": {
-                "value": "false",
-                "computed": false
-              },
-              "required": false
-            }
-          }
-        }
-      ]
-    },
-    {
       "key": "src/gatsby-theme-docz/components/Pre/index.js",
       "value": [
         {
@@ -273,6 +238,16 @@
           "displayName": "Pre",
           "methods": [],
           "actualName": "Pre"
+        }
+      ]
+    },
+    {
+      "key": "src/gatsby-theme-docz/components/Sidebar/index.js",
+      "value": [
+        {
+          "description": "",
+          "displayName": "Sidebar",
+          "methods": []
         }
       ]
     },
@@ -294,12 +269,64 @@
       ]
     },
     {
-      "key": "src/gatsby-theme-docz/components/Sidebar/index.js",
+      "key": "src/gatsby-theme-docz/components/Playground/index.js",
       "value": [
         {
           "description": "",
-          "displayName": "Sidebar",
-          "methods": []
+          "displayName": "Playground",
+          "methods": [],
+          "actualName": "Playground",
+          "props": {
+            "useScoping": {
+              "defaultValue": {
+                "value": "false",
+                "computed": false
+              },
+              "required": false
+            }
+          }
+        }
+      ]
+    },
+    {
+      "key": ".docz/src/gatsby-theme-docz/components/Playground/index.js",
+      "value": [
+        {
+          "description": "",
+          "displayName": "Playground",
+          "methods": [],
+          "actualName": "Playground",
+          "props": {
+            "useScoping": {
+              "defaultValue": {
+                "value": "false",
+                "computed": false
+              },
+              "required": false
+            }
+          }
+        }
+      ]
+    },
+    {
+      "key": "src/gatsby-theme-docz/components/Code/index.js",
+      "value": [
+        {
+          "description": "",
+          "displayName": "Code",
+          "methods": [],
+          "actualName": "Code"
+        }
+      ]
+    },
+    {
+      "key": ".docz/src/gatsby-theme-docz/components/Code/index.js",
+      "value": [
+        {
+          "description": "",
+          "displayName": "Code",
+          "methods": [],
+          "actualName": "Code"
         }
       ]
     }
