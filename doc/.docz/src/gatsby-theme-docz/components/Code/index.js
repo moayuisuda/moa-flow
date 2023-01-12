@@ -2,7 +2,7 @@
 /* eslint react/jsx-key: 0 */
 import Highlight, { defaultProps } from 'prism-react-renderer'
 import { jsx, Styled } from 'theme-ui'
-
+import { useIntl } from "gatsby-plugin-intl";
 import { usePrismTheme } from '~utils/theme'
 
 export const Code = ({ children, className: outerClassName }) => {
@@ -10,6 +10,7 @@ export const Code = ({ children, className: outerClassName }) => {
     ? outerClassName.replace(/language-/, '').split(' ')
     : ['text']
   const theme = usePrismTheme()
+  const intl = useIntl();
   return (
     <Highlight
       {...defaultProps}
@@ -26,11 +27,19 @@ export const Code = ({ children, className: outerClassName }) => {
           {tokens.map((line, i) => {
             return (
               <div {...getLineProps({ line, key: i })} style={{ fontSize: '16px' }}>
-                {line.map((token, key) => (
-                  <span
-                    {...getTokenProps({ token, key })}
-                    sx={{ display: 'inline-block' }} />
-                ))}
+                {line.map((token, key) => {
+                  if (typeof token.content === 'string' && token.content?.startsWith('//')) {
+                    token = {
+                      ...token,
+                      content: intl.formatMessage({ id: token.content })
+                    }
+                  }
+                  return (
+                    <span
+                      {...getTokenProps({ token, key })}
+                      sx={{ display: 'inline-block' }} />
+                  )
+                })}
               </div>
             )
           })}

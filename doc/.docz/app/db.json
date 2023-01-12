@@ -148,17 +148,6 @@
       ]
     },
     {
-      "key": "src/gatsby-theme-docz/components/Code/index.js",
-      "value": [
-        {
-          "description": "",
-          "displayName": "Code",
-          "methods": [],
-          "actualName": "Code"
-        }
-      ]
-    },
-    {
       "key": "src/gatsby-theme-docz/components/Language/index.js",
       "value": [
         {
