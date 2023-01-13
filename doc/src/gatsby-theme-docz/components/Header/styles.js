@@ -72,11 +72,11 @@ export const editButton = {
 
 
 export const nav = {
-  width: ' 150px',
   display: 'flex',
   justifyContent: ' space-between',
   alignItems: 'center',
   flexFlow: 'row nowrap',
+  lineHeight: "100%",
 }
 
 

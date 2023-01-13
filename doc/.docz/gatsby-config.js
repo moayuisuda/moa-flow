@@ -16,7 +16,7 @@ if (hasGatsbyConfig) {
 }
 
 const config = {
-  pathPrefix: '/pages/',
+  pathPrefix: '/',
 
   siteMetadata: {
     title: 'Moa Flow Doc',
@@ -42,7 +42,7 @@ const config = {
         menu: [],
         mdPlugins: [],
         hastPlugins: [],
-        ignore: ['README.md'],
+        ignore: [],
         typescript: true,
         ts: false,
         propsParser: true,
@@ -55,14 +55,14 @@ const config = {
         'open-browser': null,
         root:
           '/Users/admin/code/moa-flow/moa-fow-version-dom/moa-flow/doc/.docz',
-        base: '/pages/',
+        base: '/',
         source: './',
         'gatsby-root': null,
         files: '**/*.{md,markdown,mdx}',
         public: '/public',
-        dest: '/build',
+        dest: '.docz/dist',
         d: '.docz/dist',
-        editBranch: 'main',
+        editBranch: 'master',
         eb: 'master',
         'edit-branch': 'master',
         config: '',
@@ -105,6 +105,7 @@ const config = {
           db:
             '/Users/admin/code/moa-flow/moa-fow-version-dom/moa-flow/doc/.docz/app/db.json',
         },
+        include: ['pages', 'src', 'public', 'intl', 'src/intl'],
       },
     },
   ],

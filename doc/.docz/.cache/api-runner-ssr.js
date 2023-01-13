@@ -4,6 +4,9 @@ var plugins = [{
     },{
       plugin: require('/Users/admin/code/moa-flow/moa-fow-version-dom/moa-flow/doc/node_modules/gatsby-plugin-react-helmet-async/gatsby-ssr'),
       options: {"plugins":[]},
+    },{
+      plugin: require('/Users/admin/code/moa-flow/moa-fow-version-dom/moa-flow/doc/node_modules/gatsby-plugin-intl/gatsby-ssr'),
+      options: {"plugins":[],"path":"/Users/admin/code/moa-flow/moa-fow-version-dom/moa-flow/doc/.docz/static/public/intl","languages":["en","zh"],"defaultLanguage":"en","redirect":true},
     }]
 // During bootstrap, we write requires at top of this file which looks like:
 // var plugins = [

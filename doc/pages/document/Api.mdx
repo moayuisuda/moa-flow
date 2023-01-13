@@ -3,13 +3,14 @@ name: API
 route: /document/Api.mdx
 ---
 
-import { Playground } from 'docz'
-
+import { FormattedMessage } from "@components/FormattedMessage";
+import { Playground } from "@components/Playground";
 
 # API
-moa-flow具有完善的ts支持，可以直接在代码中看到对应的标注，此文档暂仅作参考
 
-## Flow组件 props
+<FormattedMessage id="api-ts-surport" />
+
+## flowProps
 
 ```tsx
 link?: (source: D, target: D) => boolean;
@@ -17,12 +18,12 @@ dir: PortDir;
 anchor: { x: number; y: number } | (() => { x: number; y: number });
 data: Object;
 ```
-## Port组件 props
+
+## portProps
 
 ```tsx
 canvasData?: any; // 画布的数据
-onEvent?: (e: { type: string; data: any }) => void; // 可在外层监听线条连接等事件，但不推荐，
-//在edge内部也可用Port的link属性来定义连接时的行为，尽量将行为内聚在组件model中
+onEvent?: (e: { type: string; data: any }) => void; // propProps-onEnvent
 
 onLoad?: (model: FlowModel) => void;
 flowModelRef?: any;
@@ -35,34 +36,34 @@ models?: Record<string, typeof CellModel>;
 linkEdge?: string; // 当前默认连接的edge
 ```
 
-## FlowModel 属性
+## flowModelProps
 
 ```tsx
-get height: () => number 
+get height: () => number
 set height: (grid: number) => void
 
-get width: () => number 
+get width: () => number
 set width: (grid: number) => void
 
 get grid: () => number
 set grid: (grid: number) => void
-  
-get linkEdge: () => number 
+
+get linkEdge: () => number
 set linkEdge: (linkEdge: string) => void
 
-get scale: () => number 
+get scale: () => number
 set scale: (scale: number) => void
 
-get x: () => number 
+get x: () => number
 set x: (x: number) => void
 
-get y: () => number 
+get y: () => number
 set y: (y: number) => void
 
 // 右键菜单的visible
-get contextMenuVisible: () => boolean 
+get contextMenuVisible: () => boolean
 set contextMenuVisible: (visible: boolean) => void
-  
+
 // 获取当前正在连接的port
 getLinkingPort: () => string
 
@@ -111,9 +112,9 @@ getCellModel: (id: string) => CellModel;
 getPortInstance: (id: string) => React.Component
 ```
 
-## CellModel 属性
+## cellModelProps
 
-NodeModel和EdgeModel都是继承于CellModel
+NodeModel 和 EdgeModel 都是继承于 CellModel
 
 ```jsx
 defaultData = (): any => ({
@@ -138,7 +139,7 @@ setData = (data: any, rec: boolean = true): void
 static getDefaultData: () => Object
 ```
 
-## NodeModel 属性
+## nodeModelProps
 
 ```tsx
 getLinkNodes: () => string[]
@@ -147,7 +148,7 @@ getNodeEdges: () => string[]
 
 ```
 
-## EdgeModel 属性
+## edgeModelProps
 
 ```tsx
 defaultData: () => ({
@@ -166,4 +167,3 @@ isLinking: () => boolean
 d: string
 
 ```
-

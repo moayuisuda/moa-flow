@@ -1,10 +1,10 @@
 /** @jsx jsx */
 import { Fragment, forwardRef } from 'react'
 import { jsx } from 'theme-ui'
-import { Link } from 'gatsby'
+import { Link } from 'gatsby-plugin-intl'
 import { useDocs, useCurrentDoc } from 'docz'
 import { get } from 'lodash/fp'
-
+import { FormattedMessage } from '../FormattedMessage'
 import * as styles from './styles'
 
 const getHeadings = (route, docs) => {
@@ -43,16 +43,18 @@ export const NavLink = forwardRef(function NavLink({ item, ...props }, ref) {
         ref={ref}
       />
       {showHeadings &&
-        headings.map(heading => (
-          <Link
-            key={heading.slug}
-            to={`${to}#${heading.slug}`}
-            sx={styles.smallLink}
-            className={currentHash === `#${heading.slug}` ? 'active' : ''}
-          >
-            {heading.value}
-          </Link>
-        ))}
+        headings.map(heading => {
+          return (
+            <Link
+              key={heading.slug}
+              to={`${to}#${heading.slug}`}
+              sx={styles.smallLink}
+              className={currentHash === `#${heading.slug}` ? 'active' : ''}
+            >
+              <FormattedMessage id={heading.value} />
+            </Link>
+          )
+        })}
     </Fragment>
   )
 })

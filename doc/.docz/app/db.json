@@ -9,22 +9,14 @@
     "themeConfig": {},
     "separator": "-",
     "typescript": true,
-    "plugins": [
-      {
-        "resolve": "gatsby-theme-docz",
-        "options": {}
-      }
+    "include": [
+      "pages",
+      "src",
+      "public",
+      "intl",
+      "src/intl"
     ],
-    "base": "/pages/",
-    "src": "./",
-    "files": "**/*.{md,markdown,mdx}",
-    "ignore": [
-      "README.md"
-    ],
-    "dest": "/build",
-    "public": "/public",
-    "editBranch": "main",
-    "port": 3000
+    "files": "**/*.{md,markdown,mdx}"
   },
   "entries": [
     {
@@ -84,34 +76,34 @@
             "value": "API"
           },
           {
-            "slug": "flow组件-props",
+            "slug": "flowprops",
             "depth": 2,
-            "value": "Flow组件 props"
+            "value": "flowProps"
           },
           {
-            "slug": "port组件-props",
+            "slug": "portprops",
             "depth": 2,
-            "value": "Port组件 props"
+            "value": "portProps"
           },
           {
-            "slug": "flowmodel-属性",
+            "slug": "flowmodelprops",
             "depth": 2,
-            "value": "FlowModel 属性"
+            "value": "flowModelProps"
           },
           {
-            "slug": "cellmodel-属性",
+            "slug": "cellmodelprops",
             "depth": 2,
-            "value": "CellModel 属性"
+            "value": "cellModelProps"
           },
           {
-            "slug": "nodemodel-属性",
+            "slug": "nodemodelprops",
             "depth": 2,
-            "value": "NodeModel 属性"
+            "value": "nodeModelProps"
           },
           {
-            "slug": "edgemodel-属性",
+            "slug": "edgemodelprops",
             "depth": 2,
-            "value": "EdgeModel 属性"
+            "value": "edgeModelProps"
           }
         ]
       }
@@ -119,17 +111,50 @@
   ],
   "props": [
     {
+      "key": "src/index.tsx",
+      "value": []
+    },
+    {
       "key": "src/gatsby-theme-docz/index.tsx",
       "value": []
     },
     {
-      "key": "src/gatsby-theme-docz/components/Code/index.js",
+      "key": "src/gatsby-theme-docz/components/FormattedMessage/index.tsx",
+      "value": [
+        {
+          "tags": {},
+          "filePath": "src/gatsby-theme-docz/components/FormattedMessage/index.tsx",
+          "description": "",
+          "displayName": "FormattedMessage",
+          "methods": [],
+          "props": {
+            "id": {
+              "defaultValue": null,
+              "description": "",
+              "name": "id",
+              "declarations": [
+                {
+                  "fileName": "src/gatsby-theme-docz/components/FormattedMessage/index.tsx",
+                  "name": "TypeLiteral"
+                }
+              ],
+              "required": true,
+              "type": {
+                "name": "string"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "key": "src/gatsby-theme-docz/components/Language/index.js",
       "value": [
         {
           "description": "",
-          "displayName": "Code",
+          "displayName": "Language",
           "methods": [],
-          "actualName": "Code"
+          "actualName": "Language"
         }
       ]
     },

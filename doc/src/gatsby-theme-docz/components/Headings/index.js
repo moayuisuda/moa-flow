@@ -1,5 +1,6 @@
 /** @jsx jsx */
 import { jsx } from 'theme-ui'
+import { FormattedMessage } from '../FormattedMessage';
 
 const heading = Tag => {
   const Component = props => {
@@ -15,7 +16,7 @@ const heading = Tag => {
             },
           }}
         >
-          {props.children}
+          <FormattedMessage id={props.children} />
         </a>
       </Tag>
     ) : (
