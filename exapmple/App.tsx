@@ -7,7 +7,7 @@ import {
   useFlowModel,
   FlowModel,
 } from "moa-flow";
-import React from "react";
+import React, { useState } from "react";
 import { useRef } from "react";
 
 class BizNodeModel extends NodeModel {
@@ -67,12 +67,22 @@ const BizNode = observer(({ model }) => {
 
 const App = () => {
   const flowModelRef = useRef<FlowModel>();
+  const [miniMap, setMiniMap] = useState(false);
   return (
     <div>
-      <h1>HELLO</h1>
+      <div>
+        <h1>HELLO</h1>
+        <button
+          onClick={() => {
+            setMiniMap(!miniMap);
+          }}
+        >
+          {!miniMap ? "打开小地图" : "关闭小地图"}
+        </button>
+      </div>
       <Flow
         miniMapShrinkTimes={10}
-        miniMap
+        miniMap={miniMap}
         flowModelRef={flowModelRef}
         components={{
           BizNode: BizNode,

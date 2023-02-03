@@ -118,7 +118,6 @@ export const MiniMap = observer(
                 }
               }}
               onMouseDown={(e) => {
-                console.log("aaa");
                 context.buffer.miniMap.mapDragging = true;
                 e.stopPropagation();
               }}
