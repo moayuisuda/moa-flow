@@ -72,6 +72,7 @@ export class FlowModel {
   isInitEvents = false;
   multiSelect = false;
   scaleBy = 1.01;
+  isMiniMap = false;
 
   pendingRender: boolean = true;
   @action
@@ -253,6 +254,12 @@ export class FlowModel {
       isSelecting: false, // 鼠标按下还没有松开的状态
       start: { x: 0, y: 0 },
       end: { x: 0, y: 0 },
+    },
+    miniMap: {
+      dragging: false,
+      mapDragging: false,
+      mapScale: 1,
+      mapPosition: [0, 0],
     },
     link: {
       // 只是为了统一渲染，加$state
@@ -840,7 +847,7 @@ export class FlowModel {
       });
     }
   };
-  
+
   registModels = (models: Record<string, typeof CellModel>) => {
     for (let key in models) {
       this.modelFactoriesMap.set(key, models[key]);

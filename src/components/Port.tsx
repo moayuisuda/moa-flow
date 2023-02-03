@@ -39,7 +39,7 @@ export class Port<D extends PortDataType> extends React.Component<
   wrapperRef: React.RefObject<any>;
   constructor(props: PortPropsType<D>, context: FlowModel) {
     super(props, context);
-    context.cellsMap.set(props.data.id, this);
+    if (!context.isMiniMap) context.cellsMap.set(props.data.id, this);
     this.wrapperRef = context.getWrapperRef(props.data.id);
   }
 

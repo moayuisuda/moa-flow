@@ -71,6 +71,8 @@ const App = () => {
     <div>
       <h1>HELLO</h1>
       <Flow
+        miniMapShrinkTimes={10}
+        miniMap
         flowModelRef={flowModelRef}
         components={{
           BizNode: BizNode,
