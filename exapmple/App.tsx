@@ -39,8 +39,8 @@ const BizNode = observer(({ model }) => {
         dir="left"
         anchor={() => ({
           // 线条的锚点位置
-          x: data.x + 60,
-          y: data.y + 160,
+          x: 60,
+          y: 160,
         })}
         data={inPort}
       >
@@ -54,8 +54,8 @@ const BizNode = observer(({ model }) => {
       <Port
         dir="right"
         anchor={() => ({
-          x: data.x + 240,
-          y: data.y + 160,
+          x: 240,
+          y: 160,
         })}
         data={outPort}
       >
@@ -69,7 +69,7 @@ const App = () => {
   const flowModelRef = useRef<FlowModel>();
   return (
     <div>
-      <h1>asdadasd</h1>
+      <h1>HELLO</h1>
       <Flow
         flowModelRef={flowModelRef}
         components={{
