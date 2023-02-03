@@ -1,6 +1,6 @@
 class ConstantsFactory<
   T extends {
-    [key: string | number]: string | number;
+    [key: string | number]: any;
   }
 > {
   readonly source: T[];
@@ -16,9 +16,7 @@ class ConstantsFactory<
     });
 
     type Keys = T[typeof keyName];
-    type Map = typeof valueName extends string
-      ? Record<Keys, T>
-      : Record<Keys, T[typeof valueName]>;
+    type Map = Record<Keys, T>;
     return map as Map;
   }
 
@@ -38,15 +36,15 @@ const TNT_NAME_MAP = {
 };
 
 const TNT_SOURCE = [
-  { id: "fcia", name: "网商银行", productCode: 11232 },
-  { id: "alipay", name: "支付宝", productCode: 12323 },
+  { id: "fcia", name: "网商银行", productCode: 11232, auth: ["name"] },
+  { id: "alipay", name: "支付宝", productCode: 12323, auth: ["age"] },
 ] as const;
 
 export const tntConstants = new ConstantsFactory(TNT_SOURCE);
 
 const idMap = tntConstants.map("id");
 const codeToNameMap = tntConstants.map("productCode", "name");
-const list = tntConstants.list("name");
+const list = tntConstants.list('auth');
 
 console.log(idMap, codeToNameMap, list);
 
