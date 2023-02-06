@@ -1,23 +1,35 @@
-class ConstantsFactory<
+import { isUndefined } from "lodash";
+class Constants<
   T extends {
     [key: string | number]: any;
   }
 > {
-  readonly source: T[];
+  private readonly source: T[];
   constructor(source: readonly T[]) {
     (this as any).source = source;
   }
 
+  map<KN extends keyof T, VN extends keyof T>(
+    keyName: KN,
+    valueName: VN
+  ): Record<T[KN], T[VN]>;
+  map<KN extends keyof T>(keyName: KN): Record<T[KN], T>;
   map<KN extends keyof T, VN extends keyof T>(keyName: KN, valueName?: VN) {
     const { source } = this;
-    const map = {} as any;
-    source.forEach((item) => {
-      map[item[keyName]] = valueName ? item[valueName] : item;
-    });
 
-    type Keys = T[typeof keyName];
-    type Map = Record<Keys, T>;
-    return map as Map;
+    if (isUndefined(valueName)) {
+      const map = {} as Record<T[KN], T>;
+      source.forEach((item) => {
+        map[item[keyName]] = item;
+      });
+      return map;
+    } else {
+      const map = {} as Record<T[KN], T[VN]>;
+      source.forEach((item) => {
+        map[item[keyName]] = item[valueName];
+      });
+      return map;
+    }
   }
 
   list<N extends keyof T>(name: N) {
@@ -26,44 +38,53 @@ class ConstantsFactory<
 }
 
 // 例子
-const TNT_ID_MAP = {
-  FCIA: "fcia",
-  ALIPAY: "alipay",
-};
-const TNT_NAME_MAP = {
-  FCIA: "网商银行",
-  ALIPAY: "支付宝",
-};
-
-const TNT_SOURCE = [
-  { id: "fcia", name: "网商银行", productCode: 11232, auth: ["name"] },
-  { id: "alipay", name: "支付宝", productCode: 12323, auth: ["age"] },
+const AUTH_CONSTANT_SOURCE = [
+  {
+    auth: "admin",
+    color: "blue",
+    name: "管理员",
+    age: 10,
+    attrs: { hello: "hello" },
+  },
+  {
+    auth: "normal",
+    color: "white",
+    name: "普通",
+    age: 14,
+    attrs: {
+      hello: "no",
+    },
+  },
 ] as const;
 
-export const tntConstants = new ConstantsFactory(TNT_SOURCE);
+export const authConstants = new Constants(AUTH_CONSTANT_SOURCE);
 
-const idMap = tntConstants.map("id");
-const codeToNameMap = tntConstants.map("productCode", "name");
-const list = tntConstants.list('auth');
+const AUTH_NAME_MAP = authConstants.map("auth", "color");
+AUTH_NAME_MAP.normal;
 
-console.log(idMap, codeToNameMap, list);
+const AGE_LIST = authConstants.list("age");
+const COLOR_LIST = authConstants.list("color");
 
 // =====
-// const people = [
-//   {
-//     id: 1,
-//     name: "a",
-//   },
-//   {
-//     id: 2,
-//     name: "b",
-//   },
-// ] as const;
+const people = [
+  {
+    id: 1,
+    name: "a",
+  },
+  {
+    id: 2,
+    name: "b",
+  },
+] as const;
 
-// function toList<T, N extends keyof T>(arr: readonly T[], name: N) {
-//   return arr.map((item) => item[name]);
-// }
-// const list = toList(people, "name");
+function test(a: number): number;
+function test(a: number, b: string): string;
+function test(a: number, b?: string) {
+  if (typeof b !== "undefined") {
+    return b;
+  } else {
+    return a;
+  }
+}
 
-// const map = toMap(people);
-// (id) => name;
+let a = test(1, "asd");
