@@ -1,60 +1,96 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useContext } from "react";
 import { CellDataType, CellModel } from "../../cells";
 import { FlowContext } from "../../Context";
 import FlowModel from "../../Model";
 import { observer } from "mobx-react";
 
-const ShrinkWaraper = (props: {
-  scale: number;
-  children: any;
-  shrinkTimes: number;
-}) => {
-  console.log("ShrinkWaraper");
+const miniMapWidth = 300;
+const miniMapHeight = 200;
+
+const MapNodes = observer(() => {
+  const context = useContext(FlowContext);
+  const nodesData = context.canvasData.cells.filter((cellData) => {
+    return cellData.cellType !== "edge";
+  });
   return (
     <div
       style={{
-        transform: `scale(${props.scale / props.shrinkTimes} )`,
+        transform: `scale(${
+          (1 / context.shrinkTimes, 1 / context.shrinkTimes)
+        } )`,
         transformOrigin: "top left",
       }}
     >
-      {props.children}
+      {nodesData
+        .slice(0, nodesData.length)
+        .map((cellData: { id: any; component: any }) => {
+          return <MapPositionWrapper cellData={cellData} key={cellData.id} />;
+        })}
     </div>
   );
-};
-const miniMapWidth = 300;
-const miniMapHeight = 200;
-const MapCellComponet = observer(({ cellData }: { cellData: any }) => {
-  const isNode = cellData.cellType === "node";
+});
 
-  console.log("MapCellComponet124", isNode ? "node" : "edge1");
-  console.log("test4");
-
+const MapEdges = observer(() => {
   const context = useContext(FlowContext);
-  const absolutePosition = context.getNodePosition(cellData.id);
+  const edgesData = context.canvasData.cells.filter(
+    (cellData: CellDataType) => cellData.cellType === "edge"
+  );
+  const shrinkTimes = context.shrinkTimes;
+
+  return (
+    <svg
+      viewBox={`0 0 ${miniMapWidth * shrinkTimes} ${
+        miniMapHeight * shrinkTimes
+      }`}
+      style={{
+        zIndex: 2,
+        position: "absolute",
+        pointerEvents: "none",
+        transform: `scale(${
+          (1 / context.shrinkTimes, 1 / context.shrinkTimes)
+        } )`,
+        transformOrigin: "top left",
+      }}
+      width={miniMapWidth * shrinkTimes}
+      height={miniMapHeight * shrinkTimes}
+    >
+      {edgesData.map((cellData: { id: any; component: any }) => {
+        return <MapPositionWrapper cellData={cellData} />;
+      })}
+    </svg>
+  );
+});
+
+const MapCellComponent = observer(({ cellData }: { cellData: any }) => {
+  const context = useContext(FlowContext);
   const Component = context.componentsMap.get(cellData.component) as React.FC<{
     model: CellModel;
   }>;
   const cellModel = context.cellsModelMap.get(cellData.id) as CellModel;
+  return React.createElement(Component, {
+    model: cellModel,
+    key: cellData.id,
+  });
+});
+const MapPositionWrapper = observer(({ cellData }: { cellData: any }) => {
+  const isNode = cellData.cellType === "node";
+  const context = useContext(FlowContext);
+  const absolutePosition = context.getNodePosition(cellData.id);
   return React.createElement(isNode ? "div" : "g", {
     style: {
       position: "absolute",
       left: absolutePosition.x,
       top: absolutePosition.y,
-    },
-    children: React.createElement(Component, {
-      model: cellModel,
-      key: cellData.id,
-    }),
+    }, // 改变node位置不引起子组件渲染
+    children: <MapCellComponent cellData={cellData} />,
   });
 });
+
 export const MiniMap = observer(
   (props: { shrinkTimes: number; show?: boolean }) => {
     const { shrinkTimes, show } = props;
     const context = useContext(FlowContext);
-    const nodesData = context.canvasData.cells.filter((cellData) => {
-      return cellData.cellType !== "edge";
-    });
     const edgesData = context.canvasData.cells.filter(
       (cellData: CellDataType) => cellData.cellType === "edge"
     );
@@ -69,13 +105,12 @@ export const MiniMap = observer(
     const { dragging, mapDragging, mapScale, mapPosition } = miniMap;
     const [mapX, mapY] = mapPosition;
     const scaleBy = context.scaleBy;
+    const newContext = Object.assign(context, { isMiniMap: true });
 
     return (
       <>
         {show ? (
-          <FlowContext.Provider
-            value={{ ...context, isMiniMap: true } as FlowModel}
-          >
+          <FlowContext.Provider value={newContext as FlowModel}>
             <div
               style={{
                 width: miniMapWidth,
@@ -89,6 +124,11 @@ export const MiniMap = observer(
                 border: "1px solid black",
                 userSelect: "none",
                 overflow: "hidden",
+              }}
+              onWheelCapture={(e) => {
+                let direction = e.deltaY > 0 ? scaleBy : 1 / scaleBy;
+                context.buffer.miniMap.mapScale = mapScale * direction;
+                e.stopPropagation();
               }}
               onMouseLeave={() => {
                 context.buffer.miniMap = {
@@ -116,9 +156,8 @@ export const MiniMap = observer(
                 if (dragging) {
                   const canvasData = context.canvasData;
                   context.setStagePosition(
-                    canvasData.x -
-                      (moverMentX * shrinkTimes) / scale / mapScale,
-                    canvasData.y - (moverMentY * shrinkTimes) / scale / mapScale
+                    canvasData.x - (moverMentX * shrinkTimes) / mapScale,
+                    canvasData.y - (moverMentY * shrinkTimes) / mapScale
                   );
                 }
               }}
@@ -139,11 +178,6 @@ export const MiniMap = observer(
                   transform: `scale(${mapScale})`,
                   transformOrigin: "center",
                 }}
-                onWheelCapture={(e) => {
-                  let direction = e.deltaY > 0 ? scaleBy : 1 / scaleBy;
-                  context.buffer.miniMap.mapScale = mapScale * direction;
-                  e.stopPropagation();
-                }}
               >
                 <div
                   style={{
@@ -153,42 +187,17 @@ export const MiniMap = observer(
                     pointerEvents: "none",
                   }}
                 >
-                  <ShrinkWaraper scale={scale} shrinkTimes={shrinkTimes}>
-                    {nodesData
-                      .slice(0, nodesData.length)
-                      .map((cellData: { id: any; component: any }) => {
-                        return <MapCellComponet cellData={cellData} />;
-                      })}
-                  </ShrinkWaraper>
-                  <ShrinkWaraper shrinkTimes={shrinkTimes} scale={scale}>
-                    <svg
-                      viewBox={`0 0 ${miniMapWidth * shrinkTimes} ${
-                        miniMapHeight * shrinkTimes
-                      }`}
-                      style={{
-                        zIndex: 2,
-                        position: "absolute",
-                        pointerEvents: "none",
-                      }}
-                      width={miniMapWidth * shrinkTimes}
-                      height={miniMapHeight * shrinkTimes}
-                    >
-                      {edgesData.map(
-                        (cellData: { id: any; component: any }) => {
-                          return <MapCellComponet cellData={cellData} />;
-                        }
-                      )}
-                    </svg>
-                  </ShrinkWaraper>
+                  <MapNodes />
+                  <MapEdges />
                 </div>
                 <div
                   style={{
                     border: "1px solid red",
-                    width: miniMapViewBoxWidth,
-                    height: miniMapViewBoxHeight,
+                    width: miniMapViewBoxWidth / scale,
+                    height: miniMapViewBoxHeight / scale,
                     position: "absolute",
-                    left: centerBoxStart - (context.x / shrinkTimes) * scale,
-                    top: centerBoxEnd - (context.y / shrinkTimes) * scale,
+                    left: centerBoxStart - context.x / shrinkTimes,
+                    top: centerBoxEnd - context.y / shrinkTimes,
                     cursor: "pointer",
                   }}
                   onMouseDown={(e) => {

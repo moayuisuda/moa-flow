@@ -46,7 +46,6 @@ const PositionWrapper = observer(({ cellData }: { cellData: CellDataType }) => {
 const CellComponent = observer(({ cellData }: { cellData: CellDataType }) => {
   const isNode = cellData.cellType === "node";
   const context = useContext(FlowContext);
-
   const Component = context.componentsMap.get(cellData.component) as React.FC<{
     model: CellModel;
   }>;
@@ -233,6 +232,9 @@ class Flow extends React.Component<FlowProps, {}> {
     this.flowModel.registComponents(props.components || {});
     !isUndefined(this.flowModel.scaleBy) &&
       (this.flowModel.scaleBy = this.props.scaleBy || 1.01);
+
+    !isUndefined(this.flowModel.shrinkTimes) &&
+      (this.flowModel.shrinkTimes = this.props.miniMapShrinkTimes as number);
     this.props.linkEdge && (this.flowModel.linkEdge = this.props.linkEdge);
     this.props.canvasData &&
       this.flowModel.setCanvasData(this.props.canvasData);

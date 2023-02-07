@@ -83,8 +83,9 @@ const App = () => {
         </button>
       </div>
       <Flow
+        scaleBy={1.03}
         multiSelect
-        miniMapShrinkTimes={10}
+        miniMapShrinkTimes={15}
         miniMap={miniMap}
         flowModelRef={flowModelRef}
         components={{
@@ -103,7 +104,6 @@ const App = () => {
               onClick={() => {
                 const flowModel = flowModelRef.current;
                 const { selectCells, deleCell } = flowModel;
-
                 deleCell(selectCells[0]);
               }}
             >
