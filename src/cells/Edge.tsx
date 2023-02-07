@@ -248,6 +248,7 @@ export class EdgeModel<
     (
       props?: {
         pathProps?: React.SVGProps<SVGPathElement>;
+        arrowProps?: React.SVGProps<SVGPathElement>;
       } & React.SVGProps<SVGGElement>
     ) => {
       const { d } = this;
@@ -260,6 +261,7 @@ export class EdgeModel<
       ];
 
       const pathProps = props?.pathProps || {};
+      const arrowProps = props?.arrowProps || {};
 
       return (
         <g {...props}>
@@ -288,6 +290,7 @@ export class EdgeModel<
                 } L${DEFAULT_ARROW_SIZE * cos(PI / 6) + arrowOffset[0]},${
                   DEFAULT_ARROW_SIZE * sin(PI / 6) + arrowOffset[1]
                 } Z`}
+                {...arrowProps}
               />
             </marker>
           </defs>

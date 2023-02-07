@@ -20,7 +20,7 @@ export default defineConfig({
       formats: ["es"],
     },
     rollupOptions: {
-      external: ["react", "mobx", "mobx-react"],
+      external: ["react", "mobx", "mobx-react", "uuid"],
     },
   },
 });
