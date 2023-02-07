@@ -10,6 +10,7 @@ const ShrinkWaraper = (props: {
   children: any;
   shrinkTimes: number;
 }) => {
+  console.log("ShrinkWaraper");
   return (
     <div
       style={{
@@ -25,6 +26,10 @@ const miniMapWidth = 300;
 const miniMapHeight = 200;
 const MapCellComponet = observer(({ cellData }: { cellData: any }) => {
   const isNode = cellData.cellType === "node";
+
+  console.log("MapCellComponet124", isNode ? "node" : "edge1");
+  console.log("test4");
+
   const context = useContext(FlowContext);
   const absolutePosition = context.getNodePosition(cellData.id);
   const Component = context.componentsMap.get(cellData.component) as React.FC<{

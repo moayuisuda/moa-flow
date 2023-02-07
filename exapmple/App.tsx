@@ -9,7 +9,8 @@ import {
 } from "moa-flow";
 import React, { useState } from "react";
 import { useRef } from "react";
-
+import { RelationEdge, RelationEdgeModel } from "./BizEdge";
+import canvasData from "./test.json";
 class BizNodeModel extends NodeModel {
   defaultData = () => ({
     nodeName: "node 0",
@@ -67,13 +68,14 @@ const BizNode = observer(({ model }) => {
 
 const App = () => {
   const flowModelRef = useRef<FlowModel>();
-  const [miniMap, setMiniMap] = useState(false);
+  const [miniMap, setMiniMap] = useState(true);
   return (
     <div>
       <div>
         <h1>HELLO</h1>
         <button
           onClick={() => {
+            console.log(flowModelRef.current?.canvasData);
             setMiniMap(!miniMap);
           }}
         >
@@ -81,24 +83,19 @@ const App = () => {
         </button>
       </div>
       <Flow
+        multiSelect
         miniMapShrinkTimes={10}
         miniMap={miniMap}
         flowModelRef={flowModelRef}
         components={{
           BizNode: BizNode,
+          RelationEdge: RelationEdge,
         }}
         models={{
           BizNode: BizNodeModel,
+          RelationEdge: RelationEdgeModel,
         }}
-        canvasData={{
-          cells: [
-            {
-              component: "BizNode",
-              nodeName: "node 0",
-              ports: [{ portType: "in" }, { portType: "out" }],
-            },
-          ],
-        }}
+        canvasData={canvasData}
       >
         <ContextMenu>
           <div style={{ boxShadow: "0px 0px 4px rgb(100,100,100)" }}>
