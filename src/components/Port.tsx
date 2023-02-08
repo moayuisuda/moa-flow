@@ -8,7 +8,6 @@ import { observer } from "mobx-react";
 import { NodeDataType } from "../cells/Node";
 
 export type PortDataType = {
-  edges: string[];
   host: string;
   [index: string]: any;
 } & CellDataType;
@@ -39,7 +38,7 @@ export class Port<
   wrapperRef: React.RefObject<any>;
   constructor(props: PortPropsType<D>, context: FlowModel) {
     super(props, context);
-    context.setCellMap(props.data.id, this);
+    context.setPortInstanceMap(props.data.id, this);
     this.wrapperRef = context.getWrapperRef(props.data.id);
   }
 

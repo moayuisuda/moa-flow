@@ -39,6 +39,6 @@ export class NodeModel<
   getChildren = () => {
     return this.context.canvasData.cells
       .filter((cellData) => cellData.parent === this.data.id)
-      .map((cellData) => cellData.id);
+      .map((cellData) => cellData.id) as string[];
   };
 }

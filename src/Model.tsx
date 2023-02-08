@@ -1,4 +1,11 @@
-import { cloneDeep, debounce, merge, union, without } from "lodash";
+import {
+  cloneDeep,
+  debounce,
+  merge,
+  union,
+  without,
+  isUndefined,
+} from "lodash";
 import { action, makeObservable, observable, computed } from "mobx";
 import React from "react";
 import { v4 } from "uuid";
@@ -30,11 +37,12 @@ export class FlowModel {
     });
   };
 
-  setCellMap = (id: string, instance: Port<any>) => {
-    this.cellsMap.set(id, instance);
+  setPortInstanceMap = (id: string, instance: Port<any>) => {
+    this.portInstanceMap.set(id, instance);
   };
 
   private setCellDataMap(cellData: AllCellDataType) {
+    // the portData will not change its data. And remember node will traverse to change ports data first.
     Object.assign(cellData, this.getFullNodeData(cellData.component, cellData));
 
     this.cellsDataMap.set(cellData.id, cellData);
@@ -214,18 +222,6 @@ export class FlowModel {
     return this.buffer.link.source;
   };
 
-  @action private clearPortEdge = (edgeId: string) => {
-    const edgeData = this.getCellData(edgeId) as EdgeDataType;
-    const sourcePort = this.getCellData(
-      edgeData.source as string
-    ) as PortDataType;
-    const targetPort = this.getCellData(
-      edgeData.target as string
-    ) as PortDataType;
-    sourcePort.edges && remove(sourcePort.edges as string[], edgeId);
-    targetPort.edges && remove(targetPort.edges as string[], edgeId);
-  };
-
   /**@description some state in flow context */
   @observable
   buffer = {
@@ -351,7 +347,7 @@ export class FlowModel {
     { current: HTMLDivElement | null }
   >();
   // cell的<id, 实例>map，方便用id获取到组件实例
-  private cellsMap = new Map<string, React.Component<any, any> & any>();
+  private portInstanceMap = new Map<string, React.Component<any, any> & any>();
   private cellsModelMap = new Map<string, CellModel>();
   // cellData的<id, cellData>map，用来修改受控数据
   private cellsDataMap = new Map<string, CellDataType>();
@@ -481,10 +477,11 @@ export class FlowModel {
     const newData = cloneDeep(Object.assign(this.canvasData, canvasData));
 
     this.canvasData = newData;
-    // 这里考虑到react会复用实例，所以不能简单地清除cellsMap
+    // 这里考虑到react会复用实例，所以不能简单地清除portInstanceMap
     // this.cellsDataMap.clear();
-    // this.cellsMap.clear();
+    // this.portInstanceMap.clear();
     this.setCellsDataMap();
+    this.setPortsEdgesMap();
   };
 
   @action setCellId = (data: CellDataType) => {
@@ -507,8 +504,9 @@ export class FlowModel {
     const nodeData = this.getCellData(nodeId) as NodeDataType;
     if (nodeData?.ports)
       nodeData.ports.forEach((port: PortDataType) => {
-        if (port.edges) {
-          port.edges.forEach((edgeId) => {
+        const edges = this.getPortEdges(port.id);
+        if (edges) {
+          edges.forEach((edgeId) => {
             re.push(edgeId);
           });
         }
@@ -524,7 +522,7 @@ export class FlowModel {
     const re: string[] = [];
 
     const portData = this.getCellData(portId) as PortDataType;
-    portData?.edges?.forEach((edgeId) => {
+    this.getPortEdges(portData.id)?.forEach((edgeId) => {
       const edgeData = this.getCellData(edgeId) as EdgeDataType;
       const sourcePort = this.getCellData(
         edgeData.source as string
@@ -551,7 +549,7 @@ export class FlowModel {
     const re: string[] = [];
 
     const portData = this.getCellData(portId) as PortDataType;
-    portData?.edges?.forEach((edgeId) => {
+    this.getPortEdges(portId)?.forEach((edgeId) => {
       const edgeData = this.getCellData(edgeId) as EdgeDataType;
       const sourcePort = this.getCellData(
         edgeData.source as string
@@ -606,7 +604,6 @@ export class FlowModel {
       return;
     }
 
-    if (matchCell.cellType === "edge") this.clearPortEdge(matchCell.id);
     if (matchCell.cellType === "node" && this.getNodeEdges(id).length) {
       this.getNodeEdges(id).forEach((edgeId) => {
         this.deleCell(edgeId);
@@ -615,11 +612,17 @@ export class FlowModel {
 
     this.selectCells.includes(id) && remove(this.selectCells, id);
     remove(this.canvasData.cells, matchCell);
-    this.cellsMap.delete(id);
+    this.portInstanceMap.delete(id);
     this.cellsDataMap.delete(id);
     this.cellsModelMap.delete(id);
 
-    this.addStep(); //删除cell时添加redo记录
+    if (matchCell.cellType === "edge") {
+      const { source, target } = matchCell;
+      this.setPortEdgesMap(source);
+      this.setPortEdgesMap(target);
+    }
+
+    this.addStep();
     return matchCell.id;
   };
 
@@ -708,7 +711,6 @@ export class FlowModel {
           host: newCellData.id,
           cellType: "port",
           id: port.id || v4(),
-          edges: port.edges || [],
           source: undefined,
           target: undefined,
         });
@@ -725,10 +727,9 @@ export class FlowModel {
       this.canvasData.cells[this.canvasData.cells.length - 1]
     );
 
-    // console.log(
-    //   newCellData,
-    //   this.canvasData.cells[this.canvasData.cells.length - 1]
-    // ); // 两者不是一个对象，后者是proxy
+    //  newCellData,
+    //  this.canvasData.cells[this.canvasData.cells.length - 1]
+    // 两者不是一个对象，后者是proxy
     this.addStep();
 
     return data.id;
@@ -741,21 +742,13 @@ export class FlowModel {
 
   /**@description link 2 port */
   @action link = (source: string, target: string) => {
-    const sourceCellData = this.getCellData(source) as PortDataType;
-    const targetCellData = this.getCellData(target) as PortDataType;
-
     const edgeId = this.addCell(this.linkEdge, {
       source,
       target,
     });
 
-    if (sourceCellData.edges) {
-      sourceCellData.edges.push(edgeId);
-    } else sourceCellData.edges = [edgeId];
-
-    if (targetCellData.edges) {
-      targetCellData.edges.push(edgeId);
-    } else targetCellData.edges = [edgeId];
+    this.setPortEdgesMap(source);
+    this.setPortEdgesMap(target);
 
     this.emitEvent({
       type: "link",
@@ -797,7 +790,34 @@ export class FlowModel {
    * @description get port's component instance
    */
   getPortInstance = (id: string) => {
-    return this.cellsMap.get(id);
+    return this.portInstanceMap.get(id);
+  };
+
+  private portEdgesMap = new Map<string, string[]>([]);
+  /**
+   * @description get port's linked edges
+   */
+  getPortEdges = (id: string) => {
+    return this.portEdgesMap.get(id);
+  };
+
+  private setPortEdgesMap = (id: string) => {
+    const edges = this.getEdgesData();
+    if (!this.portEdgesMap.get(id)) this.portEdgesMap.set(id, []);
+
+    const re: string[] = [];
+    edges.forEach((edge) => {
+      if (edge.source === id || edge.target === id) re.push(edge.id);
+    });
+    this.portEdgesMap.set(id, re);
+  };
+
+  private setPortsEdgesMap = () => {
+    this.cellsDataMap.forEach((value, id) => {
+      if (value.cellType === "port") {
+        this.setPortEdgesMap(id);
+      }
+    });
   };
 
   getCellsData = () => {

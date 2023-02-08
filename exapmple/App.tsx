@@ -99,7 +99,7 @@ const App = () => {
           <div style={{ boxShadow: "0px 0px 4px rgb(100,100,100)" }}>
             <button
               onClick={() => {
-                const flowModel = flowModelRef.current;
+                const flowModel = flowModelRef.current as FlowModel;
                 const { selectCells, deleCell } = flowModel;
 
                 deleCell(selectCells[0]);
