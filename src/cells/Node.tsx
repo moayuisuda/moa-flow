@@ -19,6 +19,7 @@ export class NodeModel<
   });
   declare data: D;
 
+  /**@description if the node can drag */
   drag = () => {
     return true;
   };
@@ -41,24 +42,3 @@ export class NodeModel<
       .map((cellData) => cellData.id);
   };
 }
-
-// @TODO
-// type BizParams = {
-//   name: string;
-//   age: number;
-// };
-
-// class Base<T> {
-//   param: T;
-//   constructor() {}
-// }
-
-// class Biz extends Base<{ name: string; age: number }> {
-//   constructor() {
-//     super();
-//   }
-// }
-
-// const map: Record<string, typeof Base> = {
-//   Biz: Biz,
-// };

@@ -32,7 +32,7 @@ const BizNode = observer(({ model }) => {
       }}
     >
       <h3>{data.nodeName}</h3>
-      <p>总节点数{flowModel.getNodesData().length}</p>
+      <p>连接的节点数{model.getLinkNodes().length}</p>
       {/* moa-flow将连接桩抽象为了一个react组件
           你可以在任何位置像写普通react组件那样来写桩组件 */}
       <Port

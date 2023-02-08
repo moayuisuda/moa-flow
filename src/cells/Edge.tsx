@@ -1,6 +1,6 @@
 import { Dir, Vector2d } from "../typings/common";
 import { PortDataType, PortDir } from "../components";
-import React, { ComponentProps } from "react";
+import React from "react";
 import { isVector2d } from "../utils";
 import { callIfFn } from "../utils/util";
 import { CellModel, CellDataType } from "./Cell";
@@ -58,12 +58,12 @@ export class EdgeModel<
     return {
       source: isVector2d(this.data.source)
         ? (this.data.source as Vector2d)
-        : (this.context.cellsDataMap.get(
+        : (this.context.getCellData(
             this.data.source as string
           ) as PortDataType),
       target: isVector2d(this.data.target)
         ? (this.data.target as Vector2d)
-        : (this.context.cellsDataMap.get(
+        : (this.context.getCellData(
             this.data.target as string
           ) as PortDataType),
     };
@@ -75,14 +75,14 @@ export class EdgeModel<
 
     if (isVector2d(this.data.source)) sourceAnchor = this.data.source;
     else {
-      const sourceInstance = this.context.cellsMap.get(
+      const sourceInstance = this.context.getPortInstance(
         this.data.source as string
       );
       sourceAnchor = sourceInstance.anchor();
     }
     if (isVector2d(this.data.target)) targetAnchor = this.data.target;
     else {
-      const targetInstance = this.context.cellsMap.get(
+      const targetInstance = this.context.getPortInstance(
         this.data.target as string
       );
       targetAnchor = targetInstance.anchor();
@@ -178,12 +178,12 @@ export class EdgeModel<
   getBazierDir = () => {
     const {
       props: { dir: sourceDir },
-    } = this.context.cellsMap.get(this.data.source as string);
+    } = this.context.getPortInstance(this.data.source as string);
 
     const getTargetDir = () => {
       const {
         props: { dir: targetDir },
-      } = this.context.cellsMap.get(this.data.target as string);
+      } = this.context.getPortInstance(this.data.target as string);
 
       return targetDir;
     };

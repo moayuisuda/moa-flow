@@ -8,35 +8,33 @@ import { NodeDataType, NodeModel, NodeData } from "./cells/Node";
 import { Port, PortDataType } from "./components";
 import { color } from "./theme/style";
 import { AllCellDataType, CanvasDataType, Vector2d } from "./typings/common";
-import {
-  arrayMove,
-  findIndex,
-  isRectsInterSect,
-  remove,
-  isVector2d,
-} from "./utils/util";
+import { arrayMove, findIndex, isRectsInterSect, remove } from "./utils/util";
 import { getRelativeBoundingBox } from "./utils/coords";
 
 type EventSender = (data: any) => void;
 export class FlowModel {
-  eventMap = new Map<string, Map<string, Function>>();
+  private eventMap = new Map<string, Map<string, Function>>();
 
   constructor(eventSender?: EventSender) {
     makeObservable(this);
     if (eventSender) this.eventBus.sender = eventSender;
     this.addStep();
   }
-  setEventSender = (eventSender: EventSender) => {
+  private setEventSender = (eventSender: EventSender) => {
     this.eventBus.sender = eventSender;
   };
 
-  setCellsDataMap = () => {
+  private setCellsDataMap = () => {
     this.canvasData.cells.forEach((cellData) => {
       this.setCellDataMap(cellData);
     });
   };
 
-  setCellDataMap(cellData: AllCellDataType) {
+  setCellMap = (id: string, instance: Port<any>) => {
+    this.cellsMap.set(id, instance);
+  };
+
+  private setCellDataMap(cellData: AllCellDataType) {
     Object.assign(cellData, this.getFullNodeData(cellData.component, cellData));
 
     this.cellsDataMap.set(cellData.id, cellData);
@@ -69,21 +67,21 @@ export class FlowModel {
   }
 
   extra: any = {};
-  isInitEvents = false;
+  private isInitEvents = false;
   multiSelect = false;
   scaleBy = 1.01;
 
-  pendingRender: boolean = true;
+  private pendingRender: boolean = true;
   @action
-  trigRender = () => {
+  private trigRender = () => {
     this.pendingRender = false;
   };
   @action
-  pendRender = () => {
+  private pendRender = () => {
     this.pendingRender = true;
   };
 
-  @observable private _width: number = 1000;
+  @observable private _width: number = 800;
   @computed
   get width() {
     return this._width;
@@ -163,12 +161,14 @@ export class FlowModel {
     this.buffer.contextMenu.visible = visible;
   }
 
+  /**@description set position of context menu */
   @action
   setContextMenuPos = (pos: Vector2d) => {
     this.buffer.contextMenu.x = pos.x;
     this.buffer.contextMenu.y = pos.y;
   };
 
+  /**@description get position of context menu */
   @computed
   get contextMenuPos() {
     const { x, y } = this.buffer.contextMenu;
@@ -209,11 +209,12 @@ export class FlowModel {
     this.hotKey[key] = value;
   };
 
+  /**@description get current linking port id */
   getLinkingPort = () => {
     return this.buffer.link.source;
   };
 
-  @action clearPortEdge = (edgeId: string) => {
+  @action private clearPortEdge = (edgeId: string) => {
     const edgeData = this.getCellData(edgeId) as EdgeDataType;
     const sourcePort = this.getCellData(
       edgeData.source as string
@@ -225,7 +226,7 @@ export class FlowModel {
     targetPort.edges && remove(targetPort.edges as string[], edgeId);
   };
 
-  // 一些中间状态，比如连线中的开始节点的暂存，不应该让外部感知
+  /**@description some state in flow context */
   @observable
   buffer = {
     debug: {
@@ -269,6 +270,7 @@ export class FlowModel {
     },
   };
 
+  /**@description to determine if a event is trig select */
   isSelecting(e: any) {
     const selectingDom = this.buffer.select.selectingDom as any;
     if (!selectingDom) return false;
@@ -276,6 +278,7 @@ export class FlowModel {
     else return false;
   }
 
+  /**@description set select by a given area */
   @action setMultiSelect = (
     select: {
       isSelecting?: boolean;
@@ -333,6 +336,7 @@ export class FlowModel {
   // 全局颜色，可以由用户自定义
   @observable color = color;
 
+  /**@description get the node's div ref */
   getWrapperRef = (id: string): React.RefObject<HTMLDivElement> => {
     const ref = this.wrapperRefsMap.get(id);
 
@@ -341,33 +345,39 @@ export class FlowModel {
 
     return this.wrapperRefsMap.get(id) as React.RefObject<HTMLDivElement>;
   };
+
   // function component的外层group ref的map
-  wrapperRefsMap = new Map<string, { current: HTMLDivElement | null }>();
+  private wrapperRefsMap = new Map<
+    string,
+    { current: HTMLDivElement | null }
+  >();
   // cell的<id, 实例>map，方便用id获取到组件实例
-  cellsMap = new Map<string, React.Component<any, any> & any>();
-  cellsModelMap = new Map<string, CellModel>();
+  private cellsMap = new Map<string, React.Component<any, any> & any>();
+  private cellsModelMap = new Map<string, CellModel>();
   // cellData的<id, cellData>map，用来修改受控数据
-  cellsDataMap = new Map<string, CellDataType>();
+  private cellsDataMap = new Map<string, CellDataType>();
 
   // 注册节点到model，方便动态引用
-  componentsMap = new Map<string, typeof Port | React.FC>([
+  componentsMap = new Map<string, React.FC<{ model: any }> | typeof Port>([
     ["Edge", Edge],
     ["Port", Port],
   ]);
   // component和model的映射
   modelFactoriesMap = new Map<string, typeof CellModel>([["Edge", EdgeModel]]);
 
-  regist = (name: string, component: any) => {
+  private regist = (name: string, component: any) => {
     this.componentsMap.set(name, component);
   };
 
-  eventBus = {
+  private eventBus = {
     sender: undefined as EventSender | undefined,
     receiver: undefined,
   };
 
   // 选中的cell
   @observable selectCells: string[] = [];
+
+  /**@description set selected cells */
   @action setSelectedCells = (ids: string[], ifReplace = true) => {
     if (ifReplace) {
       this.selectCells = ids;
@@ -386,6 +396,7 @@ export class FlowModel {
     cells: [],
   };
 
+  /**@description emit event to outter component */
   emitEvent = (data: any) => {
     this.eventBus.sender?.(data);
   };
@@ -394,7 +405,7 @@ export class FlowModel {
     this.canvasData.scale = scale;
   };
 
-  insertRuntimeState = (cellData: CellDataType) => {
+  private insertRuntimeState = (cellData: CellDataType) => {
     cellData.$state = {
       isSelect: false,
       isLinking: false,
@@ -402,7 +413,7 @@ export class FlowModel {
   };
 
   /**
-   * @description 获取当前鼠标的[画布坐标]
+   * @description get current cursor's canvas coords
    */
   getCursorCoord = (e: React.MouseEvent, isCanvasCoord: boolean = true) => {
     const stageBounds = this.refs.stageRef?.getBoundingClientRect() as DOMRect;
@@ -420,6 +431,7 @@ export class FlowModel {
     }
   };
 
+  /**@description let content auto fit canvas */
   fit = (nodeWidth: number, nodeHeight: number) => {
     const { canvasData, width, height } = this;
     const [first, ...others] = canvasData.cells;
@@ -458,6 +470,7 @@ export class FlowModel {
     this.setStagePosition(-boundingRect.x + spareX, -boundingRect.y + spareY);
   };
 
+  /**@description get a node's canvas bbox */
   getLocalBBox = (id: string) => {
     const dom = this.wrapperRefsMap.get(id)?.current as HTMLDivElement;
 
@@ -467,6 +480,7 @@ export class FlowModel {
     );
   };
 
+  /**@description to check if a cell exist */
   isCellExist = (id: string) => {
     return this.canvasData.cells.find((cell) => cell.id === id);
   };
@@ -490,7 +504,7 @@ export class FlowModel {
   };
 
   @action setCellData = (id: string, data: any, deepMerge: boolean = true) => {
-    const cellData = this.getCellData(id);
+    const cellData = this.getCellData(id) as CellDataType;
 
     if (!deepMerge) Object.assign(cellData, data);
     else merge(cellData, data);
@@ -498,7 +512,7 @@ export class FlowModel {
   };
 
   /**
-   * @description 获取某个node连接的所有edge
+   * @description get a node's linked edges
    */
   getNodeEdges = (nodeId: string) => {
     const re: string[] = [];
@@ -516,7 +530,7 @@ export class FlowModel {
   };
 
   /**
-   * @description 获取某个port连接的所有port
+   * @description get a port's linked ports
    */
   getPortLinkPorts = (portId: string) => {
     const re: string[] = [];
@@ -543,7 +557,7 @@ export class FlowModel {
   };
 
   /**
-   * @description 获取某个port连接的所有node
+   * @description get a port's linked nodes
    */
   getPortLinkNodes = (portId: string) => {
     const re: string[] = [];
@@ -570,7 +584,7 @@ export class FlowModel {
   };
 
   /**
-   * @description 获取某个node连接的所有port
+   * @description get a node's linked ports
    */
   getLinkPorts = (nodeId: string) => {
     const re: string[] = [];
@@ -584,7 +598,7 @@ export class FlowModel {
   };
 
   /**
-   * @description 获取某个node连接的所有node
+   * @description get a node's linked nodes
    */
   getLinkNodes = (nodeId: string) => {
     const re: string[] = [];
@@ -621,6 +635,9 @@ export class FlowModel {
     return matchCell.id;
   };
 
+  /**
+   * @description make a Vector2d snap to grid
+   */
   snap = (vector: Vector2d) => {
     const grid = this.grid as number;
     return {
@@ -736,6 +753,7 @@ export class FlowModel {
     this.buffer.link.target.y = coord.y;
   };
 
+  /**@description link 2 port */
   @action link = (source: string, target: string) => {
     const sourceCellData = this.getCellData(source) as PortDataType;
     const targetCellData = this.getCellData(target) as PortDataType;
@@ -770,8 +788,7 @@ export class FlowModel {
   };
 
   /**
-   *
-   * @description 调整某个Cell的层级
+   * @description adjust a node's index
    */
   @action
   moveTo = (id: string, index: number) => {
@@ -782,18 +799,17 @@ export class FlowModel {
     arrayMove(this.canvasData.cells, oldIndex, index);
   };
 
-  getCell = (id: string) => {
-    return this.cellsMap.get(id);
-  };
-
   getCellData = (id: string) => {
-    return this.cellsDataMap.get(id);
+    return this.cellsDataMap.get(id) as CellDataType;
   };
 
   getCellModel = (id: string) => {
-    return this.cellsModelMap.get(id);
+    return this.cellsModelMap.get(id) as CellModel;
   };
 
+  /**
+   * @description get port's component instance
+   */
   getPortInstance = (id: string) => {
     return this.cellsMap.get(id);
   };
@@ -803,19 +819,7 @@ export class FlowModel {
   };
 
   getNodePosition = (id: string) => {
-    // const re = { x: 0, y: 0 };
-
     let curr: CellDataType | undefined = this.getCellData(id) as NodeDataType;
-
-    // while (curr) {
-    //   re.x += curr.x;
-    //   re.y += curr.y;
-    //   curr = curr.parent
-    //     ? (this.getCellData(curr.parent) as CellDataType)
-    //     : undefined;
-    // }
-
-    // return re;
 
     return {
       x: curr.x,
@@ -840,7 +844,7 @@ export class FlowModel {
       });
     }
   };
-  
+
   registModels = (models: Record<string, typeof CellModel>) => {
     for (let key in models) {
       this.modelFactoriesMap.set(key, models[key]);
@@ -853,6 +857,7 @@ export class FlowModel {
     }
   };
 
+  /**@description make flow stage size to fit parent */
   @action
   fitParentSize = () => {
     let parentSize;
@@ -874,7 +879,7 @@ export class FlowModel {
   private undoList: CanvasDataType[] = [];
   private redoList: CanvasDataType[] = [];
 
-  addStep = debounce(() => {
+  private addStep = debounce(() => {
     const cpoiedCanvasData = cloneDeep(this.canvasData);
     this.undoList = [...this.undoList, cpoiedCanvasData];
     this.redoList = [];
