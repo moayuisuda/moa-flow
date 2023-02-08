@@ -90,7 +90,7 @@ export class FlowModel {
     this._width = width as number;
   }
 
-  @observable private _height: number = 600;
+  @observable private _height: number = 400;
   @computed
   get height() {
     return this._height;
@@ -259,7 +259,6 @@ export class FlowModel {
       // 只是为了统一渲染，加$state
       $state: {
         isSelect: false,
-        isLinking: true,
       },
       edge: undefined as undefined | string,
       source: undefined as undefined | string,
@@ -405,13 +404,6 @@ export class FlowModel {
     this.canvasData.scale = scale;
   };
 
-  private insertRuntimeState = (cellData: CellDataType) => {
-    cellData.$state = {
-      isSelect: false,
-      isLinking: false,
-    };
-  };
-
   /**
    * @description get current cursor's canvas coords
    */
@@ -487,10 +479,6 @@ export class FlowModel {
 
   @action setCanvasData = (canvasData: Partial<CanvasDataType>) => {
     const newData = cloneDeep(Object.assign(this.canvasData, canvasData));
-
-    newData.cells.forEach((cellData) => {
-      this.insertRuntimeState(cellData);
-    });
 
     this.canvasData = newData;
     // 这里考虑到react会复用实例，所以不能简单地清除cellsMap
@@ -705,8 +693,6 @@ export class FlowModel {
         component,
       }
     );
-
-    this.insertRuntimeState(metaData);
 
     return Object.assign(metaData, {
       id: metaData.id || id,

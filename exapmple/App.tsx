@@ -83,7 +83,14 @@ const App = () => {
             {
               component: "BizNode",
               nodeName: "node 0",
-              ports: [{ portType: "in" }, { portType: "out" }],
+              x: 50,
+              y: 50,
+            },
+            {
+              component: "BizNode",
+              nodeName: "node 1",
+              x: 300,
+              y: 300,
             },
           ],
         }}

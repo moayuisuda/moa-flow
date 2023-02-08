@@ -2,6 +2,7 @@ import { observer } from "mobx-react";
 import styles from "./style.module.less";
 import React, { createRef } from "react";
 import { FlowContext } from "../../Context";
+import { STAGE_ID } from "../../constants";
 @observer
 class ContextMenu extends React.Component<{ children?: React.ReactNode }> {
   static contextType = FlowContext;
@@ -20,13 +21,15 @@ class ContextMenu extends React.Component<{ children?: React.ReactNode }> {
     const { x, y } = this.context.buffer.contextMenu;
 
     const containerDom = this.wrapperRef.current as HTMLDivElement;
+    const stageDom = document.getElementById(STAGE_ID) as HTMLDivElement;
     const style = getComputedStyle(containerDom);
+    const stageBox = stageDom.getBoundingClientRect();
 
-    if (parseFloat(style.height) + y > window.innerHeight) {
+    if (parseFloat(style.height) + y > stageBox.bottom) {
       re.y = true;
     }
 
-    if (parseFloat(style.width) + x > window.innerWidth) {
+    if (parseFloat(style.width) + x > stageBox.right) {
       re.x = true;
     }
 
@@ -61,6 +64,7 @@ class ContextMenu extends React.Component<{ children?: React.ReactNode }> {
     const { x, y } = this.context.buffer.contextMenu;
     return (
       <div
+        id=""
         style={{
           left: x,
           top: y,

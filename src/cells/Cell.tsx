@@ -21,27 +21,19 @@ export class CellModel {
   @observable
   declare data: CellDataType;
 
-  @observable
-  state: {
-    isSelect: boolean;
-    isLinking: boolean;
-  } = {
-    isSelect: false,
-    isLinking: false,
-  };
-
   constructor(data: any, context: FlowModel) {
     this.data = data;
     this.context = context;
     makeObservable(this);
   }
 
+  @observable private _isSelect = false;
   @computed
   get isSelect() {
-    return this.state.isSelect;
+    return this._isSelect;
   }
   set isSelect(isSelect: boolean) {
-    this.state.isSelect = isSelect;
+    this._isSelect = isSelect;
   }
 
   getWrapperRef = () => {

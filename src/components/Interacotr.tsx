@@ -49,7 +49,7 @@ export class Interactor extends React.Component<InteractorType> {
           );
 
         select.isSelecting = true;
-        select.selectingDom = context.wrapperRefsMap.get(id)?.current as any;
+        select.selectingDom = context.getWrapperRef(id)?.current as any;
 
         const coord = this.context.getCursorCoord(e);
         drag.start.x = coord.x;
