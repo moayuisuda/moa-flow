@@ -78,8 +78,6 @@ export class FlowModel {
   private isInitEvents = false;
   multiSelect = false;
   scaleBy = 1.01;
-  shrinkTimes = 10;
-  isMiniMap = false;
 
   private pendingRender: boolean = true;
   @action
