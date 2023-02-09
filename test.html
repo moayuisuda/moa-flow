@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <svg>
+      <defs>
+        <marker
+          id="triangle"
+          markerWidth="100"
+          markerHeight="100"
+          refX="0"
+          refY="0"
+          orient="auto"
+          markerUnits="userSpaceOnUse"
+        >
+          <path d="M 0 0 L 5 0 z" stroke-width="4" stroke="red" fill="none" />
+          <!-- <path
+            class="moa-edge__arrow"
+            stroke="red"
+            stroke-width="3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            fill="none"
+            d="M2.5,2.5 L2.5,12.499999999999998 L11.160254037844387,7.499999999999999 Z"
+            size="10"
+          ></path> -->
+        </marker>
+      </defs>
+      <path
+        stroke-width="2"
+        d="M 0,0 L 100,100"
+        stroke="blue"
+        fill="none"
+        marker-end="url(#triangle)"
+      />
+    </svg>
+  </body>
+</html>

@@ -273,7 +273,6 @@ export class EdgeModel<
               <path
                 className="moa-edge__arrow"
                 stroke={pathProps.stroke || lineProps.stroke}
-                strokeWidth={pathProps.strokeWidth || lineProps.strokeWidth}
                 strokeLinecap={
                   pathProps.strokeLinecap || lineProps.strokeLinecap
                 }
