@@ -6,6 +6,7 @@ import {
   Port,
   useFlowModel,
   FlowModel,
+  MiniMap,
 } from "moa-flow";
 import React, { useState } from "react";
 import { useRef } from "react";
@@ -68,25 +69,27 @@ const BizNode = observer(({ model }) => {
 
 const App = () => {
   const flowModelRef = useRef<FlowModel>();
-  const [miniMap, setMiniMap] = useState(true);
   return (
     <div>
       <div>
         <h1>HELLO</h1>
         <button
           onClick={() => {
-            console.log(flowModelRef.current?.canvasData);
-            setMiniMap(!miniMap);
+            console.log(flowModelRef.current?.buffer.miniMap.showMiniMap);
+            flowModelRef.current?.setMiniMap({
+              showMiniMap: !flowModelRef.current?.buffer.miniMap.showMiniMap,
+            });
           }}
         >
-          {!miniMap ? "打开小地图" : "关闭小地图"}
+          {!flowModelRef.current?.buffer.miniMap.showMiniMap
+            ? "打开小地图"
+            : "关闭小地图"}
         </button>
       </div>
       <Flow
         scaleBy={1.03}
         multiSelect
         miniMapShrinkTimes={15}
-        miniMap={miniMap}
         flowModelRef={flowModelRef}
         components={{
           BizNode: BizNode,
@@ -122,6 +125,18 @@ const App = () => {
             </button>
           </div>
         </ContextMenu>
+        <MiniMap
+          mapBorderColor="red"
+          mapBorderWidth={3}
+          position={"right-bottom"}
+          style={{
+            width: 300,
+            height: 200,
+            border: "1px solid #eee",
+            borderRadius: "5px",
+          }}
+          viewBoxStyle={{ border: "1px solid #137cbd", borderRadius: "5px" }}
+        />
       </Flow>
     </div>
   );

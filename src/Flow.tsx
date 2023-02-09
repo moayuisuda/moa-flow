@@ -14,7 +14,7 @@ import { mountEvents } from "./events";
 import { BehaviorName, CanvasDataType } from "@/typings/common";
 import { Interactor } from "./components/Interacotr";
 import { isNumber, isUndefined } from "lodash";
-import { MiniMap } from "./components/Minimap";
+import { getMiniMap, MiniMap } from "./components/Minimap";
 
 const PositionWrapper = observer(({ cellData }: { cellData: CellDataType }) => {
   const isNode = cellData.cellType === "node";
@@ -217,8 +217,6 @@ type FlowProps = {
   linkEdge?: string;
   children?: React.ReactNode;
   undoRedo?: boolean;
-  miniMapShrinkTimes?: number;
-  miniMap?: boolean;
 };
 @observer
 class Flow extends React.Component<FlowProps, {}> {
@@ -232,9 +230,6 @@ class Flow extends React.Component<FlowProps, {}> {
     this.flowModel.registComponents(props.components || {});
     !isUndefined(this.flowModel.scaleBy) &&
       (this.flowModel.scaleBy = this.props.scaleBy || 1.01);
-
-    !isUndefined(this.flowModel.shrinkTimes) &&
-      (this.flowModel.shrinkTimes = this.props.miniMapShrinkTimes as number);
     this.props.linkEdge && (this.flowModel.linkEdge = this.props.linkEdge);
     this.props.canvasData &&
       this.flowModel.setCanvasData(this.props.canvasData);
@@ -312,10 +307,7 @@ class Flow extends React.Component<FlowProps, {}> {
           )}
           <Nodes />
           <LinesAndInterect />
-          <MiniMap
-            shrinkTimes={this.props.miniMapShrinkTimes as number}
-            show={this.props.miniMap}
-          />
+          {getMiniMap(this.props.children)}
         </div>
         {getContextMenu(this.props.children)}
       </FlowContext.Provider>
@@ -327,8 +319,6 @@ Flow.defaultProps = {
   undoRedo: true,
   scale: true,
   mutiSelect: false,
-  miniMapShrinkTimes: 10,
-  miniMap: false,
 };
 
 export default Flow;
