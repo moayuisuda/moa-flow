@@ -8,7 +8,6 @@ import { observer } from "mobx-react";
 import { NodeDataType } from "../cells/Node";
 
 export type PortDataType = {
-  edges: string[];
   host: string;
   [index: string]: any;
 } & CellDataType;
@@ -29,9 +28,9 @@ type PortPropsType<D extends PortDataType> = {
 export type PortData<D> = D & PortDataType;
 
 @observer
-export class Port<D extends PortDataType> extends React.Component<
-  PortPropsType<D>
-> {
+export class Port<
+  D extends PortDataType = PortDataType
+> extends React.Component<PortPropsType<D>> {
   static contextType = FlowContext;
   // vscode 无法推断 this.context 的类型，需要显式声明 this.context 的类型
   declare context: React.ContextType<typeof FlowContext>;
@@ -39,7 +38,7 @@ export class Port<D extends PortDataType> extends React.Component<
   wrapperRef: React.RefObject<any>;
   constructor(props: PortPropsType<D>, context: FlowModel) {
     super(props, context);
-    if (!context.isMiniMap) context.cellsMap.set(props.data.id, this);
+    context.setPortInstanceMap(props.data.id, this);
     this.wrapperRef = context.getWrapperRef(props.data.id);
   }
 
@@ -88,7 +87,7 @@ export class Port<D extends PortDataType> extends React.Component<
     } = this;
 
     if (!link.source) return;
-    const sourceInstance = context.cellsMap.get(link.source as string);
+    const sourceInstance = context.getPortInstance(link.source as string);
 
     if (link.source === this.props.data.id) {
       context.clearLinkBuffer();
@@ -122,10 +121,13 @@ export class Port<D extends PortDataType> extends React.Component<
     return (
       <div
         ref={this.wrapperRef}
-        style={{
-          cursor: "crosshair",
-          display: "inline-block",
-        }}
+        style={Object.assign(
+          {
+            cursor: "crosshair",
+            display: "inline-block",
+          },
+          this.props.style
+        )}
         onMouseDown={(e) => this.onLinkStart(e)}
         onMouseUp={(e) => this.onLinkEnd(e)}
         {...others}

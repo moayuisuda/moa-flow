@@ -1,6 +1,6 @@
 import { Dir, Vector2d } from "../typings/common";
 import { PortDataType, PortDir } from "../components";
-import React, { ComponentProps } from "react";
+import React from "react";
 import { isVector2d } from "../utils";
 import { callIfFn } from "../utils/util";
 import { CellModel, CellDataType } from "./Cell";
@@ -54,35 +54,20 @@ export class EdgeModel<
     super(data, context);
   }
 
-  getLinkPortsData = () => {
-    return {
-      source: isVector2d(this.data.source)
-        ? (this.data.source as Vector2d)
-        : (this.context.cellsDataMap.get(
-            this.data.source as string
-          ) as PortDataType),
-      target: isVector2d(this.data.target)
-        ? (this.data.target as Vector2d)
-        : (this.context.cellsDataMap.get(
-            this.data.target as string
-          ) as PortDataType),
-    };
-  };
-
   getAnchors = () => {
     let sourceAnchor;
     let targetAnchor;
 
     if (isVector2d(this.data.source)) sourceAnchor = this.data.source;
     else {
-      const sourceInstance = this.context.cellsMap.get(
+      const sourceInstance = this.context.getPortInstance(
         this.data.source as string
       );
       sourceAnchor = sourceInstance.anchor();
     }
     if (isVector2d(this.data.target)) targetAnchor = this.data.target;
     else {
-      const targetInstance = this.context.cellsMap.get(
+      const targetInstance = this.context.getPortInstance(
         this.data.target as string
       );
       targetAnchor = targetInstance.anchor();
@@ -100,11 +85,26 @@ export class EdgeModel<
     return this.vectorsToPoints(routeResult);
   };
 
-  getVectors = () => {
+  private getVectors = () => {
     const anchors = this.getAnchors();
     const verticies = this.data.verticies || [];
 
     return [anchors.source, ...verticies, anchors.target];
+  };
+
+  getLinkPortsData = () => {
+    return {
+      source: isVector2d(this.data.source)
+        ? (this.data.source as Vector2d)
+        : (this.context.getCellData(
+            this.data.source as string
+          ) as PortDataType),
+      target: isVector2d(this.data.target)
+        ? (this.data.target as Vector2d)
+        : (this.context.getCellData(
+            this.data.target as string
+          ) as PortDataType),
+    };
   };
 
   getLinkNodes = () => {
@@ -113,14 +113,14 @@ export class EdgeModel<
     let target;
 
     if (!isVector2d(data.source)) {
-      const sourcePort = this.context.cellsDataMap.get(
+      const sourcePort = this.context.getCellData(
         data.source as string
       ) as PortDataType;
       source = sourcePort.host;
     }
 
     if (!isVector2d(data.target)) {
-      const targetPort = this.context.cellsDataMap.get(
+      const targetPort = this.context.getCellData(
         data.target as string
       ) as PortDataType;
       target = targetPort.host;
@@ -131,7 +131,6 @@ export class EdgeModel<
       target,
     };
   };
-
   getLinkNodesData = () => {
     const { source, target } = this.getLinkNodes();
     return {
@@ -140,7 +139,6 @@ export class EdgeModel<
     };
   };
 
-  // 这个方法暴露出去，可自定义路由
   route({ vectors }: { vectors: Vector2d[] }) {
     return vectors;
   }
@@ -167,23 +165,19 @@ export class EdgeModel<
     return label;
   }
 
-  isLinking = () => {
-    return this.state.isLinking;
-  };
-
   controlPointOffset = () => {
     return 60;
   };
 
-  getBazierDir = () => {
+  private getBazierDir = () => {
     const {
       props: { dir: sourceDir },
-    } = this.context.cellsMap.get(this.data.source as string);
+    } = this.context.getPortInstance(this.data.source as string);
 
     const getTargetDir = () => {
       const {
         props: { dir: targetDir },
-      } = this.context.cellsMap.get(this.data.target as string);
+      } = this.context.getPortInstance(this.data.target as string);
 
       return targetDir;
     };
@@ -240,8 +234,8 @@ export class EdgeModel<
     fill: "none",
     strokeWidth: 2,
     stroke: this.isSelect
-      ? this.context.color.active
-      : this.context.color.deepGrey,
+      ? this.context.color.primary
+      : this.context.color.base,
   });
 
   LineRender = observer(

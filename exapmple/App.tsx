@@ -34,7 +34,7 @@ const BizNode = observer(({ model }) => {
       }}
     >
       <h3>{data.nodeName}</h3>
-      <p>总节点数{flowModel.getNodesData().length}</p>
+      <p>连接的节点数{model.getLinkNodes().length}</p>
       {/* moa-flow将连接桩抽象为了一个react组件
           你可以在任何位置像写普通react组件那样来写桩组件 */}
       <Port
@@ -87,9 +87,10 @@ const App = () => {
         </button>
       </div>
       <Flow
+        width={1200}
+        height={800}
         scaleBy={1.03}
         multiSelect
-        miniMapShrinkTimes={15}
         flowModelRef={flowModelRef}
         components={{
           BizNode: BizNode,
@@ -105,7 +106,7 @@ const App = () => {
           <div style={{ boxShadow: "0px 0px 4px rgb(100,100,100)" }}>
             <button
               onClick={() => {
-                const flowModel = flowModelRef.current;
+                const flowModel = flowModelRef.current as FlowModel;
                 const { selectCells, deleCell } = flowModel;
                 deleCell(selectCells[0]);
               }}

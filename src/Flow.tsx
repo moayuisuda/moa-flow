@@ -52,7 +52,7 @@ const CellComponent = observer(({ cellData }: { cellData: CellDataType }) => {
   if (!Component)
     throw `[moa-flow] component ${cellData.component} is not regist.`;
 
-  const cellModel = context.cellsModelMap.get(cellData.id) as CellModel;
+  const cellModel = context.getCellModel(cellData.id) as CellModel;
 
   return React.createElement(Interactor, {
     key: cellData.id,
@@ -114,7 +114,7 @@ class Grid extends React.Component<{}> {
               cx={radius}
               cy={radius}
               r={radius}
-              fill={context.color.deepGrey}
+              fill={context.color.base}
             />
           </pattern>
         </defs>
@@ -203,17 +203,17 @@ const LinesAndInterect = observer(() => {
 
 type FlowProps = {
   canvasData?: Partial<CanvasDataType>;
+  components?: Record<string, React.FC<{ model: any }>>;
+  models?: Record<string, typeof CellModel>;
   onEvent?: (e: { type: string; data: any }) => void;
   onLoad?: (model: FlowModel) => void;
   scale?: boolean;
   flowModelRef?: any;
   width?: number;
-  scaleBy?: number;
   height?: number;
+  scaleBy?: number;
   grid?: number;
   multiSelect?: boolean;
-  components?: Record<string, React.FC<any>>;
-  models?: Record<string, typeof CellModel>;
   linkEdge?: string;
   children?: React.ReactNode;
   undoRedo?: boolean;
@@ -258,8 +258,8 @@ class Flow extends React.Component<FlowProps, {}> {
         this.flowModel.contextMenuVisible = true;
 
         this.flowModel.setContextMenuPos({
-          x: e.clientX,
-          y: e.clientY,
+          x: e.clientX + 5,
+          y: e.clientY + 5,
         });
       });
   };
