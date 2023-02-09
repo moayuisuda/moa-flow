@@ -1,7 +1,53 @@
+import { isFunction } from "lodash";
 import { observer } from "mobx-react";
 import React, { useContext, useEffect, useRef } from "react";
 import { FlowContext } from "../../Context";
 
+const Node = observer(
+  (props: {
+    node: any;
+    nodeClassName: any;
+    nodeBorderRadius: any;
+    width: any;
+    height: any;
+    nodeColor: any;
+    nodeStrokeColor: any;
+    nodeStrokeWidth: any;
+    x: any;
+    y: any;
+  }) => {
+    const {
+      node,
+      nodeClassName,
+      nodeBorderRadius,
+      width,
+      height,
+      nodeColor,
+      nodeStrokeColor,
+      nodeStrokeWidth,
+      x,
+      y,
+    } = props;
+
+    return (
+      <rect
+        key={node.id}
+        className={nodeClassName}
+        x={x}
+        y={y}
+        rx={nodeBorderRadius}
+        ry={nodeBorderRadius}
+        width={width}
+        height={height}
+        fill={isFunction(nodeColor) ? nodeColor(node) : nodeColor}
+        stroke={
+          isFunction(nodeStrokeColor) ? nodeStrokeColor(node) : nodeStrokeColor
+        }
+        strokeWidth={nodeStrokeWidth}
+      />
+    );
+  }
+);
 const MiniMap = observer(
   (props: {
     style: React.CSSProperties;
@@ -212,20 +258,18 @@ const MiniMap = observer(
                     ?.offsetWidth as number;
                   const height = context.getWrapperRef(node.id).current
                     ?.offsetHeight as number;
-
                   return (
-                    <rect
-                      key={node.id}
-                      className={nodeClassName}
-                      x={x}
-                      y={y}
-                      rx={nodeBorderRadius}
-                      ry={nodeBorderRadius}
+                    <Node
+                      node={node}
+                      nodeClassName={nodeClassName}
+                      nodeBorderRadius={nodeBorderRadius}
                       width={width}
                       height={height}
-                      fill={nodeColor}
-                      stroke={nodeStrokeColor}
-                      strokeWidth={nodeStrokeWidth}
+                      nodeColor={nodeColor}
+                      nodeStrokeColor={nodeStrokeColor}
+                      nodeStrokeWidth={nodeStrokeWidth}
+                      x={x}
+                      y={y}
                     />
                   );
                 })}

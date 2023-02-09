@@ -12,10 +12,18 @@ import React, { useState } from "react";
 import { useRef } from "react";
 import { RelationEdge, RelationEdgeModel } from "./BizEdge";
 import canvasData from "./test.json";
+
+export const statusEnum = {
+  warn: "yellow",
+  error: "red",
+  default: "#eee",
+  success: "green",
+};
 class BizNodeModel extends NodeModel {
   defaultData = () => ({
     nodeName: "node 0",
     ports: [{ portType: "in" }, { portType: "out" }],
+    status: "default",
   });
 }
 const BizNode = observer(({ model }) => {
@@ -25,15 +33,26 @@ const BizNode = observer(({ model }) => {
   const [outPort] = data.ports.filter((port) => port.portType === "out");
 
   const flowModel = useFlowModel();
-
   return (
     <div
       style={{
         padding: 48,
         border: isSelect ? "1px solid #1890ff" : "1px solid black",
+        background: statusEnum[data.status],
       }}
     >
-      <h3>{data.nodeName}</h3>
+      <div>
+        <h3>{data.nodeName}</h3>
+        <button
+          onClick={() => {
+            model.setData({
+              status: "success",
+            });
+          }}
+        >
+          {data.status}
+        </button>
+      </div>
       <p>连接的节点数{model.getLinkNodes().length}</p>
       {/* moa-flow将连接桩抽象为了一个react组件
           你可以在任何位置像写普通react组件那样来写桩组件 */}
@@ -127,8 +146,15 @@ const App = () => {
           </div>
         </ContextMenu>
         <MiniMap
+          nodeColor={(node) => statusEnum[node.status]}
+          nodeStrokeColor={(node) => {
+            const model = flowModelRef.current.getCellModel(node.id);
+            const { isSelect } = model;
+            return isSelect ? "blue" : "black";
+          }}
           mapBorderColor="red"
           mapBorderWidth={3}
+          nodeStrokeWidth={5}
           position={"right-bottom"}
           style={{
             width: 300,
