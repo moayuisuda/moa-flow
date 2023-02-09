@@ -6,9 +6,11 @@ import {
   Port,
   useFlowModel,
   FlowModel,
+  EdgeModel,
 } from "moa-flow";
 import React from "react";
 import { useRef } from "react";
+import { BizEdge } from "./BizEdge";
 
 class BizNodeModel extends NodeModel {
   defaultData = () => ({
@@ -74,10 +76,13 @@ const App = () => {
         flowModelRef={flowModelRef}
         components={{
           BizNode: BizNode,
+          BizEdge,
         }}
         models={{
+          BizEdge: EdgeModel,
           BizNode: BizNodeModel,
         }}
+        linkEdge="BizEdge"
         canvasData={{
           cells: [
             {
