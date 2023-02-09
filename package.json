@@ -1,6 +1,6 @@
 {
   "name": "moa-flow",
-  "version": "1.2.22",
+  "version": "1.2.23",
   "type": "module",
   "main": "./dist/moa-flow.js",
   "typings": "./dist/index.d.ts",
