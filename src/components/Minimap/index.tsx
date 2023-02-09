@@ -5,80 +5,50 @@ import { FlowContext } from "../../Context";
 
 const Node = observer(
   (props: {
-    node: any;
-    nodeClassName: any;
-    nodeBorderRadius: any;
-    width: any;
-    height: any;
+    width: number;
+    height: number;
     nodeColor: any;
-    nodeStrokeColor: any;
-    nodeStrokeWidth: any;
-    x: any;
-    y: any;
+    x: number;
+    y: number;
+    cellModel: any;
+    id: string;
   }) => {
-    const {
-      node,
-      nodeClassName,
-      nodeBorderRadius,
-      width,
-      height,
-      nodeColor,
-      nodeStrokeColor,
-      nodeStrokeWidth,
-      x,
-      y,
-    } = props;
+    const { width, height, nodeColor, x, y, id, cellModel } = props;
 
     return (
       <rect
-        key={node.id}
-        className={nodeClassName}
+        key={id}
+        className="moa-flow-minimap-nodes"
         x={x}
         y={y}
-        rx={nodeBorderRadius}
-        ry={nodeBorderRadius}
+        rx="4"
+        ry="4"
         width={width}
         height={height}
-        fill={isFunction(nodeColor) ? nodeColor(node) : nodeColor}
-        stroke={
-          isFunction(nodeStrokeColor) ? nodeStrokeColor(node) : nodeStrokeColor
-        }
-        strokeWidth={nodeStrokeWidth}
+        fill={isFunction(nodeColor) ? nodeColor(cellModel) : nodeColor}
+        strokeWidth="4"
       />
     );
   }
 );
+
 const MiniMap = observer(
-  (props: {
-    style: React.CSSProperties;
-    defaultWidth: number;
-    defaultHeight: number;
-
-    nodeClassName: string;
-    mapClassName: string;
-    viewBoxClassName: string;
-
-    nodeStrokeColor: string;
-    nodeColor: string;
-    nodeStrokeWidth: number;
-    nodeBorderRadius: number;
-
-    viewBoxStyle: React.CSSProperties;
-
-    position: string;
-  }) => {
+  (
+    props: {
+      width?: number; // 默认宽度
+      height?: number; // 默认高度
+      nodeColor?: string | ((node: any) => string); //节点颜色
+      position?: "bottom-right" | "bottom-left" | "top-right" | "top-left"; // 节点位置
+    } & React.DetailedHTMLProps<
+      React.HTMLAttributes<HTMLDivElement>,
+      HTMLDivElement
+    >
+  ) => {
     const {
-      defaultWidth = 200,
-      defaultHeight = 150,
+      width: defaultWidth = 200,
+      height: defaultHeight = 150,
       style,
-      nodeClassName = "",
-      mapClassName = "",
-      viewBoxClassName = "",
-      nodeStrokeColor = "transparent",
       nodeColor = "#e2e2e2",
-      nodeStrokeWidth = 2,
-      nodeBorderRadius = 5,
-      viewBoxStyle = {},
       position = "bottom-right",
     } = props;
     const context = useContext(FlowContext);
@@ -122,7 +92,10 @@ const MiniMap = observer(
         (item) => item.cellType === "node"
       );
 
-      const boundingRect = nodes.reduce(
+      const boundingRect = [
+        ...nodes,
+        { x: 0, y: 0, width: viewBB.width, height: viewBB.height },
+      ].reduce(
         (pre, cur) => {
           const width =
             cur.width ||
@@ -153,7 +126,15 @@ const MiniMap = observer(
         },
         showMiniMap: true,
       });
-    }, [context.x, context.y, context.scale, viewWidth, viewHeight]);
+    }, [
+      context.x,
+      context.y,
+      context.scale,
+      viewWidth,
+      viewHeight,
+      mapScale,
+      canvasData.cells.length,
+    ]);
 
     const nodes = canvasData.cells.filter((cell) => cell.cellType === "node");
 
@@ -163,6 +144,7 @@ const MiniMap = observer(
         ...pre,
       };
     }, {});
+
     const viewBoxShrinkTimes = width / viewBB.width;
     const boxWidth = elementWidth / viewBoxShrinkTimes;
     const boxHeight = elementHeight / viewBoxShrinkTimes;
@@ -173,7 +155,7 @@ const MiniMap = observer(
       <>
         {showMiniMap ? (
           <div
-            className={mapClassName}
+            className="moa-floa-minimap"
             style={{
               scale: mapScale,
               backgroundColor: "white",
@@ -183,7 +165,7 @@ const MiniMap = observer(
               userSelect: "none",
               overflow: "hidden",
               ...mapAbsolutePosition,
-              ...style,
+              ...(props.style || {}),
               width: elementWidth,
               height: elementHeight,
             }}
@@ -241,7 +223,7 @@ const MiniMap = observer(
                 height: elementHeight,
                 scale: mapScale,
                 transform: `scale(${mapScale})`,
-                transformOrigin: "left top",
+                transformOrigin: "center",
               }}
             >
               <svg
@@ -258,16 +240,16 @@ const MiniMap = observer(
                     ?.offsetWidth as number;
                   const height = context.getWrapperRef(node.id).current
                     ?.offsetHeight as number;
+                  const cellModel = context.getCellModel(node.id);
+
                   return (
                     <Node
-                      node={node}
-                      nodeClassName={nodeClassName}
-                      nodeBorderRadius={nodeBorderRadius}
+                      id={node.id}
+                      cellModel={cellModel}
+                      key={node.id}
                       width={width}
                       height={height}
                       nodeColor={nodeColor}
-                      nodeStrokeColor={nodeStrokeColor}
-                      nodeStrokeWidth={nodeStrokeWidth}
                       x={x}
                       y={y}
                     />
@@ -276,7 +258,7 @@ const MiniMap = observer(
               </svg>
 
               <div
-                className={viewBoxClassName}
+                className="moa-flow-minimap-viewbox"
                 style={{
                   border: "1px solid red",
                   width: boxWidth,
@@ -286,7 +268,6 @@ const MiniMap = observer(
                   top: startY,
                   cursor: "pointer",
                   borderColor: "none",
-                  ...viewBoxStyle,
                 }}
                 onMouseDown={(e) => {
                   context.setMiniMap({

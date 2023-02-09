@@ -152,9 +152,6 @@ const App = () => {
             const { isSelect } = model;
             return isSelect ? "blue" : "black";
           }}
-          mapBorderColor="red"
-          mapBorderWidth={3}
-          nodeStrokeWidth={5}
           position={"right-bottom"}
           style={{
             width: 300,
@@ -162,7 +159,6 @@ const App = () => {
             border: "1px solid #eee",
             borderRadius: "5px",
           }}
-          viewBoxStyle={{ border: "1px solid #137cbd", borderRadius: "5px" }}
         />
       </Flow>
     </div>

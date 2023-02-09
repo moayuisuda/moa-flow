@@ -68,3 +68,8 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+.moa-flow-minimap-viewbox {
+  border-radius: 5px;
+  border: 1px solid #4fa6f0 !important;
+}
