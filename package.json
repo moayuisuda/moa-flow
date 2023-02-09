@@ -7,7 +7,7 @@
   "module": "./dist/moa-flow.js",
   "scripts": {
     "dev": "vite",
-    "build": "vite build --watch",
+    "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
