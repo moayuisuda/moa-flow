@@ -18,7 +18,8 @@
           orient="auto"
           markerUnits="userSpaceOnUse"
         >
-          <path d="M 0 0 L 5 0 z" stroke-width="4" stroke="red" fill="none" />
+          <!-- path默认就是1，在markerUnits="strokeWidth"的情况下会根据外层path的strokeWidth成倍增大 -->
+          <path d="M 0 0 L 5 0 L 5 5 z" stroke="red" fill="none" />
           <!-- <path
             class="moa-edge__arrow"
             stroke="red"
@@ -32,10 +33,11 @@
         </marker>
       </defs>
       <path
-        stroke-width="2"
-        d="M 0,0 L 100,100"
+        d="M 0,0 L 100,100 L100"
         stroke="blue"
-        fill="none"
+        fill="black"
+        stroke-linecap="round"
+        stroke-linejoin="round"
         marker-end="url(#triangle)"
       />
     </svg>

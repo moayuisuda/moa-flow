@@ -5,6 +5,7 @@ import {
   union,
   without,
   isUndefined,
+  uniq,
 } from "lodash";
 import { action, makeObservable, observable, computed } from "mobx";
 import React from "react";
@@ -594,7 +595,7 @@ export class FlowModel {
         re.push(...this.getPortLinkNodes(portData.id));
       });
 
-    return re;
+    return uniq(re);
   };
 
   @action deleCell = (id: string) => {
@@ -794,7 +795,7 @@ export class FlowModel {
     return this.portInstanceMap.get(id) as Port;
   };
 
-  private portEdgesMap = new Map<string, string[]>([]);
+  @observable private portEdgesMap = new Map<string, string[]>([]);
   /**
    * @description get port's linked edges
    */

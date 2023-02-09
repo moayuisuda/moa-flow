@@ -245,19 +245,30 @@ export class EdgeModel<
       props?: {
         pathProps?: React.SVGProps<SVGPathElement>;
         arrowProps?: React.SVGProps<SVGPathElement> & { size?: number };
+        markerProps?: React.SVGProps<SVGMarkerElement>;
       } & React.SVGProps<SVGGElement>
     ) => {
       const { d } = this;
       const lineProps = this.defaultLineProps() as any;
       const pathProps = props?.pathProps || {};
       const arrowProps = props?.arrowProps || {};
+      const markerProps = props?.markerProps || {};
       const arrowSize = arrowProps.size || DEFAULT_ARROW_SIZE;
 
       const { cos, sin, PI } = Math;
+      const pathWidth = pathProps.strokeWidth || lineProps.strokeWidth;
       const arrowOffset = [
-        (arrowProps.strokeWidth || lineProps.strokeWidth) / 2 || 0,
-        (arrowProps.strokeWidth || lineProps.strokeWidth) / 2 || 0,
+        (arrowProps.strokeWidth || pathWidth) / 2 || 0,
+        (arrowProps.strokeWidth || pathWidth) / 2 || 0,
       ];
+
+      // console.log(
+      //   pathProps.fill ||
+      //     lineProps.fill ||
+      //     pathProps.stroke ||
+      //     lineProps.stroke ||
+      //     this.context.color.base
+      // );
 
       return (
         <g {...props}>
@@ -269,6 +280,7 @@ export class EdgeModel<
               refX={arrowOffset[0] + arrowSize * cos(PI / 6)}
               refY={arrowOffset[1] + arrowSize * sin(PI / 6)}
               orient="auto"
+              {...markerProps}
             >
               <path
                 className="moa-edge__arrow"
@@ -279,7 +291,11 @@ export class EdgeModel<
                 strokeLinejoin={
                   pathProps.strokeLinejoin || lineProps.strokeLinejoin
                 }
-                fill={pathProps.fill || lineProps.fill}
+                fill={
+                  pathProps.stroke ||
+                  lineProps.stroke ||
+                  this.context.color.base
+                }
                 d={`M${arrowOffset[0]},${arrowOffset[1]} L${arrowOffset[0]},${
                   arrowSize * sin(PI / 6) * 2 + arrowOffset[1]
                 } L${arrowSize * cos(PI / 6) + arrowOffset[0]},${
