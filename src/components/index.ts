@@ -4,3 +4,4 @@ export * from "./ContextMenu";
 export * from "./SelectBoundsRect";
 export * from "./PortalWrapper";
 export * from "./Debugger";
+export * from "./Minimap";

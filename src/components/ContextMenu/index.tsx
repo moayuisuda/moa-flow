@@ -69,7 +69,7 @@ class ContextMenu extends React.Component<{ children?: React.ReactNode }> {
           left: x,
           top: y,
           position: "fixed",
-          zIndex: 2,
+          zIndex: 5,
         }}
         ref={this.wrapperRef}
       >

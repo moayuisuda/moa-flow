@@ -252,6 +252,19 @@ export class FlowModel {
       start: { x: 0, y: 0 },
       end: { x: 0, y: 0 },
     },
+    miniMap: {
+      dragging: false,
+      showMiniMap: false,
+      mapDragging: false,
+      mapScale: 0.8,
+      mapPosition: [0, 0],
+      boundingRect: {
+        width: 0,
+        height: 0,
+        x: 0,
+        y: 0,
+      },
+    },
     link: {
       // 只是为了统一渲染，加$state
       $state: {
@@ -735,6 +748,19 @@ export class FlowModel {
     this.addStep();
 
     return data.id;
+  };
+  @action setMiniMap = (miniMap: {
+    mapScale?: number;
+    mapDragging?: boolean;
+    dragging?: boolean;
+    mapPosition?: number[] | number[];
+    showMiniMap?: boolean;
+    boundingRect?: { width: number; height: number; x: number; y: number };
+  }) => {
+    this.buffer.miniMap = {
+      ...this.buffer.miniMap,
+      ...miniMap,
+    };
   };
 
   @action setLinkingPosition = (coord: Vector2d) => {

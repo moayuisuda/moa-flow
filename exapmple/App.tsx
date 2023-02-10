@@ -7,15 +7,24 @@ import {
   useFlowModel,
   FlowModel,
   EdgeModel,
+  MiniMap,
 } from "moa-flow";
 import React from "react";
 import { useRef } from "react";
 import { BizEdge } from "./BizEdge";
+import canvasdata from "./test.json";
+export const statusEnum = {
+  warn: "yellow",
+  error: "red",
+  default: "#eee",
+  success: "green",
+};
 
 class BizNodeModel extends NodeModel {
   defaultData = () => ({
     nodeName: "node 0",
     ports: [{ portType: "in" }, { portType: "out" }],
+    status: "default",
   });
 }
 const BizNode = observer(({ model }) => {
@@ -31,10 +40,20 @@ const BizNode = observer(({ model }) => {
       style={{
         padding: 48,
         border: isSelect ? "1px solid #1890ff" : "1px solid black",
+        background: statusEnum[data.status],
       }}
     >
-      <h3>{data.nodeName}</h3>
+      <h3
+        onClick={() => {
+          model.setData({
+            status: "warn",
+          });
+        }}
+      >
+        {data.nodeName}
+      </h3>
       <p>连接的节点数{model.getLinkNodes().length}</p>
+
       {/* moa-flow将连接桩抽象为了一个react组件
           你可以在任何位置像写普通react组件那样来写桩组件 */}
       <Port
@@ -73,6 +92,9 @@ const App = () => {
     <div>
       <h1>HELLO</h1>
       <Flow
+        scaleBy={1.03}
+        width={1200}
+        height={800}
         flowModelRef={flowModelRef}
         components={{
           BizNode: BizNode,
@@ -83,22 +105,7 @@ const App = () => {
           BizNode: BizNodeModel,
         }}
         linkEdge="BizEdge"
-        canvasData={{
-          cells: [
-            {
-              component: "BizNode",
-              nodeName: "node 0",
-              x: 50,
-              y: 50,
-            },
-            {
-              component: "BizNode",
-              nodeName: "node 1",
-              x: 300,
-              y: 300,
-            },
-          ],
-        }}
+        canvasData={canvasdata}
       >
         <ContextMenu>
           <div style={{ boxShadow: "0px 0px 4px rgb(100,100,100)" }}>
@@ -125,6 +132,19 @@ const App = () => {
             </button>
           </div>
         </ContextMenu>
+        <MiniMap
+          nodeColor={(cellModel) => {
+            const data = cellModel.data;
+            return statusEnum[data.status];
+          }}
+          position={"bottom-right"}
+          style={{
+            width: 300,
+            height: 200,
+            border: "1px solid #eee",
+            borderRadius: "5px",
+          }}
+        />
       </Flow>
     </div>
   );

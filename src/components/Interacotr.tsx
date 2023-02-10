@@ -27,7 +27,6 @@ export class Interactor extends React.Component<InteractorType> {
       context,
       props: { id, topOnFocus = false, inSvg = false },
     } = this;
-
     const onMouseDown = (
       e: React.MouseEvent<HTMLDivElement | SVGGElement, MouseEvent>
     ) => {
