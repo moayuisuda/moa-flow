@@ -135,15 +135,7 @@ const MiniMap = observer(
         },
         showMiniMap: true,
       });
-    }, [
-      context.x,
-      context.y,
-      context.scale,
-      viewWidth,
-      viewHeight,
-      mapScale,
-      canvasData.cells.length,
-    ]);
+    }, [canvasData.cells.length]);
 
     const nodes = canvasData.cells.filter((cell) => cell.cellType === "node");
 
@@ -277,19 +269,6 @@ const MiniMap = observer(
                 });
               }}
             />
-
-            {/* <div
-              style={{
-                position: "absolute",
-                left: mapX,
-                top: mapY,
-                width: elementWidth,
-                height: elementHeight,
-                scale: mapScale,
-                transform: `scale(${mapScale})`,
-                transformOrigin: "center",
-              }}
-            ></div> */}
           </div>
         ) : (
           ""

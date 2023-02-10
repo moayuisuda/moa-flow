@@ -40,10 +40,20 @@ const BizNode = observer(({ model }) => {
       style={{
         padding: 48,
         border: isSelect ? "1px solid #1890ff" : "1px solid black",
+        background: statusEnum[data.status],
       }}
     >
-      <h3>{data.nodeName}</h3>
+      <h3
+        onClick={() => {
+          model.setData({
+            status: "warn",
+          });
+        }}
+      >
+        {data.nodeName}
+      </h3>
       <p>连接的节点数{model.getLinkNodes().length}</p>
+
       {/* moa-flow将连接桩抽象为了一个react组件
           你可以在任何位置像写普通react组件那样来写桩组件 */}
       <Port
