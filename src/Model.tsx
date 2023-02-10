@@ -255,7 +255,7 @@ export class FlowModel {
       dragging: false,
       showMiniMap: false,
       mapDragging: false,
-      mapScale: 1,
+      mapScale: 0.8,
       mapPosition: [0, 0],
       boundingRect: {
         width: 0,

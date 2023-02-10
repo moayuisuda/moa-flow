@@ -14,7 +14,6 @@ const Node = observer(
     id: string;
   }) => {
     const { width, height, nodeColor, x, y, id, cellModel } = props;
-
     return (
       <rect
         key={id}
@@ -80,11 +79,21 @@ const MiniMap = observer(
     const viewScale = Math.max(scaledWidth, scaledHeight); //取最大值
     const viewWidth = viewScale * elementWidth;
     const viewHeight = viewScale * elementHeight;
-    const offset = 5 * viewScale;
-    const x = boundingRect.x - (viewWidth - boundingRect.width) / 2 - offset;
-    const y = boundingRect.y - (viewHeight - boundingRect.height) / 2 - offset;
-    const width = viewWidth + offset * 2;
-    const height = viewHeight + offset * 2;
+
+    const width = viewWidth / mapScale;
+    const height = viewHeight / mapScale;
+
+    const shrinkHeightTimes = elementHeight / height;
+    const shrinkWidthTimes = elementWidth / width;
+
+    const mapOffestX = mapX / shrinkWidthTimes;
+    const mapOffestY = mapY / shrinkHeightTimes;
+
+    const _x = boundingRect.x - (viewWidth - boundingRect.width) / 2;
+    const x = _x - (width - viewWidth) / 2 - mapOffestX;
+    const _y = boundingRect.y - (viewHeight - boundingRect.height) / 2;
+    const y = _y - (height - viewHeight) / 2 - mapOffestY;
+
     const svg = useRef<SVGSVGElement>(null);
 
     useEffect(() => {
@@ -144,7 +153,6 @@ const MiniMap = observer(
         ...pre,
       };
     }, {});
-
     const viewBoxShrinkTimes = width / viewBB.width;
     const boxWidth = elementWidth / viewBoxShrinkTimes;
     const boxHeight = elementHeight / viewBoxShrinkTimes;
@@ -198,11 +206,10 @@ const MiniMap = observer(
               }
               if (dragging) {
                 const canvasData = context.canvasData;
-                const shrinkHeightTimes = elementHeight / height;
-                const shrinkWidthTimes = elementWidth / width;
+
                 context.setStagePosition(
-                  canvasData.x - moverMentX / shrinkHeightTimes / mapScale,
-                  canvasData.y - moverMentY / shrinkWidthTimes / mapScale
+                  canvasData.x - moverMentX / shrinkHeightTimes,
+                  canvasData.y - moverMentY / shrinkWidthTimes
                 );
               }
             }}
@@ -214,7 +221,64 @@ const MiniMap = observer(
             }}
             // onWheelCapture={(e) => e.stopPropagation()}
           >
+            <svg
+              width={elementWidth}
+              height={elementHeight}
+              viewBox={`${x} ${y}
+               ${width} ${height}`}
+              role="img"
+              ref={svg}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {nodes.map((node) => {
+                const { x, y } = node;
+                const width = context.getWrapperRef(node.id).current
+                  ?.offsetWidth as number;
+                const height = context.getWrapperRef(node.id).current
+                  ?.offsetHeight as number;
+                const cellModel = context.getCellModel(node.id);
+
+                return (
+                  <Node
+                    id={node.id}
+                    cellModel={cellModel}
+                    key={node.id}
+                    width={width}
+                    height={height}
+                    nodeColor={nodeColor}
+                    x={x}
+                    y={y}
+                  />
+                );
+              })}
+            </svg>
             <div
+              className="moa-flow-minimap-viewbox"
+              style={{
+                border: "1px solid red",
+                width: boxWidth,
+                height: boxHeight,
+                position: "absolute",
+                left: startX,
+                top: startY,
+                cursor: "pointer",
+                borderColor: "none",
+              }}
+              onMouseDown={(e) => {
+                context.setMiniMap({
+                  dragging: true,
+                });
+                e.stopPropagation();
+              }}
+              onMouseUp={() => {
+                context.setMiniMap({
+                  mapDragging: false,
+                  dragging: false,
+                });
+              }}
+            />
+
+            {/* <div
               style={{
                 position: "absolute",
                 left: mapX,
@@ -225,64 +289,7 @@ const MiniMap = observer(
                 transform: `scale(${mapScale})`,
                 transformOrigin: "center",
               }}
-            >
-              <svg
-                width={elementWidth}
-                height={elementHeight}
-                viewBox={`${x} ${y} ${width} ${height}`}
-                role="img"
-                ref={svg}
-                onClick={(e) => e.stopPropagation()}
-              >
-                {nodes.map((node) => {
-                  const { x, y } = node;
-                  const width = context.getWrapperRef(node.id).current
-                    ?.offsetWidth as number;
-                  const height = context.getWrapperRef(node.id).current
-                    ?.offsetHeight as number;
-                  const cellModel = context.getCellModel(node.id);
-
-                  return (
-                    <Node
-                      id={node.id}
-                      cellModel={cellModel}
-                      key={node.id}
-                      width={width}
-                      height={height}
-                      nodeColor={nodeColor}
-                      x={x}
-                      y={y}
-                    />
-                  );
-                })}
-              </svg>
-
-              <div
-                className="moa-flow-minimap-viewbox"
-                style={{
-                  border: "1px solid red",
-                  width: boxWidth,
-                  height: boxHeight,
-                  position: "absolute",
-                  left: startX,
-                  top: startY,
-                  cursor: "pointer",
-                  borderColor: "none",
-                }}
-                onMouseDown={(e) => {
-                  context.setMiniMap({
-                    dragging: true,
-                  });
-                  e.stopPropagation();
-                }}
-                onMouseUp={() => {
-                  context.setMiniMap({
-                    mapDragging: false,
-                    dragging: false,
-                  });
-                }}
-              />
-            </div>
+            ></div> */}
           </div>
         ) : (
           ""

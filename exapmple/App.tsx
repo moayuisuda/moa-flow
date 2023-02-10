@@ -146,13 +146,11 @@ const App = () => {
           </div>
         </ContextMenu>
         <MiniMap
-          nodeColor={(node) => statusEnum[node.status]}
-          nodeStrokeColor={(node) => {
-            const model = flowModelRef.current.getCellModel(node.id);
-            const { isSelect } = model;
-            return isSelect ? "blue" : "black";
+          nodeColor={(cellModel) => {
+            const data = cellModel.data;
+            return statusEnum[data.status];
           }}
-          position={"right-bottom"}
+          position={"bottom-right"}
           style={{
             width: 300,
             height: 200,
