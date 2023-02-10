@@ -6,19 +6,20 @@ import {
   Port,
   useFlowModel,
   FlowModel,
+  EdgeModel,
   MiniMap,
 } from "moa-flow";
-import React, { useState } from "react";
+import React from "react";
 import { useRef } from "react";
-import { RelationEdge, RelationEdgeModel } from "./BizEdge";
-import canvasData from "./test.json";
-
+import { BizEdge } from "./BizEdge";
+import canvasdata from "./test.json";
 export const statusEnum = {
   warn: "yellow",
   error: "red",
   default: "#eee",
   success: "green",
 };
+
 class BizNodeModel extends NodeModel {
   defaultData = () => ({
     nodeName: "node 0",
@@ -33,26 +34,15 @@ const BizNode = observer(({ model }) => {
   const [outPort] = data.ports.filter((port) => port.portType === "out");
 
   const flowModel = useFlowModel();
+
   return (
     <div
       style={{
         padding: 48,
         border: isSelect ? "1px solid #1890ff" : "1px solid black",
-        background: statusEnum[data.status],
       }}
     >
-      <div>
-        <h3>{data.nodeName}</h3>
-        <button
-          onClick={() => {
-            model.setData({
-              status: "success",
-            });
-          }}
-        >
-          {data.status}
-        </button>
-      </div>
+      <h3>{data.nodeName}</h3>
       <p>连接的节点数{model.getLinkNodes().length}</p>
       {/* moa-flow将连接桩抽象为了一个react组件
           你可以在任何位置像写普通react组件那样来写桩组件 */}
@@ -90,36 +80,22 @@ const App = () => {
   const flowModelRef = useRef<FlowModel>();
   return (
     <div>
-      <div>
-        <h1>HELLO</h1>
-        <button
-          onClick={() => {
-            console.log(flowModelRef.current?.buffer.miniMap.showMiniMap);
-            flowModelRef.current?.setMiniMap({
-              showMiniMap: !flowModelRef.current?.buffer.miniMap.showMiniMap,
-            });
-          }}
-        >
-          {!flowModelRef.current?.buffer.miniMap.showMiniMap
-            ? "打开小地图"
-            : "关闭小地图"}
-        </button>
-      </div>
+      <h1>HELLO</h1>
       <Flow
+        scaleBy={1.03}
         width={1200}
         height={800}
-        scaleBy={1.03}
-        multiSelect
         flowModelRef={flowModelRef}
         components={{
           BizNode: BizNode,
-          RelationEdge: RelationEdge,
+          BizEdge,
         }}
         models={{
+          BizEdge: EdgeModel,
           BizNode: BizNodeModel,
-          RelationEdge: RelationEdgeModel,
         }}
-        canvasData={canvasData}
+        linkEdge="BizEdge"
+        canvasData={canvasdata}
       >
         <ContextMenu>
           <div style={{ boxShadow: "0px 0px 4px rgb(100,100,100)" }}>
@@ -127,6 +103,7 @@ const App = () => {
               onClick={() => {
                 const flowModel = flowModelRef.current as FlowModel;
                 const { selectCells, deleCell } = flowModel;
+
                 deleCell(selectCells[0]);
               }}
             >

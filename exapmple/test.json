@@ -87,7 +87,7 @@
       "id": "33f5254c-e4a4-4343-b72d-573fe3fc00e7"
     },
     {
-      "component": "RelationEdge",
+      "component": "BizEdge",
       "source": "95c84334-8b0d-4ec1-9448-cf0c60626bc5",
       "target": "5a41a655-3983-4705-94f7-1a9567d53d2c",
       "label": "",

@@ -1,6 +1,6 @@
 {
   "name": "moa-flow",
-  "version": "1.2.0",
+  "version": "1.2.25",
   "type": "module",
   "main": "./src/index.ts",
   "typings": "./dist/index.d.ts",

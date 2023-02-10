@@ -58,14 +58,16 @@ export class EdgeModel<
     let sourceAnchor;
     let targetAnchor;
 
-    if (isVector2d(this.data.source)) sourceAnchor = this.data.source;
+    if (isVector2d(this.data.source))
+      sourceAnchor = this.data.source as Vector2d;
     else {
       const sourceInstance = this.context.getPortInstance(
         this.data.source as string
       );
       sourceAnchor = sourceInstance.anchor();
     }
-    if (isVector2d(this.data.target)) targetAnchor = this.data.target;
+    if (isVector2d(this.data.target))
+      targetAnchor = this.data.target as Vector2d;
     else {
       const targetInstance = this.context.getPortInstance(
         this.data.target as string
@@ -242,20 +244,31 @@ export class EdgeModel<
     (
       props?: {
         pathProps?: React.SVGProps<SVGPathElement>;
-        arrowProps?: React.SVGProps<SVGPathElement>;
+        arrowProps?: React.SVGProps<SVGPathElement> & { size?: number };
+        markerProps?: React.SVGProps<SVGMarkerElement>;
       } & React.SVGProps<SVGGElement>
     ) => {
       const { d } = this;
       const lineProps = this.defaultLineProps() as any;
-
-      const { cos, sin, PI } = Math;
-      const arrowOffset = [
-        lineProps.strokeWidth / 2 || 0,
-        lineProps.strokeWidth / 2 || 0,
-      ];
-
       const pathProps = props?.pathProps || {};
       const arrowProps = props?.arrowProps || {};
+      const markerProps = props?.markerProps || {};
+      const arrowSize = arrowProps.size || DEFAULT_ARROW_SIZE;
+
+      const { cos, sin, PI } = Math;
+      const pathWidth = pathProps.strokeWidth || lineProps.strokeWidth;
+      const arrowOffset = [
+        (arrowProps.strokeWidth || pathWidth) / 2 || 0,
+        (arrowProps.strokeWidth || pathWidth) / 2 || 0,
+      ];
+
+      // console.log(
+      //   pathProps.fill ||
+      //     lineProps.fill ||
+      //     pathProps.stroke ||
+      //     lineProps.stroke ||
+      //     this.context.color.base
+      // );
 
       return (
         <g {...props}>
@@ -264,25 +277,29 @@ export class EdgeModel<
               id={`arrow-end--${this.data.id}`}
               markerWidth="100"
               markerHeight="100"
-              refX={arrowOffset[0] + DEFAULT_ARROW_SIZE * cos(PI / 6)}
-              refY={arrowOffset[1] + DEFAULT_ARROW_SIZE * sin(PI / 6)}
+              refX={arrowOffset[0] + arrowSize * cos(PI / 6)}
+              refY={arrowOffset[1] + arrowSize * sin(PI / 6)}
               orient="auto"
+              {...markerProps}
             >
               <path
                 className="moa-edge__arrow"
                 stroke={pathProps.stroke || lineProps.stroke}
-                strokeWidth={pathProps.strokeWidth || lineProps.strokeWidth}
                 strokeLinecap={
                   pathProps.strokeLinecap || lineProps.strokeLinecap
                 }
                 strokeLinejoin={
                   pathProps.strokeLinejoin || lineProps.strokeLinejoin
                 }
-                fill={pathProps.fill || lineProps.fill}
+                fill={
+                  pathProps.stroke ||
+                  lineProps.stroke ||
+                  this.context.color.base
+                }
                 d={`M${arrowOffset[0]},${arrowOffset[1]} L${arrowOffset[0]},${
-                  DEFAULT_ARROW_SIZE * sin(PI / 6) * 2 + arrowOffset[1]
-                } L${DEFAULT_ARROW_SIZE * cos(PI / 6) + arrowOffset[0]},${
-                  DEFAULT_ARROW_SIZE * sin(PI / 6) + arrowOffset[1]
+                  arrowSize * sin(PI / 6) * 2 + arrowOffset[1]
+                } L${arrowSize * cos(PI / 6) + arrowOffset[0]},${
+                  arrowSize * sin(PI / 6) + arrowOffset[1]
                 } Z`}
                 {...arrowProps}
               />
