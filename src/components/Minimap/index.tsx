@@ -141,7 +141,7 @@ const MiniMap = observer(
 
     const mapAbsolutePosition = position?.split("-").reduce((pre, cur) => {
       return {
-        [cur]: 0,
+        [cur]: 12,
         ...pre,
       };
     }, {});
@@ -155,13 +155,15 @@ const MiniMap = observer(
       <>
         {showMiniMap ? (
           <div
-            className="moa-floa-minimap"
+            className="moa-flow-minimap"
             style={{
               scale: mapScale,
               backgroundColor: "white",
               zIndex: "4",
-              border: "1px solid black",
+              border: `1px solid ${context.color.base}`,
               position: "absolute",
+              borderRadius: "2px",
+              boxShadow: "0px 2px 12px rgba(0,0,0,.08)",
               userSelect: "none",
               overflow: "hidden",
               ...mapAbsolutePosition,
@@ -169,7 +171,7 @@ const MiniMap = observer(
               width: elementWidth,
               height: elementHeight,
             }}
-            onWheelCapture={(e) => {
+            onWheel={(e) => {
               let direction = e.deltaY > 0 ? scaleBy : 1 / scaleBy;
               context.setMiniMap({
                 mapScale: mapScale * direction,
@@ -211,7 +213,6 @@ const MiniMap = observer(
               });
               e.stopPropagation();
             }}
-            // onWheelCapture={(e) => e.stopPropagation()}
           >
             <svg
               width={elementWidth}
@@ -247,9 +248,10 @@ const MiniMap = observer(
             <div
               className="moa-flow-minimap-viewbox"
               style={{
-                border: "1px solid red",
+                border: `1px solid ${context.color.primary}`,
                 width: boxWidth,
                 height: boxHeight,
+                borderRadius: "2px",
                 position: "absolute",
                 left: startX,
                 top: startY,

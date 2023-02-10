@@ -290,7 +290,6 @@ class Flow extends React.Component<FlowProps, {}> {
         <div
           style={{
             overflow: "hidden",
-            display: "inline-block",
             position: "relative",
             width: model.width,
             height: model.height,

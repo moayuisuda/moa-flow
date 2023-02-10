@@ -1,4 +1,4 @@
 export const color = {
-  primary: "#1890ff",
+  primary: "hsl(242, 100%, 50%)",
   base: "rgb(162, 177, 195)",
 };
