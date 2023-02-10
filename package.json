@@ -2,12 +2,12 @@
   "name": "moa-flow",
   "version": "1.2.25",
   "type": "module",
-  "main": "./src/index.ts",
+  "main": "./dist/moa-flow.js",
   "typings": "./dist/index.d.ts",
   "module": "./dist/moa-flow.js",
   "scripts": {
     "dev": "vite",
-    "build": "vite build --watch",
+    "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
