@@ -200,31 +200,31 @@ const MiniMap = observer(
       });
     }, [canvasData.cells.length]);
 
-    const scollerRef = useRef(null);
+    // const scollerRef = useRef(null);
 
-    const fn = (e: {
-      deltaY: number;
-      stopPropagation: () => void;
-      preventDefault: () => void;
-    }) => {
-      let direction = e.deltaY > 0 ? scaleBy : 1 / scaleBy;
-      context.setMiniMap({
-        mapScale: mapScale * direction,
-      });
-      e.stopPropagation();
-      e.preventDefault();
-    };
+    // const fn = (e: {
+    //   deltaY: number;
+    //   stopPropagation: () => void;
+    //   preventDefault: () => void;
+    // }) => {
+    //   let direction = e.deltaY > 0 ? scaleBy : 1 / scaleBy;
+    //   context.setMiniMap({
+    //     mapScale: mapScale * direction,
+    //   });
+    //   e.stopPropagation();
+    //   e.preventDefault();
+    // };
 
-    useEffect(() => {
-      scollerRef.current?.addEventListener("wheel", fn, {
-        passive: false,
-      });
-      return () => {
-        scollerRef.current?.removeEventListener("wheel", fn, {
-          passive: false,
-        });
-      };
-    });
+    // useEffect(() => {
+    //   scollerRef.current?.addEventListener("wheel", fn, {
+    //     passive: false,
+    //   });
+    //   return () => {
+    //     scollerRef.current?.removeEventListener("wheel", fn, {
+    //       passive: false,
+    //     });
+    //   };
+    // });
 
     const mapAbsolutePosition = position?.split("-").reduce((pre, cur) => {
       return {
@@ -237,7 +237,7 @@ const MiniMap = observer(
       <>
         {showMiniMap ? (
           <div
-            ref={scollerRef}
+            // ref={scollerRef}
             className="moa-flow-minimap"
             {...rest}
             style={{
