@@ -203,7 +203,7 @@ const MiniMap = observer(
 
     const scollerRef = useRef(null);
 
-    const fn = (e: {
+    const onWheel = (e: {
       deltaY: number;
       stopPropagation: () => void;
       preventDefault: () => void;
@@ -217,13 +217,9 @@ const MiniMap = observer(
     };
 
     useEffect(() => {
-      scollerRef.current?.addEventListener("wheel", fn, {
-        passive: false,
-      });
+      scollerRef.current?.addEventListener("wheel", onWheel);
       return () => {
-        scollerRef.current?.removeEventListener("wheel", fn, {
-          passive: false,
-        });
+        scollerRef.current?.removeEventListener("wheel", onWheel);
       };
     });
 
