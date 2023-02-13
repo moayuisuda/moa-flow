@@ -239,6 +239,7 @@ const MiniMap = observer(
           <div
             ref={scollerRef}
             className="moa-flow-minimap"
+            {...rest}
             style={{
               scale: mapScale,
               backgroundColor: "white",
@@ -254,7 +255,6 @@ const MiniMap = observer(
               width: elementWidth,
               height: elementHeight,
             }}
-            {...rest}
             onWheel={(e) => {
               let direction = e.deltaY > 0 ? scaleBy : 1 / scaleBy;
               context.setMiniMap({
