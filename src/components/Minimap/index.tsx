@@ -28,12 +28,12 @@ const Nodes = observer((props: { nodes: any; nodeColor: any }) => {
 
 const Node = observer(
   (props: {
-    width: any;
-    height: any;
+    width: number;
+    height: number;
     nodeColor: any;
-    x: any;
-    y: any;
-    id: any;
+    x: number;
+    y: number;
+    id: string;
     cellModel: any;
   }) => {
     const { width, height, nodeColor, x, y, id, cellModel } = props;
