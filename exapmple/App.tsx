@@ -90,11 +90,16 @@ const App = () => {
   const flowModelRef = useRef<FlowModel>();
   return (
     <div>
-      <h1>HELLO</h1>
+      <h1
+        onClick={() => {
+          flowModelRef.current!.width = 1600;
+          flowModelRef.current!.height = 800;
+        }}
+      >
+        HELLO
+      </h1>
       <Flow
         scaleBy={1.03}
-        width={1200}
-        height={800}
         flowModelRef={flowModelRef}
         components={{
           BizNode: BizNode,
