@@ -3,6 +3,30 @@ import { observer } from "mobx-react";
 import React, { useContext, useEffect, useRef } from "react";
 import { FlowContext } from "../../Context";
 
+const Nodes = observer((props: { nodes: any; nodeColor: any }) => {
+  const { nodes, nodeColor } = props;
+  return nodes.map((node: { id?: any; x?: any; y?: any }) => {
+    const context = useContext(FlowContext);
+    const width = context.getWrapperRef(node.id).current?.offsetWidth as number;
+    const height = context.getWrapperRef(node.id).current
+      ?.offsetHeight as number;
+    const cellModel = context.getCellModel(node.id);
+    const { x, y, id } = node;
+    return (
+      <Node
+        key={node.id}
+        nodeColor={nodeColor}
+        width={width}
+        height={height}
+        x={x}
+        y={y}
+        id={id}
+        cellModel={cellModel}
+      />
+    );
+  });
+});
+
 const Node = observer(
   (props: {
     width: number;
@@ -10,10 +34,11 @@ const Node = observer(
     nodeColor: any;
     x: number;
     y: number;
-    cellModel: any;
     id: string;
+    cellModel: any;
   }) => {
     const { width, height, nodeColor, x, y, id, cellModel } = props;
+
     return (
       <rect
         key={id}
@@ -31,6 +56,55 @@ const Node = observer(
   }
 );
 
+const ViewBox = observer(
+  (props: {
+    width: any;
+    viewBB: any;
+    elementWidth: any;
+    elementHeight: any;
+    x: any;
+    y: any;
+    height: any;
+  }) => {
+    const context = useContext(FlowContext);
+    const { width, viewBB, elementWidth, elementHeight, x, y, height } = props;
+    const viewBoxShrinkTimesW = width / viewBB.width;
+    const viewBoxShrinkTimesH = height / viewBB.height;
+    const boxWidth = elementWidth / viewBoxShrinkTimesW;
+    const boxHeight = elementHeight / viewBoxShrinkTimesH;
+    const startX = ((viewBB.x - x) / width) * elementWidth;
+    const startY = ((viewBB.y - y) / height) * elementHeight;
+
+    return (
+      <div
+        className="moa-flow-minimap-viewbox"
+        style={{
+          border: `1px solid ${context.color.primary}`,
+          width: boxWidth,
+          height: boxHeight,
+          borderRadius: "2px",
+          position: "absolute",
+          left: startX,
+          top: startY,
+          cursor: "pointer",
+          borderColor: "none",
+        }}
+        onMouseDown={(e) => {
+          context.setMiniMap({
+            dragging: true,
+          });
+          e.stopPropagation();
+        }}
+        onMouseUp={() => {
+          context.setMiniMap({
+            mapDragging: false,
+            dragging: false,
+          });
+        }}
+      />
+    );
+  }
+);
 const MiniMap = observer(
   (
     props: {
@@ -49,6 +123,7 @@ const MiniMap = observer(
       style,
       nodeColor = "#e2e2e2",
       position = "bottom-right",
+      ...rest
     } = props;
     const context = useContext(FlowContext);
 
@@ -95,37 +170,26 @@ const MiniMap = observer(
     const y = _y - (height - viewHeight) / 2 - mapOffestY;
 
     const svg = useRef<SVGSVGElement>(null);
+    const nodes = canvasData.cells.filter((cell) => cell.cellType === "node");
 
     useEffect(() => {
-      const nodes = canvasData?.cells.filter(
-        (item) => item.cellType === "node"
-      );
-
       const boundingRect = [
         ...nodes,
         { x: 0, y: 0, width: viewBB.width, height: viewBB.height },
-      ].reduce(
-        (pre, cur) => {
-          const width =
-            cur.width ||
-            (context.getWrapperRef(cur.id).current?.offsetWidth as number);
-          const height =
-            cur.height ||
-            (context.getWrapperRef(cur.id).current?.offsetHeight as number);
-          return {
-            x1: pre.x1 ? Math.min(pre.x1, cur.x) : cur.x,
-            y1: pre.y1 ? Math.min(pre.y1, cur.y) : cur.y,
-            x2: pre.x2 ? Math.max(pre.x2, cur.x + width) : cur.x,
-            y2: pre.y2 ? Math.max(pre.y2, cur.y + height) : cur.y,
-          };
-        },
-        {
-          x1: undefined,
-          y1: undefined,
-          x2: undefined,
-          y2: undefined,
-        }
-      );
+      ].reduce((pre, cur) => {
+        const width =
+          cur.width ||
+          (context.getWrapperRef(cur.id).current?.offsetWidth as number);
+        const height =
+          cur.height ||
+          (context.getWrapperRef(cur.id).current?.offsetHeight as number);
+        return {
+          x1: pre.x1 ? Math.min(pre.x1, cur.x) : cur.x,
+          y1: pre.y1 ? Math.min(pre.y1, cur.y) : cur.y,
+          x2: pre.x2 ? Math.max(pre.x2, cur.x + width) : cur.x + width,
+          y2: pre.y2 ? Math.max(pre.y2, cur.y + height) : cur.y + height,
+        };
+      }, {});
       context.setMiniMap({
         boundingRect: {
           x: boundingRect.x1,
@@ -137,7 +201,27 @@ const MiniMap = observer(
       });
     }, [canvasData.cells.length]);
 
-    const nodes = canvasData.cells.filter((cell) => cell.cellType === "node");
+    const scollerRef = useRef(null);
+
+    const onWheel = (e: {
+      deltaY: number;
+      stopPropagation: () => void;
+      preventDefault: () => void;
+    }) => {
+      let direction = e.deltaY > 0 ? scaleBy : 1 / scaleBy;
+      context.setMiniMap({
+        mapScale: mapScale * direction,
+      });
+      e.stopPropagation();
+      e.preventDefault();
+    };
+
+    useEffect(() => {
+      scollerRef.current?.addEventListener("wheel", onWheel);
+      return () => {
+        scollerRef.current?.removeEventListener("wheel", onWheel);
+      };
+    });
 
     const mapAbsolutePosition = position?.split("-").reduce((pre, cur) => {
       return {
@@ -145,17 +229,14 @@ const MiniMap = observer(
         ...pre,
       };
     }, {});
-    const viewBoxShrinkTimes = width / viewBB.width;
-    const boxWidth = elementWidth / viewBoxShrinkTimes;
-    const boxHeight = elementHeight / viewBoxShrinkTimes;
-    const startX = ((viewBB.x - x) / width) * elementWidth;
-    const startY = ((viewBB.y - y) / height) * elementHeight;
 
     return (
       <>
         {showMiniMap ? (
           <div
+            ref={scollerRef}
             className="moa-flow-minimap"
+            {...rest}
             style={{
               scale: mapScale,
               backgroundColor: "white",
@@ -213,6 +294,7 @@ const MiniMap = observer(
               });
               e.stopPropagation();
             }}
+            // onWheelCapture={(e) => e.stopPropagation()}
           >
             <svg
               width={elementWidth}
@@ -223,53 +305,16 @@ const MiniMap = observer(
               ref={svg}
               onClick={(e) => e.stopPropagation()}
             >
-              {nodes.map((node) => {
-                const { x, y } = node;
-                const width = context.getWrapperRef(node.id).current
-                  ?.offsetWidth as number;
-                const height = context.getWrapperRef(node.id).current
-                  ?.offsetHeight as number;
-                const cellModel = context.getCellModel(node.id);
-
-                return (
-                  <Node
-                    id={node.id}
-                    cellModel={cellModel}
-                    key={node.id}
-                    width={width}
-                    height={height}
-                    nodeColor={nodeColor}
-                    x={x}
-                    y={y}
-                  />
-                );
-              })}
+              <Nodes nodeColor={nodeColor} nodes={nodes} />
             </svg>
-            <div
-              className="moa-flow-minimap-viewbox"
-              style={{
-                border: `1px solid ${context.color.primary}`,
-                width: boxWidth,
-                height: boxHeight,
-                borderRadius: "2px",
-                position: "absolute",
-                left: startX,
-                top: startY,
-                cursor: "pointer",
-                borderColor: "none",
-              }}
-              onMouseDown={(e) => {
-                context.setMiniMap({
-                  dragging: true,
-                });
-                e.stopPropagation();
-              }}
-              onMouseUp={() => {
-                context.setMiniMap({
-                  mapDragging: false,
-                  dragging: false,
-                });
-              }}
+            <ViewBox
+              width={width}
+              viewBB={viewBB}
+              elementWidth={elementWidth}
+              elementHeight={elementHeight}
+              x={x}
+              y={y}
+              height={height}
             />
           </div>
         ) : (
