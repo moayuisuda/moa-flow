@@ -76,7 +76,7 @@ export class FlowModel {
   }
 
   extra: any = {};
-  private isInitEvents = false;
+  isInitEvents = false;
   multiSelect = false;
   scaleBy = 1.01;
 
@@ -913,7 +913,7 @@ export class FlowModel {
   private undoList: CanvasDataType[] = [];
   private redoList: CanvasDataType[] = [];
 
-  private addStep = debounce(() => {
+  addStep = debounce(() => {
     const cpoiedCanvasData = cloneDeep(this.canvasData);
     this.undoList = [...this.undoList, cpoiedCanvasData];
     this.redoList = [];

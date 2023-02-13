@@ -181,7 +181,6 @@ export const behaviorsMap: EventMaps = {
          */
         let scaleBy = model.scaleBy;
         e.preventDefault();
-        e.stopPropagation();
 
         const oldScale = model.scale;
         const oldPointer = model.getCursorCoord(e) as Vector2d;
