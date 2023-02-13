@@ -213,7 +213,7 @@ export const behaviorsMap: EventMaps = {
         model.setStagePosition(model.x - moveBack.x, model.y - moveBack.y);
       },
       mountTarget: "stage",
-      passive: true,
+      passive: false,
       addStep: true,
     },
   },
@@ -379,7 +379,7 @@ export const mountEvents = (behaviors: BehaviorName[], model: Model) => {
       const { handler, mountTarget, passive, addStep } = eventConfig;
       switch (mountTarget) {
         case "stage": {
-          if (passive && !model.isInitEvents) {
+          if (passive === false && !model.isInitEvents) {
             Promise.resolve().then(() => {
               model.refs.stageRef?.addEventListener(
                 eventName.replace("on", "").toLocaleLowerCase(),
