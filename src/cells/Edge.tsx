@@ -248,11 +248,12 @@ export class EdgeModel<
         markerProps?: React.SVGProps<SVGMarkerElement>;
       } & React.SVGProps<SVGGElement>
     ) => {
+      let { pathProps, arrowProps, markerProps, ...others } = props || {};
       const { d } = this;
       const lineProps = this.defaultLineProps() as any;
-      const pathProps = props?.pathProps || {};
-      const arrowProps = props?.arrowProps || {};
-      const markerProps = props?.markerProps || {};
+      pathProps = props?.pathProps || {};
+      arrowProps = props?.arrowProps || {};
+      markerProps = props?.markerProps || {};
       const arrowSize = arrowProps.size || DEFAULT_ARROW_SIZE;
 
       const { cos, sin, PI } = Math;
@@ -262,16 +263,8 @@ export class EdgeModel<
         (arrowProps.strokeWidth || pathWidth) / 2 || 0,
       ];
 
-      // console.log(
-      //   pathProps.fill ||
-      //     lineProps.fill ||
-      //     pathProps.stroke ||
-      //     lineProps.stroke ||
-      //     this.context.color.base
-      // );
-
       return (
-        <g {...props}>
+        <g {...others}>
           <defs>
             <marker
               id={`arrow-end--${this.data.id}`}

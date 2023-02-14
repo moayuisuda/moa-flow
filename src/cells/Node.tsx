@@ -20,9 +20,7 @@ export class NodeModel<
   declare data: D;
 
   /**@description if the node can drag */
-  drag = () => {
-    return true;
-  };
+  drag: boolean | (() => boolean) = true;
 
   getLinkNodes = () => {
     return this.context.getLinkNodes(this.data.id);

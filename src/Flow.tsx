@@ -14,7 +14,6 @@ import { mountEvents } from "./events";
 import { BehaviorName, CanvasDataType } from "@/typings/common";
 import { Interactor } from "./components/Interacotr";
 import { isNumber, isUndefined } from "lodash";
-import { getMiniMap, MiniMap } from "./components/Minimap";
 
 const PositionWrapper = observer(({ cellData }: { cellData: CellDataType }) => {
   const isNode = cellData.cellType === "node";
@@ -306,9 +305,8 @@ class Flow extends React.Component<FlowProps, {}> {
           )}
           <Nodes />
           <LinesAndInterect />
-          {getMiniMap(this.props.children)}
+          {this.props.children}
         </div>
-        {getContextMenu(this.props.children)}
       </FlowContext.Provider>
     );
   }

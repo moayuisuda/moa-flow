@@ -4,7 +4,6 @@ import {
   merge,
   union,
   without,
-  isUndefined,
   uniq,
 } from "lodash";
 import { action, makeObservable, observable, computed } from "mobx";
@@ -12,7 +11,7 @@ import React from "react";
 import { v4 } from "uuid";
 import { CellDataType, CellModel } from "./cells/Cell";
 import { Edge, EdgeDataType, EdgeModel } from "./cells/Edge";
-import { NodeDataType, NodeModel, NodeData } from "./cells/Node";
+import { NodeDataType, NodeModel } from "./cells/Node";
 import { Port, PortDataType } from "./components";
 import { color } from "./theme/style";
 import { AllCellDataType, CanvasDataType, Vector2d } from "./typings/common";

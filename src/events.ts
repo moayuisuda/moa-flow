@@ -5,6 +5,7 @@ import { NodeDataType, NodeModel } from "./cells/Node";
 import { CellDataType, CellModel } from "./cells/Cell";
 import { EVT_LEFTCLICK, EVT_RIGHTCLICK } from "./constants";
 import { BehaviorName, Vector2d } from "./typings/common";
+import { callIfFn } from "./utils";
 
 type StageEventType = React.WheelEvent | React.MouseEvent;
 interface StageEventFn {
@@ -131,7 +132,9 @@ export const behaviorsMap: EventMaps = {
             const cellModel = model.getCellModel(id) as NodeModel;
             if (
               cellData.cellType === "node" &&
-              !(!cellModel.drag() || cellData.drag === false) &&
+              !(
+                callIfFn(cellModel.drag) === false || cellData.drag === false
+              ) &&
               !model.selectCells.includes(cellData.parent)
             ) {
               model.moveNodesRecursively(cellData.id, movement);
@@ -388,8 +391,7 @@ export const mountEvents = (behaviors: BehaviorName[], model: Model) => {
                 }
               );
             });
-          }
-          if (stageEvents[eventName]) {
+          } else if (stageEvents[eventName]) {
             stageEvents[eventName].push(handler);
           } else stageEvents[eventName] = [handler];
           break;
