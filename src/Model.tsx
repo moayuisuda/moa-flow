@@ -884,7 +884,7 @@ export class FlowModel {
     }
   };
 
-  registComponents = (components: Record<string, React.FC>) => {
+  registComponents = (components: Record<string, React.FC<{ model: any }>>) => {
     for (let key in components) {
       this.regist(key, components[key]);
     }

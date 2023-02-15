@@ -1,4 +1,4 @@
-import React from "react";
+import React, { MutableRefObject } from "react";
 import { LinkingEdge } from "./cells/LinkingEdge";
 import FlowModel from "./Model";
 
@@ -207,7 +207,7 @@ type FlowProps = {
   onEvent?: (e: { type: string; data: any }) => void;
   onLoad?: (model: FlowModel) => void;
   scale?: boolean;
-  flowModelRef?: any;
+  flowModelRef?: MutableRefObject<FlowModel>;
   width?: number;
   height?: number;
   scaleBy?: number;
