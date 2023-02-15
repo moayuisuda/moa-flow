@@ -203,14 +203,10 @@ const MiniMap = observer(
 
     const ref = useRef<HTMLDivElement>(null);
 
-    const onWheel = (e: {
-      deltaY: number;
-      stopPropagation: () => void;
-      preventDefault: () => void;
-    }) => {
+    const onWheel = (e: WheelEvent) => {
       let direction = e.deltaY > 0 ? scaleBy : 1 / scaleBy;
       context.setMiniMap({
-        mapScale: mapScale * direction,
+        mapScale: context.buffer.miniMap.mapScale * direction,
       });
       e.stopPropagation();
       e.preventDefault();
@@ -254,13 +250,6 @@ const MiniMap = observer(
               width: elementWidth,
               height: elementHeight,
             }}
-            onWheel={(e) => {
-              let direction = e.deltaY > 0 ? scaleBy : 1 / scaleBy;
-              context.setMiniMap({
-                mapScale: mapScale * direction,
-              });
-              e.stopPropagation();
-            }}
             onMouseLeave={() => {
               context.setMiniMap({
                 mapDragging: false,
@@ -296,7 +285,6 @@ const MiniMap = observer(
               });
               e.stopPropagation();
             }}
-            // onWheelCapture={(e) => e.stopPropagation()}
           >
             <svg
               width={elementWidth}
