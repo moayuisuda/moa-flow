@@ -217,12 +217,13 @@ const MiniMap = observer(
     };
 
     useEffect(() => {
+      if (!showMiniMap) return;
       const dom = ref.current as HTMLDivElement;
       dom.addEventListener("wheel", onWheel);
       return () => {
         dom.removeEventListener("wheel", onWheel);
       };
-    });
+    }, [showMiniMap]);
 
     const mapAbsolutePosition = position?.split("-").reduce((pre, cur) => {
       return {

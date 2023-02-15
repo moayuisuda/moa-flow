@@ -1,4 +1,5 @@
 import { CellModel, CellDataType } from "./Cell";
+import { PortDataType } from "../components/Port";
 
 export type NodeDataType = {
   x: number;
