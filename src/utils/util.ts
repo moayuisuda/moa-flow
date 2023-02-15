@@ -49,3 +49,12 @@ export const stopPortalEvents = {
     e.stopPropagation();
   },
 };
+
+export const isContainTarget = (el: HTMLElement, ancestorId: string) => {
+  let curr = el;
+
+  while (curr) {
+    if (curr.id === ancestorId) return true;
+    else curr = curr.parentElement as any;
+  }
+};

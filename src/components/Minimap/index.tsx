@@ -201,7 +201,7 @@ const MiniMap = observer(
       });
     }, [canvasData.cells.length]);
 
-    const scollerRef = useRef(null);
+    const ref = useRef<HTMLDivElement>(null);
 
     const onWheel = (e: {
       deltaY: number;
@@ -217,9 +217,10 @@ const MiniMap = observer(
     };
 
     useEffect(() => {
-      scollerRef.current?.addEventListener("wheel", onWheel);
+      const dom = ref.current as HTMLDivElement;
+      dom.addEventListener("wheel", onWheel);
       return () => {
-        scollerRef.current?.removeEventListener("wheel", onWheel);
+        dom.removeEventListener("wheel", onWheel);
       };
     });
 
@@ -234,7 +235,7 @@ const MiniMap = observer(
       <>
         {showMiniMap ? (
           <div
-            ref={scollerRef}
+            ref={ref}
             className="moa-flow-minimap"
             {...rest}
             style={{
@@ -324,11 +325,5 @@ const MiniMap = observer(
     );
   }
 );
-
-export const getMiniMap = (children: React.ReactNode[] | React.ReactNode) => {
-  return React.Children.toArray(children).find((item: { type }) => {
-    return item.type === MiniMap;
-  });
-};
 
 export { MiniMap };

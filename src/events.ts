@@ -6,20 +6,8 @@ import { CellDataType, CellModel } from "./cells/Cell";
 import { EVT_LEFTCLICK, EVT_RIGHTCLICK } from "./constants";
 import { BehaviorName, Vector2d } from "./typings/common";
 import { callIfFn } from "./utils";
-
-type StageEventType = React.WheelEvent | React.MouseEvent;
-interface StageEventFn {
-  (e: StageEventType, model: Model): any;
-}
-
-interface WindowEventFn {
-  (e: KeyboardEvent, model: Model): any;
-}
-
-//一开始挂载在window上的fn
-interface InitFn {
-  (model: Model): any;
-}
+import { isContainTarget } from "./utils/util";
+import { CONTEXT_MENU_ID } from "./components/ContextMenu/index";
 
 type MountTarget = "stage" | "window";
 
@@ -44,10 +32,16 @@ export const behaviorsMap: EventMaps = {
   clearState: {
     onMouseDown: {
       handler: (e, model) => {
-        if (!model.isSelecting(e) && e.button === EVT_LEFTCLICK)
+        // prevent to clearState and make contextMenu invisible when mousedown on contextMenu.
+        const isOnContextMenu = isContainTarget(e.target, CONTEXT_MENU_ID);
+        if (
+          !model.isSelecting(e) &&
+          e.button === EVT_LEFTCLICK &&
+          !isOnContextMenu
+        )
           model.clearSelect();
 
-        if (e.button === EVT_LEFTCLICK) {
+        if (e.button === EVT_LEFTCLICK && !isOnContextMenu) {
           model.contextMenuVisible = false;
         }
       },

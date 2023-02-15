@@ -1,11 +1,4 @@
-import {
-  cloneDeep,
-  debounce,
-  merge,
-  union,
-  without,
-  uniq,
-} from "lodash";
+import { cloneDeep, debounce, merge, union, without, uniq } from "lodash";
 import { action, makeObservable, observable, computed } from "mobx";
 import React from "react";
 import { v4 } from "uuid";
@@ -20,7 +13,7 @@ import { getRelativeBoundingBox } from "./utils/coords";
 
 type EventSender = (data: any) => void;
 export class FlowModel {
-  private eventMap = new Map<string, Map<string, Function>>();
+  eventMap = new Map<string, Map<string, Function>>();
 
   constructor(eventSender?: EventSender) {
     makeObservable(this);
@@ -79,15 +72,15 @@ export class FlowModel {
   multiSelect = false;
   scaleBy = 1.01;
 
-  private pendingRender: boolean = true;
-  @action
-  private trigRender = () => {
-    this.pendingRender = false;
-  };
-  @action
-  private pendRender = () => {
-    this.pendingRender = true;
-  };
+  // private pendingRender: boolean = true;
+  // @action
+  // private trigRender = () => {
+  //   this.pendingRender = false;
+  // };
+  // @action
+  // private pendRender = () => {
+  //   this.pendingRender = true;
+  // };
 
   @observable private _width: number = 800;
   @computed

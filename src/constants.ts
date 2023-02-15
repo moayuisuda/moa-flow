@@ -1,4 +1,4 @@
-import { StageEventName, WindowEventName } from "typings/common";
+import { StageEventName, WindowEventName } from "./typings/common";
 
 export const STAGE_ID = "flow-stage";
 export const CONTEXT_MENU_ID = "context-menu";

@@ -5,7 +5,7 @@ import FlowModel from "./Model";
 import { observer } from "mobx-react";
 import { FlowContext } from "./Context";
 
-import { getContextMenu, SelectBoundsRect } from "./components";
+import { SelectBoundsRect } from "./components";
 
 import { useContext } from "react";
 import { CellDataType, CellModel } from "./cells/Cell";
@@ -244,24 +244,6 @@ class Flow extends React.Component<FlowProps, {}> {
     this.props.onLoad && this.props.onLoad(this.flowModel);
     props.flowModelRef && (props.flowModelRef.current = this.flowModel);
   }
-
-  componentDidMount() {
-    if (getContextMenu(this.props.children)) this.initStageEvent();
-  }
-
-  initStageEvent = () => {
-    document
-      .querySelector("#" + STAGE_ID)
-      ?.addEventListener("contextmenu", (e) => {
-        e.preventDefault();
-        this.flowModel.contextMenuVisible = true;
-
-        this.flowModel.setContextMenuPos({
-          x: e.clientX + 5,
-          y: e.clientY + 5,
-        });
-      });
-  };
 
   generateEvents() {
     // 将scale和undoredo放在extraEvent里

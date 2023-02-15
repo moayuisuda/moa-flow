@@ -6,7 +6,7 @@ export const getElement = (
 ) => {
   const childrenArray = React.Children.toArray(children);
 
-  return childrenArray.find((item: { type }) => {
+  return childrenArray.find((item: any) => {
     return item.type === type;
   });
 };

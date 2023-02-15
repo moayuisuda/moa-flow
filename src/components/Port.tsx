@@ -94,7 +94,9 @@ export class Port<
     } else if (this.props.link || sourceInstance.props.link) {
       let adoptSource = true;
       let adoptTarget = true;
-      const sourceData = context.getCellData(link.source as string);
+      const sourceData = context.getCellData(
+        link.source as string
+      ) as PortDataType;
 
       if (sourceInstance.props.link) {
         if (sourceInstance.props.link(sourceData, this.props.data))

@@ -3,6 +3,8 @@ import styles from "./style.module.less";
 import React, { createRef } from "react";
 import { FlowContext } from "../../Context";
 import { STAGE_ID } from "../../constants";
+
+export const CONTEXT_MENU_ID = "moa-context-menu";
 @observer
 class ContextMenu extends React.Component<{ children?: React.ReactNode }> {
   static contextType = FlowContext;
@@ -52,7 +54,19 @@ class ContextMenu extends React.Component<{ children?: React.ReactNode }> {
   }
 
   componentDidMount() {
+    const context = this.context;
     if (this.wrapperRef.current) this.setTransform();
+    document
+      .querySelector("#" + STAGE_ID)
+      ?.addEventListener("contextmenu", (e: Event) => {
+        e.preventDefault();
+        context.contextMenuVisible = true;
+
+        context.setContextMenuPos({
+          x: (e as any).clientX + 5,
+          y: (e as any).clientY + 5,
+        });
+      });
   }
 
   componentDidUpdate() {
@@ -64,7 +78,7 @@ class ContextMenu extends React.Component<{ children?: React.ReactNode }> {
     const { x, y } = this.context.buffer.contextMenu;
     return (
       <div
-        id=""
+        id={CONTEXT_MENU_ID}
         style={{
           left: x,
           top: y,
@@ -78,13 +92,5 @@ class ContextMenu extends React.Component<{ children?: React.ReactNode }> {
     );
   }
 }
-
-export const getContextMenu = (
-  children: React.ReactNode[] | React.ReactNode
-) => {
-  return React.Children.toArray(children).find((item: { type }) => {
-    return item.type === ContextMenu;
-  });
-};
 
 export { ContextMenu };
