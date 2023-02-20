@@ -3,10 +3,11 @@ import React from "react";
 import { FlowContext } from "../Context";
 import { isUndefined } from "lodash";
 import { CellModel } from "./Cell";
+import { callIfFn } from "../utils/util";
 @observer
 export class LinkingEdge extends React.Component<{ data: any }> {
   static contextType = FlowContext;
-  declare context: React.ContextType<typeof FlowContext>
+  declare context: React.ContextType<typeof FlowContext>;
 
   constructor(props: any) {
     super(props);
@@ -17,14 +18,17 @@ export class LinkingEdge extends React.Component<{ data: any }> {
 
     if (isUndefined(data.source)) return <></>;
 
+    const linkEdge = callIfFn(this.context.linkEdge, [this.context.buffer.link.source, this.context.buffer.link.target]);
     const RegistedEdge = this.context.componentsMap.get(
-      this.context.linkEdge
+      linkEdge
     ) as React.FC<any>;
     const Model = this.context.modelFactoriesMap.get(
-      this.context.linkEdge
+      linkEdge
     ) as typeof CellModel;
 
-    const defaultData = this.context.createCellData(this.context.linkEdge, { id: 'LINKING_EDGE' });
+    const defaultData = this.context.createCellData(linkEdge, {
+      id: "LINKING_EDGE",
+    });
 
     return (
       <g

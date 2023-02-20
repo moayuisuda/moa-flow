@@ -168,7 +168,7 @@ export const behaviorsMap: EventMaps = {
       addStep: true,
     },
   },
-  scale: {
+  zoom: {
     onWheel: {
       handler: (e: React.WheelEvent, model) => {
         /**

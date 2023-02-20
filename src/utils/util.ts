@@ -33,8 +33,8 @@ export const isVector2d = (source: any) => {
   return typeof source !== "string";
 };
 
-export const callIfFn = (exp: any) => {
-  if (isFunction(exp)) return exp();
+export const callIfFn = (exp: any, args: any[] = []) => {
+  if (isFunction(exp)) return exp(...args);
   else return exp;
 };
 

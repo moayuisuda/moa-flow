@@ -46,7 +46,7 @@ export type BehaviorName =
   | "link"
   | "select"
   | "drag"
-  | "scale"
+  | "zoom"
   | "multiSelect"
   | "hotkeys"
   | "undoRedo";

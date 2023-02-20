@@ -8,8 +8,15 @@ import { NodeDataType, NodeModel } from "./cells/Node";
 import { Port, PortDataType } from "./components";
 import { color } from "./theme/style";
 import { AllCellDataType, CanvasDataType, Vector2d } from "./typings/common";
-import { arrayMove, findIndex, isRectsInterSect, remove } from "./utils/util";
+import {
+  arrayMove,
+  findIndex,
+  isRectsInterSect,
+  remove,
+  callIfFn,
+} from "./utils/util";
 import { getRelativeBoundingBox } from "./utils/coords";
+import { FlowProps } from "./Flow";
 
 type EventSender = (data: any) => void;
 export class FlowModel {
@@ -121,12 +128,12 @@ export class FlowModel {
     this._grid = grid;
   }
 
-  private _linkEdge = "Edge";
+  private _linkEdge: FlowProps["linkEdge"] = "Edge";
   @computed
   get linkEdge() {
     return this._linkEdge;
   }
-  set linkEdge(linkEdge: string) {
+  set linkEdge(linkEdge: FlowProps["linkEdge"]) {
     this._linkEdge = linkEdge;
   }
 
@@ -258,10 +265,6 @@ export class FlowModel {
       },
     },
     link: {
-      // 只是为了统一渲染，加$state
-      $state: {
-        isSelect: false,
-      },
       edge: undefined as undefined | string,
       source: undefined as undefined | string,
       target: {
@@ -762,7 +765,11 @@ export class FlowModel {
 
   /**@description link 2 port */
   @action link = (source: string, target: string) => {
-    const edgeId = this.addCell(this.linkEdge, {
+    const linkEdge = callIfFn(this.linkEdge, [
+      this.getCellData(source),
+      this.getCellData(target),
+    ]);
+    const edgeId = this.addCell(linkEdge, {
       source,
       target,
     });

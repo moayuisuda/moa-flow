@@ -14,6 +14,7 @@ import { mountEvents } from "./events";
 import { BehaviorName, CanvasDataType } from "@/typings/common";
 import { Interactor } from "./components/Interacotr";
 import { isNumber, isUndefined } from "lodash";
+import { PortDataType } from "./components/Port";
 
 const PositionWrapper = observer(({ cellData }: { cellData: CellDataType }) => {
   const isNode = cellData.cellType === "node";
@@ -200,20 +201,20 @@ const LinesAndInterect = observer(() => {
   );
 });
 
-type FlowProps = {
+export type FlowProps = {
   canvasData?: Partial<CanvasDataType>;
   components?: Record<string, React.FC<{ model: any }>>;
   models?: Record<string, typeof CellModel>;
   onEvent?: (e: { type: string; data: any }) => void;
   onLoad?: (model: FlowModel) => void;
-  scale?: boolean;
+  zoom?: boolean;
   flowModelRef?: MutableRefObject<FlowModel>;
   width?: number;
   height?: number;
   scaleBy?: number;
   grid?: number;
   multiSelect?: boolean;
-  linkEdge?: string;
+  linkEdge?: string | ((source: PortDataType, target: PortDataType) => string);
   children?: React.ReactNode;
   undoRedo?: boolean;
 };
@@ -247,7 +248,7 @@ class Flow extends React.Component<FlowProps, {}> {
 
   generateEvents() {
     // 将scale和undoredo放在extraEvent里
-    const extraEvents: BehaviorName[] = ["scale", "multiSelect", "undoRedo"];
+    const extraEvents: BehaviorName[] = ["zoom", "multiSelect", "undoRedo"];
     const defaultEvents: BehaviorName[] = [
       "clearState",
       "link",
@@ -296,7 +297,7 @@ class Flow extends React.Component<FlowProps, {}> {
 
 Flow.defaultProps = {
   undoRedo: true,
-  scale: true,
+  zoom: true,
   mutiSelect: false,
 };
 
