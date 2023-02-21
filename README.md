@@ -2,6 +2,7 @@
 
 <strong>Flexible, Natural graph editing framework for React</strong>
 
+![](/public/logo.png)
 docs in https://moa-flow-doc.vercel.app/
 
 # development
