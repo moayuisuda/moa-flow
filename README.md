@@ -1,11 +1,17 @@
 # 🚀 Flow your react!
 
+<p style="text-align: center">
+<img src="/public/logo.png" width="128" height="128">
+<br />
 <strong>Flexible, Natural graph editing framework for React</strong>
+</p>
 
-![](/public/logo.png)
-docs in https://moa-flow-doc.vercel.app/
+<hr>
 
-# development
+## docs
+https://moa-flow-doc.vercel.app/
+
+## development
 
 ```
 yarn
