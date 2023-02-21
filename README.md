@@ -1,5 +1,3 @@
-# 🚀 Flow your react!
-
 <p align="center">
 <img src="/public/logo.png" width="128" height="128">
 </p>
