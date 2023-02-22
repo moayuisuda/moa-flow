@@ -1,6 +1,7 @@
 {
   "name": "moa-flow",
-  "version": "1.2.41",
+  "version": "1.2.42",
+  "license": "MIT",
   "type": "module",
   "main": "./dist/moa-flow.js",
   "typings": "./dist/index.d.ts",
@@ -9,7 +10,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "cross-env NODE_ENV=test mocha --require babel-register 'test/**/*.test.{mjs,js,ts,tsx}'"
+    "test": "mocha"
   },
   "dependencies": {
     "lodash": "^4.17.21",
@@ -19,7 +20,7 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.20.2",
+    "@testing-library/react": "^14.0.0",
     "@types/chai": "^4.3.4",
     "@types/lodash": "^4.14.191",
     "@types/mocha": "^10.0.1",
@@ -28,16 +29,15 @@
     "@types/uuid": "^9.0.0",
     "@vitejs/plugin-react": "^3.0.0",
     "antd": "^5.1.5",
-    "babel-core": "^6.26.3",
-    "babel-loader": "^9.1.2",
-    "babel-preset-react": "^6.24.1",
-    "babel-register": "^6.26.0",
     "chai": "^4.3.7",
     "cross-env": "^7.0.3",
+    "global-jsdom": "^8.7.0",
+    "ignore-styles": "^5.0.1",
     "less": "^4.1.3",
     "mocha": "^10.2.0",
     "mocha-jsdom": "^2.0.0",
     "react-dom": "^17.0.2",
+    "ts-node": "^10.9.1",
     "typescript": "^4.9.3",
     "vite": "^4.0.0",
     "vite-plugin-dts": "^1.7.1"
