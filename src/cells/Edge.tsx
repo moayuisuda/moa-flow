@@ -7,11 +7,13 @@ import { CellModel, CellDataType } from "./Cell";
 import { FlowModel } from "@/Model";
 import { observer } from "mobx-react";
 import { computed } from "mobx";
+import { generateConnectionPoints } from "../utils/line-routes/orth";
 
 const TEXT_HEIGHT = 16;
 const LABEL_PADDING = 4;
+const LINE_EXTRA = 40;
 
-const dirMap = {
+const DIR_MAP = {
   left: [-1, 0],
   right: [1, 0],
   top: [0, -1],
@@ -22,28 +24,32 @@ export type EdgeDataType = {
   source: string | Vector2d;
   target: string | Vector2d;
   label: string;
-  verticies: Vector2d[];
+  vertices: Vector2d[];
 } & CellDataType;
 
 // util type
 export type EdgeData<D> = D & EdgeDataType;
 
-type Head = React.ReactNode | boolean;
+export enum LineType {
+  ORTH = "orth",
+  BEZIER = "bezier",
+  POLYLINE = "polyline",
+}
 export class EdgeModel<
   D extends EdgeDataType = EdgeDataType
 > extends CellModel {
   defaultData = (): any => ({
-    component: "Edge", // 这里一般会被重置为FLowEdge这种业务类的线条
+    component: "Edge", // 这里一般会被重置为FlowEdge这种业务类的线条
     source: "",
     target: "",
     label: "",
-    verticies: [],
+    vertices: [],
     cellType: "edge",
   });
 
   declare data: D;
 
-  protected bazier: boolean | (() => boolean) = true;
+  protected lineType: LineType | (() => LineType) = LineType.BEZIER;
 
   private pathInstance = document.createElementNS(
     "http://www.w3.org/2000/svg",
@@ -89,9 +95,16 @@ export class EdgeModel<
 
   private getVectors = () => {
     const anchors = this.getAnchors();
-    const verticies = this.data.verticies || [];
+    const vertices = this.data.vertices || [];
 
-    return [anchors.source, ...verticies, anchors.target];
+    return [anchors.source, ...vertices, anchors.target];
+  };
+
+  getLinkPortsInstance = () => {
+    return {
+      source: this.context.getPortInstance(this.data.source as string),
+      target: this.context.getPortInstance(this.data.target as string),
+    };
   };
 
   getLinkPortsData = () => {
@@ -142,6 +155,30 @@ export class EdgeModel<
   };
 
   route({ vectors }: { vectors: Vector2d[] }) {
+    if (this.lineType === LineType.ORTH) {
+      const { source, target } = this.getLinkPortsInstance();
+      const { source: sourceAnchor, target: targetAnchor } = this.getAnchors();
+      // if target port does not exist(when linking), fallback to this dir
+      let fallbackDir = sourceAnchor.x > targetAnchor.x ? [1, 0] : [-1, 0];
+      return generateConnectionPoints(
+        {
+          sourcePoint: [sourceAnchor.x, sourceAnchor.y],
+          sourceDir: DIR_MAP[source.props.dir as keyof typeof DIR_MAP],
+          sourceExt: LINE_EXTRA,
+
+          targetPoint: [targetAnchor.x, targetAnchor.y],
+          targetDir: target
+            ? DIR_MAP[target.props.dir as keyof typeof DIR_MAP]
+            : fallbackDir,
+          targetExt: LINE_EXTRA,
+        },
+        0.5
+      ).map(({ position }) => ({
+        x: position[0],
+        y: position[1],
+      }));
+    }
+
     return vectors;
   }
 
@@ -171,7 +208,7 @@ export class EdgeModel<
     return 60;
   };
 
-  private getBazierDir = () => {
+  private getBezierDir = () => {
     const {
       props: { dir: sourceDir },
     } = this.context.getPortInstance(this.data.source as string);
@@ -187,23 +224,23 @@ export class EdgeModel<
     const LENGTH = this.controlPointOffset();
     return {
       source: [
-        LENGTH * (sourceDir ? dirMap[sourceDir as PortDir][0] : 0),
-        LENGTH * (sourceDir ? dirMap[sourceDir as PortDir][1] : 0),
+        LENGTH * (sourceDir ? DIR_MAP[sourceDir as PortDir][0] : 0),
+        LENGTH * (sourceDir ? DIR_MAP[sourceDir as PortDir][1] : 0),
       ],
       target: isVector2d(this.data.target)
         ? [0, 0]
         : [
             LENGTH *
-              (getTargetDir() ? dirMap[getTargetDir() as PortDir][0] : 0),
+              (getTargetDir() ? DIR_MAP[getTargetDir() as PortDir][0] : 0),
             LENGTH *
-              (getTargetDir() ? dirMap[getTargetDir() as PortDir][1] : 0),
+              (getTargetDir() ? DIR_MAP[getTargetDir() as PortDir][1] : 0),
           ],
     } as { source: Dir; target: Dir };
   };
 
-  private getBazierPath = () => {
+  private getBezierPath = () => {
     const { source, target } = this.getAnchors();
-    const dir = this.getBazierDir();
+    const dir = this.getBezierDir();
 
     return `M${source.x},${source.y} 
     C${source.x + dir.source[0]},${source.y + dir.source[1]} ${
@@ -225,8 +262,8 @@ export class EdgeModel<
 
   @computed
   get d() {
-    return callIfFn(this.bazier)
-      ? this.getBazierPath()
+    return callIfFn(this.lineType) === "bezier"
+      ? this.getBezierPath()
       : this.getPolylinePath();
   }
 

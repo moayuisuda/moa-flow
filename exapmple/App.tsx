@@ -11,7 +11,7 @@ import {
 } from "moa-flow";
 import React from "react";
 import { useRef } from "react";
-import { BizEdge } from "./BizEdge";
+import { BizEdge, BizEdgeModel } from "./BizEdge";
 import canvasdata from "./test.json";
 export const statusEnum = {
   warn: "yellow",
@@ -102,11 +102,11 @@ const App = () => {
         scaleBy={1.03}
         flowModelRef={flowModelRef}
         components={{
-          BizNode: BizNode,
+          BizNode,
           BizEdge,
         }}
         models={{
-          BizEdge: EdgeModel,
+          BizEdge: BizEdgeModel,
           BizNode: BizNodeModel,
         }}
         linkEdge="BizEdge"

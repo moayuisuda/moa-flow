@@ -17,6 +17,7 @@ export default defineConfig({
       name: "moa-flow",
       // the proper extensions will be added
       fileName: "moa-flow",
+      // The 'module'of tsconfig is the module management method used by the project(es or amd), the 'target' is the target code stage(es5 is var), and the 'format' is the packaged format(es, amd, umd)
       formats: ["es"],
     },
     rollupOptions: {

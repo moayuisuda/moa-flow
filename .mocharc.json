@@ -1,0 +1,5 @@
+{
+  "spec": ["test/**/*.test.tsx"],
+  "loader": "ts-node/esm",
+  "require": ["mocha.cjs"]
+}

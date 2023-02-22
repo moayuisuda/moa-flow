@@ -1,7 +1,6 @@
 import React from "react";
 
 import { CellDataType } from "../cells/Cell";
-import { isFunction } from "lodash";
 import { FlowContext } from "../Context";
 import { FlowModel } from "../Model";
 import { observer } from "mobx-react";

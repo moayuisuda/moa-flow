@@ -43,7 +43,7 @@ export class FlowModel {
 
   private setCellDataMap(cellData: AllCellDataType) {
     // the portData will not change its data. And remember node will traverse to change ports data first.
-    Object.assign(cellData, this.getFullNodeData(cellData.component, cellData));
+    Object.assign(cellData, this.getFullCellData(cellData.component, cellData));
 
     this.cellsDataMap.set(cellData.id, cellData);
 
@@ -364,7 +364,6 @@ export class FlowModel {
   // 注册节点到model，方便动态引用
   componentsMap = new Map<string, React.FC<{ model: any }> | typeof Port>([
     ["Edge", Edge],
-    ["Port", Port],
   ]);
   // component和model的映射
   modelFactoriesMap = new Map<string, typeof CellModel>([["Edge", EdgeModel]]);
@@ -713,17 +712,20 @@ export class FlowModel {
     });
   };
 
-  getFullNodeData = (componentName: string, initOptions?: any) => {
+  getFullCellData = (componentName: string, initOptions?: any) => {
     const newCellData = this.createCellData(componentName, initOptions);
     if (newCellData.ports) {
       newCellData.ports.forEach((port: PortDataType) => {
-        Object.assign(port, {
-          host: newCellData.id,
-          cellType: "port",
-          id: port.id || v4(),
-          source: undefined,
-          target: undefined,
-        });
+        Object.assign(
+          {
+            host: newCellData.id,
+            cellType: "port",
+            id: port.id || v4(),
+            source: undefined,
+            target: undefined,
+          },
+          port
+        );
       });
     }
 
@@ -731,7 +733,7 @@ export class FlowModel {
   };
 
   @action addCell = (componentName: string, initOptions?: any) => {
-    const data = this.getFullNodeData(componentName, initOptions);
+    const data = this.getFullCellData(componentName, initOptions);
     this.canvasData.cells.push(data);
     this.setCellDataMap(
       this.canvasData.cells[this.canvasData.cells.length - 1]
@@ -943,5 +945,3 @@ export class FlowModel {
     }
   };
 }
-
-export default FlowModel;

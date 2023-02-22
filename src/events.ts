@@ -1,4 +1,4 @@
-import Model, { FlowModel } from "./Model";
+import { FlowModel } from "./Model";
 import { autorun } from "mobx";
 import { without } from "lodash";
 import { NodeDataType, NodeModel } from "./cells/Node";
@@ -353,7 +353,7 @@ export const behaviorsMap: EventMaps = {
   },
 };
 
-export const mountEvents = (behaviors: BehaviorName[], model: Model) => {
+export const mountEvents = (behaviors: BehaviorName[], model: FlowModel) => {
   const stageEvents: Record<string, Function[]> = {
     onMouseDown: [],
     onMouseUp: [],

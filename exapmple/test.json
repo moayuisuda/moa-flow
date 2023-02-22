@@ -87,7 +87,7 @@
       "id": "33f5254c-e4a4-4343-b72d-573fe3fc00e7"
     },
     {
-      "component": "Edge",
+      "component": "BizEdge",
       "source": "95c84334-8b0d-4ec1-9448-cf0c60626bc5",
       "target": "5a41a655-3983-4705-94f7-1a9567d53d2c",
       "label": "",
@@ -300,7 +300,7 @@
       "id": "cb720a4d-6f67-41df-8fe8-2fa1c47d9575"
     },
     {
-      "component": "Edge",
+      "component": "BizEdge",
       "source": "924f30b4-7864-4354-8f93-a0b0cc15d1a5",
       "target": "c16aa125-9b01-409e-8456-3d38296d77c2",
       "label": "",
@@ -313,7 +313,7 @@
       "id": "62925804-f392-4cff-bba8-4e9188d05675"
     },
     {
-      "component": "Edge",
+      "component": "BizEdge",
       "source": "59c82d24-cfcc-42ef-a5f8-9742d650ab97",
       "target": "4af703d6-0070-4fd5-9ef8-fe7a69f30f9f",
       "label": "",
@@ -326,7 +326,7 @@
       "id": "11e818f4-cc2f-4d73-97e1-1a2f3970c80c"
     },
     {
-      "component": "Edge",
+      "component": "BizEdge",
       "source": "dcecc38e-14d7-4753-9b4c-cfe8a017096c",
       "target": "6348488f-8989-4a45-a2f4-694887bd60fe",
       "label": "",
@@ -339,7 +339,7 @@
       "id": "c2156ad1-00f5-4e9a-b46a-18cb12c07e80"
     },
     {
-      "component": "Edge",
+      "component": "BizEdge",
       "source": "3faee3fc-6855-4a79-b5b6-d52c47b7cafb",
       "target": "e9302156-78df-40bd-a2cb-6b289892df8a",
       "label": "",
@@ -352,7 +352,7 @@
       "id": "2dc56384-2ff8-4e42-ad9f-7236b7de951d"
     },
     {
-      "component": "Edge",
+      "component": "BizEdge",
       "source": "95c84334-8b0d-4ec1-9448-cf0c60626bc5",
       "target": "19ceab14-969c-4e12-8beb-48a25f352492",
       "label": "",
@@ -888,7 +888,7 @@
       "id": "b8a52987-f97e-4a03-ade7-dd1c732e288e"
     },
     {
-      "component": "Edge",
+      "component": "BizEdge",
       "source": "9ca6df5a-49b1-4bf3-b732-9ea44d2dcf13",
       "target": "00eac4f2-c61c-4069-bccb-e2b8c8c94436",
       "label": "",
@@ -901,7 +901,7 @@
       "id": "1b53726a-c6b9-4223-8304-06b2296416c7"
     },
     {
-      "component": "Edge",
+      "component": "BizEdge",
       "source": "d23e9190-ad38-4aea-a095-e38b62630042",
       "target": "f0affa05-83a3-4f1a-8c5a-8fc9be29ac9b",
       "label": "",
@@ -914,7 +914,7 @@
       "id": "2785f746-704f-4962-85e4-95da37685508"
     },
     {
-      "component": "Edge",
+      "component": "BizEdge",
       "source": "f0affa05-83a3-4f1a-8c5a-8fc9be29ac9b",
       "target": "14312ec2-8a98-48db-b165-f4d5a6004a4d",
       "label": "",
@@ -927,7 +927,7 @@
       "id": "998bfbdb-bd33-482e-bc0e-d9e8f846da2b"
     },
     {
-      "component": "Edge",
+      "component": "BizEdge",
       "source": "fca61ce5-de5f-452f-964d-b611c4e50465",
       "target": "6673b458-8200-47e6-b1d8-8eed1cda7fc1",
       "label": "",
@@ -940,7 +940,7 @@
       "id": "570e2159-6550-4b3d-b6ea-34e48aecabfe"
     },
     {
-      "component": "Edge",
+      "component": "BizEdge",
       "source": "73e8b37f-1c87-4422-923c-ec0aa7e37d69",
       "target": "095c5473-eb0f-4524-8443-12b4b05ffbc0",
       "label": "",
@@ -953,7 +953,7 @@
       "id": "dff8704b-1387-4ed1-8c07-02da1f780b9b"
     },
     {
-      "component": "Edge",
+      "component": "BizEdge",
       "source": "3382b5f3-5d67-47c6-950c-d0f559776ecc",
       "target": "706a4999-57d3-4783-91ac-892348c6e0b7",
       "label": "",
@@ -966,7 +966,7 @@
       "id": "74223840-3794-4338-be8b-17c74fd17ffd"
     },
     {
-      "component": "Edge",
+      "component": "BizEdge",
       "source": "c9569d55-c801-4d09-88e6-849ffcf64522",
       "target": "7da85670-12f4-441a-9269-86c011f0fdc9",
       "label": "",
@@ -979,7 +979,7 @@
       "id": "4b9362b8-045e-4009-ae73-8fdfd39c2788"
     },
     {
-      "component": "Edge",
+      "component": "BizEdge",
       "source": "96a54af8-d532-4a07-8182-b49a6eeaef7d",
       "target": "e9d7f3cb-7ab9-45c6-b1ae-bac70d7a6f2c",
       "label": "",
@@ -992,7 +992,7 @@
       "id": "4744b47c-4285-48a2-92d8-76f6d5e6462e"
     },
     {
-      "component": "Edge",
+      "component": "BizEdge",
       "source": "688b2b00-cc22-47de-8ed1-91e676b502ac",
       "target": "3d3f0156-5fd3-48f0-9ac3-a9199ba7202f",
       "label": "",
@@ -1005,7 +1005,7 @@
       "id": "19cf5f68-8823-4d3b-ae29-00283a03dde9"
     },
     {
-      "component": "Edge",
+      "component": "BizEdge",
       "source": "c67b10a3-9cd6-4270-a6bc-73754dc93699",
       "target": "ac809eff-a9a7-4c8d-8e05-9c00c9312d48",
       "label": "",
@@ -1018,7 +1018,7 @@
       "id": "a0c5c9c9-9442-4b3d-869f-19721367abce"
     },
     {
-      "component": "Edge",
+      "component": "BizEdge",
       "source": "b803dd71-b76d-40de-b5cc-c95f8341a28b",
       "target": "ab9e3593-ba33-4abd-9a87-ba3dcb0c4782",
       "label": "",
@@ -2034,7 +2034,7 @@
       "id": "e6892b45-2ade-4086-abfa-b390d39f96ff"
     },
     {
-      "component": "Edge",
+      "component": "BizEdge",
       "source": "67d8163c-61ad-4989-b2cb-690bd93d0c7c",
       "target": "8a47d5a7-9cc7-4e1d-95a1-76d1e91c7799",
       "label": "",
@@ -2047,7 +2047,7 @@
       "id": "47cc5dbe-c064-4f12-bcb3-c1e42420bab3"
     },
     {
-      "component": "Edge",
+      "component": "BizEdge",
       "source": "3d503ec5-c621-4274-ad73-da88d54c58bc",
       "target": "c8d7e74c-5c28-4b27-9950-d26fa7b9d9e2",
       "label": "",
@@ -2060,7 +2060,7 @@
       "id": "939af246-96c8-4e28-beba-5e967e09c7cf"
     },
     {
-      "component": "Edge",
+      "component": "BizEdge",
       "source": "471d3fa8-aa0b-4453-a22d-cfe8f1bc91f2",
       "target": "3f036645-3318-44e3-a1a6-065afcc0603b",
       "label": "",
@@ -2073,7 +2073,7 @@
       "id": "12210a57-a860-4295-9444-e961160aae60"
     },
     {
-      "component": "Edge",
+      "component": "BizEdge",
       "source": "0d2b486f-bf79-421d-a93d-3593628dc15d",
       "target": "fce08179-5c8e-4359-b5f3-56994694b47e",
       "label": "",
@@ -2086,7 +2086,7 @@
       "id": "d583998c-8d9f-46d4-8562-5897d7798f86"
     },
     {
-      "component": "Edge",
+      "component": "BizEdge",
       "source": "7bd98b98-353b-4db3-a220-c4b29663bae8",
       "target": "03cb6c28-3568-45ec-940b-d94c0de5e3b0",
       "label": "",
@@ -2099,7 +2099,7 @@
       "id": "79581984-5b8a-4e8c-a382-79d8d75be99b"
     },
     {
-      "component": "Edge",
+      "component": "BizEdge",
       "source": "9fca32eb-c8a6-4169-9b4f-45e437cb1f71",
       "target": "88f872e4-8a03-41e4-8f00-c87aef2f19ed",
       "label": "",
@@ -2112,7 +2112,7 @@
       "id": "9fe4a2ff-b852-4cc8-995a-13bc82900cbf"
     },
     {
-      "component": "Edge",
+      "component": "BizEdge",
       "source": "75b26be9-47f1-4159-a176-57fc593edf7c",
       "target": "c971a5fd-ebc3-4978-aabe-2548f5088f91",
       "label": "",
@@ -2125,7 +2125,7 @@
       "id": "592c9ecf-2a00-4f6b-93c9-4fb0432f1737"
     },
     {
-      "component": "Edge",
+      "component": "BizEdge",
       "source": "1c5e31d3-28e5-4818-908a-c8e935303b86",
       "target": "10c738d2-ad4d-420d-918a-6c857cb6c45e",
       "label": "",
@@ -2138,7 +2138,7 @@
       "id": "91b578d2-4e5d-4ed7-ad55-bed9d90d6973"
     },
     {
-      "component": "Edge",
+      "component": "BizEdge",
       "source": "bec8bdba-2a58-4342-8c1a-9d5cba03d70d",
       "target": "8cf3b85d-a0b3-4992-a51c-7d1f08214fb6",
       "label": "",
@@ -2151,7 +2151,7 @@
       "id": "af0ec5df-9677-4beb-9471-544c0e08ccaa"
     },
     {
-      "component": "Edge",
+      "component": "BizEdge",
       "source": "ecf5e807-80c2-47d1-81b6-adb97ad3e8b0",
       "target": "d3807ad7-636f-4be4-8ccd-ae7b25d2c5b6",
       "label": "",
@@ -2164,7 +2164,7 @@
       "id": "0cb92730-7692-416f-aecf-110ef221f645"
     },
     {
-      "component": "Edge",
+      "component": "BizEdge",
       "source": "3ac9bed4-4424-49fc-97bd-88f7bb045b81",
       "target": "727a3aa5-cf1f-4039-9801-d801c1d4d741",
       "label": "",
@@ -2177,7 +2177,7 @@
       "id": "010fa4d8-9529-49f6-b5fb-e6aa7f0af6db"
     },
     {
-      "component": "Edge",
+      "component": "BizEdge",
       "source": "d5e35355-bd30-4826-b2b1-822aa1b4724c",
       "target": "580b23ae-e5f4-4256-a44e-99b5a430a07a",
       "label": "",
@@ -2190,7 +2190,7 @@
       "id": "b1e892e7-1b8a-426c-a9df-1ec49b94cdcd"
     },
     {
-      "component": "Edge",
+      "component": "BizEdge",
       "source": "6c4e4e94-b37c-469b-8ae7-87df893f2519",
       "target": "5a06421b-92e3-4b4d-af23-ecaec50b4f4c",
       "label": "",
@@ -2203,7 +2203,7 @@
       "id": "12864abf-40a7-4da9-add6-b9a05bd25e81"
     },
     {
-      "component": "Edge",
+      "component": "BizEdge",
       "source": "d715aaa5-e746-417e-8292-d5c0120a201d",
       "target": "e2d5716f-1655-47b1-8c0f-3d797dd7604a",
       "label": "",
@@ -2216,7 +2216,7 @@
       "id": "81dc0ec9-cd04-4872-a90b-de3f42c94123"
     },
     {
-      "component": "Edge",
+      "component": "BizEdge",
       "source": "45eb802d-df7e-4d8e-af07-50fc78cd0b96",
       "target": "51e15739-8c9b-4a39-9d24-3420a3f3686b",
       "label": "",
@@ -2229,7 +2229,7 @@
       "id": "7e6590dc-7ede-4f9f-8e7c-beae2621cc8f"
     },
     {
-      "component": "Edge",
+      "component": "BizEdge",
       "source": "9683e052-a10b-47d7-b10f-9cef11ec1020",
       "target": "989c4d66-d7f9-4730-b64e-b884aaa9d314",
       "label": "",
@@ -2242,7 +2242,7 @@
       "id": "d110b30b-3ae8-4dfe-9abe-030323e55beb"
     },
     {
-      "component": "Edge",
+      "component": "BizEdge",
       "source": "8feb768e-5f36-4fce-a8e5-70e86546c26c",
       "target": "54d97250-f554-4d63-823f-4ada9f597f72",
       "label": "",
@@ -2255,7 +2255,7 @@
       "id": "2a31e7ab-7b82-48a6-8b1b-0def237674bc"
     },
     {
-      "component": "Edge",
+      "component": "BizEdge",
       "source": "636a2ce2-fa42-428f-8d72-d8def92d034a",
       "target": "8c6b7788-b3a8-4aad-8669-1958f4935fb4",
       "label": "",
@@ -2268,7 +2268,7 @@
       "id": "0e5166f5-c8ca-41e5-ad98-c4a6e4d28573"
     },
     {
-      "component": "Edge",
+      "component": "BizEdge",
       "source": "2280e4c4-7d27-40c1-965a-f8f5e10b3556",
       "target": "e8c6f03c-efc4-487f-888e-1f1ce7f0d81d",
       "label": "",
@@ -2281,7 +2281,7 @@
       "id": "8052624c-a893-4123-bb10-ea57138b6a50"
     },
     {
-      "component": "Edge",
+      "component": "BizEdge",
       "source": "f0cec8dd-397b-4559-b205-74994991f4df",
       "target": "d5d3fb8b-9362-493f-8c9e-ab760256f1c2",
       "label": "",
@@ -2294,7 +2294,7 @@
       "id": "44dedb26-5395-4b76-9ed2-33787e7d68ad"
     },
     {
-      "component": "Edge",
+      "component": "BizEdge",
       "source": "991a8546-6f83-4460-9ccf-36a84a97d4e8",
       "target": "989c4d66-d7f9-4730-b64e-b884aaa9d314",
       "label": "",

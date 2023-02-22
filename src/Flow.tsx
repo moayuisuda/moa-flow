@@ -1,6 +1,6 @@
 import React, { MutableRefObject } from "react";
 import { LinkingEdge } from "./cells/LinkingEdge";
-import FlowModel from "./Model";
+import { FlowModel } from "./Model";
 
 import { observer } from "mobx-react";
 import { FlowContext } from "./Context";

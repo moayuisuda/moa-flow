@@ -1,6 +1,7 @@
 import { observer } from "mobx-react";
 import { useFlowModel } from "../hooks/useFlowModel";
 import { PortalWrapper } from "./PortalWrapper";
+import React from "react";
 
 export const Debugger = observer(() => {
   const context = useFlowModel();
