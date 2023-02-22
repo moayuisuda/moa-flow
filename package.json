@@ -1,6 +1,6 @@
 {
   "name": "moa-flow",
-  "version": "1.2.43",
+  "version": "1.2.44",
   "license": "MIT",
   "type": "module",
   "main": "./dist/moa-flow.js",
