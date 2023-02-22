@@ -717,6 +717,7 @@ export class FlowModel {
     if (newCellData.ports) {
       newCellData.ports.forEach((port: PortDataType) => {
         Object.assign(
+          port,
           {
             host: newCellData.id,
             cellType: "port",

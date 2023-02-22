@@ -71,5 +71,5 @@ button:focus-visible {
 
 .moa-flow-minimap-viewbox {
   border-radius: 5px;
-  border: 1px solid #4fa6f0 !important;
+  /* border: 1px solid #4fa6f0 !important; */
 }

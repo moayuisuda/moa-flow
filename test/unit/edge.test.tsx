@@ -1,9 +1,15 @@
 import { EdgeModel, LineType, FlowModel, Port } from "moa-flow";
 import React from "react";
 import { expect } from "chai";
+// @ts-ignore
+import jsdom from "mocha-jsdom";
 import { describe } from "mocha";
 
 describe("EdgeModel", () => {
+  jsdom({
+    url: "http://localhost/",
+  });
+
   const MOCK_DATA = {
     sourcePort: {
       data: {
