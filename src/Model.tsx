@@ -20,6 +20,7 @@ import { FlowProps } from "./Flow";
 
 type EventSender = (data: any) => void;
 export class FlowModel {
+  topOnFocus = true;
   eventMap = new Map<string, Map<string, Function>>();
 
   constructor(eventSender?: EventSender) {

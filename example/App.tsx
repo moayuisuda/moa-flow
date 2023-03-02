@@ -10,7 +10,7 @@ import {
   MiniMap,
 } from "moa-flow";
 import React from "react";
-import { useRef } from "react";
+import { useRef, useState } from 'react';
 import { BizEdge, BizEdgeModel } from "./BizEdge";
 import canvasdata from "./test.json";
 export const statusEnum = {
@@ -88,6 +88,7 @@ const BizNode = observer(({ model }) => {
 
 const App = () => {
   const flowModelRef = useRef<FlowModel>();
+  const [zoom, setZoom] = useState()
   return (
     <div>
       <h1

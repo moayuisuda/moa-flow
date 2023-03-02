@@ -25,7 +25,7 @@ export class Interactor extends React.Component<InteractorType> {
   render() {
     const {
       context,
-      props: { id, topOnFocus = false, inSvg = false },
+      props: { id, inSvg = false },
     } = this;
     const onMouseDown = (
       e: React.MouseEvent<HTMLDivElement | SVGGElement, MouseEvent>
@@ -41,7 +41,7 @@ export class Interactor extends React.Component<InteractorType> {
         }
 
         // drag
-        if (topOnFocus)
+        if (this.context.topOnFocus)
           this.context.moveTo(
             this.props.id,
             this.context.canvasData.cells.length - 1

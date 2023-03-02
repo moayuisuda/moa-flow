@@ -3,7 +3,7 @@ import React from "react";
 
 export class BizEdgeModel extends EdgeModel {
   protected lineType = LineType.ORTH;
-  defaultData = () => ({});
+  getDefaultData = () => ({});
 }
 
 export const BizEdge: React.FC<{ model: BizEdgeModel }> = observer(

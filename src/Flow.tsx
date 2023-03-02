@@ -13,7 +13,7 @@ import { STAGE_ID } from "./constants";
 import { mountEvents } from "./events";
 import { BehaviorName, CanvasDataType } from "@/typings/common";
 import { Interactor } from "./components/Interacotr";
-import { isNumber, isUndefined } from "lodash";
+import { isNumber, pick } from "lodash";
 import { PortDataType } from "./components/Port";
 
 const PositionWrapper = observer(({ cellData }: { cellData: CellDataType }) => {
@@ -208,7 +208,8 @@ export type FlowProps = {
   onEvent?: (e: { type: string; data: any }) => void;
   onLoad?: (model: FlowModel) => void;
   zoom?: boolean;
-  flowModelRef?: MutableRefObject<FlowModel>;
+  topOnFocus?: boolean;
+  flowModelRef?: MutableRefObject<FlowModel | undefined>;
   width?: number;
   height?: number;
   scaleBy?: number;
@@ -228,13 +229,19 @@ class Flow extends React.Component<FlowProps, {}> {
     this.flowModel = new FlowModel(props.onEvent);
     this.flowModel.registModels(props.models || {});
     this.flowModel.registComponents(props.components || {});
-    !isUndefined(this.flowModel.scaleBy) &&
-      (this.flowModel.scaleBy = this.props.scaleBy || 1.01);
-    this.props.linkEdge && (this.flowModel.linkEdge = this.props.linkEdge);
     this.props.canvasData &&
       this.flowModel.setCanvasData(this.props.canvasData);
-    this.props.grid && (this.flowModel.grid = this.props.grid);
-    this.flowModel.multiSelect = props.multiSelect || false;
+
+    Object.assign(
+      this.flowModel,
+      pick(this.props, [
+        "linkEdge",
+        "grid",
+        "multiSelect",
+        "scaleBy",
+        "topOnFocus",
+      ])
+    );
 
     if (this.props.width && this.props.height) {
       this.flowModel.size = {
@@ -246,8 +253,21 @@ class Flow extends React.Component<FlowProps, {}> {
     props.flowModelRef && (props.flowModelRef.current = this.flowModel);
   }
 
+  // // @TODO props变化映射到flowModel上
+  // componentDidUpdate(prevProps: Readonly<FlowProps>): void {
+  //   Object.assign(
+  //     this.flowModel,
+  //     pick(prevProps, [
+  //       "linkEdge",
+  //       "grid",
+  //       "multiSelect",
+  //       "scaleBy",
+  //       "topOnFocus",
+  //     ])
+  //   );
+  // }
+
   generateEvents() {
-    // 将scale和undoredo放在extraEvent里
     const extraEvents: BehaviorName[] = ["zoom", "multiSelect", "undoRedo"];
     const defaultEvents: BehaviorName[] = [
       "clearState",
@@ -298,7 +318,6 @@ class Flow extends React.Component<FlowProps, {}> {
 Flow.defaultProps = {
   undoRedo: true,
   zoom: true,
-  mutiSelect: false,
 };
 
 export default Flow;
