@@ -11,7 +11,6 @@ import { generateConnectionPoints } from "../utils/line-routes/orth";
 
 const TEXT_HEIGHT = 16;
 const LABEL_PADDING = 4;
-const LINE_EXTRA = 40;
 
 const DIR_MAP = {
   left: [-1, 0],
@@ -50,6 +49,7 @@ export class EdgeModel<
   declare data: D;
 
   protected lineType: LineType | (() => LineType) = LineType.BEZIER;
+  protected lineExtra: number | (() => number) = 20;
 
   private pathInstance = document.createElementNS(
     "http://www.w3.org/2000/svg",
@@ -158,19 +158,20 @@ export class EdgeModel<
     if (this.lineType === LineType.ORTH) {
       const { source, target } = this.getLinkPortsInstance();
       const { source: sourceAnchor, target: targetAnchor } = this.getAnchors();
+      const lineExtra = callIfFn(this.lineExtra);
       // if target port does not exist(when linking), fallback to this dir
       let fallbackDir = sourceAnchor.x > targetAnchor.x ? [1, 0] : [-1, 0];
       return generateConnectionPoints(
         {
           sourcePoint: [sourceAnchor.x, sourceAnchor.y],
           sourceDir: DIR_MAP[source.props.dir as keyof typeof DIR_MAP],
-          sourceExt: LINE_EXTRA,
+          sourceExt: lineExtra,
 
           targetPoint: [targetAnchor.x, targetAnchor.y],
           targetDir: target
             ? DIR_MAP[target.props.dir as keyof typeof DIR_MAP]
             : fallbackDir,
-          targetExt: LINE_EXTRA,
+          targetExt: lineExtra,
         },
         0.5
       ).map(({ position }) => ({

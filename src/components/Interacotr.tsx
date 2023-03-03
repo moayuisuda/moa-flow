@@ -3,14 +3,16 @@ import React from "react";
 import { Observer } from "mobx-react";
 import { FlowContext } from "../Context";
 import { Port } from "./Port";
-import { CellModel } from "../cells";
+import { CellModel, NodeModel } from "../cells";
+import { findIndex } from "../utils/util";
 
 type InteractorType = {
   id: string;
   inSvg?: boolean;
-  topOnFocus?: boolean;
+  // topOnFocus?: boolean;
   children: React.ReactNode;
   model: CellModel;
+  cellType: string;
 };
 export class Interactor extends React.Component<InteractorType> {
   static contextType = FlowContext;
@@ -25,13 +27,16 @@ export class Interactor extends React.Component<InteractorType> {
   render() {
     const {
       context,
-      props: { id, inSvg = false },
+      props: { id, inSvg = false, cellType },
     } = this;
     const onMouseDown = (
       e: React.MouseEvent<HTMLDivElement | SVGGElement, MouseEvent>
     ) => {
       const {
         selectCells,
+        getCellModel,
+        getCellData,
+        canvasData: { cells },
         buffer: { select, drag },
       } = this.context;
 
@@ -40,12 +45,25 @@ export class Interactor extends React.Component<InteractorType> {
           context.setSelectedCells([id]);
         }
 
-        // drag
-        if (this.context.topOnFocus)
-          this.context.moveTo(
-            this.props.id,
-            this.context.canvasData.cells.length - 1
-          );
+        // if (this.context.topOnFocus) {
+        //   let moveToTopStack: string[];
+
+        //   // if node has children, move its children to top too.
+        //   if (cellType === "node") {
+        //     const children = (getCellModel(id) as NodeModel).getChildren();
+        //     moveToTopStack = [...children, id].sort((a, b) => {
+        //       const aIndex = findIndex(cells, getCellData(a)) as number;
+        //       const bIndex = findIndex(cells, getCellData(b)) as number;
+        //       return aIndex - bIndex;
+        //     });
+        //   } else {
+        //     moveToTopStack = [id];
+        //   }
+
+        //   moveToTopStack.forEach((id) => {
+        //     this.context.moveTo(id, this.context.canvasData.cells.length - 1);
+        //   });
+        // }
 
         select.isSelecting = true;
         select.selectingDom = context.getWrapperRef(id)?.current as any;

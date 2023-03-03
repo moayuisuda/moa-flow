@@ -20,7 +20,7 @@ import { FlowProps } from "./Flow";
 
 type EventSender = (data: any) => void;
 export class FlowModel {
-  topOnFocus = true;
+  // topOnFocus: boolean = true;
   eventMap = new Map<string, Map<string, Function>>();
 
   constructor(eventSender?: EventSender) {
@@ -42,7 +42,8 @@ export class FlowModel {
     this.portInstanceMap.set(id, instance);
   };
 
-  private setCellDataMap(cellData: AllCellDataType) {
+  @action
+  setCellDataMap(cellData: AllCellDataType, initModel: boolean = true) {
     // the portData will not change its data. And remember node will traverse to change ports data first.
     Object.assign(cellData, this.getFullCellData(cellData.component, cellData));
 
@@ -60,11 +61,13 @@ export class FlowModel {
       );
     }
 
-    const Model =
-      (this.modelFactoriesMap.get(cellData.component) as typeof CellModel) ||
-      NodeModel;
-    const cellModel = new Model(cellData, this);
-    this.cellsModelMap.set(cellData.id, cellModel);
+    if (initModel) {
+      const Model =
+        (this.modelFactoriesMap.get(cellData.component) as typeof CellModel) ||
+        NodeModel;
+      const cellModel = new Model(cellData, this);
+      this.cellsModelMap.set(cellData.id, cellModel);
+    }
 
     if (isNodeDataType(cellData)) {
       if (cellData.ports) {
@@ -713,22 +716,26 @@ export class FlowModel {
     });
   };
 
+  getFullPortData = (portData: PortDataType, host: string) => {
+    return Object.assign(
+      portData,
+      {
+        host,
+        cellType: "port",
+        id: portData.id || v4(),
+        source: undefined,
+        target: undefined,
+      },
+      portData
+    );
+  };
+
   getFullCellData = (componentName: string, initOptions?: any) => {
     const newCellData = this.createCellData(componentName, initOptions);
     if (newCellData.ports) {
-      newCellData.ports.forEach((port: PortDataType) => {
-        Object.assign(
-          port,
-          {
-            host: newCellData.id,
-            cellType: "port",
-            id: port.id || v4(),
-            source: undefined,
-            target: undefined,
-          },
-          port
-        );
-      });
+      newCellData.ports.forEach((port: PortDataType) =>
+        this.getFullPortData(port, newCellData.id)
+      );
     }
 
     return newCellData;

@@ -16,32 +16,36 @@ import { Interactor } from "./components/Interacotr";
 import { isNumber, pick } from "lodash";
 import { PortDataType } from "./components/Port";
 
-const PositionWrapper = observer(({ cellData }: { cellData: CellDataType }) => {
-  const isNode = cellData.cellType === "node";
-  const context = useContext(FlowContext);
-  const absolutePosition = isNode
-    ? context.getNodePosition(cellData.id)
-    : { x: 0, y: 0 };
-  const Component = context.componentsMap.get(cellData.component) as React.FC<{
-    model: CellModel;
-  }>;
+const PositionWrapperCell = observer(
+  ({ cellData }: { cellData: CellDataType }) => {
+    const isNode = cellData.cellType === "node";
+    const context = useContext(FlowContext);
+    const absolutePosition = isNode
+      ? context.getNodePosition(cellData.id)
+      : { x: 0, y: 0 };
+    const Component = context.componentsMap.get(
+      cellData.component
+    ) as React.FC<{
+      model: CellModel;
+    }>;
 
-  if (!Component)
-    throw `[moa-flow] component ${cellData.component} not regist.`;
+    if (!Component)
+      throw `[moa-flow] component ${cellData.component} not regist.`;
 
-  return React.createElement(isNode ? "div" : "g", {
-    ref: context.getWrapperRef(cellData.id),
-    style: isNode
-      ? {
-          position: "absolute",
-          left: absolutePosition.x,
-          top: absolutePosition.y,
-        }
-      : {},
-    // 这里cellData没变符合pure，且在CellComponent中没有引用x，y，所以变化位置时不会重渲染
-    children: <CellComponent cellData={cellData} />,
-  });
-});
+    return React.createElement(isNode ? "div" : "g", {
+      ref: context.getWrapperRef(cellData.id),
+      style: isNode
+        ? {
+            position: "absolute",
+            left: absolutePosition.x,
+            top: absolutePosition.y,
+          }
+        : {},
+      // 这里cellData没变符合pure，且在CellComponent中没有引用x，y，所以变化位置时不会重渲染
+      children: <CellComponent cellData={cellData} />,
+    });
+  }
+);
 
 const CellComponent = observer(({ cellData }: { cellData: CellDataType }) => {
   const isNode = cellData.cellType === "node";
@@ -58,6 +62,7 @@ const CellComponent = observer(({ cellData }: { cellData: CellDataType }) => {
     key: cellData.id,
     id: cellData.id,
     inSvg: !isNode,
+    cellType: cellData.cellType,
     model: cellModel,
     children: React.createElement(Component, {
       model: cellModel, // 这里只是传了cellModel，最后返回了个ReactNode，但是cellModel内的属性并没有被读取，CellComponent也就没有收集Model的依赖
@@ -140,7 +145,7 @@ const Edges = observer(() => {
   return (
     <>
       {edgesData.map((cellData: CellDataType) => (
-        <PositionWrapper cellData={cellData} key={cellData.id} />
+        <PositionWrapperCell cellData={cellData} key={cellData.id} />
       ))}
     </>
   );
@@ -171,7 +176,7 @@ const Nodes = observer(() => {
       ref={(ref) => (context.refs.divContainerRef = ref)}
     >
       {nodesData.slice(0, nodesData.length).map((cellData) => (
-        <PositionWrapper cellData={cellData} key={cellData.id} />
+        <PositionWrapperCell cellData={cellData} key={cellData.id} />
       ))}
     </div>
   );
@@ -208,7 +213,7 @@ export type FlowProps = {
   onEvent?: (e: { type: string; data: any }) => void;
   onLoad?: (model: FlowModel) => void;
   zoom?: boolean;
-  topOnFocus?: boolean;
+  // topOnFocus?: boolean;
   flowModelRef?: MutableRefObject<FlowModel | undefined>;
   width?: number;
   height?: number;
@@ -239,7 +244,7 @@ class Flow extends React.Component<FlowProps, {}> {
         "grid",
         "multiSelect",
         "scaleBy",
-        "topOnFocus",
+        // "topOnFocus",
       ])
     );
 

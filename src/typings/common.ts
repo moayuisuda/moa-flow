@@ -1,5 +1,6 @@
 import { NodeDataType } from "../cells/Node";
 import { EdgeDataType } from "../cells/Edge";
+import { PortDataType } from "../components/Port";
 
 export type NodeFlowState = {
   isSelect: boolean;
@@ -19,7 +20,7 @@ export type CanvasDataType = {
   cells: any[];
 };
 
-export type AllCellDataType = NodeDataType | EdgeDataType;
+export type AllCellDataType = NodeDataType | EdgeDataType | PortDataType;
 
 export type FlowInfraEventType = {
   type: string;

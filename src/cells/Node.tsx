@@ -1,5 +1,6 @@
 import { CellModel, CellDataType } from "./Cell";
 import { PortDataType } from "../components/Port";
+import { v4 } from "uuid";
 
 export type NodeDataType = {
   x: number;
@@ -39,5 +40,17 @@ export class NodeModel<
     return this.context.canvasData.cells
       .filter((cellData) => cellData.parent === this.data.id)
       .map((cellData) => cellData.id) as string[];
+  };
+
+  syncPorts = () => {
+    const data = this.data;
+    if (this.data.ports)
+      this.data.ports.forEach((port: any) => {
+        if (!port.id || !this.context.getCellData(port.id)) {
+          this.context.setCellDataMap(
+            this.context.getFullPortData(port, data.id)
+          );
+        }
+      });
   };
 }
