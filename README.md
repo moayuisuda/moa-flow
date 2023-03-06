@@ -5,9 +5,10 @@
 
 ## docs
 
-[moa-flow-doc.vercel.app](https://moa-flow-doc.vercel.app/)
+[moa-flow.ink](https://moa-flow.ink)
 
 ## development
+
 ```
 yarn
 yarn build
